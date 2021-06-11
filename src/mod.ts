@@ -1,5 +1,5 @@
 import { Activation, Relu, LeakyRelu, Tanh, Sigmoid } from './activation.ts'
-import { Matrix, MatrixGPU, Backend } from './utils/mod.ts'
+import { CPUBackend, WebGPUBackend, Backend } from './backend/backend.ts'
 
 export class NeuralNetwork {
 
@@ -18,13 +18,14 @@ export class NeuralNetwork {
         this.inputSize = inputSize;
         this.hiddenSize = hiddenSize;
         this.outputSize = outputSize;
-        this.activation = this.setActivation(activation);
+        this.activation = NeuralNetwork.activation(activation);
         this.weightsHidden = Array(hiddenSize).fill(Array(inputSize).fill(0)); // TODO initialization strategies, random noise etc...
         this.weightsOutput = Array(outputSize).fill(Array(hiddenSize).fill(0));
+        this.backend = this.setupBackend()
     }
     
-    async setupBackend(gpu = true) {
-        if (!gpu) return new MatrixCPU();
+    async setupBackend(gpu = true): Promise<Backend> {
+        if (!gpu) return new CPUBackend();
 
         const adapter = await navigator.gpu.requestAdapter();
         if (adapter) {
@@ -33,14 +34,14 @@ export class NeuralNetwork {
             console.log(`Supported features: ${features.join(", ")}`);
 
             const device = await adapter.requestDevice()
-            return new MatrixGPU(adapter, device)
+            return new WebGPUBackend(adapter, device)
         } else {
             console.error("No adapter found");
-            return new MatrixCPU()
+            return new CPUBackend()
         }
     }
     
-    setActivation(activation:string): Activation {
+    static activation(activation:string): Activation {
         switch(activation) {
             case 'sigmoid':
                 return new Sigmoid();
@@ -65,7 +66,7 @@ export class NeuralNetwork {
 
     }
 
-    train(inputs: Array<Array<number>>, outputs: Array<Array<number>>, epochs = 1000) {
+    train(inputs: Array<Array<number>>, _outputs: Array<Array<number>>, epochs = 1000) {
         // TODO batch size for batch gradient descent
         for (let e = 0; e < epochs; e++) {
             for (let i = 0; i < inputs.length; i++) {

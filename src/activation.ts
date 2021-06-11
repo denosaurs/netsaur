@@ -1,6 +1,6 @@
 export interface Activation {
-    activate(val: number): number;
-    measure(weight: number, error: number): number;
+  activate(val: number): number;
+  measure(weight: number, error: number): number;
 }
 
 export class Sigmoid {
