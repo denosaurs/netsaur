@@ -1,4 +1,4 @@
-import { Shape } from './backend.ts';
+import { Shape } from "./backend.ts";
 export class WebGPUBackend {
   public adapter: GPUAdapter;
   public device: GPUDevice;
@@ -39,7 +39,7 @@ export class WebGPUBackend {
   ): Promise<Float32Array> {
     const matA = new Float32Array([...shapeA, ...a]);
     const matB = new Float32Array([...shapeB, ...b]);
-  
+
     const bufA = this.device.createBuffer({
       size: matA.byteLength,
       mappedAtCreation: true,
@@ -47,7 +47,7 @@ export class WebGPUBackend {
     });
     new Float32Array(bufA.getMappedRange()).set(matA);
     bufA.unmap();
-  
+
     const bufB = this.device.createBuffer({
       size: matB.byteLength,
       mappedAtCreation: true,
@@ -55,18 +55,19 @@ export class WebGPUBackend {
     });
     new Float32Array(bufB.getMappedRange()).set(matB);
     bufB.unmap();
-  
-    const resultSize = (2 + shapeA[0] * shapeB[1]) * Float32Array.BYTES_PER_ELEMENT;
+
+    const resultSize = (2 + shapeA[0] * shapeB[1]) *
+      Float32Array.BYTES_PER_ELEMENT;
     const bufResult = this.device.createBuffer({
       size: resultSize,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
     });
-  
+
     const bufRead = this.device.createBuffer({
       size: resultSize,
       usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     });
-  
+
     const bindGroup = this.device.createBindGroup({
       layout: this.bindGroupLayout,
       entries: [
@@ -90,28 +91,28 @@ export class WebGPUBackend {
         },
       ],
     });
-  
+
     const commandEncoder = this.device.createCommandEncoder();
     const computePass = commandEncoder.beginComputePass();
     computePass.setPipeline(this.pipeline);
     computePass.setBindGroup(0, bindGroup);
     computePass.dispatch(shapeA[0], shapeB[1]);
     computePass.endPass();
-  
+
     commandEncoder.copyBufferToBuffer(bufResult, 0, bufRead, 0, resultSize);
-  
+
     const gpuCommands = commandEncoder.finish();
     this.device.queue.submit([gpuCommands]);
-  
+
     await bufRead.mapAsync(GPUMapMode.READ);
     const res = new Float32Array(bufRead.getMappedRange().slice(0));
     bufRead.unmap();
-  
+
     bufA.destroy();
     bufB.destroy();
     bufResult.destroy();
     bufRead.destroy();
-  
-    return res.slice(2)
+
+    return res.slice(2);
   }
 }
