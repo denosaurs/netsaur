@@ -16,14 +16,14 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
         this.hidden.push(...layers.map(layer => new CPULayer(layer)))
     }
 
-    public feedForward(input: DataArray<T>, type: DataType, batches: number): DataArray<T> {
+    public feedForward(input: DataArray<T>, batches: number, type: DataType): DataArray<T> {
         const inputSize = this.input?.size || input.length / batches
-        input = this.hidden[0].feedForward(input, type, batches, inputSize)
+        input = this.hidden[0].feedForward(input, batches, inputSize, type)
 
         for (let i = 1; i < this.hidden.length; i++) {
             const layer = this.hidden[i];
             const previousLayer = this.hidden[i - 1];
-            input = layer.feedForward(input, type, batches, previousLayer.outputSize)
+            input = layer.feedForward(input, batches, previousLayer.outputSize, type)
         }
         return input;
     }
@@ -31,17 +31,15 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
     public backpropagate() {
     }
 
-    public train(datasets: DataSet<T>[], epochs: number, batches: number) {
-        const type = getType(datasets[0].input)
+    public train(dataset: DataSet<T>, epochs: number, batches: number) {
+        const type = this.input?.type || getType(dataset.inputs)
 
         for (let e = 0; e < epochs; e++) {
-            for (const dataset of datasets) {
-                this.feedForward(dataset.input, type, batches);
+            this.feedForward(dataset.inputs, batches, type);
 
-                // TODO loss function?
+            // TODO loss function?
 
-                this.backpropagate();
-            }
+            this.backpropagate();
         }
     }
 

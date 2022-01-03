@@ -1,4 +1,4 @@
-import { WebGPUData, WebGPUBackend, DataType } from "../../deps.ts";
+import { WebGPUData, WebGPUBackend, DataType, DataArrayConstructor, DataArray } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
 import { GPUActivationFn, Sigmoid, LeakyRelu, Tanh, Relu } from "./activation.ts";
 import { matMul } from "./matmul.ts";
@@ -8,7 +8,7 @@ interface GPULayerConfig extends LayerConfig {
     activation: Activation
 }
 
-export class GPULayer {
+export class GPULayer<T extends DataType = DataType> {
     public outputSize: number
     public weights!: WebGPUData
     public activationFn: GPUActivationFn = new Sigmoid()
@@ -23,16 +23,16 @@ export class GPULayer {
 
     public setActivation(activation: Activation) {
         switch (activation) {
-            case Activation.Sigmoid:
+            case "sigmoid":
                 this.activationFn = new Sigmoid();
                 break
-            case Activation.LeakyRelu:
+            case "leakyrelu":
                 this.activationFn = new LeakyRelu();
                 break
-            case Activation.Tanh:
+            case "tanh":
                 this.activationFn = new Tanh();
                 break
-            case Activation.Relu:
+            case "relu":
                 this.activationFn = new Relu();
                 break
         }
@@ -40,21 +40,30 @@ export class GPULayer {
 
     public async feedForward(
         input: WebGPUData, 
-        type: DataType, 
-        batches: number,
-        inputSize: number
+        batches: number, 
+        inputSize: number, 
+        type: DataType
     ): Promise<WebGPUData> {
         const outputs = new WebGPUData(this.backend, type, this.outputSize * batches);
+        if (!this.weights) await this.initialize(inputSize, type)
+
         await matMul(
             this.backend, 
             input, 
             this.weights, 
             outputs, 
-            batches,
             inputSize,
             this.outputSize,
+            batches,
             this.activationFn.activate(type)
         )
         return outputs
+    }
+    
+    public async initialize(inputSize: number, type: DataType) {
+        const length = this.outputSize * inputSize
+        const data = new DataArrayConstructor[type](length) as DataArray<T>
+        data.fill(1)
+        this.weights = await WebGPUData.from(this.backend, data);
     }
 }

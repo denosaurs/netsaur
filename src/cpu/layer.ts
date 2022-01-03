@@ -2,9 +2,9 @@ import { DataArray, DataArrayConstructor, DataType } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
 import { CPUActivationFn, LeakyRelu, Relu, Sigmoid, Tanh } from "./activation.ts";
 
-export class CPULayer<T extends DataType> {
+export class CPULayer<T extends DataType = DataType> {
     public outputSize: number
-    public weights!: Float32Array
+    public weights!: DataArray<T>
     public activationFn: CPUActivationFn = new Sigmoid()
 
     constructor(config: LayerConfig) {
@@ -14,16 +14,16 @@ export class CPULayer<T extends DataType> {
 
     public setActivation(activation: Activation) {
         switch (activation) {
-            case Activation.Sigmoid:
+            case "sigmoid":
                 this.activationFn = new Sigmoid();
                 break
-            case Activation.LeakyRelu:
+            case "leakyrelu":
                 this.activationFn = new LeakyRelu();
                 break
-            case Activation.Tanh:
+            case "tanh":
                 this.activationFn = new Tanh();
                 break
-            case Activation.Relu:
+            case "relu":
                 this.activationFn = new Relu();
                 break
         }
@@ -31,11 +31,12 @@ export class CPULayer<T extends DataType> {
 
     public feedForward(
         input: DataArray<T>, 
-        type: DataType, 
-        batches: number,
-        inputSize: number
+        batches: number, 
+        inputSize: number, 
+        type: DataType
     ): DataArray<T> {
         const output = new DataArrayConstructor[type](this.outputSize * batches)
+        if (!this.weights) this.initialize(inputSize, type)
         
         for (let x = 0; x < this.outputSize; x++) {
             for (let y = 0; y < batches; y++) {
@@ -52,5 +53,12 @@ export class CPULayer<T extends DataType> {
         }
 
         return output as DataArray<T>
+    }
+
+    // naive implementation
+    public initialize(inputSize: number, type: DataType) {
+        const length = this.outputSize * inputSize
+        this.weights = new DataArrayConstructor[type](length) as DataArray<T>
+        this.weights.fill(1)
     }
 }

@@ -18,14 +18,14 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
         this.hidden.push(...layers.map(layer => new GPULayer(layer, this.backend)))
     }
 
-    public async feedForward(input: WebGPUData, type: DataType, batches: number) {
+    public async feedForward(input: WebGPUData, batches: number, type: DataType) {
         const inputSize = this.input?.size || input.length / batches
-        input = await this.hidden[0].feedForward(input, type, batches, inputSize)
+        input = await this.hidden[0].feedForward(input, batches, inputSize, type)
 
         for (let i = 1; i < this.hidden.length; i++) {
             const layer = this.hidden[i];
             const previousLayer = this.hidden[i - 1];
-            input = await layer.feedForward(input, type, batches, previousLayer.outputSize)
+            input = await layer.feedForward(input, batches, previousLayer.outputSize, type)
         }
 
         return input;
@@ -34,18 +34,16 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     public backpropagate() {
     }
 
-    public async train(datasets: DataSet<T>[], epochs: number, batches: number) {
-        const type = getType(datasets[0].input)
+    public async train(dataset: DataSet<T>, epochs: number, batches: number) {
+        const type = this.input?.type || getType(dataset.inputs)
 
         for (let e = 0; e < epochs; e++) {
-            for (const dataset of datasets) {
-                const input = await WebGPUData.from(this.backend, dataset.input);
-                await this.feedForward(input, type, batches);
+            const input = await WebGPUData.from(this.backend, dataset.inputs);
+            await this.feedForward(input, batches, type);
 
-                // TODO loss function?
+            // TODO loss function?
 
-                this.backpropagate();
-            }
+            this.backpropagate();
         }
     }
 

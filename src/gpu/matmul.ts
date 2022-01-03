@@ -21,7 +21,7 @@ export async function matMul<T extends DataType>(
   await backend.execute({
     pipeline,
     data: [inputs, weights, outputs, uniform],
-    workgroups: [Math.ceil(inputs.length / 8), Math.ceil(outputs.length / 8), 1],
+    workgroups: [outputSize, batches, 1],
   });
 }
 
@@ -33,34 +33,39 @@ struct Data {
   batches: u32;
 };
 
+[[block]]
+struct Matrix {
+  values: array<${type}>;
+};
+
 [[group(0), binding(0)]]
-var<storage, read> inputs: array<${type}>;
+var<storage, read> inputs: Matrix;
 [[group(0), binding(1)]]
-var<storage, read> weights: array<${type}>;
+var<storage, read> weights: Matrix;
 [[group(0), binding(2)]]
-var<storage, write> outputs: array<${type}>;
+var<storage, write> outputs: Matrix;
 
 [[group(0), binding(3)]]
 var<uniform> data: Data;
 
 fn activation(weighted_sum: ${type}) -> ${type} {
-  ${activation}
+  ${activation};
 }
 
 [[stage(compute), workgroup_size(8, 8, 1)]]
 fn main([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
   if (global_id.x >= data.outputSize || global_id.y >= data.batches) {
     return;
-  }
+  };
 
   var weighted_sum = 0${type};
   for (var k = 0u; k < data.inputSize; k = k + 1u) {
-    var a = k + global_idx.y * data.inputSize;
-    var b = global_idx.x + k * data.outputSize;    
+    var a = k + global_id.y * data.inputSize;
+    var b = global_id.x + k * data.outputSize;    
     weighted_sum = weighted_sum + inputs.values[a] * weights.values[b];
-  }
+  };
 
-  let idx = global_idx.x + global_idx.y * data.outputSize;
-  output.values[idx] = activation(weighted_sum);
+  let idx = global_id.x + global_id.y * data.outputSize;
+  outputs.values[idx] = activation(weighted_sum);
 }
 `;

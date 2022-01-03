@@ -2,7 +2,7 @@ import { DataArray, DataType } from "../deps.ts";
 
 export interface Network<T extends DataType = DataType> {
     addLayers(layer: LayerConfig[]): void
-    train(datasets: DataSet<T>[], epochs: number, batches: number): void
+    train(datasets: DataSet<T>, epochs: number, batches: number): void
 }
 
 export interface NetworkConfig {
@@ -15,12 +15,7 @@ export interface LayerConfig {
     activation: Activation
 }
 
-export enum Activation {
-    Sigmoid = "sigmoid",
-    Tanh = "tanh",
-    Relu = "relu",
-    LeakyRelu = "leakyrelu"
-}
+export type Activation = "sigmoid" | "tanh" | "relu" | "leakyrelu"
 
 export type Shape = number
 
@@ -30,6 +25,6 @@ export type InputConfig = {
 }
 
 export type DataSet<T extends DataType = DataType> = {
-    input: DataArray<T>
-    output: DataArray<T>
+    inputs: DataArray<T>
+    outputs: DataArray<T>
 }
