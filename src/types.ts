@@ -8,6 +8,7 @@ export interface Network<T extends DataType = DataType> {
 export interface NetworkConfig {
     input?: InputConfig;
     hidden: LayerConfig[];
+    cost: Cost
 }
 
 export interface LayerConfig {
@@ -16,6 +17,8 @@ export interface LayerConfig {
 }
 
 export type Activation = "sigmoid" | "tanh" | "relu" | "leakyrelu"
+
+export type Cost = "crossentropy" | "hinge"
 
 export type Shape = number
 

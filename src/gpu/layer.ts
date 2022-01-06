@@ -1,7 +1,7 @@
 import { WebGPUData, WebGPUBackend, DataType, DataArrayConstructor, DataArray } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
 import { GPUActivationFn, Sigmoid, LeakyRelu, Tanh, Relu } from "./activation.ts";
-import { matMul } from "./matmul.ts";
+import { matMul } from "./kernels/matmul.ts";
 
 interface GPULayerConfig extends LayerConfig {
     size: number

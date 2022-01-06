@@ -1,4 +1,4 @@
-import { DataType, ensureType, WebGPUBackend, WebGPUData } from "../../deps.ts";
+import { DataType, ensureType, WebGPUBackend, WebGPUData } from "../../../deps.ts";
 
 export async function matMul<T extends DataType>(
   backend: WebGPUBackend,
@@ -11,7 +11,8 @@ export async function matMul<T extends DataType>(
   activation: string
 ) {
   const type = ensureType(inputs.type, weights.type, outputs.type);
-  const pipeline = await backend.register(shader(type, activation));
+  const code = shader(type, activation)
+  const pipeline = await backend.register(code);
   const uniform = await WebGPUData.from(
     backend,
     new Uint32Array([inputSize, outputSize, batches]),
