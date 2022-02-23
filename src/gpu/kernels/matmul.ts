@@ -1,13 +1,11 @@
 import { DataType, ensureType, WebGPUBackend, WebGPUData } from "../../../deps.ts";
+import { GPUMatrix } from "../matrix.ts";
 
 export async function matMul<T extends DataType>(
   backend: WebGPUBackend,
-  inputs: WebGPUData<T>,
-  weights: WebGPUData<T>,
-  outputs: WebGPUData<T>,
-  inputSize: number,
-  outputSize: number,
-  batches: number,
+  inputs: GPUMatrix<T>,
+  weights: GPUMatrix<T>,
+  outputs: GPUMatrix<T>,
   activation: string
 ) {
   const type = ensureType(inputs.type, weights.type, outputs.type);
@@ -15,14 +13,14 @@ export async function matMul<T extends DataType>(
   const pipeline = await backend.register(code);
   const uniform = await WebGPUData.from(
     backend,
-    new Uint32Array([inputSize, outputSize, batches]),
+    new Uint32Array([inputs.x, outputs.x, inputs.y]),
     GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
   );
 
   await backend.execute({
     pipeline,
-    data: [inputs, weights, outputs, uniform],
-    workgroups: [outputSize, batches, 1],
+    data: [inputs.data, weights.data, outputs.data, uniform],
+    workgroups: [outputs.x, inputs.y, 1],
   });
 }
 

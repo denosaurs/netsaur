@@ -6,12 +6,13 @@ const time = Date.now()
 const net = await new NeuralNetwork({
     hidden: [
         { size: 100, activation: "sigmoid" }
-    ]
+    ],
+    cost: "crossentropy",
 }).setupBackend(false);
 
 for (let i = 0; i < 1000; i++) {
     const res = (net.network as CPUNetwork).feedForward(
-        new Float32Array(1000* 100).fill(1), 100, "f32"
+        new Float32Array(1000 * 100).fill(1), 100, "f32"
     )
 }
 

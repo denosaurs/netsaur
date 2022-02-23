@@ -7,7 +7,8 @@ const time = Date.now()
 const net = await new NeuralNetwork({
     hidden: [
         { size: 100, activation: "sigmoid" }
-    ]
+    ],
+    cost: "crossentropy",
 }).setupBackend(true);
 
 for (let i = 0; i < 1000; i++) {

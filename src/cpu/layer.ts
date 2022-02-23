@@ -1,25 +1,30 @@
-import { DataArray, DataArrayConstructor, DataType } from "../../deps.ts";
+import { DataType } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
 import { CPUActivationFn, LeakyRelu, Relu, Sigmoid, Tanh } from "./activation.ts";
 import { CPUCostFunction, CrossEntropy } from "./cost.ts";
+import { CPUMatrix } from "./matrix.ts";
 
 export class CPULayer<T extends DataType = DataType> {
     public outputSize: number
     public activationFn: CPUActivationFn = new Sigmoid()
     public costFunction: CPUCostFunction = new CrossEntropy()
-
-    public inputSize!: number
-    public batches!: number
     
-    public weights!: DataArray<T>
-    public product!: DataArray<T>
-    public output!: DataArray<T>
-    public weightsDelta!: DataArray<T>
-    public biasesDelta!: DataArray<T>
+    public weights!: CPUMatrix
+    public product!: CPUMatrix
+    public output!: CPUMatrix
+    public weightsDelta!: CPUMatrix
+    public biasesDelta!: CPUMatrix
 
     constructor(config: LayerConfig) {
         this.outputSize = config.size
         this.setActivation(config.activation)
+    }
+
+    public initialize(type: DataType, inputSize: number, batches: number) {
+        this.weights = CPUMatrix.with(this.outputSize, inputSize, type)
+        this.output = CPUMatrix.with(this.outputSize, batches, type)
+        this.product = CPUMatrix.with(this.outputSize, batches, type)
+        this.weights.fill(1)
     }
 
     public setActivation(activation: Activation) {
@@ -39,28 +44,21 @@ export class CPULayer<T extends DataType = DataType> {
         }
     }
 
-    public feedForward(input: DataArray<T>): DataArray<T> {
-        for (let x = 0; x < this.outputSize; x++) {
-            for (let y = 0; y < this.batches; y++) {
-                let weightedSum = 0
-                for (let k = 0; k < this.inputSize; k++) {
-                    const a = k + y * this.inputSize;
-                    const b = x + k * this.outputSize;  
-                    weightedSum += input[a] * this.weights[b];
-                    
-                }
-                const idx = x + y * this.outputSize;
-                this.product[idx] = weightedSum;
-                this.output[idx] = this.activationFn.activate(weightedSum);
-            }
+    public feedForward(input: CPUMatrix): CPUMatrix {
+        this.product = CPUMatrix.mul(input, this.weights)
+        for (let i = 0; i < this.product.data.length; i++) {
+            this.output.data[i] = this.activationFn.activate(this.product.data[i]);
         }
-
         return this.output
     }
 
-    public cost(input: DataArray<T>, output: DataArray<T>): DataArray<T> {
-        for (let i = 0; i < input.length; i++) {
-            this.biasesDelta[i] = this.costFunction.measure(this.product[i], input[i], output[i]);
+    public cost(input: CPUMatrix, output: CPUMatrix): CPUMatrix {
+        for (let i = 0; i < input.data.length; i++) {
+            this.biasesDelta.data[i] = this.costFunction.measure(
+                this.product.data[i], 
+                input.data[i], 
+                output.data[i]
+            );
         }
         return input;
     }
@@ -68,15 +66,5 @@ export class CPULayer<T extends DataType = DataType> {
 
     public backPropagate() {
         
-    }
-
-    public initialize(type: DataType, inputSize: number, batches: number) {
-        this.inputSize = inputSize
-        const weightsLength = this.outputSize * inputSize
-        const outputLength = this.outputSize * batches
-        this.weights = new DataArrayConstructor[type](weightsLength) as DataArray<T>
-        this.output = new DataArrayConstructor[type](outputLength) as DataArray<T>
-        this.product = new DataArrayConstructor[type](outputLength) as DataArray<T>
-        this.weights.fill(1)
     }
 }

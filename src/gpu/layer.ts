@@ -1,7 +1,9 @@
 import { WebGPUData, WebGPUBackend, DataType, DataArrayConstructor, DataArray } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
 import { GPUActivationFn, Sigmoid, LeakyRelu, Tanh, Relu } from "./activation.ts";
+import { CrossEntropy, GPUCostFunction } from "./cost.ts";
 import { matMul } from "./kernels/matmul.ts";
+import { GPUMatrix } from "./matrix.ts";
 
 interface GPULayerConfig extends LayerConfig {
     size: number
@@ -10,8 +12,14 @@ interface GPULayerConfig extends LayerConfig {
 
 export class GPULayer<T extends DataType = DataType> {
     public outputSize: number
-    public weights!: WebGPUData
     public activationFn: GPUActivationFn = new Sigmoid()
+    public costFunction: GPUCostFunction = new CrossEntropy()
+
+    public weights!: GPUMatrix
+    public product!: GPUMatrix
+    public output!: GPUMatrix
+    public weightsDelta!: GPUMatrix
+    public biasesDelta!: GPUMatrix
 
     private backend: WebGPUBackend
 
@@ -38,8 +46,9 @@ export class GPULayer<T extends DataType = DataType> {
         }
     }
 
+    // TODO: memoization
     public async feedForward(
-        input: WebGPUData, 
+        input: GPUMatrix, 
         batches: number, 
         inputSize: number, 
         type: DataType
@@ -51,10 +60,7 @@ export class GPULayer<T extends DataType = DataType> {
             this.backend, 
             input, 
             this.weights, 
-            outputs, 
-            inputSize,
-            this.outputSize,
-            batches,
+            outputs,
             this.activationFn.activate(type)
         )
         return outputs
@@ -62,7 +68,7 @@ export class GPULayer<T extends DataType = DataType> {
     
     public async initialize(inputSize: number, type: DataType) {
         const length = this.outputSize * inputSize
-        const data = new DataArrayConstructor[type](length) as DataArray<T>
+        const data = new DataArrayConstructor[type](length) as DataArray
         data.fill(1)
         this.weights = await WebGPUData.from(this.backend, data);
     }

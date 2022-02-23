@@ -3,7 +3,8 @@ import { NeuralNetwork } from "../mod.ts";
 const net = await new NeuralNetwork({
     hidden: [
         { size: 3, activation: "relu" }
-    ]
+    ],
+    cost: "crossentropy"
 }).setupBackend(false)
 
 net.train({
