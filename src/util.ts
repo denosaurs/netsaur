@@ -1,4 +1,4 @@
-import { DataArray, DataType } from "../deps.ts";
+import { DataArray, DataType, DataArrayConstructor } from "../deps.ts";
 
 export function getType<T extends DataType>(type: DataArray<T>) {
     return (
@@ -7,4 +7,12 @@ export function getType<T extends DataType>(type: DataArray<T>) {
       : type instanceof Float32Array ? "f32"
       : undefined
     )! as T
+}
+export function fromType<T extends DataType>(type: string) {
+    return (
+        type === "u32" ? Uint32Array
+      : type === "i32" ? Int32Array
+      : type === "f32" ? Float32Array
+      : Uint32Array
+    ) as DataArrayConstructor<T>
 }

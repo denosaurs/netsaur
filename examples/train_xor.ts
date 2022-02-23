@@ -7,7 +7,7 @@ const net = await new NeuralNetwork({
     cost: "crossentropy"
 }).setupBackend(false)
 
-net.train({
+net?.train({
     inputs: new Float32Array([
         0, 0,
         0, 1,
@@ -21,3 +21,4 @@ net.train({
         0
     ])
 }, 10, 4);
+console.log(net?.network)

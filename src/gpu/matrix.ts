@@ -1,4 +1,5 @@
-import { DataArrayConstructor, DataType, WebGPUData } from "../../deps.ts";
+import { /*DataArrayConstructor,*/ DataType, WebGPUData } from "../../deps.ts";
+import { fromType } from "../util.ts";
 
 export class GPUMatrix<T extends DataType = DataType> {
     public type: DataType
@@ -21,7 +22,7 @@ export class GPUMatrix<T extends DataType = DataType> {
         y: number,
         type: DataType,
     ) {
-        const data = new DataArrayConstructor[type](x * y);
+        const data = new (fromType(type))(x * y);
         return new this(data, x, y)
     }
   
