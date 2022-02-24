@@ -1,7 +1,8 @@
 import { GPULayer } from "./layer.ts";
 import { DataSet, InputConfig, LayerConfig, Network, NetworkConfig } from "../types.ts";
-import { DataType, WebGPUBackend, WebGPUData } from "../../deps.ts";
+import { DataType, WebGPUBackend } from "../../deps.ts";
 import { getType } from "../util.ts";
+import { GPUMatrix } from "./matrix.ts";
 
 export class GPUNetwork<T extends DataType = DataType> implements Network {
     public input?: InputConfig;
@@ -18,16 +19,20 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
         this.hidden.push(...layers.map(layer => new GPULayer(layer, this.backend)))
     }
 
-    public async feedForward(input: WebGPUData, batches: number, type: DataType) {
-        const inputSize = this.input?.size || input.length / batches
-        input = await this.hidden[0].feedForward(input, batches, inputSize, type)
+    public async initialize(type: DataType, inputSize: number, batches: number){
+        await this.hidden[0].initialize(type, inputSize, batches);
 
         for (let i = 1; i < this.hidden.length; i++) {
-            const layer = this.hidden[i];
-            const previousLayer = this.hidden[i - 1];
-            input = await layer.feedForward(input, batches, previousLayer.outputSize, type)
+            const current = this.hidden[i];
+            const previous = this.hidden[i - 1];
+            await current.initialize(type, previous.outputSize, batches);
         }
+    }
 
+    public async feedForward(input: GPUMatrix) {
+        for (const layer of this.hidden) {
+            input = await layer.feedForward(input);
+        }
         return input;
     }
 
@@ -36,10 +41,14 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
 
     public async train(dataset: DataSet<T>, epochs: number, batches: number) {
         const type = this.input?.type || getType(dataset.inputs)
+        const inputSize = this.input?.size || dataset.inputs.length / batches;
+        
+        const input = await GPUMatrix.from(this.backend, dataset.inputs, inputSize, batches, type)
 
         for (let e = 0; e < epochs; e++) {
-            const input = await WebGPUData.from(this.backend, dataset.inputs);
-            await this.feedForward(input, batches, type);
+            await this.initialize(type, inputSize, batches);
+            
+            await this.feedForward(input);
 
             // TODO loss function?
 

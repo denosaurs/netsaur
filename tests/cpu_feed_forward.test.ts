@@ -1,21 +1,24 @@
 import { NeuralNetwork } from "../mod.ts";
+import { CPUMatrix } from "../src/cpu/matrix.ts";
 import { CPUNetwork } from "../src/cpu/network.ts";
-
-const time = Date.now()
 
 const net = await new NeuralNetwork({
     hidden: [
-        { size: 100, activation: "sigmoid" }
+        { size: 2, activation: "sigmoid" }
     ],
     cost: "crossentropy",
 }).setupBackend(false);
 
-for (let i = 0; i < 1000; i++) {
-    const res = (net.network as CPUNetwork).feedForward(
-        new Float32Array(1000 * 100).fill(1), 100, "f32"
-    )
-}
+const network = (net.network as CPUNetwork);
 
-// console.log(res)
+network.initialize("f32", 2, 3);
 
-console.log(`Time taken: ${Date.now() - time}ms`)
+const res = network.feedForward(
+    new CPUMatrix(new Float32Array([
+        1, 2,
+        3, 4,
+        5, 6
+    ]), 2, 3)
+)
+
+console.log(res.data)

@@ -1,21 +1,13 @@
-import { DataArray, /*DataArrayConstructor,*/ DataType } from "../../deps.ts";
-import { fromType } from "../util.ts";
+import { DataArray, DataType } from "../../deps.ts";
+import { fromType, getType } from "../util.ts";
 
 export class CPUMatrix<T extends DataType = DataType> {
-    public type: DataType
     constructor(
         public data: DataArray<T>,
         public x: number,
         public y: number,
-        type?: DataType,
-    ) {
-        this.type = type ?? (
-            data instanceof Uint32Array ? "u32"
-          : data instanceof Int32Array ? "i32"
-          : data instanceof Float32Array ? "f32"
-          : undefined
-        ) as T
-    }
+        public type: DataType = getType(data),
+    ) { }
 
     static with(
         x: number,
@@ -32,15 +24,15 @@ export class CPUMatrix<T extends DataType = DataType> {
             res.data[i] = matA.data[i] + matB.data[i]
         }
         return res
-    }        
+    }
     static mul(matA: CPUMatrix, matB: CPUMatrix) {
-        const res = CPUMatrix.with(matA.x, matB.y, matA.type)
+        const res = CPUMatrix.with(matB.x, matA.y, matA.type)
         for (let x = 0; x < matB.x; x++) {
             for (let y = 0; y < matA.y; y++) {
                 let sum = 0
                 for (let k = 0; k < matA.x; k++) {
                     const a = k + y * matA.x;
-                    const b = x + k * matB.x;  
+                    const b = x + k * matB.x;
                     sum += matA.data[a] * matB.data[b];
                 }
                 const idx = x + y * matB.x;

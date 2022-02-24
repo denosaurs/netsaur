@@ -27,14 +27,12 @@ export async function reduce<T extends DataType>(
 }
 
 const shader = (type: DataType, activation: string) => `
-[[block]]
 struct Data {
   inputSize: u32;
   outputSize: u32;
   batches: u32;
 };
 
-[[block]]
 struct Matrix {
   values: array<${type}>;
 };
@@ -55,7 +53,7 @@ fn main([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
     return;
   };
 
-  var weighted_sum = 0${type};
+  var weighted_sum = ${type}(0);
   for (var k = 0u; k < data.inputSize; k = k + 1u) {
     var a = k + global_id.y * data.inputSize;
     var b = global_id.x + k * data.outputSize;    

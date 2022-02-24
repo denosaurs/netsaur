@@ -1,24 +1,24 @@
-import { WebGPUData } from "../deps.ts";
 import { NeuralNetwork } from "../mod.ts";
+import { GPUMatrix } from "../src/gpu/matrix.ts";
 import { GPUNetwork } from "../src/gpu/network.ts";
-
-const time = Date.now()
 
 const net = await new NeuralNetwork({
     hidden: [
-        { size: 100, activation: "sigmoid" }
+        { size: 2, activation: "sigmoid" }
     ],
     cost: "crossentropy",
 }).setupBackend(true);
 
-for (let i = 0; i < 1000; i++) {
-    const res = await (net.network as GPUNetwork).feedForward(
-        await WebGPUData.from(
-            (net.network as GPUNetwork).backend,
-            new Float32Array(1000 * 100).fill(1)), 100, "f32"
-    )
-}
+const network = (net.network as GPUNetwork);
 
-// console.log(await res.get())
+await network.initialize("f32", 2, 3);
 
-console.log(`Time taken: ${Date.now() - time}ms`)
+const res = await network.feedForward(
+    await GPUMatrix.from(network.backend, new Float32Array([
+        1, 2,
+        3, 4,
+        5, 6
+    ]), 2, 3)
+)
+
+console.log(await res.data.get())

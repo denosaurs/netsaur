@@ -1,4 +1,4 @@
-import { DataArray, DataType } from "../../deps.ts";
+import { DataType } from "../../deps.ts";
 import { DataSet, NetworkConfig, LayerConfig, Network, InputConfig, Cost } from "../types.ts";
 import { getType } from "../util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
@@ -31,8 +31,7 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
         this.hidden.push(...layers.map(layer => new CPULayer(layer)));
     }
 
-    public initialize(input: DataArray<T>, type: DataType, batches: number): DataArray<T> {
-        const inputSize = this.input?.size ?? input.length / batches;
+    public initialize(type: DataType, inputSize: number, batches: number){
         this.hidden[0].initialize(type, inputSize, batches);
 
         for (let i = 1; i < this.hidden.length; i++) {
@@ -40,7 +39,6 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
             const previous = this.hidden[i - 1];
             current.initialize(type, previous.outputSize, batches);
         }
-        return input;
     }
 
     public feedForward(input: CPUMatrix<T>): CPUMatrix<T> {
@@ -55,9 +53,14 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
 
     public train(dataset: DataSet<T>, epochs: number, batches: number): void {
         const type = this.input?.type || getType(dataset.inputs);
+        const inputSize = this.input?.size || dataset.inputs.length / batches;
+
+        const input = new CPUMatrix(dataset.inputs, inputSize, batches, type)
 
         for (let e = 0; e < epochs; e++) {
-            this.initialize(dataset.inputs, type, batches);
+            this.initialize(type, inputSize, batches);
+
+            this.feedForward(input);
 
             // TODO loss function?
 

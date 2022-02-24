@@ -1,5 +1,6 @@
-import { WebGPUData, WebGPUBackend, DataType, DataArrayConstructor, DataArray } from "../../deps.ts";
+import { WebGPUBackend, DataType } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
+import { fromType } from "../util.ts";
 import { GPUActivationFn, Sigmoid, LeakyRelu, Tanh, Relu } from "./activation.ts";
 import { CrossEntropy, GPUCostFunction } from "./cost.ts";
 import { matMul } from "./kernels/matmul.ts";
@@ -29,6 +30,14 @@ export class GPULayer<T extends DataType = DataType> {
         this.backend = backend
     }
 
+    public async initialize(type: DataType, inputSize: number, batches: number) {
+        const data = new (fromType(type))(this.outputSize * inputSize).fill(1);
+
+        this.weights = await GPUMatrix.from(this.backend, data, this.outputSize, inputSize, type)
+        this.output = await GPUMatrix.with(this.backend, this.outputSize, batches, type)
+        this.product = await GPUMatrix.with(this.backend, this.outputSize, batches, type)
+    }
+
     public setActivation(activation: Activation) {
         switch (activation) {
             case "sigmoid":
@@ -47,29 +56,14 @@ export class GPULayer<T extends DataType = DataType> {
     }
 
     // TODO: memoization
-    public async feedForward(
-        input: GPUMatrix, 
-        batches: number, 
-        inputSize: number, 
-        type: DataType
-    ): Promise<WebGPUData> {
-        const outputs = new WebGPUData(this.backend, type, this.outputSize * batches);
-        if (!this.weights) await this.initialize(inputSize, type)
-
+    public async feedForward(input: GPUMatrix): Promise<GPUMatrix> {
         await matMul(
             this.backend, 
             input, 
             this.weights, 
-            outputs,
-            this.activationFn.activate(type)
+            this.output,
+            this.activationFn.activate(input.type)
         )
-        return outputs
-    }
-    
-    public async initialize(inputSize: number, type: DataType) {
-        const length = this.outputSize * inputSize
-        const data = new DataArrayConstructor[type](length) as DataArray
-        data.fill(1)
-        this.weights = await WebGPUData.from(this.backend, data);
+        return this.output
     }
 }

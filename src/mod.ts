@@ -1,5 +1,6 @@
 import { DataType, WebGPUBackend } from "../deps.ts";
 import { CPUNetwork } from "./cpu/network.ts";
+import { GPUNetwork } from "./gpu/network.ts";
 // import { GPUNetwork } from "./gpu/network.ts";
 import { DataSet, LayerConfig, Network, NetworkConfig } from "./types.ts";
 
@@ -12,13 +13,12 @@ export class NeuralNetwork<T extends DataType = DataType> {
     this.config = config;
   }
 
-  // deno-lint-ignore require-await
   public async setupBackend(gpu = true, silent = true) {
     if (!gpu) {
       this.network = new CPUNetwork(this.config);
       return this
     }
-    /*const backend = new WebGPUBackend();
+    const backend = new WebGPUBackend();
     await backend.initialize()
     if (backend.adapter) {
       if (!silent) console.log(`Using adapter: ${backend.adapter.name}`);
@@ -31,7 +31,7 @@ export class NeuralNetwork<T extends DataType = DataType> {
       this.network = new CPUNetwork(this.config);
     }
 
-    return this*/
+    return this
   }
 
   // public withDevice(adapter: GPUAdapter, device: GPUDevice) {
