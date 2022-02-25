@@ -1,5 +1,5 @@
 <p align="center">
- <img src="assets/netsaur.svg" width="80rem" />
+ <img src="https://deno.land/x/netsaur/assets/netsaur.svg" width="80rem" />
  <br/>
  <h1 align="center">Netsaur</h1>
 </p>
