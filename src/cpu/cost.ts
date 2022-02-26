@@ -5,7 +5,7 @@ export interface CPUCostFunction<T extends DataType = DataType> {
     cost(yHat: DataArray<T>, y: DataArray<T>): number
 
     /** Return the error delta from the output layer. */
-    measure(z: number, yHat: number, y: number): number
+    prime(yHat: number, y: number): number
 }
 
 export class CrossEntropy<T extends DataType = DataType> implements CPUCostFunction {
@@ -17,7 +17,7 @@ export class CrossEntropy<T extends DataType = DataType> implements CPUCostFunct
         return sum
     }
 
-    public measure(_: number, yHat: number, y: number) {
+    public prime(yHat: number, y: number) {
         return yHat - y
     }
 }
@@ -32,7 +32,7 @@ export class Hinge<T extends DataType = DataType> implements CPUCostFunction {
         return max
     }
 
-    public measure(z: number, yHat: number, y: number) {
-        return y * yHat * z < 1 ? -y * yHat : 0
+    public prime(yHat: number, y: number) {
+        return y * yHat * 2 < 1 ? -y * yHat : 0
     }
 }

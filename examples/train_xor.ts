@@ -2,12 +2,13 @@ import { NeuralNetwork } from "../mod.ts";
 
 const net = await new NeuralNetwork({
     hidden: [
-        { size: 3, activation: "relu" }
+        { size: 2, activation: "sigmoid" }
     ],
-    cost: "crossentropy"
+    cost: "crossentropy",
+    output: { size: 1, activation: "sigmoid" }
 }).setupBackend(false)
 
-net?.train({
+net.train({
     inputs: new Float32Array([
         0, 0,
         0, 1,
@@ -20,5 +21,6 @@ net?.train({
         1,
         0
     ])
-}, 10, 4);
-console.log(net?.network)
+}, 10000, 4, 1);
+
+console.log(net.network.getOutput())

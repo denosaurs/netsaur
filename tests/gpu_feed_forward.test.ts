@@ -7,6 +7,7 @@ const net = await new NeuralNetwork({
         { size: 2, activation: "sigmoid" }
     ],
     cost: "crossentropy",
+    output: { size: 2, activation: "sigmoid" }
 }).setupBackend(true);
 
 const network = (net.network as GPUNetwork);

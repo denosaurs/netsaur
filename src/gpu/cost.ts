@@ -5,7 +5,7 @@ export interface GPUCostFunction {
     cost(type: string): string
 
     /** Return the error delta from the output layer. */
-    measure(type: string): string
+    prime(type: string): string
 }
 
 export class CrossEntropy implements GPUCostFunction {
@@ -13,7 +13,7 @@ export class CrossEntropy implements GPUCostFunction {
         return ``
     }
 
-    public measure(type: string) {
+    public prime(type: string) {
         return ``
     }
 }
@@ -23,7 +23,7 @@ export class Hinge implements GPUCostFunction {
         return ``
     }
 
-    public measure(type: string) {
+    public prime(type: string) {
         return ``
     }
 }

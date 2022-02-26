@@ -1,6 +1,6 @@
 export interface GPUActivationFn {
     activate(type: string): string;
-    measure(type: string): string;
+    prime(type: string): string;
 }
 
 export class Sigmoid implements GPUActivationFn {
@@ -8,7 +8,7 @@ export class Sigmoid implements GPUActivationFn {
         return `return ${type}(1) / (${type}(1) + exp(-weighted_sum))`;
     }
 
-    measure(type: string): string {
+    prime(type: string): string {
         return `return weight * (${type}(1) - weight) * error`;
     }
 }
@@ -18,7 +18,7 @@ export class Tanh implements GPUActivationFn {
         return `return tanh(weighted_sum)`;
     }
 
-    measure(type: string): string {
+    prime(type: string): string {
         return `return (${type}(1) - weighted_sum * weighted_sum) * error`;
     }
 }
@@ -28,7 +28,7 @@ export class Relu implements GPUActivationFn {
         return `return max(${type}(0), weighted_sum)`;
     }
 
-    measure(type: string): string {
+    prime(type: string): string {
         return `if (weighted_sum <= ${type}(0)) {
             return ${type}(0);
         }
@@ -44,7 +44,7 @@ export class LeakyRelu implements GPUActivationFn {
         return ${type}(f32(weighted_sum) * 0.01);`;
     }
 
-    measure(type: string): string {
+    prime(type: string): string {
         return `if (weighted_sum > ${type}(0)) {
             return error;
         }

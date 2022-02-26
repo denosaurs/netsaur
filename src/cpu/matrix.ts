@@ -25,6 +25,7 @@ export class CPUMatrix<T extends DataType = DataType> {
         }
         return res
     }
+
     static mul(matA: CPUMatrix, matB: CPUMatrix) {
         const res = CPUMatrix.with(matB.x, matA.y, matA.type)
         for (let x = 0; x < matB.x; x++) {
@@ -62,13 +63,14 @@ export class CPUMatrix<T extends DataType = DataType> {
         return mat;
     }
     static transpose(mat: CPUMatrix) {
+        const resMat = CPUMatrix.with(mat.y, mat.x, mat.type)
         for (let x = 0; x < mat.x; x++) {
             for (let y = 0; y < mat.y; y++) {
                 const idx = x + y * mat.x;
-                mat.data[idx] = mat.data[y + x * mat.y]
+                resMat.data[idx] = mat.data[y + x * mat.y]
             }
         }
-        return mat;
+        return resMat;
     }
 
     fill(val: number) {

@@ -1,6 +1,6 @@
 import { GPULayer } from "./layer.ts";
 import { DataSet, InputConfig, LayerConfig, Network, NetworkConfig } from "../types.ts";
-import { DataType, WebGPUBackend } from "../../deps.ts";
+import { DataArray, DataType, WebGPUBackend } from "../../deps.ts";
 import { getType } from "../util.ts";
 import { GPUMatrix } from "./matrix.ts";
 
@@ -54,6 +54,10 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
 
             this.backpropagate();
         }
+    }
+
+    public getOutput(): DataArray<T> {
+        throw new Error("Unimplemented!")
     }
 
     public predict() {

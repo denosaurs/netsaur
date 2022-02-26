@@ -1,6 +1,6 @@
 export interface CPUActivationFn {
   activate(val: number): number;
-  measure(weight: number, error: number): number;
+  prime(val: number): number;
 }
 
 export class Sigmoid implements CPUActivationFn {
@@ -8,40 +8,37 @@ export class Sigmoid implements CPUActivationFn {
     return 1 / (1 + Math.exp(-val));
   }
   
-  measure(weight: number, error: number): number {
-    return weight * (1 - weight) * error;
+  prime(val: number): number {
+    return this.activate(val) * (1-this.activate(val))
   }
 }
 
 export class Tanh implements CPUActivationFn {
-  activate(weight: number): number {
-    return Math.tanh(weight);
+  activate(val: number): number {
+    return Math.tanh(val);
   }
 
-  measure(weight: number, error: number): number {
-    return (1 - weight * weight) * error;
+  prime(val: number): number {
+    return 1 - Math.pow(this.activate(val), 2);
   }
 }
 
 export class Relu implements CPUActivationFn {
-  activate(weight: number): number {
-    return Math.max(0, weight);
+  activate(val: number): number {
+    return Math.max(0, val);
   }
 
-  measure(weight: number, delta: number): number {
-    if (weight <= 0) {
-      return 0;
-    }
-    return delta;
+  prime(val: number): number {
+    return val > 0 ? 1 : 0
   }
 }
 
 export class LeakyRelu implements CPUActivationFn {
-  activate(weight: number): number {
-    return weight > 0 ? weight : 0.01 * weight;
+  activate(val: number): number {
+    return val > 0 ? val : 0.01 * val;
   }
 
-  measure(weight: number, error: number): number {
-    return weight > 0 ? error : 0.01 * error;
+  prime(val: number): number {
+    return val > 0 ? 1 : 0.01
   }
 }

@@ -20,7 +20,7 @@ export class GPULayer<T extends DataType = DataType> {
     public product!: GPUMatrix
     public output!: GPUMatrix
     public weightsDelta!: GPUMatrix
-    public biasesDelta!: GPUMatrix
+    public error!: GPUMatrix
 
     private backend: WebGPUBackend
 

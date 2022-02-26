@@ -14,7 +14,7 @@ const network = (net.network as CPUNetwork);
 
 network.initialize("f32", 2, 3);
 
-const res = network.feedForward(
+network.feedForward(
     new CPUMatrix(new Float32Array([
         1, 2,
         3, 4,
@@ -22,4 +22,13 @@ const res = network.feedForward(
     ]), 2, 3)
 )
 
-console.log(res.data)
+network.backpropagate(
+    new Float32Array([
+        1, 2,
+        3, 4,
+        5, 6
+    ]),
+    0.1
+)
+
+console.log(network.output.output)
