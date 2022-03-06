@@ -16,3 +16,11 @@ export function fromType<T extends DataType>(type: string) {
       : Uint32Array
     ) as DataArrayConstructor<T>
 }
+export function toType<T extends DataType>(type: string) {
+    return (
+        type === "u32" ? Uint32Array
+      : type === "i32" ? Int32Array
+      : type === "f32" ? Float32Array
+      : Uint32Array
+    ) as DataArrayConstructor<T>
+}

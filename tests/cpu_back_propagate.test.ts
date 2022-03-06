@@ -16,15 +16,15 @@ network.initialize("f32", 2, 3);
 
 network.feedForward(
     new CPUMatrix(new Float32Array([
-        1, 2,
-        3, 4,
-        5, 6
+        0, 0,
+        1, 0,
+        0, 1
     ]), 2, 3)
 )
 
 network.backpropagate(
     new Float32Array([
-        1, 2,
+        0, 0,
         3, 4,
         5, 6
     ]),

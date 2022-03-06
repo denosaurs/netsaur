@@ -1,7 +1,7 @@
 import { GPULayer } from "./layer.ts";
 import { DataSet, InputConfig, LayerConfig, Network, NetworkConfig } from "../types.ts";
 import { DataArray, DataType, WebGPUBackend } from "../../deps.ts";
-import { getType } from "../util.ts";
+import { fromType, getType } from "../util.ts";
 import { GPUMatrix } from "./matrix.ts";
 
 export class GPUNetwork<T extends DataType = DataType> implements Network {
@@ -39,11 +39,13 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     public backpropagate() {
     }
 
-    public async train(dataset: DataSet<T>, epochs: number, batches: number) {
-        const type = this.input?.type || getType(dataset.inputs)
-        const inputSize = this.input?.size || dataset.inputs.length / batches;
+    public async train(datasets: DataSet[], epochs: number, batches: number) {
+        const type = this.input?.type || getType(datasets[0].inputs as DataArray<T>)
+        const inputSize = this.input?.size || datasets[0].inputs.length / batches;
         
-        const input = await GPUMatrix.from(this.backend, dataset.inputs, inputSize, batches, type)
+        const inputArray = new (fromType(type))(datasets[0].inputs)
+        const outputArray = new (fromType(type))(datasets[0].outputs) as DataArray<T>
+        const input = await GPUMatrix.from(this.backend, inputArray, inputSize, batches, type)
 
         for (let e = 0; e < epochs; e++) {
             await this.initialize(type, inputSize, batches);
@@ -60,6 +62,7 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
         throw new Error("Unimplemented!")
     }
 
-    public predict() {
+    public predict(data: DataArray<T>): DataArray<T> {
+        throw new Error("Unimplemented!")
     }
 }

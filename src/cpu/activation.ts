@@ -7,9 +7,9 @@ export class Sigmoid implements CPUActivationFn {
   activate(val: number): number {
     return 1 / (1 + Math.exp(-val));
   }
-  
+
   prime(val: number): number {
-    return this.activate(val) * (1-this.activate(val))
+    return val * (1 - val);
   }
 }
 
@@ -19,7 +19,7 @@ export class Tanh implements CPUActivationFn {
   }
 
   prime(val: number): number {
-    return 1 - Math.pow(this.activate(val), 2);
+    return 1 - (val * val);
   }
 }
 
@@ -29,7 +29,7 @@ export class Relu implements CPUActivationFn {
   }
 
   prime(val: number): number {
-    return val > 0 ? 1 : 0
+    return val > 0 ? 1 : 0;
   }
 }
 
@@ -39,6 +39,6 @@ export class LeakyRelu implements CPUActivationFn {
   }
 
   prime(val: number): number {
-    return val > 0 ? 1 : 0.01
+    return val > 0 ? 1 : 0.01;
   }
 }

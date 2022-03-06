@@ -1,26 +1,28 @@
 import { NeuralNetwork } from "../mod.ts";
 
+const time = Date.now()
+
 const net = await new NeuralNetwork({
     hidden: [
-        { size: 2, activation: "sigmoid" }
+        { size: 2, activation: "relu" }
     ],
     cost: "crossentropy",
-    output: { size: 1, activation: "sigmoid" }
+    output: { size: 1, activation: "relu" },
+    input: {
+        type: "f32"
+    }
 }).setupBackend(false)
 
-net.train({
-    inputs: new Float32Array([
-        0, 0,
-        0, 1,
-        1, 0,
-        1, 1
-    ]),
-    outputs: new Float32Array([
-        0,
-        1,
-        1,
-        0
-    ])
-}, 10000, 4, 1);
+net.train([
+    { inputs: [0, 0], outputs: [0] },
+    { inputs: [1, 0], outputs: [1] },
+    { inputs: [0, 1], outputs: [1] },
+    { inputs: [1, 1], outputs: [0] },
+], 1000, 1, 0.1);
 
-console.log(net.network.getOutput())
+console.log(net.predict(new Float32Array([0, 0])))
+console.log(net.predict(new Float32Array([1, 0])))
+console.log(net.predict(new Float32Array([0, 1])))
+console.log(net.predict(new Float32Array([1, 1])))
+
+console.log(Date.now() - time)
