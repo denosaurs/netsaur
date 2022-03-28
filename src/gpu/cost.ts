@@ -15,7 +15,7 @@ export class CrossEntropy implements GPUCostFunction {
   }
 
   prime(_type: string) {
-    return ``;
+    return `return yHat - y`;
   }
 }
 
@@ -25,6 +25,6 @@ export class Hinge implements GPUCostFunction {
   }
 
   prime(_type: string) {
-    return ``;
+    return ``
   }
 }

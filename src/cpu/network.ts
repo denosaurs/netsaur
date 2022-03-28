@@ -82,8 +82,9 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
       cost,
     );
     for (const i in weightsDelta.data) {
-      this.output.weights.data[i] += weightsDelta.data[i] * learningRate;
+      this.output.weights.data[i] += weightsDelta.data[i] * 1;
     }
+    console.log(this.output.weights)
     for (let i = 0, j = 0; i < cost.data.length; i++, j++) {
       if (j >= this.output.biases.x) j = 0;
       this.output.biases.data[j] += cost.data[i] * learningRate;

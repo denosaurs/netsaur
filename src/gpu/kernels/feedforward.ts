@@ -6,10 +6,11 @@ import {
 } from "../../../deps.ts";
 import { GPUMatrix } from "../matrix.ts";
 
-export async function matMul<T extends DataType>(
+export async function feedForward<T extends DataType>(
   backend: WebGPUBackend,
   inputs: GPUMatrix<T>,
   weights: GPUMatrix<T>,
+  products: GPUMatrix<T>,
   outputs: GPUMatrix<T>,
   activation: string,
 ) {
@@ -19,13 +20,13 @@ export async function matMul<T extends DataType>(
   const uniform = await WebGPUData.from(
     backend,
     new Uint32Array([inputs.x, outputs.x, inputs.y]),
-    // deno-lint-ignore no-explicit-any
-    (GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM) as any,
+    "u32",
+    GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
   );
 
   await backend.execute({
     pipeline,
-    data: [inputs.data, weights.data, outputs.data, uniform],
+    data: [inputs.data, weights.data, products.data, outputs.data, uniform],
     workgroups: [outputs.x, inputs.y, 1],
   });
 }
@@ -46,9 +47,11 @@ var<storage, read> inputs: Matrix;
 [[group(0), binding(1)]]
 var<storage, read> weights: Matrix;
 [[group(0), binding(2)]]
+var<storage, write> products: Matrix;
+[[group(0), binding(3)]]
 var<storage, write> outputs: Matrix;
 
-[[group(0), binding(3)]]
+[[group(0), binding(4)]]
 var<uniform> data: Data;
 
 fn activation(weighted_sum: ${type}) -> ${type} {
@@ -69,6 +72,7 @@ fn main([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
   };
 
   let idx = global_id.x + global_id.y * data.outputSize;
+  products.values[idx] = weighted_sum;
   outputs.values[idx] = activation(weighted_sum);
 }
 `;

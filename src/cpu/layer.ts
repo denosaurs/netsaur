@@ -10,7 +10,6 @@ import {
 import { CPUCostFunction, CrossEntropy } from "./cost.ts";
 import { CPUMatrix } from "./matrix.ts";
 
-// this is pretty good too
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
 
@@ -40,10 +39,12 @@ export class CPULayer {
     this.biases = CPUMatrix.with(this.outputSize, 1, type);
     this.reset(type, batches);
     for (const i in this.biases.data) {
-      this.biases.data[i] = Math.random() * 2 - 1;
+      this.weights.data[i] = 1
+      // this.biases.data[i] = Math.random() * 2 - 1;
     }
     for (const i in this.weights.data) {
-      this.weights.data[i] = Math.random() * 2 - 1;
+      this.weights.data[i] = 1
+      // this.weights.data[i] = Math.random() * 2 - 1;
     }
   }
 

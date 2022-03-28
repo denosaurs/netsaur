@@ -17,12 +17,12 @@ network.initialize("f32", 2, 3);
 const res = network.feedForward(
   new CPUMatrix(
     new Float32Array([
-      0,
-      0,
       1,
-      0,
-      0,
-      1,
+      2,
+      3,
+      4,
+      5,
+      6,
     ]),
     2,
     3,

@@ -9,7 +9,7 @@ export class Sigmoid implements GPUActivationFn {
   }
 
   prime(type: string): string {
-    return `return weight * (${type}(1) - weight) * error`;
+    return `return output * (${type}(1) - output)`;
   }
 }
 
@@ -19,7 +19,7 @@ export class Tanh implements GPUActivationFn {
   }
 
   prime(type: string): string {
-    return `return (${type}(1) - weighted_sum * weighted_sum) * error`;
+    return `return ${type}(1) - output * output`;
   }
 }
 

@@ -9,7 +9,7 @@ import {
   Tanh,
 } from "./activation.ts";
 import { CrossEntropy, GPUCostFunction } from "./cost.ts";
-import { matMul } from "./kernels/matmul.ts";
+import { feedForward } from "./kernels/feedforward.ts";
 import { GPUMatrix } from "./matrix.ts";
 
 interface GPULayerConfig extends LayerConfig {
@@ -22,6 +22,7 @@ export class GPULayer<T extends DataType = DataType> {
   activationFn: GPUActivationFn = new Sigmoid();
   costFunction: GPUCostFunction = new CrossEntropy();
 
+  inputs!: GPUMatrix;
   weights!: GPUMatrix;
   product!: GPUMatrix;
   output!: GPUMatrix;
@@ -77,15 +78,28 @@ export class GPULayer<T extends DataType = DataType> {
     }
   }
 
-  // TODO: memoization
   async feedForward(input: GPUMatrix): Promise<GPUMatrix> {
-    await matMul(
+    this.inputs = input
+    await feedForward(
       this.#backend,
-      input,
+      this.inputs,
       this.weights,
+      this.product,
       this.output,
       this.activationFn.activate(input.type),
     );
     return this.output;
   }
+
+  // async backPropagate(): Promise<GPUMatrix> {
+  //   await backPropagate(
+  //     this.#backend,
+  //     input,
+  //     this.weights,
+  //     this.product,
+  //     this.output,
+  //     this.activationFn.activate(input.type),
+  //   );
+  //   return this.output;
+  // }
 }
