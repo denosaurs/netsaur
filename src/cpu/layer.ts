@@ -2,7 +2,9 @@ import { DataType } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
 import {
   CPUActivationFn,
+  Elu,
   LeakyRelu,
+  Linear,
   Relu,
   Sigmoid,
   Tanh,
@@ -39,12 +41,12 @@ export class CPULayer {
     this.biases = CPUMatrix.with(this.outputSize, 1, type);
     this.reset(type, batches);
     for (const i in this.biases.data) {
-      this.weights.data[i] = 1
-      // this.biases.data[i] = Math.random() * 2 - 1;
+      // this.weights.data[i] = 1;
+      this.biases.data[i] = Math.random() * 2 - 1;
     }
     for (const i in this.weights.data) {
-      this.weights.data[i] = 1
-      // this.weights.data[i] = Math.random() * 2 - 1;
+      // this.weights.data[i] = 1;
+      this.weights.data[i] = Math.random() * 2 - 1;
     }
   }
 
@@ -61,6 +63,12 @@ export class CPULayer {
         break;
       case "relu":
         this.activationFn = new Relu();
+        break;
+      case "elu":
+        this.activationFn = new Elu();
+        break;
+      case "linear":
+        this.activationFn = new Linear();
         break;
     }
   }

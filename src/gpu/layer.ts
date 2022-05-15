@@ -2,8 +2,10 @@ import { DataType, WebGPUBackend } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
 import { fromType } from "../util.ts";
 import {
+  Elu,
   GPUActivationFn,
   LeakyRelu,
+  Linear,
   Relu,
   Sigmoid,
   Tanh,
@@ -75,11 +77,17 @@ export class GPULayer<T extends DataType = DataType> {
       case "relu":
         this.activationFn = new Relu();
         break;
+      case "elu":
+        this.activationFn = new Elu();
+        break;
+      case "linear":
+        this.activationFn = new Linear();
+        break;
     }
   }
 
   async feedForward(input: GPUMatrix): Promise<GPUMatrix> {
-    this.inputs = input
+    this.inputs = input;
     await feedForward(
       this.#backend,
       this.inputs,

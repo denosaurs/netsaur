@@ -16,7 +16,6 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
   hidden: GPULayer[];
   output: GPULayer;
   backend: WebGPUBackend;
-
   constructor(config: NetworkConfig, backend: WebGPUBackend) {
     this.input = config.input;
     this.backend = backend;

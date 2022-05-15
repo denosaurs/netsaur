@@ -45,7 +45,12 @@ export async function backPropagate<T extends DataType>(
 
 // embed rate into the shader to avoid adding another binding
 // its not gonna change much anyways
-const shader = (type: DataType, activation: string, cost: string, rate: number) => `
+const shader = (
+  type: DataType,
+  activation: string,
+  cost: string,
+  rate: number,
+) => `
   struct Data {
     inputSize: u32;
     outputSize: u32;

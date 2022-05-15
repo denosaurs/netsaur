@@ -26,27 +26,32 @@
 ### Usage
 ```typescript 
 import { NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
-import { CPUMatrix } from "https://deno.land/x/netsaur/src/cpu/matrix.ts";
-import { CPUNetwork } from "https://deno.land/x/netsaur/src/cpu/network.ts";
 
 const net = await new NeuralNetwork({
-    hidden: [
-        { size: 2, activation: "sigmoid" }
-    ],
-    cost: "crossentropy",
+  hidden: [
+    { size: 2, activation: "sigmoid" },
+  ],
+  cost: "crossentropy",
+  output: { size: 1, activation: "sigmoid" },
+  input: {
+    type: "f32",
+  },
 }).setupBackend(false);
 
-const network = (net.network as CPUNetwork);
-
-network.initialize("f32", 2, 3);
-
-const res = network.feedForward(
-    new CPUMatrix(new Float32Array([
-        1, 2,
-        3, 4,
-        5, 6
-    ]), 2, 3)
+net.train(
+  [
+    { inputs: [0, 0], outputs: [0] },
+    { inputs: [1, 0], outputs: [1] },
+    { inputs: [0, 1], outputs: [1] },
+    { inputs: [1, 1], outputs: [0] },
+  ],
+  1000,
+  1,
+  0.1,
 );
 
-console.log(res.data);
+console.log(net.predict(new Float32Array([0, 0])));
+console.log(net.predict(new Float32Array([1, 0])));
+console.log(net.predict(new Float32Array([0, 1])));
+console.log(net.predict(new Float32Array([1, 1])));
 ```

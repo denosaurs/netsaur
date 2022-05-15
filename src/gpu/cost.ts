@@ -25,6 +25,6 @@ export class Hinge implements GPUCostFunction {
   }
 
   prime(_type: string) {
-    return ``
+    return ``;
   }
 }

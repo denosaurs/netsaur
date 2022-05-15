@@ -42,3 +42,22 @@ export class LeakyRelu implements CPUActivationFn {
     return val > 0 ? 1 : 0.01;
   }
 }
+
+export class Elu implements CPUActivationFn {
+  activate(val: number): number {
+    return val >= 0 ? val : Math.exp(val) - 1;
+  }
+
+  prime(val: number): number {
+    return val > 0 ? 1 : Math.exp(val);
+  }
+}
+export class Linear implements CPUActivationFn {
+  activate(val: number): number {
+    return val;
+  }
+
+  prime(_val: number): number {
+    return 1;
+  }
+}

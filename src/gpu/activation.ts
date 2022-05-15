@@ -22,7 +22,21 @@ export class Tanh implements GPUActivationFn {
     return `return ${type}(1) - output * output`;
   }
 }
+export class Elu implements GPUActivationFn {
+  activate(type: string): string {
+    return `if (weighted_sum > ${type}(0)) {
+            return weighted_sum;
+        }
+        return ${type}(exp(weighted_sum) - ${type}(1));`;
+  }
 
+  prime(type: string): string {
+    return `if (weighted_sum > ${type}(0)) {
+            return error;
+        }
+        return ${type}(exp(weighted_sum) - ${type}(1));`;
+  }
+}
 export class Relu implements GPUActivationFn {
   activate(type: string): string {
     return `return max(${type}(0), weighted_sum)`;
@@ -49,5 +63,14 @@ export class LeakyRelu implements GPUActivationFn {
             return error;
         }
         return ${type}(f32(error) * 0.01);`;
+  }
+}
+export class Linear implements GPUActivationFn {
+  activate(_type: string): string {
+    return `return weighted_sum`;
+  }
+
+  prime(_type: string): string {
+    return `return error`;
   }
 }

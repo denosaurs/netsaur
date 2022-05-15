@@ -24,7 +24,7 @@ export interface LayerConfig {
   activation: Activation;
 }
 
-export type Activation = "sigmoid" | "tanh" | "relu" | "leakyrelu";
+export type Activation = "sigmoid" | "tanh" | "relu" | "leakyrelu" | "elu" | "linear";
 
 export type Cost = "crossentropy" | "hinge";
 
