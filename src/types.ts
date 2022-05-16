@@ -17,6 +17,7 @@ export interface NetworkConfig {
   hidden: LayerConfig[];
   cost: Cost;
   output: LayerConfig;
+  silent?: boolean;
 }
 
 export interface LayerConfig {
@@ -24,7 +25,15 @@ export interface LayerConfig {
   activation: Activation;
 }
 
-export type Activation = "sigmoid" | "tanh" | "relu" | "leakyrelu" | "elu" | "linear";
+export type Activation =
+  | "sigmoid"
+  | "tanh"
+  | "relu"
+  | "relu6"
+  | "leakyrelu"
+  | "elu"
+  | "linear"
+  | "selu";
 
 export type Cost = "crossentropy" | "hinge";
 

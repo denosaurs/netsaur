@@ -16,8 +16,9 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
   input?: InputConfig;
   hidden: CPULayer[];
   output: CPULayer;
-
+  silent: boolean;
   constructor(config: NetworkConfig) {
+    this.silent = config.silent ?? false;
     this.input = config.input;
     this.hidden = config.hidden.map((layer) => new CPULayer(layer));
     this.output = new CPULayer(config.output);
@@ -84,7 +85,7 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
     for (const i in weightsDelta.data) {
       this.output.weights.data[i] += weightsDelta.data[i] * 1;
     }
-    console.log(this.output.weights);
+    if (!this.silent)console.log(this.output.weights);
     for (let i = 0, j = 0; i < cost.data.length; i++, j++) {
       if (j >= this.output.biases.x) j = 0;
       this.output.biases.data[j] += cost.data[i] * learningRate;
@@ -120,6 +121,7 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
       }
     }
     for (let e = 0; e < epochs; e++) {
+      if (!this.silent)console.log(`Epoch ${e + 1}`);
       for (const dataset of datasets) {
         const input = new CPUMatrix(
           dataset.inputs as DataArray<T>,
@@ -153,5 +155,12 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
     }
     this.output.reset(type, 1);
     return this.feedForward(input).data;
+  }
+  toJSON() {
+    return {
+      input: this.input,
+      hidden: this.hidden.map((layer) => layer.toJSON()),
+      output: this.output.toJSON(),
+    };
   }
 }

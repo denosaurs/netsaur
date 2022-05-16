@@ -30,4 +30,12 @@ export class GPUMatrix<T extends DataType = DataType> {
     const buf = await WebGPUData.from(backend, data);
     return new this(buf, x, y, type);
   }
+  toJSON() {
+    return {
+      data: this.data,
+      x: this.x,
+      y: this.y,
+      type: this.type,
+    };
+  }
 }

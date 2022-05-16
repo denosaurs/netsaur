@@ -1,11 +1,14 @@
 import { DataType } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
+import { ActivationError } from "../util.ts";
 import {
   CPUActivationFn,
   Elu,
   LeakyRelu,
   Linear,
   Relu,
+  Relu6,
+  Selu,
   Sigmoid,
   Tanh,
 } from "./activation.ts";
@@ -64,12 +67,20 @@ export class CPULayer {
       case "relu":
         this.activationFn = new Relu();
         break;
+      case "relu6":
+        this.activationFn = new Relu6();
+        break;
       case "elu":
         this.activationFn = new Elu();
+        break;
+      case "selu":
+        this.activationFn = new Selu();
         break;
       case "linear":
         this.activationFn = new Linear();
         break;
+      default:
+        throw new ActivationError(activation);
     }
   }
 
@@ -104,5 +115,11 @@ export class CPULayer {
       this.biases.data[j] += cost.data[i] * learningRate;
     }
     return error;
+  }
+  toJSON() {
+    return {
+      outputSize: this.outputSize,
+      activation: this.activationFn,
+    };
   }
 }

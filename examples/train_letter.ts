@@ -1,7 +1,5 @@
 import { DataArray, DataType } from "../deps.ts";
 import { NeuralNetwork } from "../mod.ts";
-// deno-lint-ignore no-unused-vars
-import { CPUNetwork } from "../src/cpu/network.ts";
 
 // https://github.com/BrainJS/brain.js/blob/master/examples/typescript/which-letter-simple.ts
 const character = (string: string): Float32Array =>

@@ -77,4 +77,12 @@ export class CPUMatrix<T extends DataType = DataType> {
   fill(val: number) {
     this.data.fill(val);
   }
+  toJSON() {
+    return {
+      data: this.data,
+      x: this.x,
+      y: this.y,
+      type: this.type,
+    };
+  }
 }

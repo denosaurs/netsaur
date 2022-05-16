@@ -33,3 +33,11 @@ export function toType<T extends DataType>(type: string) {
       : Uint32Array
   ) as DataArrayConstructor<T>;
 }
+
+export class ActivationError extends Error {
+  constructor(activation: string) {
+    super(
+      `Unknown activation function: ${activation}.  Available: "sigmoid", "tanh", "relu", "relu6" , "leakyrelu", "elu", "linear", "selu"`,
+    );
+  }
+}

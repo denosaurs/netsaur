@@ -1,12 +1,14 @@
 import { DataType, WebGPUBackend } from "../../deps.ts";
 import { Activation, LayerConfig } from "../types.ts";
-import { fromType } from "../util.ts";
+import { ActivationError, fromType } from "../util.ts";
 import {
   Elu,
   GPUActivationFn,
   LeakyRelu,
   Linear,
   Relu,
+  Relu6,
+  Selu,
   Sigmoid,
   Tanh,
 } from "./activation.ts";
@@ -77,12 +79,20 @@ export class GPULayer<T extends DataType = DataType> {
       case "relu":
         this.activationFn = new Relu();
         break;
+      case "relu6":
+        this.activationFn = new Relu6();
+        break;
       case "elu":
         this.activationFn = new Elu();
+        break;
+      case "selu":
+        this.activationFn = new Selu();
         break;
       case "linear":
         this.activationFn = new Linear();
         break;
+      default:
+        throw new ActivationError(activation);
     }
   }
 
@@ -110,4 +120,10 @@ export class GPULayer<T extends DataType = DataType> {
   //   );
   //   return this.output;
   // }
+  toJSON() {
+    return {
+      outputSize: this.outputSize,
+      activation: this.activationFn,
+    };
+  }
 }

@@ -3,6 +3,16 @@ export interface CPUActivationFn {
   prime(val: number): number;
 }
 
+export class Linear implements CPUActivationFn {
+  activate(val: number): number {
+    return val;
+  }
+
+  prime(_val: number): number {
+    return 1;
+  }
+}
+
 export class Sigmoid implements CPUActivationFn {
   activate(val: number): number {
     return 1 / (1 + Math.exp(-val));
@@ -33,6 +43,16 @@ export class Relu implements CPUActivationFn {
   }
 }
 
+export class Relu6 implements CPUActivationFn {
+  activate(val: number): number {
+    return Math.min(Math.max(0, val), 6);
+  }
+
+  prime(val: number): number {
+    return val > 0 ? 1 : 0;
+  }
+}
+
 export class LeakyRelu implements CPUActivationFn {
   activate(val: number): number {
     return val > 0 ? val : 0.01 * val;
@@ -52,12 +72,13 @@ export class Elu implements CPUActivationFn {
     return val > 0 ? 1 : Math.exp(val);
   }
 }
-export class Linear implements CPUActivationFn {
+
+export class Selu implements CPUActivationFn {
   activate(val: number): number {
-    return val;
+    return val >= 0 ? val : 1.0507 * (Math.exp(val) - 1);
   }
 
-  prime(_val: number): number {
-    return 1;
+  prime(val: number): number {
+    return val > 0 ? 1 : 1.0507 * Math.exp(val);
   }
 }

@@ -16,7 +16,9 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
   hidden: GPULayer[];
   output: GPULayer;
   backend: WebGPUBackend;
+  silent: boolean;
   constructor(config: NetworkConfig, backend: WebGPUBackend) {
+    this.silent = config.silent ?? false;
     this.input = config.input;
     this.backend = backend;
     this.output = new GPULayer(config.output, backend);
@@ -112,5 +114,13 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
 
   predict(_data: DataArray<T>): DataArray<T> {
     throw new Error("Unimplemented!");
+  }
+
+  toJSON() {
+    return {
+      input: this.input,
+      hidden: this.hidden.map((layer) => layer.toJSON()),
+      output: this.output.toJSON(),
+    };
   }
 }
