@@ -1,4 +1,4 @@
-import { GPULayer } from "./layer.ts";
+import { BaseGPULayer } from "./layers/base.ts";
 import {
   DataSet,
   InputConfig,
@@ -13,21 +13,23 @@ import { backPropagate } from "./kernels/backpropagate.ts";
 
 export class GPUNetwork<T extends DataType = DataType> implements Network {
   input?: InputConfig;
-  hidden: GPULayer[];
-  output: GPULayer;
+  hidden: BaseGPULayer[];
+  output: BaseGPULayer;
   backend: WebGPUBackend;
   silent: boolean;
   constructor(config: NetworkConfig, backend: WebGPUBackend) {
     this.silent = config.silent ?? false;
     this.input = config.input;
     this.backend = backend;
-    this.output = new GPULayer(config.output, backend);
-    this.hidden = config.hidden.map((layer) => new GPULayer(layer, backend));
+    this.output = new BaseGPULayer(config.output, backend);
+    this.hidden = config.hidden.map((layer) =>
+      new BaseGPULayer(layer, backend)
+    );
   }
 
   addLayers(layers: LayerConfig[]) {
     this.hidden.push(
-      ...layers.map((layer) => new GPULayer(layer, this.backend)),
+      ...layers.map((layer) => new BaseGPULayer(layer, this.backend)),
     );
   }
 
@@ -109,11 +111,11 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
   }
 
   getOutput(): DataArray<T> {
-    throw new Error("Unimplemented!");
+    return this.output.output.data as unknown as DataArray<T>;
   }
 
   predict(_data: DataArray<T>): DataArray<T> {
-    throw new Error("Unimplemented!");
+    throw new Error("Method not implemented.");
   }
 
   toJSON() {

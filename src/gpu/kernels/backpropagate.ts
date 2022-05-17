@@ -93,7 +93,6 @@ const shader = (
       error.values[idx] = costPrime(result.values[idx], output.values[idx]);
       cost.values[idx] = activation_prime * error.values[idx];
     };
-
     if (global_id.x < data.inputSize && global_id.y < data.outputSize) {
       var weighted_sum = ${type}(0);
       for (var k = 0u; k < data.batches; k = k + 1u) {
@@ -101,7 +100,7 @@ const shader = (
         var b = global_id.x + k * data.outputSize;    
         weighted_sum = weighted_sum + inputs.values[a] * cost.values[b];
       };
-      weights.values[idx] = weights.values[idx] + weighted_sum * ${rate};
+      weights.values[idx] = weights.values[idx] + ${type}(weighted_sum) * ${type}(${rate});
     };
   }
 `;

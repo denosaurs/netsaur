@@ -1,6 +1,6 @@
-import { DataType } from "../../deps.ts";
-import { Activation, LayerConfig } from "../types.ts";
-import { ActivationError } from "../util.ts";
+import { DataType } from "../../../deps.ts";
+import { Activation, LayerConfig } from "../../types.ts";
+import { ActivationError } from "../../util.ts";
 import {
   CPUActivationFn,
   Elu,
@@ -11,14 +11,14 @@ import {
   Selu,
   Sigmoid,
   Tanh,
-} from "./activation.ts";
-import { CPUCostFunction, CrossEntropy } from "./cost.ts";
-import { CPUMatrix } from "./matrix.ts";
+} from "../activation.ts";
+import { CPUCostFunction, CrossEntropy } from "../cost.ts";
+import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
 
-export class CPULayer {
+export class BaseCPULayer {
   outputSize: number;
   activationFn: CPUActivationFn = new Sigmoid();
   costFn: CPUCostFunction = new CrossEntropy();

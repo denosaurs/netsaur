@@ -4,13 +4,11 @@ import { GPUNetwork } from "./gpu/network.ts";
 import { DataSet, LayerConfig, Network, NetworkConfig } from "./types.ts";
 
 export class NeuralNetwork<T extends DataType = DataType> {
-  config: NetworkConfig;
-
   network!: Network;
 
-  constructor(config: NetworkConfig) {
-    this.config = config;
-  }
+  constructor(
+    public config: NetworkConfig,
+  ) {}
 
   async setupBackend(gpu = true, silent = true) {
     if (!gpu) {
@@ -51,7 +49,6 @@ export class NeuralNetwork<T extends DataType = DataType> {
   getOutput() {
     return this.network.getOutput();
   }
-
   predict(data: DataArray<T>) {
     return this.network.predict(data);
   }

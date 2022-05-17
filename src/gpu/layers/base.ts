@@ -1,6 +1,6 @@
-import { DataType, WebGPUBackend } from "../../deps.ts";
-import { Activation, LayerConfig } from "../types.ts";
-import { ActivationError, fromType } from "../util.ts";
+import { DataType, WebGPUBackend } from "../../../deps.ts";
+import { Activation, LayerConfig } from "../../types.ts";
+import { ActivationError, fromType } from "../../util.ts";
 import {
   Elu,
   GPUActivationFn,
@@ -11,17 +11,18 @@ import {
   Selu,
   Sigmoid,
   Tanh,
-} from "./activation.ts";
-import { CrossEntropy, GPUCostFunction } from "./cost.ts";
-import { feedForward } from "./kernels/feedforward.ts";
-import { GPUMatrix } from "./matrix.ts";
+} from "../activation.ts";
+import { CrossEntropy, GPUCostFunction } from "../cost.ts";
+import { feedForward } from "../kernels/feedforward.ts";
+// import { backPropagate } from "../kernels/backPropagate.ts";
+import { GPUMatrix } from "../matrix.ts";
 
 interface GPULayerConfig extends LayerConfig {
   size: number;
   activation: Activation;
 }
 
-export class GPULayer<T extends DataType = DataType> {
+export class BaseGPULayer<T extends DataType = DataType> {
   outputSize: number;
   activationFn: GPUActivationFn = new Sigmoid();
   costFunction: GPUCostFunction = new CrossEntropy();
