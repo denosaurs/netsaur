@@ -21,7 +21,9 @@ interface GPULayerConfig extends LayerConfig {
   size: number;
   activation: Activation;
 }
-
+/**
+ * Base class for all layers.
+ */
 export class BaseGPULayer<T extends DataType = DataType> {
   outputSize: number;
   activationFn: GPUActivationFn = new Sigmoid();

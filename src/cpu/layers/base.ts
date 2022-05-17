@@ -18,6 +18,9 @@ import { CPUMatrix } from "../matrix.ts";
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
 
+/**
+ * Base class for all layers.
+ */ 
 export class BaseCPULayer {
   outputSize: number;
   activationFn: CPUActivationFn = new Sigmoid();

@@ -13,7 +13,7 @@ const net = await new NeuralNetwork({
   },
 }).setupBackend(false);
 
-await net.train(
+net.train(
   [
     { inputs: [0, 0], outputs: [0] },
     { inputs: [1, 0], outputs: [1] },

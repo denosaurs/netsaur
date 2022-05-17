@@ -8,6 +8,9 @@ export interface CPUCostFunction<T extends DataType = DataType> {
   prime(yHat: number, y: number): number;
 }
 
+/**
+ * Cross entropy cost function is the standard cost function for binary classification.
+ */
 export class CrossEntropy<T extends DataType = DataType>
   implements CPUCostFunction {
   cost(yHat: DataArray<T>, y: DataArray<T>) {
@@ -23,6 +26,9 @@ export class CrossEntropy<T extends DataType = DataType>
   }
 }
 
+/**
+ * Hinge cost function is the standard cost function for multiclass classification.
+ */
 export class Hinge<T extends DataType = DataType> implements CPUCostFunction {
   cost(yHat: DataArray<T>, y: DataArray<T>) {
     let max = -Infinity;
