@@ -42,6 +42,21 @@ export class BaseGPULayer<T extends DataType = DataType> {
     this.#backend = backend;
   }
 
+  async reset(type: DataType, batches: number) {
+    this.output = await GPUMatrix.with(
+      this.#backend,
+      this.outputSize,
+      batches,
+      type,
+    );
+    this.product = await GPUMatrix.with(
+      this.#backend,
+      this.outputSize,
+      batches,
+      type,
+    );
+  }
+
   async initialize(type: DataType, inputSize: number, batches: number) {
     const data = new (fromType(type))(this.outputSize * inputSize).fill(1);
 
@@ -121,6 +136,7 @@ export class BaseGPULayer<T extends DataType = DataType> {
   //   );
   //   return this.output;
   // }
+
   toJSON() {
     return {
       outputSize: this.outputSize,
