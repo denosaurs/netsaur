@@ -11,8 +11,8 @@ export class Linear implements GPUActivationFn {
     return `return weighted_sum`;
   }
 
-  prime(_: string): string {
-    return `return error`;
+  prime(type: string): string {
+    return `return ${type}(1)`;
   }
 }
 
@@ -125,13 +125,13 @@ export class LeakyRelu implements GPUActivationFn {
  */
 export class Selu implements GPUActivationFn {
   activate(type: string): string {
-    return `return ${type}(weighted_sum) + ${type}(weighted_sum) * (1 - ${type}(weighted_sum)) * ${type}(1.67326)`;
+    return `return ${type}(weighted_sum) + ${type}(weighted_sum) * (${type}(1) - ${type}(weighted_sum)) * ${type}(1.67326)`;
   }
 
   prime(type: string): string {
     return `if (weighted_sum > ${type}(0)) {
             return error;
         }
-        return ${type}(error) * (1 - ${type}(weighted_sum)) * ${type}(1.67326);`;
+        return ${type}(error) * (${type}(1) - ${type}(weighted_sum)) * ${type}(1.67326);`;
   }
 }

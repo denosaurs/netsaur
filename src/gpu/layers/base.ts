@@ -61,7 +61,6 @@ export class BaseGPULayer<T extends DataType = DataType> {
 
   async initialize(type: DataType, inputSize: number, batches: number) {
     const data = new (fromType(type))(this.outputSize * inputSize).fill(1);
-
     this.weights = await GPUMatrix.from(
       this.#backend,
       data,

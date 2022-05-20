@@ -13,8 +13,12 @@ export interface GPUCostFunction {
  * Cross entropy cost function is the standard cost function for binary classification.
  */
 export class CrossEntropy implements GPUCostFunction {
-  cost(_type: string) {
-    return ``;
+  cost(type: string) {
+    return `var sum: ${type} = ${type}(0);
+    for (var i = ${type}(0); i < yHat.length; i++) {
+      sum += -y[i] * log(yHat[i]) - (${type}(1) - y[i]) * log(${type}(1) - yHat[i]);
+    }
+    return sum;`;
   }
 
   prime(_type: string) {
@@ -26,8 +30,13 @@ export class CrossEntropy implements GPUCostFunction {
  * Hinge cost function is the standard cost function for multiclass classification.
  */
 export class Hinge implements GPUCostFunction {
-  cost(_type: string) {
-    return ``;
+  cost(type: string) {
+    return `var max: ${type} = ${type}(0);
+    for (var i = ${type}(0); i < yHat.length; i++) {
+      var value: ${type} = y[i] - (1 - 2 * y[i]) * yHat[i];
+      if (value > max) { max = value; }
+    }
+    return max;`;
   }
 
   prime(type: string) {

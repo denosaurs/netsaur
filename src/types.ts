@@ -9,7 +9,8 @@ export interface Network<T extends DataType = DataType> {
     batches: number,
     learningRate: number,
   ): void;
-  predict(input: DataArray<T>): DataArray<T>;
+  // deno-lint-ignore no-explicit-any
+  predict(input: DataArray<T>): DataArray<T> | any;
 }
 
 export interface NetworkConfig {

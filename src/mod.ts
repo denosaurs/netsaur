@@ -56,8 +56,8 @@ export class NeuralNetwork<T extends DataType = DataType> {
   /**
    * train network
    */
-  train(datasets: DataSet[], epochs = 1000, batches = 1, learningRate = 0.1) {
-    this.network.train(datasets, epochs, batches, learningRate);
+  async train(datasets: DataSet[], epochs = 1000, batches = 1, learningRate = 0.1) {
+    await this.network.train(datasets, epochs, batches, learningRate);
   }
 
   /**

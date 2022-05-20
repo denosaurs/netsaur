@@ -48,6 +48,7 @@ export class BaseCPULayer {
     this.reset(type, batches);
     for (const i in this.biases.data) {
       // this.weights.data[i] = 1;
+      
       this.biases.data[i] = Math.random() * 2 - 1;
     }
     for (const i in this.weights.data) {
