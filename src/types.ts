@@ -13,6 +13,9 @@ export interface Network<T extends DataType = DataType> {
   predict(input: DataArray<T>): DataArray<T> | any;
 }
 
+/**
+ * NetworkConfig represents the configuration of a neural network.
+ */
 export interface NetworkConfig {
   input?: InputConfig;
   hidden: LayerConfig[];
@@ -20,12 +23,17 @@ export interface NetworkConfig {
   output: LayerConfig;
   silent?: boolean;
 }
-
+/**
+ * LayerConfig is the configuration for a layer.
+ */
 export interface LayerConfig {
   size: number;
   activation: Activation;
 }
 
+/**
+ * Activation functions are used to transform the output of a layer into a new output.
+ */
 export type Activation =
   | "sigmoid"
   | "tanh"
@@ -39,16 +47,22 @@ export type Activation =
 export type Cost = "crossentropy" | "hinge";
 
 export type Shape = number;
-
+/**
+ * InputConfig represents the configuration of the input layer.
+ */
 export type InputConfig = {
   size?: number;
   type: DataType;
 };
-
+/**
+ * NumberArray is a typed array of numbers.
+ */
 export type NumberArray<T extends DataType = DataType> =
   | DataArray<T>
   | Array<number>;
-
+/**
+ * DataSet is a container for training data.
+ */
 export type DataSet = {
   inputs: NumberArray;
   outputs: NumberArray;

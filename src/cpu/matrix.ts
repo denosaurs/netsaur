@@ -2,12 +2,15 @@ import { DataArray, DataType } from "../../deps.ts";
 import { fromType, getType } from "../util.ts";
 
 export class CPUMatrix<T extends DataType = DataType> {
+  deltas: DataArray<T>;
   constructor(
     public data: DataArray<T>,
     public x: number,
     public y: number,
     public type: DataType = getType(data),
-  ) {}
+  ) {
+    this.deltas = this.data;
+  }
 
   static with(
     x: number,
@@ -76,6 +79,34 @@ export class CPUMatrix<T extends DataType = DataType> {
 
   fill(val: number) {
     this.data.fill(val);
+  }
+  getData(x: number, y: number) {
+    const ix = this.y * x + y;
+    if (ix < 0 || ix >= this.data.length) {
+      throw new Error('get accessor is skewed');
+    }
+    return this.data[ix];
+  }
+  setData(x: number, y: number, val: number) {
+    const ix = this.y * x + y;
+    if (ix < 0 || ix >= this.data.length) {
+      throw new Error('set accessor is skewed');
+    }
+    this.data[ix] = val;
+  }
+  getDelta(x: number, y: number) {
+    const ix = this.y * x + y;
+    if (ix < 0 || ix >= this.deltas.length) {
+      throw new Error('get accessor is skewed');
+    }
+    return this.deltas[ix];
+  }
+  setDelta(x: number, y: number, val: number) {
+    const ix = this.y * x + y;
+    if (ix < 0 || ix >= this.deltas.length) {
+      throw new Error('set accessor is skewed');
+    }
+    this.deltas[ix] = val;
   }
   toJSON() {
     return {

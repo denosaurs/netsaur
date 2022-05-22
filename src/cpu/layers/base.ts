@@ -20,7 +20,7 @@ import { CPUMatrix } from "../matrix.ts";
 
 /**
  * Base class for all layers.
- */ 
+ */
 export class BaseCPULayer {
   outputSize: number;
   activationFn: CPUActivationFn = new Sigmoid();
@@ -48,7 +48,6 @@ export class BaseCPULayer {
     this.reset(type, batches);
     for (const i in this.biases.data) {
       // this.weights.data[i] = 1;
-      
       this.biases.data[i] = Math.random() * 2 - 1;
     }
     for (const i in this.weights.data) {
