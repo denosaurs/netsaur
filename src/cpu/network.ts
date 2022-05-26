@@ -136,12 +136,19 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
     }
   }
 
-  get weights(): CPUMatrix<T>[] {
-    return this.hidden.map((layer) => layer.weights);
-  }
-
-  get biases(): CPUMatrix<T>[] {
-    return this.hidden.map((layer) => layer.biases);
+  getCostLoss(output: DataArray<T>) {
+    const { x, y, type } = this.output.output;
+    const cost = CPUMatrix.with(x, y, type);
+    for (const i in this.output.output.data) {
+      const activation = this.output.activationFn.prime(
+        this.output.output.data[i],
+      );
+      cost.data[i] = activation * this.output.costFn.prime(
+        output[i],
+        this.output.output.data[i],
+      );
+    }
+    return cost;
   }
 
   getOutput(): DataArray<T> {
@@ -160,9 +167,19 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
 
   toJSON() {
     return {
+      type: "NeuralNetwork",
+      sizes: this.hidden.map((layer) => layer.outputSize),
       input: this.input,
       hidden: this.hidden.map((layer) => layer.toJSON()),
       output: this.output.toJSON(),
     };
+  }
+
+  get weights(): CPUMatrix<T>[] {
+    return this.hidden.map((layer) => layer.weights);
+  }
+
+  get biases(): CPUMatrix<T>[] {
+    return this.hidden.map((layer) => layer.biases);
   }
 }

@@ -83,7 +83,7 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
       getType(datasets[0].inputs as DataArray<T>);
     const inputSize = this.input?.size || datasets[0].inputs.length / batches;
     const outputSize = datasets[0].outputs.length / batches;
-    
+
     for (let e = 0; e < epochs; e++) {
       for (const dataset of datasets) {
         await this.initialize(type, inputSize, batches);
@@ -117,10 +117,6 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     }
   }
 
-  getOutput(): DataArray<T> {
-    return this.output.output.data as unknown as DataArray<T>;
-  }
-
   async predict(data: DataArray<T>) {
     const type = this.input?.type || getType(data);
     const gpuData = await WebGPUData.from(this.backend, data, type);
@@ -132,11 +128,27 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     return await (await this.feedForward(input)).data.get();
   }
 
+  getOutput(): DataArray<T> {
+    return this.output.output.data as unknown as DataArray<T>;
+  }
+
   toJSON() {
     return {
+      type: "NeuralNetwork",
+      sizes: [
+        this.input?.size,
+        ...this.hidden.map((layer) => layer.outputSize),
+      ],
       input: this.input,
       hidden: this.hidden.map((layer) => layer.toJSON()),
       output: this.output.toJSON(),
     };
+  }
+
+  get weights() {
+    return [
+      ...this.hidden.map((layer) => layer.weights),
+      this.output.weights,
+    ];
   }
 }
