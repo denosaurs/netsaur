@@ -1,10 +1,10 @@
-import { DataArray, DataType } from "../../deps.ts";
+import { DataTypeArray, DataType } from "../../deps.ts";
 import { fromType, getType } from "../util.ts";
 
 export class CPUMatrix<T extends DataType = DataType> {
-  deltas: DataArray<T>;
+  deltas: DataTypeArray<T>;
   constructor(
-    public data: DataArray<T>,
+    public data: DataTypeArray<T>,
     public x: number,
     public y: number,
     public type: DataType = getType(data),

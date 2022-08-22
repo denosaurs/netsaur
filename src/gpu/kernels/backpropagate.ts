@@ -1,10 +1,12 @@
 import {
   DataType,
-  ensureType,
+  ensureDataType,
   WebGPUBackend,
   WebGPUData,
 } from "../../../deps.ts";
 import { GPUMatrix } from "../matrix.ts";
+
+// let uniform;
 
 export async function backPropagate<T extends DataType>(
   backend: WebGPUBackend,
@@ -18,7 +20,7 @@ export async function backPropagate<T extends DataType>(
   activation: string,
   costFn: string,
 ) {
-  const type = ensureType(outputs.type, result.type, error.type, cost.type);
+  const type = ensureDataType(outputs.type, result.type, error.type, cost.type);
   const code = shader(type, activation, costFn, rate);
   const pipeline = await backend.register(code);
   const uniform = await WebGPUData.from(
@@ -28,9 +30,10 @@ export async function backPropagate<T extends DataType>(
     GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
   );
 
-  await backend.execute({
+  backend.execute(
     pipeline,
-    data: [
+    [outputs.x, outputs.y, 1],
+    [
       outputs.data,
       result.data,
       error.data,
@@ -39,8 +42,7 @@ export async function backPropagate<T extends DataType>(
       inputs.data,
       uniform,
     ],
-    workgroups: [outputs.x, outputs.y, 1],
-  });
+  );
 }
 
 // embed rate into the shader to avoid adding another binding
@@ -52,29 +54,29 @@ const shader = (
   rate: number,
 ) => `
   struct Data {
-    inputSize: u32;
-    outputSize: u32;
-    batches: u32;
+    inputSize: u32,
+    outputSize: u32,
+    batches: u32,
   };
   
   struct Matrix {
-    values: array<${type}>;
+    values: array<${type}>,
   };
   
-  [[group(0), binding(0)]]
+  @group(0) @binding(0)
   var<storage, read> output: Matrix;
-  [[group(0), binding(1)]]
+  @group(0) @binding(1)
   var<storage, read> result: Matrix;
-  [[group(0), binding(2)]]
+  @group(0) @binding(2)
   var<storage, read_write> error: Matrix;
-  [[group(0), binding(3)]]
+  @group(0) @binding(3)
   var<storage, read_write> cost: Matrix;
-  [[group(0), binding(4)]]
+  @group(0) @binding(4)
   var<storage, read_write> weights: Matrix;
-  [[group(0), binding(5)]]
+  @group(0) @binding(5)
   var<storage, read> inputs: Matrix;
   
-  [[group(0), binding(6)]]
+  @group(0) @binding(6)
   var<uniform> data: Data;
   
   fn activationPrime(output: ${type}) -> ${type} {
@@ -85,8 +87,8 @@ const shader = (
     ${cost};
   }
   
-  [[stage(compute), workgroup_size(8, 8, 1)]]
-  fn main([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
+  @compute @workgroup_size(8, 8, 1)
+  fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let idx = global_id.x + global_id.y * data.outputSize;
     if (global_id.x < data.outputSize && global_id.y < data.batches) {
       var activation_prime = activationPrime(output.values[idx]);

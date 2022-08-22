@@ -44,16 +44,12 @@ export class BaseCPULayer {
 
   initialize(type: DataType, inputSize: number, batches: number) {
     this.weights = CPUMatrix.with(this.outputSize, inputSize, type);
+    this.weights.data = this.weights.data.map(() => 1);
+    // this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
     this.biases = CPUMatrix.with(this.outputSize, 1, type);
+    this.biases.data = this.biases.data.map(() => 1);
+    // this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
     this.reset(type, batches);
-    for (const i in this.biases.data) {
-      // this.weights.data[i] = 1;
-      this.biases.data[i] = Math.random() * 2 - 1;
-    }
-    for (const i in this.weights.data) {
-      // this.weights.data[i] = 1;
-      this.weights.data[i] = Math.random() * 2 - 1;
-    }
   }
 
   setActivation(activation: Activation) {
@@ -102,6 +98,7 @@ export class BaseCPULayer {
     error: CPUMatrix,
     prevWeights: CPUMatrix,
     learningRate: number,
+    // output: CPUMatrix,
   ) {
     error = CPUMatrix.dot(error, CPUMatrix.transpose(prevWeights));
     const cost = CPUMatrix.with(error.x, error.y, error.type);

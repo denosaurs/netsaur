@@ -1,6 +1,6 @@
 import {
   DataType,
-  ensureType,
+  ensureDataType,
   WebGPUBackend,
   WebGPUData,
 } from "../../../deps.ts";
@@ -10,11 +10,12 @@ export async function feedForward<T extends DataType>(
   backend: WebGPUBackend,
   inputs: GPUMatrix<T>,
   weights: GPUMatrix<T>,
+  biases: GPUMatrix<T>,
   products: GPUMatrix<T>,
   outputs: GPUMatrix<T>,
   activation: string,
 ) {
-  const type = ensureType(inputs.type, weights.type, outputs.type);
+  const type = ensureDataType(inputs.type, weights.type, outputs.type);
   const code = shader(type, activation);
   const pipeline = await backend.register(code);
   const uniform = await WebGPUData.from(
@@ -24,55 +25,64 @@ export async function feedForward<T extends DataType>(
     GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
   );
 
-  await backend.execute({
+  backend.execute(
     pipeline,
-    data: [inputs.data, weights.data, products.data, outputs.data, uniform],
-    workgroups: [outputs.x, inputs.y, 1],
-  });
+    [outputs.x, inputs.y, 1],
+    [
+      inputs.data,
+      weights.data,
+      products.data,
+      biases.data,
+      outputs.data,
+      uniform,
+    ],
+  );
 }
 
 const shader = (type: DataType, activation: string) => `
 struct Data {
-  inputSize: u32;
-  outputSize: u32;
-  batches: u32;
+  inputSize: u32,
+  outputSize: u32,
+  batches: u32
 };
 
 struct Matrix {
-  values: array<${type}>;
+  values: array<${type}>
 };
 
-[[group(0), binding(0)]]
+@group(0) @binding(0)
 var<storage, read> inputs: Matrix;
-[[group(0), binding(1)]]
+@group(0) @binding(1)
 var<storage, read> weights: Matrix;
-[[group(0), binding(2)]]
+@group(0) @binding(2)
 var<storage, write> products: Matrix;
-[[group(0), binding(3)]]
+@group(0) @binding(3)
+var<storage, read> biases: Matrix;
+@group(0) @binding(4)
 var<storage, write> outputs: Matrix;
 
-[[group(0), binding(4)]]
+@group(0) @binding(5)
 var<uniform> data: Data;
 
 fn activation(weighted_sum: ${type}) -> ${type} {
   ${activation};
 }
 
-[[stage(compute), workgroup_size(8, 8, 1)]]
-fn main([[builtin(global_invocation_id)]] global_id: vec3<u32>) {
+@compute @workgroup_size(8, 8, 1)
+fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
   if (global_id.x >= data.outputSize || global_id.y >= data.batches) {
     return;
   };
 
   var weighted_sum = ${type}(0);
-  for (var k = 0u; k < data.inputSize; k = k + 1u) {
+  for (var k = 0u; k < data.inputSize; k += 1u) {
     var a = k + global_id.y * data.inputSize;
     var b = global_id.x + k * data.outputSize;    
-    weighted_sum = weighted_sum + inputs.values[a] * weights.values[b];
+    weighted_sum += inputs.values[a] * weights.values[b];
   };
 
   let idx = global_id.x + global_id.y * data.outputSize;
   products.values[idx] = weighted_sum;
-  outputs.values[idx] = activation(weighted_sum);
+  outputs.values[idx] = activation(weighted_sum + biases.values[global_id.x]);
 }
 `;

@@ -1,4 +1,4 @@
-import { DataArray, DataType } from "../deps.ts";
+import { DataTypeArray, DataType } from "../deps.ts";
 import { NeuralNetwork } from "../mod.ts";
 
 const character = (string: string): Float32Array =>
@@ -58,6 +58,7 @@ const happy = character(
   );
 
   const net = await new NeuralNetwork({
+    silent: true,
     hidden: [
       { size: 10, activation: "sigmoid" },
     ],
@@ -78,7 +79,7 @@ const happy = character(
   console.log(toChar(net.predict(happy))); // 😀
   console.log(toChar(net.predict(sad))); // 😔
 
-function toChar<T extends DataType>(x: DataArray<T>) {
+function toChar<T extends DataType>(x: DataTypeArray<T>) {
   const str = String.fromCharCode(Math.round(x[0] * 255));
   return str === "a" ? "😀" : str === "b" ? "😔" : str;
 }

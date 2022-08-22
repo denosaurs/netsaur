@@ -1,8 +1,8 @@
-import { DataArray, DataType } from "../deps.ts";
+import { DataTypeArray, DataType } from "../deps.ts";
 
 export interface Network<T extends DataType = DataType> {
   addLayers(layer: LayerConfig[]): void;
-  getOutput(): DataArray<T>;
+  getOutput(): DataTypeArray<T>;
   train(
     datasets: DataSet[],
     epochs: number,
@@ -10,7 +10,7 @@ export interface Network<T extends DataType = DataType> {
     learningRate: number,
   ): void;
   // deno-lint-ignore no-explicit-any
-  predict(input: DataArray<T>): DataArray<T> | any;
+  predict(input: DataTypeArray<T>): DataTypeArray<T> | any;
 }
 
 /**
@@ -58,7 +58,7 @@ export type InputConfig = {
  * NumberArray is a typed array of numbers.
  */
 export type NumberArray<T extends DataType = DataType> =
-  | DataArray<T>
+  | DataTypeArray<T>
   | Array<number>;
 /**
  * DataSet is a container for training data.

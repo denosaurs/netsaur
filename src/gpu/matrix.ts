@@ -1,4 +1,4 @@
-import { DataArray, DataType, WebGPUBackend, WebGPUData } from "../../deps.ts";
+import { DataTypeArray, DataType, WebGPUBackend, WebGPUData } from "../../deps.ts";
 import { fromType } from "../util.ts";
 
 export class GPUMatrix<T extends DataType = DataType> {
@@ -22,7 +22,7 @@ export class GPUMatrix<T extends DataType = DataType> {
 
   static async from<T extends DataType = DataType>(
     backend: WebGPUBackend,
-    data: DataArray<T>,
+    data: DataTypeArray<T>,
     x: number,
     y: number,
     type?: DataType,

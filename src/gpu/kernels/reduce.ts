@@ -1,6 +1,6 @@
 import {
   DataType,
-  ensureType,
+  ensureDataType,
   WebGPUBackend,
   WebGPUData,
 } from "../../../deps.ts";
@@ -15,21 +15,21 @@ export async function reduce<T extends DataType>(
   batches: number,
   activation: string,
 ) {
-  const type = ensureType(inputs.type, weights.type, outputs.type);
+  const type = ensureDataType(inputs.type, weights.type, outputs.type);
   const code = shader(type, activation);
   const pipeline = await backend.register(code);
   const uniform = await WebGPUData.from(
     backend,
     new Uint32Array([inputSize, outputSize, batches]),
-    // deno-lint-ignore no-explicit-any
-    (GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM) as any,
+    "u32",
+    GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
   );
 
-  await backend.execute({
+  backend.execute(
     pipeline,
-    data: [inputs, weights, outputs, uniform],
-    workgroups: [outputSize, batches, 1],
-  });
+    [outputSize, batches, 1],
+    [inputs, weights, outputs, uniform],
+  );
 }
 
 const shader = (type: DataType, activation: string) => `

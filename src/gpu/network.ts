@@ -6,7 +6,7 @@ import {
   Network,
   NetworkConfig,
 } from "../types.ts";
-import { DataArray, DataType, WebGPUBackend, WebGPUData } from "../../deps.ts";
+import { DataTypeArray, DataType, WebGPUBackend, WebGPUData } from "../../deps.ts";
 import { fromType, getType } from "../util.ts";
 import { GPUMatrix } from "./matrix.ts";
 import { backPropagate } from "./kernels/backpropagate.ts";
@@ -80,7 +80,7 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     learningRate: number,
   ) {
     const type = this.input?.type ||
-      getType(datasets[0].inputs as DataArray<T>);
+      getType(datasets[0].inputs as DataTypeArray<T>);
     const inputSize = this.input?.size || datasets[0].inputs.length / batches;
     const outputSize = datasets[0].outputs.length / batches;
 
@@ -90,7 +90,7 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
         const inputArray = new (fromType(type))(dataset.inputs);
         const outputArray = new (fromType(type))(
           dataset.outputs,
-        ) as DataArray<
+        ) as DataTypeArray<
           T
         >;
 
@@ -117,9 +117,9 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     }
   }
 
-  async predict(data: DataArray<T>) {
+  async predict(data: DataTypeArray<T>) {
     const type = this.input?.type || getType(data);
-    const gpuData = await WebGPUData.from(this.backend, data, type);
+    const gpuData = await WebGPUData.from(this.backend, data);
     const input = new GPUMatrix<DataType>(gpuData, gpuData.length, 1, type);
     for (const layer of this.hidden) {
       await layer.reset(type, 1);
@@ -128,8 +128,8 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     return await (await this.feedForward(input)).data.get();
   }
 
-  getOutput(): DataArray<T> {
-    return this.output.output.data as unknown as DataArray<T>;
+  getOutput(): DataTypeArray<T> {
+    return this.output.output.data as unknown as DataTypeArray<T>;
   }
 
   toJSON() {

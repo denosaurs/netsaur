@@ -1,4 +1,4 @@
-import { DataArray, DataType, WebGPUBackend } from "../deps.ts";
+import { DataTypeArray, DataType, WebGPUBackend } from "../deps.ts";
 import { CPUNetwork } from "./cpu/network.ts";
 import { GPUNetwork } from "./gpu/network.ts";
 import { DataSet, LayerConfig, Network, NetworkConfig } from "./types.ts";
@@ -13,7 +13,9 @@ export class NeuralNetwork<T extends DataType = DataType> {
    */
   constructor(
     public config: NetworkConfig,
-  ) {}
+  ) {
+    this.network = new CPUNetwork(this.config);
+  }
 
   /**
    * setup backend and initialize network
@@ -26,7 +28,7 @@ export class NeuralNetwork<T extends DataType = DataType> {
     const backend = new WebGPUBackend();
     await backend.initialize();
     if (backend.adapter) {
-      if (!silent) console.log(`Using adapter: ${backend.adapter.name}`);
+      if (!silent) console.log(`Using adapter: ${backend.adapter}`);
       const features = [...backend.adapter.features.values()];
       if (!silent) console.log(`Supported features: ${features.join(", ")}`);
 
@@ -69,7 +71,7 @@ export class NeuralNetwork<T extends DataType = DataType> {
   /**
    * use network to predict data
    */
-  predict(data: DataArray<T>) {
+  predict(data: DataTypeArray<T>) {
     return this.network.predict(data);
   }
 }

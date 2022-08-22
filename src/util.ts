@@ -1,6 +1,6 @@
-import { DataArray, DataArrayConstructor, DataType } from "../deps.ts";
+import { DataTypeArray, DataTypeArrayConstructor, DataType } from "../deps.ts";
 
-export function getType<T extends DataType>(type: DataArray<T>) {
+export function getType<T extends DataType>(type: DataTypeArray<T>) {
   return (
     type instanceof Uint32Array
       ? "u32"
@@ -20,7 +20,7 @@ export function fromType<T extends DataType>(type: string) {
       : type === "f32"
       ? Float32Array
       : Uint32Array
-  ) as DataArrayConstructor<T>;
+  ) as DataTypeArrayConstructor<T>;
 }
 export function toType<T extends DataType>(type: string) {
   return (
@@ -31,7 +31,7 @@ export function toType<T extends DataType>(type: string) {
       : type === "f32"
       ? Float32Array
       : Uint32Array
-  ) as DataArrayConstructor<T>;
+  ) as DataTypeArrayConstructor<T>;
 }
 
 export class ActivationError extends Error {
