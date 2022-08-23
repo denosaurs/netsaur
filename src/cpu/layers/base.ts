@@ -12,7 +12,6 @@ import {
   Sigmoid,
   Tanh,
 } from "../activation.ts";
-import { CPUCostFunction, CrossEntropy } from "../cost.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -24,7 +23,6 @@ import { CPUMatrix } from "../matrix.ts";
 export class BaseCPULayer {
   outputSize: number;
   activationFn: CPUActivationFn = new Sigmoid();
-  costFn: CPUCostFunction = new CrossEntropy();
 
   input!: CPUMatrix;
   weights!: CPUMatrix;
@@ -44,11 +42,11 @@ export class BaseCPULayer {
 
   initialize(type: DataType, inputSize: number, batches: number) {
     this.weights = CPUMatrix.with(this.outputSize, inputSize, type);
-    this.weights.data = this.weights.data.map(() => 1);
-    // this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
+    // this.weights.data = this.weights.data.map(() => 1);
+    this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
     this.biases = CPUMatrix.with(this.outputSize, 1, type);
-    this.biases.data = this.biases.data.map(() => 1);
-    // this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
+    // this.biases.data = this.biases.data.map(() => 1);
+    this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
     this.reset(type, batches);
   }
 
@@ -96,11 +94,9 @@ export class BaseCPULayer {
 
   backPropagate(
     error: CPUMatrix,
-    prevWeights: CPUMatrix,
-    learningRate: number,
+    rate: number,
     // output: CPUMatrix,
   ) {
-    error = CPUMatrix.dot(error, CPUMatrix.transpose(prevWeights));
     const cost = CPUMatrix.with(error.x, error.y, error.type);
     for (const i in this.product.data) {
       const activation = this.activationFn.prime(this.output.data[i]);
@@ -108,11 +104,11 @@ export class BaseCPULayer {
     }
     const weightsDelta = CPUMatrix.dot(CPUMatrix.transpose(this.input), cost);
     for (const i in weightsDelta.data) {
-      this.weights.data[i] += weightsDelta.data[i] * learningRate;
+      this.weights.data[i] += weightsDelta.data[i] * rate;
     }
     for (let i = 0, j = 0; i < error.data.length; i++, j++) {
       if (j >= this.biases.x) j = 0;
-      this.biases.data[j] += cost.data[i] * learningRate;
+      this.biases.data[j] += cost.data[i] * rate;
     }
     return error;
   }

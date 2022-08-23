@@ -17,6 +17,7 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
   hidden: BaseCPULayer[];
   output: BaseCPULayer;
   silent: boolean;
+  costFn: CPUCostFunction = new CrossEntropy();
   constructor(config: NetworkConfig) {
     this.silent = config.silent ?? false;
     this.input = config.input;
@@ -26,17 +27,14 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
   }
 
   setCost(activation: Cost): void {
-    let costFn: CPUCostFunction;
     switch (activation) {
       case "crossentropy":
-        costFn = new CrossEntropy();
+        this.costFn = new CrossEntropy();
         break;
       case "hinge":
-        costFn = new Hinge();
+        this.costFn = new Hinge();
         break;
     }
-    this.hidden.map((layer) => layer.costFn = costFn);
-    this.output.costFn = costFn;
   }
 
   addLayers(layers: LayerConfig[]): void {
@@ -67,33 +65,17 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
   backpropagate(output: DataTypeArray<T>, rate: number) {
     const { x, y, type } = this.output.output;
     let error = CPUMatrix.with(x, y, type);
-    const cost = CPUMatrix.with(x, y, type);
     for (const i in this.output.output.data) {
-      const activation = this.output.activationFn.prime(
-        this.output.output.data[i],
-      );
-      error.data[i] = this.output.costFn.prime(
+      error.data[i] = this.costFn.prime(
         output[i],
         this.output.output.data[i],
       );
-      cost.data[i] = activation * error.data[i];
     }
-    const weightsDelta = CPUMatrix.dot(
-      CPUMatrix.transpose(this.output.input),
-      cost,
-    );
-    for (const i in weightsDelta.data) {
-      this.output.weights.data[i] += weightsDelta.data[i] * rate;
-    }
-    // if (!this.silent) console.log(this.output.weights);
-    for (let i = 0; i < cost.x; i++) {
-      for (let j = 0; j < cost.y; j++) {
-        this.output.biases.data[j] += cost.data[i] * rate;
-      }
-    }
+    error = this.output.backPropagate(error, rate);
     let weights = this.output.weights;
     for (let i = this.hidden.length - 1; i >= 0; i--) {
-      error = this.hidden[i].backPropagate(error, weights, rate);
+      error = CPUMatrix.dot(error, CPUMatrix.transpose(weights));
+      error = this.hidden[i].backPropagate(error, rate);
       weights = this.hidden[i].weights;
     }
   }
@@ -143,7 +125,7 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
       const activation = this.output.activationFn.prime(
         this.output.output.data[i],
       );
-      cost.data[i] = activation * this.output.costFn.prime(
+      cost.data[i] = activation * this.costFn.prime(
         output[i],
         this.output.output.data[i],
       );
