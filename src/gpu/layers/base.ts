@@ -13,6 +13,7 @@ import {
   Tanh,
 } from "../activation.ts";
 import { CrossEntropy, GPUCostFunction } from "../cost.ts";
+import { backPropagate } from "../kernels/backpropagate.ts";
 import { feedForward } from "../kernels/feedforward.ts";
 // import { backPropagate } from "../kernels/backPropagate.ts";
 import { GPUMatrix } from "../matrix.ts";
@@ -32,10 +33,9 @@ export class BaseGPULayer {
   inputs!: GPUMatrix;
   weights!: GPUMatrix;
   biases!: GPUMatrix;
-  product!: GPUMatrix;
   output!: GPUMatrix;
-  // weightsDelta!: GPUMatrix;
-  // error!: GPUMatrix;
+  error!: GPUMatrix;
+  cost!: GPUMatrix;
 
   #backend: WebGPUBackend;
 
@@ -47,31 +47,30 @@ export class BaseGPULayer {
 
   async reset(type: DataType, batches: number) {
     const b = this.#backend;
-    if (this.output) {
-      const buffer = new (fromType(type))(this.outputSize * batches);
-      b.device.queue.writeBuffer(this.output.data.buffer, 0, buffer);
-      b.device.queue.writeBuffer(this.product.data.buffer, 0, buffer);
-    } else {
+    if (batches != this.output.y) {
       this.output = await GPUMatrix.with(b, this.outputSize, batches, type);
-      this.product = await GPUMatrix.with(b, this.outputSize, batches, type);
+      this.error = await GPUMatrix.with(b, this.outputSize, batches, type);
+      this.cost = await GPUMatrix.with(b, this.outputSize, batches, type);
     }
   }
 
   async initialize(type: DataType, inputSize: number, batches: number) {
     const b = this.#backend;
     const weights = new (fromType(type))(this.outputSize * inputSize)
-      .map(() => 1);
-    // .map(() => Math.random() * 2 - 1);
+    // .map(() => 1)
+    .map(() => Math.random() * 2 - 1);
     const biases = new (fromType(type))(this.outputSize)
-      .map(() => 1);
-    // .map(() => Math.random() * 2 - 1);
+    // .map(() => 1)
+    .map(() => Math.random() * 2 - 1);
     if (!this.weights) {
       this.weights = await GPUMatrix.with(b, this.outputSize, inputSize, type);
       this.biases = await GPUMatrix.with(b, this.outputSize, 1, type);
+      this.output = await GPUMatrix.with(b, this.outputSize, batches, type);
+      this.error = await GPUMatrix.with(b, this.outputSize, batches, type);
+      this.cost = await GPUMatrix.with(b, this.outputSize, batches, type);
     }
     b.device.queue.writeBuffer(this.weights.data.buffer, 0, weights);
     b.device.queue.writeBuffer(this.biases.data.buffer, 0, biases);
-    this.reset(type, batches);
   }
 
   setActivation(activation: Activation) {
@@ -112,24 +111,35 @@ export class BaseGPULayer {
       this.inputs,
       this.weights,
       this.biases,
-      this.product,
       this.output,
       this.activationFn.activate(input.type),
     );
     return this.output;
   }
 
-  // async backPropagate(): Promise<GPUMatrix> {
-  //   await backPropagate(
-  //     this.#backend,
-  //     input,
-  //     this.weights,
-  //     this.product,
-  //     this.output,
-  //     this.activationFn.activate(input.type),
-  //   );
-  //   return this.output;
-  // }
+  async backPropagate(
+    error: GPUMatrix,
+    prev: GPUMatrix,
+    rate: number,
+    last: boolean,
+  ): Promise<GPUMatrix> {
+    await backPropagate(
+      this.#backend,
+      this.inputs,
+      this.weights,
+      this.biases,
+      this.output,
+      this.cost,
+      error,
+      this.error,
+      prev,
+      rate,
+      last,
+      this.activationFn.prime(error.type),
+      this.costFunction.prime(error.type),
+    );
+    return this.output;
+  }
 
   toJSON() {
     return {

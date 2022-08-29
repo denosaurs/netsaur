@@ -1,4 +1,4 @@
-import { DataTypeArray, DataType } from "../../deps.ts";
+import { DataType, DataTypeArray } from "../../deps.ts";
 import { fromType, getType } from "../util.ts";
 
 export class CPUMatrix<T extends DataType = DataType> {
@@ -46,6 +46,23 @@ export class CPUMatrix<T extends DataType = DataType> {
     return res;
   }
 
+  static Tdot(matA: CPUMatrix, matB: CPUMatrix) {
+    const res = CPUMatrix.with(matB.y, matA.y, matA.type);
+    for (let x = 0; x < matB.y; x++) {
+      for (let y = 0; y < matA.y; y++) {
+        let sum = 0;
+        for (let k = 0; k < matA.x; k++) {
+          const a = k + y * matA.x;
+          const b = k + x * matB.x;
+          sum += matA.data[a] * matB.data[b];
+        }
+        const idx = x + y * matB.y;
+        res.data[idx] = sum;
+      }
+    }
+    return res;
+  }
+
   static sub(matA: CPUMatrix, matB: CPUMatrix) {
     const res = CPUMatrix.with(matA.x, matA.y, matA.type);
     for (let i = 0; i < matA.data.length; i++) {
@@ -83,28 +100,28 @@ export class CPUMatrix<T extends DataType = DataType> {
   getData(x: number, y: number) {
     const ix = this.y * x + y;
     if (ix < 0 || ix >= this.data.length) {
-      throw new Error('get accessor is skewed');
+      throw new Error("get accessor is skewed");
     }
     return this.data[ix];
   }
   setData(x: number, y: number, val: number) {
     const ix = this.y * x + y;
     if (ix < 0 || ix >= this.data.length) {
-      throw new Error('set accessor is skewed');
+      throw new Error("set accessor is skewed");
     }
     this.data[ix] = val;
   }
   getDelta(x: number, y: number) {
     const ix = this.y * x + y;
     if (ix < 0 || ix >= this.deltas.length) {
-      throw new Error('get accessor is skewed');
+      throw new Error("get accessor is skewed");
     }
     return this.deltas[ix];
   }
   setDelta(x: number, y: number, val: number) {
     const ix = this.y * x + y;
     if (ix < 0 || ix >= this.deltas.length) {
-      throw new Error('set accessor is skewed');
+      throw new Error("set accessor is skewed");
     }
     this.deltas[ix] = val;
   }

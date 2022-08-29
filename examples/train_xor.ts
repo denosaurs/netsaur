@@ -13,17 +13,14 @@ const net = await new NeuralNetwork({
   input: {
     type: "f32",
   },
-}).setupBackend(false);
+}).setupBackend(true);
 
 await net.train(
   [
-    { inputs: [0, 0], outputs: [0] },
-    { inputs: [1, 0], outputs: [1] },
-    { inputs: [0, 1], outputs: [1] },
-    { inputs: [1, 1], outputs: [0] },
+    { inputs: [0, 0, 1, 0, 0, 1, 1, 1], outputs: [0, 1, 1, 0] },
   ],
   5000,
-  1,
+  4,
   0.1,
 );
 

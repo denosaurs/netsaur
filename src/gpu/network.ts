@@ -6,10 +6,14 @@ import {
   Network,
   NetworkConfig,
 } from "../types.ts";
-import { DataTypeArray, DataType, WebGPUBackend, WebGPUData } from "../../deps.ts";
+import {
+  DataType,
+  DataTypeArray,
+  WebGPUBackend,
+  WebGPUData,
+} from "../../deps.ts";
 import { fromType, getType } from "../util.ts";
 import { GPUMatrix } from "./matrix.ts";
-import { backPropagate } from "./kernels/backpropagate.ts";
 
 export class GPUNetwork<T extends DataType = DataType> implements Network {
   input?: InputConfig;
@@ -54,22 +58,10 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     return input;
   }
 
-  async backpropagate(output: GPUMatrix, learningRate: number) {
-    const { x, y, type } = this.output.output;
-    const error = await GPUMatrix.with(this.backend, x, y, type);
-    const cost = await GPUMatrix.with(this.backend, x, y, type);
-    await backPropagate(
-      this.backend,
-      this.output.output,
-      output,
-      error,
-      cost,
-      this.output.weights,
-      this.output.inputs,
-      learningRate,
-      this.output.activationFn.prime(type),
-      this.output.costFunction.prime(type),
-    );
+  async backpropagate(output: GPUMatrix, rate: number) {
+    await this.output.backPropagate(output, output, rate, true);
+    const weights = this.output.weights;
+    await this.hidden[0].backPropagate(this.output.error, weights, rate, false);
     return this.output.weights;
   }
 
@@ -84,15 +76,12 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     const inputSize = this.input?.size || datasets[0].inputs.length / batches;
     const outputSize = datasets[0].outputs.length / batches;
 
+    await this.initialize(type, inputSize, batches);
+
     for (let e = 0; e < epochs; e++) {
       for (const dataset of datasets) {
-        await this.initialize(type, inputSize, batches);
         const inputArray = new (fromType(type))(dataset.inputs);
-        const outputArray = new (fromType(type))(
-          dataset.outputs,
-        ) as DataTypeArray<
-          T
-        >;
+        const outputArray = new (fromType(type))(dataset.outputs);
 
         const input = await GPUMatrix.from(
           this.backend,
@@ -109,9 +98,6 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
           type,
         );
         await this.feedForward(input);
-
-        // TODO loss function?
-
         await this.backpropagate(output, learningRate);
       }
     }
