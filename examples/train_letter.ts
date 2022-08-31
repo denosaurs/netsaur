@@ -1,4 +1,4 @@
-import { DataTypeArray, DataType } from "../deps.ts";
+import { DataType, DataTypeArray } from "../deps.ts";
 import { NeuralNetwork } from "../mod.ts";
 
 // https://github.com/BrainJS/brain.js/blob/master/examples/typescript/which-letter-simple.ts
@@ -26,7 +26,7 @@ const b = character(
     "######.",
 );
 const c = character(
-    "#######" +
+  "#######" +
     "#......" +
     "#......" +
     "#......" +

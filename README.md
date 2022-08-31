@@ -20,11 +20,13 @@
 ## neural network deno module using [neo](https://github.com/denosaurs/neo)
 
 ### Maintainers
+
 - Loading ([@load1n9](https://github.com/load1n9))
 - CarrotzRule ([@carrotzrule123](https://github.com/CarrotzRule123))
 
 ### Usage
-```typescript 
+
+```typescript
 import { NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
 
 const net = await new NeuralNetwork({

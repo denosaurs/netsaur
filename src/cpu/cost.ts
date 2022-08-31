@@ -1,4 +1,4 @@
-import { DataTypeArray, DataType } from "../../deps.ts";
+import { DataType, DataTypeArray } from "../../deps.ts";
 
 export interface CPUCostFunction<T extends DataType = DataType> {
   /** Return the cost associated with an output `a` and desired output `y`. */

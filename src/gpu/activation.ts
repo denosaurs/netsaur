@@ -103,7 +103,7 @@ export class LeakyRelu implements GPUActivationFn {
  * Elu activation function f(x) = x if x >= 0, 1.01 * (e^x - 1) otherwise
  * This is a rectified linear unit with an exponential output range.
  */
- export class Elu implements GPUActivationFn {
+export class Elu implements GPUActivationFn {
   activate(type: string): string {
     return `if (weighted_sum > ${type}(0)) {
             return weighted_sum;

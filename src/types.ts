@@ -1,4 +1,4 @@
-import { DataTypeArray, DataType } from "../deps.ts";
+import { DataType, DataTypeArray } from "../deps.ts";
 
 export interface Network<T extends DataType = DataType> {
   addLayers(layer: LayerConfig[]): void;

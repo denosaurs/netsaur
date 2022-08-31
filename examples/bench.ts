@@ -1,13 +1,13 @@
 import { assert } from "https://deno.land/std/testing/asserts.ts";
 import { NeuralNetwork } from "../mod.ts";
 
-let x = 0
+let x = 0;
 
 Deno.bench({
   name: "example test",
   fn(): void {
-    x += 1
-    console.log(x)
+    x += 1;
+    console.log(x);
     const net = new NeuralNetwork({
       silent: true,
       hidden: [
@@ -34,10 +34,10 @@ Deno.bench({
       0.1,
     );
 
-    const a = net.predict(new Float32Array([0, 0]))
-    const b = net.predict(new Float32Array([1, 0]))
-    const c = net.predict(new Float32Array([0, 1]))
-    const d = net.predict(new Float32Array([1, 1]))
+    const a = net.predict(new Float32Array([0, 0]));
+    const b = net.predict(new Float32Array([1, 0]));
+    const c = net.predict(new Float32Array([0, 1]));
+    const d = net.predict(new Float32Array([1, 1]));
     assert(a < 0.1, `${a}, ${b}, ${c}, ${d}, ${x}`);
     assert(b > 0.9, `${a}, ${b}, ${c}, ${d}, ${x}`);
     assert(c > 0.9, `${a}, ${b}, ${c}, ${d}, ${x}`);

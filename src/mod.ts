@@ -1,4 +1,4 @@
-import { DataTypeArray, DataType, WebGPUBackend } from "../deps.ts";
+import { DataType, DataTypeArray, WebGPUBackend } from "../deps.ts";
 import { CPUNetwork } from "./cpu/network.ts";
 import { GPUNetwork } from "./gpu/network.ts";
 import { DataSet, LayerConfig, Network, NetworkConfig } from "./types.ts";
@@ -58,7 +58,12 @@ export class NeuralNetwork<T extends DataType = DataType> {
   /**
    * train network
    */
-  async train(datasets: DataSet[], epochs = 1000, batches = 1, learningRate = 0.1) {
+  async train(
+    datasets: DataSet[],
+    epochs = 1000,
+    batches = 1,
+    learningRate = 0.1,
+  ) {
     await this.network.train(datasets, epochs, batches, learningRate);
   }
 

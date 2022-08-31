@@ -1,4 +1,4 @@
-import { DataTypeArray, DataTypeArrayConstructor, DataType } from "../deps.ts";
+import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
 
 export function getType<T extends DataType>(type: DataTypeArray<T>) {
   return (

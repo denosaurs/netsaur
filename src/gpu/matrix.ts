@@ -1,4 +1,9 @@
-import { DataTypeArray, DataType, WebGPUBackend, WebGPUData } from "../../deps.ts";
+import {
+  DataType,
+  DataTypeArray,
+  WebGPUBackend,
+  WebGPUData,
+} from "../../deps.ts";
 import { fromType } from "../util.ts";
 
 export class GPUMatrix<T extends DataType = DataType> {

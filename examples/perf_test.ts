@@ -34,7 +34,7 @@ console.log(await cpuNet.predict(new Float32Array([1, 1])));
 const cpuResult = Date.now() - cpuTime;
 console.log(cpuResult);
 
-// gpu 
+// gpu
 const time = Date.now();
 
 const net = await new NeuralNetwork({
@@ -68,4 +68,4 @@ console.log(await net.predict(new Float32Array([1, 1])));
 const gpuResult = Date.now() - time;
 console.log(gpuResult);
 
-console.log(`${Math.round((cpuResult/gpuResult)* 100)}% speed increase`);
+console.log(`${Math.round((cpuResult / gpuResult) * 100)}% speed increase`);
