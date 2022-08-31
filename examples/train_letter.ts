@@ -37,7 +37,7 @@ const c = character(
 const net = await new NeuralNetwork({
   silent: true,
   hidden: [
-    { size: 10, activation: "sigmoid" },
+    { size: 3, activation: "sigmoid" },
   ],
   cost: "crossentropy",
   output: { size: 1, activation: "sigmoid" },

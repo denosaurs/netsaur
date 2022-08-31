@@ -59,9 +59,9 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
   }
 
   async backpropagate(output: GPUMatrix, rate: number) {
-    await this.output.backPropagate(output, output, rate, true);
+    await this.output.backPropagate(output, output, rate, 0);
     const weights = this.output.weights;
-    await this.hidden[0].backPropagate(this.output.error, weights, rate, false);
+    await this.hidden[0].backPropagate(this.output.error, weights, rate, 1);
     return this.output.weights;
   }
 
@@ -78,27 +78,31 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
 
     await this.initialize(type, inputSize, batches);
 
-    for (let e = 0; e < epochs; e++) {
-      for (const dataset of datasets) {
-        const inputArray = new (fromType(type))(dataset.inputs);
-        const outputArray = new (fromType(type))(dataset.outputs);
+    const databuffers = [];
+    for (const dataset of datasets) {
+      const inputArray = new (fromType(type))(dataset.inputs);
+      const outputArray = new (fromType(type))(dataset.outputs);
 
-        const input = await GPUMatrix.from(
-          this.backend,
-          inputArray,
-          inputSize,
-          batches,
-          type,
-        );
-        const output = await GPUMatrix.from(
-          this.backend,
-          outputArray,
-          outputSize,
-          batches,
-          type,
-        );
-        await this.feedForward(input);
-        await this.backpropagate(output, learningRate);
+      const input = await GPUMatrix.from(
+        this.backend,
+        inputArray,
+        inputSize,
+        batches,
+      );
+      const output = await GPUMatrix.from(
+        this.backend,
+        outputArray,
+        outputSize,
+        batches,
+      );
+
+      databuffers.push({ input, output });
+    }
+
+    for (let e = 0; e < epochs; e++) {
+      for (const dataset of databuffers) {
+        await this.feedForward(dataset.input);
+        await this.backpropagate(dataset.output, learningRate);
       }
     }
   }

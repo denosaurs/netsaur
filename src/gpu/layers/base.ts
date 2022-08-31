@@ -15,7 +15,6 @@ import {
 import { CrossEntropy, GPUCostFunction } from "../cost.ts";
 import { backPropagate } from "../kernels/backpropagate.ts";
 import { feedForward } from "../kernels/feedforward.ts";
-// import { backPropagate } from "../kernels/backPropagate.ts";
 import { GPUMatrix } from "../matrix.ts";
 
 interface GPULayerConfig extends LayerConfig {
@@ -57,11 +56,9 @@ export class BaseGPULayer {
   async initialize(type: DataType, inputSize: number, batches: number) {
     const b = this.#backend;
     const weights = new (fromType(type))(this.outputSize * inputSize)
-    // .map(() => 1)
-    .map(() => Math.random() * 2 - 1);
+      .map(() => Math.random() * 2 - 1);
     const biases = new (fromType(type))(this.outputSize)
-    // .map(() => 1)
-    .map(() => Math.random() * 2 - 1);
+      .map(() => Math.random() * 2 - 1);
     if (!this.weights) {
       this.weights = await GPUMatrix.with(b, this.outputSize, inputSize, type);
       this.biases = await GPUMatrix.with(b, this.outputSize, 1, type);
@@ -121,7 +118,7 @@ export class BaseGPULayer {
     error: GPUMatrix,
     prev: GPUMatrix,
     rate: number,
-    last: boolean,
+    last: number,
   ): Promise<GPUMatrix> {
     await backPropagate(
       this.#backend,

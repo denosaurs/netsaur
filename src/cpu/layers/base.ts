@@ -26,7 +26,6 @@ export class BaseCPULayer {
 
   input!: CPUMatrix;
   weights!: CPUMatrix;
-  product!: CPUMatrix;
   biases!: CPUMatrix;
   output!: CPUMatrix;
 
@@ -37,15 +36,12 @@ export class BaseCPULayer {
 
   reset(type: DataType, batches: number) {
     this.output = CPUMatrix.with(this.outputSize, batches, type);
-    this.product = CPUMatrix.with(this.outputSize, batches, type);
   }
 
   initialize(type: DataType, inputSize: number, batches: number) {
     this.weights = CPUMatrix.with(this.outputSize, inputSize, type);
-    // this.weights.data = this.weights.data.map(() => 1);
     this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
     this.biases = CPUMatrix.with(this.outputSize, 1, type);
-    // this.biases.data = this.biases.data.map(() => 1);
     this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
     this.reset(type, batches);
   }
@@ -83,22 +79,18 @@ export class BaseCPULayer {
 
   feedForward(input: CPUMatrix): CPUMatrix {
     this.input = input;
-    this.product = CPUMatrix.dot(input, this.weights);
-    for (let i = 0, j = 0; i < this.product.data.length; i++, j++) {
+    const product = CPUMatrix.dot(input, this.weights);
+    for (let i = 0, j = 0; i < product.data.length; i++, j++) {
       if (j >= this.biases.x) j = 0;
-      const sum = this.product.data[i] + this.biases.data[j];
+      const sum = product.data[i] + this.biases.data[j];
       this.output.data[i] = this.activationFn.activate(sum);
     }
     return this.output;
   }
 
-  backPropagate(
-    error: CPUMatrix,
-    rate: number,
-    // output: CPUMatrix,
-  ) {
+  backPropagate(error: CPUMatrix, rate: number) {
     const cost = CPUMatrix.with(error.x, error.y, error.type);
-    for (const i in this.product.data) {
+    for (const i in cost.data) {
       const activation = this.activationFn.prime(this.output.data[i]);
       cost.data[i] = error.data[i] * activation;
     }
@@ -110,8 +102,8 @@ export class BaseCPULayer {
       if (j >= this.biases.x) j = 0;
       this.biases.data[j] += cost.data[i] * rate;
     }
-    return error;
   }
+
   toJSON() {
     return {
       outputSize: this.outputSize,

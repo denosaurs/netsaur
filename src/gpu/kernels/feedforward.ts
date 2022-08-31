@@ -6,6 +6,8 @@ import {
 } from "../../../deps.ts";
 import { GPUMatrix } from "../matrix.ts";
 
+let uniform: WebGPUData;
+
 export async function feedForward<T extends DataType>(
   backend: WebGPUBackend,
   inputs: GPUMatrix<T>,
@@ -17,13 +19,13 @@ export async function feedForward<T extends DataType>(
   const type = ensureDataType(inputs.type, weights.type, outputs.type);
   const code = shader(type, activation);
   const pipeline = await backend.register(code);
-  const uniform = await WebGPUData.from(
-    backend,
-    new Uint32Array([inputs.x, outputs.x, inputs.y]),
-    "u32",
-    GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
-  );
-
+  const buffer = new Uint32Array([inputs.x, outputs.x, inputs.y]);
+  if (!uniform) {
+    const usage = GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM;
+    uniform = await WebGPUData.from(backend, buffer, "u32", usage);
+  } else {
+    backend.device.queue.writeBuffer(uniform.buffer, 0, buffer);
+  }
   backend.execute(
     pipeline,
     [outputs.x, inputs.y, 1],

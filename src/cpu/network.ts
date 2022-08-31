@@ -71,11 +71,11 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
         this.output.output.data[i],
       );
     }
-    error = this.output.backPropagate(error, rate);
+    this.output.backPropagate(error, rate);
     let weights = this.output.weights;
     for (let i = this.hidden.length - 1; i >= 0; i--) {
       error = CPUMatrix.dot(error, CPUMatrix.transpose(weights));
-      error = this.hidden[i].backPropagate(error, rate);
+      this.hidden[i].backPropagate(error, rate);
       weights = this.hidden[i].weights;
     }
   }

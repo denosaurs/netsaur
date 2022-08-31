@@ -6,7 +6,7 @@ import {
 } from "../../../deps.ts";
 import { GPUMatrix } from "../matrix.ts";
 
-// let uniform;
+let uniform: WebGPUData;
 
 export async function backPropagate<T extends DataType>(
   backend: WebGPUBackend,
@@ -19,19 +19,20 @@ export async function backPropagate<T extends DataType>(
   result: GPUMatrix<T>,
   prev: GPUMatrix<T>,
   rate: number,
-  last: boolean,
+  last: number,
   activation: string,
   costFn: string,
 ) {
   const type = ensureDataType(error.type, weights.type);
   const code = shader(type, activation, costFn, rate);
   const pipeline = await backend.register(code);
-  const uniform = await WebGPUData.from(
-    backend,
-    new Uint32Array([weights.y, weights.x, prev.x, error.y, last ? 0 : 1]),
-    "u32",
-    GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
-  );
+  const buffer = new Uint32Array([weights.y, weights.x, prev.x, error.y, last]);
+  if (!uniform) {
+    const usage = GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM;
+    uniform = await WebGPUData.from(backend, buffer, "u32", usage);
+  } else {
+    backend.device.queue.writeBuffer(uniform.buffer, 0, buffer);
+  }
   backend.execute(
     pipeline,
     [weights.x, error.y, 1],
@@ -49,8 +50,6 @@ export async function backPropagate<T extends DataType>(
   );
 }
 
-// embed rate into the shader to avoid adding another binding
-// its not gonna change much anyways
 const shader = (
   type: DataType,
   activation: string,
@@ -129,7 +128,7 @@ const shader = (
         var b = global_id.x + k * data.outputSize;    
         weighted_sum += cost.values[b] * inputs.values[a];
       };
-      let idx = global_id.y + global_id.x * data.inputSize;
+      let idx = global_id.x + global_id.y * data.outputSize;
       weights.values[idx] += weighted_sum * ${rate};
     };
   }

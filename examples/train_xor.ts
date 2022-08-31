@@ -6,7 +6,6 @@ const net = await new NeuralNetwork({
   silent: true,
   hidden: [
     { size: 3, activation: "sigmoid" },
-    // { size: 3, activation: "sigmoid" },
   ],
   cost: "crossentropy",
   output: { size: 1, activation: "sigmoid" },
@@ -28,6 +27,4 @@ console.log(await net.predict(new Float32Array([0, 0])));
 console.log(await net.predict(new Float32Array([1, 0])));
 console.log(await net.predict(new Float32Array([0, 1])));
 console.log(await net.predict(new Float32Array([1, 1])));
-// console.log((net.network as CPUNetwork).hidden[0].output.data)
-// console.log((net.network as CPUNetwork).hidden[0].output.data)
 console.log(Date.now() - time);
