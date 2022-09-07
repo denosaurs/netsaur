@@ -64,7 +64,7 @@ const net = await new NeuralNetwork({
   ],
   cost: "crossentropy",
   output: { size: 1, activation: "sigmoid" },
-}).setupBackend(false, true);
+}).setupBackend(false);
 
 net.train(
   [

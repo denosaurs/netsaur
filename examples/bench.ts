@@ -1,4 +1,4 @@
-import { assert } from "https://deno.land/std/testing/asserts.ts";
+import { assert } from "https://deno.land/std@0.154.0/testing/asserts.ts";
 import { NeuralNetwork } from "../mod.ts";
 
 let x = 0;

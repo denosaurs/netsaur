@@ -1,4 +1,4 @@
-import { DataType, DataTypeArray, WebGPUBackend } from "../deps.ts";
+import { DataType, DataTypeArray, WebGPUBackend, Core } from "../deps.ts";
 import { CPUNetwork } from "./cpu/network.ts";
 import { GPUNetwork } from "./gpu/network.ts";
 import { DataSet, LayerConfig, Network, NetworkConfig } from "./types.ts";
@@ -20,13 +20,15 @@ export class NeuralNetwork<T extends DataType = DataType> {
   /**
    * setup backend and initialize network
    */
-  async setupBackend(gpu = true, silent = true) {
+  async setupBackend(gpu = true) {
+    const silent = this.config.silent;
     if (!gpu) {
       this.network = new CPUNetwork(this.config);
       return this;
     }
-    const backend = new WebGPUBackend();
-    await backend.initialize();
+    const core = new Core();
+    await core.initialize();
+    const backend = core.backends.get("webgpu")! as WebGPUBackend;
     if (backend.adapter) {
       if (!silent) console.log(`Using adapter: ${backend.adapter}`);
       const features = [...backend.adapter.features.values()];
