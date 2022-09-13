@@ -2,11 +2,11 @@ export type {
   DataType,
   DataTypeArray,
   DataTypeArrayConstructor,
-} from "https://raw.githubusercontent.com/denosaurs/neo/main/backend/types/data.ts";
+} from "neo/backend/types/data.ts";
 export {
   ensureDataType,
   lookupDataPrimitiveArrayConstructor,
-} from "https://raw.githubusercontent.com/denosaurs/neo/main/backend/util/data.ts";
-export { WebGPUBackend } from "https://raw.githubusercontent.com/denosaurs/neo/main/backend/webgpu/backend.ts";
-export { Core } from "https://raw.githubusercontent.com/denosaurs/neo/main/backend/core/core.ts";
-export { WebGPUData } from "https://raw.githubusercontent.com/denosaurs/neo/main/backend/webgpu/data.ts";
+} from "neo/backend/util/data.ts";
+export { WebGPUBackend } from "neo/backend/webgpu/backend.ts";
+export { Core } from "neo/backend/core/core.ts";
+export { WebGPUData } from "neo/backend/webgpu/data.ts";

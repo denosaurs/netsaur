@@ -1,7 +1,7 @@
 import { DataType, DataTypeArray, WebGPUBackend, Core } from "../deps.ts";
 import { CPUNetwork } from "./cpu/network.ts";
 import { GPUNetwork } from "./gpu/network.ts";
-import { DataSet, LayerConfig, Network, NetworkConfig } from "./types.ts";
+import { ConvLayerConfig, DataSet, DenseLayerConfig, Layer, Network, NetworkConfig } from "./types.ts";
 
 /**
  * base class for neural network
@@ -53,7 +53,7 @@ export class NeuralNetwork<T extends DataType = DataType> {
   /**
    * add layers to network
    */
-  addLayers(layer: LayerConfig[]) {
+  addLayers(layer: Layer[]) {
     this.network.addLayers(layer);
   }
 
@@ -81,4 +81,12 @@ export class NeuralNetwork<T extends DataType = DataType> {
   predict(data: DataTypeArray<T>) {
     return this.network.predict(data);
   }
+}
+
+export class DenseLayer {
+  constructor(public config: DenseLayerConfig) {}
+}
+
+export class ConvLayer {
+  constructor(public config: ConvLayerConfig) {}
 }

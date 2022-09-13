@@ -1,5 +1,5 @@
 import { assert } from "https://deno.land/std@0.154.0/testing/asserts.ts";
-import { NeuralNetwork } from "../mod.ts";
+import { DenseLayer, NeuralNetwork } from "../mod.ts";
 
 let x = 0;
 
@@ -11,12 +11,12 @@ Deno.bench({
     const net = new NeuralNetwork({
       silent: true,
       hidden: [
-        { size: 6, activation: "sigmoid" },
-        { size: 6, activation: "sigmoid" },
+        new DenseLayer({ size: 6, activation: "sigmoid" }),
+        new DenseLayer({ size: 6, activation: "sigmoid" }),
         // { size: 3, activation: "sigmoid" },
       ],
       cost: "crossentropy",
-      output: { size: 1, activation: "sigmoid" },
+      output: new DenseLayer({ size: 1, activation: "sigmoid" }),
       input: {
         type: "f32",
       },

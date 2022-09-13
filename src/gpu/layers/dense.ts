@@ -1,5 +1,5 @@
 import { DataType, WebGPUBackend } from "../../../deps.ts";
-import { Activation, LayerConfig } from "../../types.ts";
+import { Activation, DenseLayerConfig } from "../../types.ts";
 import { ActivationError, fromType } from "../../util.ts";
 import {
   Elu,
@@ -17,14 +17,10 @@ import { backPropagate } from "../kernels/backpropagate.ts";
 import { feedForward } from "../kernels/feedforward.ts";
 import { GPUMatrix } from "../matrix.ts";
 
-interface GPULayerConfig extends LayerConfig {
-  size: number;
-  activation: Activation;
-}
 /**
  * Base class for all layers.
  */
-export class BaseGPULayer {
+export class DenseGPULayer {
   outputSize: number;
   activationFn: GPUActivationFn = new Sigmoid();
   costFunction: GPUCostFunction = new CrossEntropy();
@@ -38,8 +34,8 @@ export class BaseGPULayer {
 
   #backend: WebGPUBackend;
 
-  constructor(config: GPULayerConfig, backend: WebGPUBackend) {
-    this.outputSize = config.size;
+  constructor(config: DenseLayerConfig, backend: WebGPUBackend) {
+    this.outputSize = config.size as number;
     this.setActivation(config.activation);
     this.#backend = backend;
   }

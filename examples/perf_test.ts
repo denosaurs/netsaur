@@ -1,4 +1,4 @@
-import { NeuralNetwork } from "../mod.ts";
+import { DenseLayer, NeuralNetwork } from "../mod.ts";
 
 // cpu
 
@@ -6,10 +6,10 @@ const cpuTime = Date.now();
 
 const cpuNet = await new NeuralNetwork({
   hidden: [
-    { size: 3, activation: "sigmoid" },
+    new DenseLayer({ size: 3, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-  output: { size: 1, activation: "sigmoid" },
+  output: new DenseLayer({ size: 1, activation: "sigmoid" }),
   input: {
     type: "f32",
   },
@@ -36,10 +36,10 @@ const time = Date.now();
 
 const net = await new NeuralNetwork({
   hidden: [
-    { size: 3, activation: "sigmoid" },
+    new DenseLayer({ size: 3, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-  output: { size: 1, activation: "sigmoid" },
+  output: new DenseLayer({ size: 1, activation: "sigmoid" }),
   input: {
     type: "f32",
   },

@@ -1,5 +1,5 @@
 import { DataType } from "../../../deps.ts";
-import { Activation, LayerConfig } from "../../types.ts";
+import { Activation, DenseLayerConfig } from "../../types.ts";
 import { ActivationError } from "../../util.ts";
 import {
   CPUActivationFn,
@@ -20,7 +20,7 @@ import { CPUMatrix } from "../matrix.ts";
 /**
  * Base class for all layers.
  */
-export class BaseCPULayer {
+export class DenseCPULayer {
   outputSize: number;
   activationFn: CPUActivationFn = new Sigmoid();
 
@@ -29,8 +29,8 @@ export class BaseCPULayer {
   biases!: CPUMatrix;
   output!: CPUMatrix;
 
-  constructor(config: LayerConfig) {
-    this.outputSize = config.size;
+  constructor(config: DenseLayerConfig) {
+    this.outputSize = config.size as number;
     this.setActivation(config.activation);
   }
 

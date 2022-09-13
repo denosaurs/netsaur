@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { NeuralNetwork } from "../mod.ts";
+import { DenseLayer, NeuralNetwork } from "../mod.ts";
 
 // https://github.com/BrainJS/brain.js/blob/master/examples/typescript/which-letter-simple.ts
 const character = (string: string): Float32Array =>
@@ -37,10 +37,10 @@ const c = character(
 const net = await new NeuralNetwork({
   silent: true,
   hidden: [
-    { size: 3, activation: "sigmoid" },
+    new DenseLayer({ size: 10, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-  output: { size: 1, activation: "sigmoid" },
+  output: new DenseLayer({ size: 1, activation: "sigmoid" }),
 }).setupBackend(false);
 
 net.train(

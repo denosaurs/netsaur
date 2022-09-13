@@ -1,4 +1,11 @@
-import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
+import { DataType, DataTypeArray, DataTypeArrayConstructor, WebGPUBackend } from "../deps.ts";
+import type { Layer, CPULayer, GPULayer } from "./types.ts";
+import { ConvLayer, DenseLayer } from "./mod.ts";
+import { ConvCPULayer } from "./cpu/layers/conv.ts";
+import { DenseCPULayer } from "./cpu/layers/dense.ts";
+import { DenseGPULayer } from "./gpu/layers/dense.ts";
+
+
 
 export function getType<T extends DataType>(type: DataTypeArray<T>) {
   return (
@@ -139,3 +146,20 @@ export const mse = (errors: Float32Array): number => {
   }
   return sum / errors.length;
 };
+
+
+export function setLayerCPU(layer: Layer): CPULayer {
+  if (layer instanceof ConvLayer) {
+    return new ConvCPULayer(layer.config);
+  } else {
+    return new DenseCPULayer(layer.config);
+  }
+}
+
+export function setLayerGPU(layer: Layer, backend: WebGPUBackend): GPULayer {
+  if (layer instanceof ConvLayer) {
+    throw new Error("gpu convolutional layer not implemented")
+  } else {
+    return new DenseGPULayer(layer.config, backend);
+  }
+}

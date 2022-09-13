@@ -1,0 +1,5 @@
+{
+    "imports": {
+        "neo/": "https://raw.githubusercontent.com/denosaurs/neo/e7f602cd218fbdb7418e0fca9ac4aba8d6c22d08/"
+    }
+}

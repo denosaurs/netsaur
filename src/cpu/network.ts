@@ -3,26 +3,28 @@ import {
   Cost,
   DataSet,
   InputConfig,
-  LayerConfig,
+  Layer,
   Network,
   NetworkConfig,
+  CPULayer,
 } from "../types.ts";
-import { fromType, getType } from "../util.ts";
+import { fromType, getType, setLayerCPU } from "../util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
-import { BaseCPULayer } from "./layers/base.ts";
+import { DenseCPULayer } from "./layers/dense.ts";
 import { CPUMatrix } from "./matrix.ts";
+import { DenseLayer, ConvLayer } from "../mod.ts";
 
 export class CPUNetwork<T extends DataType = DataType> implements Network {
   input?: InputConfig;
-  hidden: BaseCPULayer[];
-  output: BaseCPULayer;
+  hidden: CPULayer[];
+  output: CPULayer;
   silent: boolean;
   costFn: CPUCostFunction = new CrossEntropy();
   constructor(config: NetworkConfig) {
     this.silent = config.silent ?? false;
     this.input = config.input;
-    this.hidden = config.hidden.map((layer) => new BaseCPULayer(layer));
-    this.output = new BaseCPULayer(config.output);
+    this.hidden = config.hidden.map((layer) => setLayerCPU(layer));
+    this.output = setLayerCPU(config.output);
     this.setCost(config.cost);
   }
 
@@ -37,8 +39,8 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
     }
   }
 
-  addLayers(layers: LayerConfig[]): void {
-    this.hidden.push(...layers.map((layer) => new BaseCPULayer(layer)));
+  addLayers(layers: Layer[]): void {
+    this.hidden.push(...layers.map((layer) => setLayerCPU(layer)));
   }
 
   initialize(type: DataType, inputSize: number, batches: number) {

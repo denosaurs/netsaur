@@ -1,10 +1,11 @@
-import { BaseGPULayer } from "./layers/base.ts";
+import { DenseGPULayer } from "./layers/dense.ts";
 import {
   DataSet,
   InputConfig,
-  LayerConfig,
+  Layer,
   Network,
   NetworkConfig,
+  GPULayer,
 } from "../types.ts";
 import {
   DataType,
@@ -12,28 +13,28 @@ import {
   WebGPUBackend,
   WebGPUData,
 } from "../../deps.ts";
-import { fromType, getType } from "../util.ts";
+import { fromType, getType, setLayerGPU } from "../util.ts";
 import { GPUMatrix } from "./matrix.ts";
 
 export class GPUNetwork<T extends DataType = DataType> implements Network {
   input?: InputConfig;
-  hidden: BaseGPULayer[];
-  output: BaseGPULayer;
+  hidden: GPULayer[];
+  output: GPULayer;
   backend: WebGPUBackend;
   silent: boolean;
   constructor(config: NetworkConfig, backend: WebGPUBackend) {
     this.silent = config.silent ?? false;
     this.input = config.input;
     this.backend = backend;
-    this.output = new BaseGPULayer(config.output, backend);
+    this.output = setLayerGPU(config.output, backend);
     this.hidden = config.hidden.map((layer) =>
-      new BaseGPULayer(layer, backend)
+      setLayerGPU(layer, backend)
     );
   }
 
-  addLayers(layers: LayerConfig[]) {
+  addLayers(layers: Layer[]) {
     this.hidden.push(
-      ...layers.map((layer) => new BaseGPULayer(layer, this.backend)),
+      ...layers.map((layer) => setLayerGPU(layer, this.backend)),
     );
   }
 

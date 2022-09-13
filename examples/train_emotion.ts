@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { NeuralNetwork } from "../mod.ts";
+import { DenseLayer, NeuralNetwork } from "../mod.ts";
 
 const character = (string: string): Float32Array =>
   Float32Array.from(string.trim().split("").map(integer));
@@ -60,10 +60,10 @@ const sad = character(
 const net = await new NeuralNetwork({
   silent: true,
   hidden: [
-    { size: 10, activation: "sigmoid" },
+    new DenseLayer({ size: 10, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-  output: { size: 1, activation: "sigmoid" },
+  output: new DenseLayer({ size: 1, activation: "sigmoid" }),
 }).setupBackend(false);
 
 net.train(

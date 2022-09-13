@@ -1,1 +1,1 @@
-export { NeuralNetwork } from "./src/mod.ts";
+export { NeuralNetwork, DenseLayer, ConvLayer } from "./src/mod.ts";

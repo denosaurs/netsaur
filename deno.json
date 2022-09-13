@@ -1,0 +1,9 @@
+{
+  "tasks": {
+    "train_xor": "deno run -A --unstable ./examples/train_xor.ts",
+    "train_letter": "deno run -A --unstable ./examples/train_letter.ts",
+    "train_emoticon": "deno run -A --unstable ./examples/train_emoticon.ts",
+    "perf_test": "deno run -A --unstable ./examples/perf_test.ts"
+  },
+  "importMap": "./import_map.json"
+}
