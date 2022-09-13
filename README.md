@@ -27,33 +27,33 @@
 ### Usage
 
 ```typescript
-import { NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
+import { NeuralNetwork, DenseLayer } from "https://deno.land/x/netsaur/mod.ts";
 
 const net = await new NeuralNetwork({
+  silent: true,
   hidden: [
-    { size: 2, activation: "sigmoid" },
+    new DenseLayer({ size: 3, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-  output: { size: 1, activation: "sigmoid" },
+  output: new DenseLayer({ size: 1, activation: "sigmoid" }),
   input: {
+    size: 2,
     type: "f32",
   },
-}).setupBackend(false);
+}).setupBackend("cpu");
 
-net.train(
+
+await net.train(
   [
-    { inputs: [0, 0], outputs: [0] },
-    { inputs: [1, 0], outputs: [1] },
-    { inputs: [0, 1], outputs: [1] },
-    { inputs: [1, 1], outputs: [0] },
+    { inputs: [0, 0, 1, 0, 0, 1, 1, 1], outputs: [0, 1, 1, 0] },
   ],
-  1000,
-  1,
+  5000,
+  4,
   0.1,
 );
 
-console.log(net.predict(new Float32Array([0, 0])));
-console.log(net.predict(new Float32Array([1, 0])));
-console.log(net.predict(new Float32Array([0, 1])));
-console.log(net.predict(new Float32Array([1, 1])));
+console.log(await net.predict(new Float32Array([0, 0])));
+console.log(await net.predict(new Float32Array([1, 0])));
+console.log(await net.predict(new Float32Array([0, 1])));
+console.log(await net.predict(new Float32Array([1, 1])));
 ```

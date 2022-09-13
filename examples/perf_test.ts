@@ -13,7 +13,7 @@ const cpuNet = await new NeuralNetwork({
   input: {
     type: "f32",
   },
-}).setupBackend(false);
+}).setupBackend("cpu");
 
 cpuNet.train(
   [
@@ -43,7 +43,7 @@ const net = await new NeuralNetwork({
   input: {
     type: "f32",
   },
-}).setupBackend(true);
+}).setupBackend("gpu");
 
 await net.train(
   [

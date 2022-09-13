@@ -50,6 +50,7 @@ export type Size = number | Size2D
 
 export type Size2D = {x: number, y: number}
 
+export type Backend = "gpu" | "cpu" | "GPU" | "CPU";
 /**
  * Activation functions are used to transform the output of a layer into a new output.
  */

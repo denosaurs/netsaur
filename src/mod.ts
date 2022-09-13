@@ -1,7 +1,7 @@
 import { DataType, DataTypeArray, WebGPUBackend, Core } from "../deps.ts";
 import { CPUNetwork } from "./cpu/network.ts";
 import { GPUNetwork } from "./gpu/network.ts";
-import { ConvLayerConfig, DataSet, DenseLayerConfig, Layer, Network, NetworkConfig } from "./types.ts";
+import { ConvLayerConfig, DataSet, DenseLayerConfig, Layer, Network, NetworkConfig, Backend } from "./types.ts";
 
 /**
  * base class for neural network
@@ -20,9 +20,9 @@ export class NeuralNetwork<T extends DataType = DataType> {
   /**
    * setup backend and initialize network
    */
-  async setupBackend(gpu = true) {
+  async setupBackend(backendType: Backend | boolean = false) {
     const silent = this.config.silent;
-    if (!gpu) {
+    if (!backendType || backendType === "CPU" || backendType === "cpu") {
       this.network = new CPUNetwork(this.config);
       return this;
     }
