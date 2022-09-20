@@ -1,5 +1,4 @@
 import { DataType, DataTypeArray } from "../../deps.ts";
-import { fromType, getType } from "../util.ts";
 
 export class CPUMatrix<T extends DataType = DataType> {
   deltas: DataTypeArray<T>;
@@ -7,7 +6,6 @@ export class CPUMatrix<T extends DataType = DataType> {
     public data: DataTypeArray<T>,
     public x: number,
     public y: number,
-    public type: DataType = getType(data),
   ) {
     this.deltas = this.data;
   }
@@ -15,14 +13,13 @@ export class CPUMatrix<T extends DataType = DataType> {
   static with(
     x: number,
     y: number,
-    type: DataType,
   ) {
-    const data = new (fromType(type))(x * y);
+    const data = new Float32Array(x * y);
     return new this(data, x, y);
   }
 
   static add(matA: CPUMatrix, matB: CPUMatrix) {
-    const res = CPUMatrix.with(matA.x, matA.y, matA.type);
+    const res = CPUMatrix.with(matA.x, matA.y);
     for (let i = 0; i < matA.data.length; i++) {
       res.data[i] = matA.data[i] + matB.data[i];
     }
@@ -30,7 +27,7 @@ export class CPUMatrix<T extends DataType = DataType> {
   }
 
   static dot(matA: CPUMatrix, matB: CPUMatrix) {
-    const res = CPUMatrix.with(matB.x, matA.y, matA.type);
+    const res = CPUMatrix.with(matB.x, matA.y);
     for (let x = 0; x < matB.x; x++) {
       for (let y = 0; y < matA.y; y++) {
         let sum = 0;
@@ -47,7 +44,7 @@ export class CPUMatrix<T extends DataType = DataType> {
   }
 
   static Tdot(matA: CPUMatrix, matB: CPUMatrix) {
-    const res = CPUMatrix.with(matB.y, matA.y, matA.type);
+    const res = CPUMatrix.with(matB.y, matA.y);
     for (let x = 0; x < matB.y; x++) {
       for (let y = 0; y < matA.y; y++) {
         let sum = 0;
@@ -64,7 +61,7 @@ export class CPUMatrix<T extends DataType = DataType> {
   }
 
   static sub(matA: CPUMatrix, matB: CPUMatrix) {
-    const res = CPUMatrix.with(matA.x, matA.y, matA.type);
+    const res = CPUMatrix.with(matA.x, matA.y);
     for (let i = 0; i < matA.data.length; i++) {
       res.data[i] = matA.data[i] - matB.data[i];
     }
@@ -83,7 +80,7 @@ export class CPUMatrix<T extends DataType = DataType> {
     return mat;
   }
   static transpose(mat: CPUMatrix) {
-    const res = CPUMatrix.with(mat.y, mat.x, mat.type);
+    const res = CPUMatrix.with(mat.y, mat.x);
     for (let x = 0; x < mat.x; x++) {
       for (let y = 0; y < mat.y; y++) {
         const i = x + y * mat.x;
@@ -130,7 +127,6 @@ export class CPUMatrix<T extends DataType = DataType> {
       data: this.data,
       x: this.x,
       y: this.y,
-      type: this.type,
     };
   }
 }

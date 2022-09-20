@@ -1,19 +1,26 @@
-import { DataType, DataTypeArray, WebGPUBackend, Core } from "../deps.ts";
+import { Core, DataTypeArray, WebGPUBackend } from "../deps.ts";
 import { CPUNetwork } from "./cpu/network.ts";
 import { GPUNetwork } from "./gpu/network.ts";
-import { ConvLayerConfig, DataSet, DenseLayerConfig, Layer, Network, NetworkConfig, Backend } from "./types.ts";
+import {
+  Backend,
+  ConvLayerConfig,
+  DataSet,
+  DenseLayerConfig,
+  Layer,
+  Network,
+  NetworkConfig,
+  Size,
+} from "./types.ts";
 
 /**
  * base class for neural network
  */
-export class NeuralNetwork<T extends DataType = DataType> {
+export class NeuralNetwork {
   network!: Network;
   /**
    * create a neural network
    */
-  constructor(
-    public config: NetworkConfig,
-  ) {
+  constructor(public config: NetworkConfig) {
     this.network = new CPUNetwork(this.config);
   }
 
@@ -51,10 +58,10 @@ export class NeuralNetwork<T extends DataType = DataType> {
   // }
 
   /**
-   * add layers to network
+   * add layer to network
    */
-  addLayers(layer: Layer[]) {
-    this.network.addLayers(layer);
+  addLayer(layer: Layer) {
+    this.network.addLayer(layer);
   }
 
   /**
@@ -78,15 +85,17 @@ export class NeuralNetwork<T extends DataType = DataType> {
   /**
    * use network to predict data
    */
-  predict(data: DataTypeArray<T>) {
+  predict(data: DataTypeArray) {
     return this.network.predict(data);
   }
 }
 
 export class DenseLayer {
+  public type = "dense";
   constructor(public config: DenseLayerConfig) {}
 }
 
 export class ConvLayer {
+  public type = "conv";
   constructor(public config: ConvLayerConfig) {}
 }

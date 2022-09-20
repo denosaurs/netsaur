@@ -3,15 +3,11 @@ import { DenseLayer, NeuralNetwork } from "../mod.ts";
 
 const net = await new NeuralNetwork({
   silent: true,
-  hidden: [
+  layers: [
     new DenseLayer({ size: 3, activation: "sigmoid" }),
+    new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-  output: new DenseLayer({ size: 1, activation: "sigmoid" }),
-  input: {
-    size: 2,
-    type: "f32",
-  },
 }).setupBackend("cpu");
 
 const time = Date.now();

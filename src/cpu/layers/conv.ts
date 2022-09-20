@@ -1,5 +1,4 @@
-import { DataType } from "../../../deps.ts";
-import { Activation, ConvLayerConfig, Size2D } from "../../types.ts";
+import { Activation, ConvLayerConfig, Size, Size2D } from "../../types.ts";
 import { ActivationError } from "../../util.ts";
 import {
   CPUActivationFn,
@@ -26,6 +25,7 @@ export class ConvCPULayer {
   stride = 1;
   activationFn: CPUActivationFn = new Sigmoid();
 
+  kernel!: CPUMatrix;
   input!: CPUMatrix;
   weights!: CPUMatrix;
   biases!: CPUMatrix;
@@ -36,14 +36,15 @@ export class ConvCPULayer {
     this.setActivation(config.activation);
   }
 
-  reset(type: DataType, inputSize: Size2D, kernelSize: Size2D) {
-    const w = 1 + (inputSize.x + 2 * this.padding - kernelSize.x) / this.stride;
-    const h = 1 + (inputSize.y + 2 * this.padding - kernelSize.y) / this.stride;
-    this.output = CPUMatrix.with(w, h, type);
+  reset(batches: number) {
+    
   }
 
-  initialize(type: DataType, inputSize: Size2D, kernelSize: Size2D) {
-    this.reset(type, inputSize, kernelSize);
+  initialize(inputSize: Size, batches: number) {
+    const size = inputSize as Size2D;
+    const w = 1 + (size.x + 2 * this.padding - this.kernel.x) / this.stride;
+    const h = 1 + (size.y + 2 * this.padding - this.kernel.y) / this.stride;
+    this.output = CPUMatrix.with(w, h);
   }
 
   setActivation(activation: Activation) {
@@ -78,6 +79,7 @@ export class ConvCPULayer {
   }
 
   feedForward(input: CPUMatrix) {
+    return this.output;
   }
 
   backPropagate(error: CPUMatrix, rate: number) {

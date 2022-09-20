@@ -5,7 +5,7 @@ import { DenseCPULayer } from "./cpu/layers/dense.ts";
 import { DenseGPULayer } from "./gpu/layers/dense.ts";
 
 export interface Network<T extends DataType = DataType> {
-  addLayers(layer: Layer[]): void;
+  addLayer(layer: Layer): void;
   getOutput(): DataTypeArray<T>;
   train(
     datasets: DataSet[],
@@ -21,10 +21,9 @@ export interface Network<T extends DataType = DataType> {
  * NetworkConfig represents the configuration of a neural network.
  */
 export interface NetworkConfig {
-  input?: InputConfig;
-  hidden: Layer[];
+  input?: Size;
+  layers: Layer[];
   cost: Cost;
-  output: Layer;
   silent?: boolean;
 }
 
@@ -67,13 +66,6 @@ export type Activation =
 export type Cost = "crossentropy" | "hinge";
 
 export type Shape = number;
-/**
- * InputConfig represents the configuration of the input layer.
- */
-export type InputConfig = {
-  size?: number;
-  type: DataType;
-};
 /**
  * NumberArray is a typed array of numbers.
  */

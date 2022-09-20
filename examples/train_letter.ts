@@ -36,11 +36,11 @@ const c = character(
 );
 const net = await new NeuralNetwork({
   silent: true,
-  hidden: [
+  layers: [
     new DenseLayer({ size: 10, activation: "sigmoid" }),
+    new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-  output: new DenseLayer({ size: 1, activation: "sigmoid" }),
 }).setupBackend("cpu");
 
 net.train(
