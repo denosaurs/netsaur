@@ -41,6 +41,8 @@ export interface DenseLayerConfig {
 export interface ConvLayerConfig {
   size: Size;
   activation: Activation;
+  kernel: DataTypeArray;
+  kernelSize: Size2D;
   padding?: number;
   stride?: number;
 }

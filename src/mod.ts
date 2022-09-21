@@ -9,7 +9,6 @@ import {
   Layer,
   Network,
   NetworkConfig,
-  Size,
 } from "./types.ts";
 
 /**

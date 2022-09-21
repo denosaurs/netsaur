@@ -129,4 +129,15 @@ export class CPUMatrix<T extends DataType = DataType> {
       y: this.y,
     };
   }
+  fmt() {
+    let res = ""
+    for (let i = 0; i < this.y; i++) {
+      const row = this.data.slice(i * this.x, (i+ 1) * this.x)
+      for (let j = 0; j < row.length; j++) {
+        res += row[j].toString() + " "
+      }
+      res += "\n"
+    }
+    return res
+  }
 }

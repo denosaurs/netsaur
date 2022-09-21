@@ -21,30 +21,38 @@ import { CPUMatrix } from "../matrix.ts";
  */
 export class ConvCPULayer {
   outputSize: Size2D;
-  padding = 0;
-  stride = 1;
+  padding: number;
+  stride: number;
   activationFn: CPUActivationFn = new Sigmoid();
 
-  kernel!: CPUMatrix;
   input!: CPUMatrix;
-  weights!: CPUMatrix;
-  biases!: CPUMatrix;
+  kernel!: CPUMatrix;
+  test!: CPUMatrix;
   output!: CPUMatrix;
 
   constructor(config: ConvLayerConfig) {
     this.outputSize = config.size as Size2D;
+    this.kernel = new CPUMatrix(
+      config.kernel,
+      config.kernelSize.x,
+      config.kernelSize.y,
+    );
+    this.padding = config.padding || 0;
+    this.stride = config.stride || 1;
     this.setActivation(config.activation);
   }
 
   reset(batches: number) {
-    
   }
 
   initialize(inputSize: Size, batches: number) {
     const size = inputSize as Size2D;
-    const w = 1 + (size.x + 2 * this.padding - this.kernel.x) / this.stride;
-    const h = 1 + (size.y + 2 * this.padding - this.kernel.y) / this.stride;
-    this.output = CPUMatrix.with(w, h);
+    const w = (size.x + 2 * this.padding) / this.stride;
+    const h = (size.y + 2 * this.padding) / this.stride;
+    this.test = CPUMatrix.with(w, h);
+    const w2 = 1 + (size.x + 2 * this.padding - this.kernel.x) / this.stride;
+    const h2 = 1 + (size.y + 2 * this.padding - this.kernel.y) / this.stride;
+    this.output = CPUMatrix.with(w2, h2);
   }
 
   setActivation(activation: Activation) {
@@ -79,6 +87,25 @@ export class ConvCPULayer {
   }
 
   feedForward(input: CPUMatrix) {
+    for (let i = 0; i < input.x; i++) {
+      for (let j = 0; j < input.y; j++) {
+        const idx = this.test.x * (this.padding + j) + this.padding + i;
+        this.test.data[idx] = input.data[j * input.x + i];
+      }
+    }
+    for (let i = 0; i < this.output.x; i++) {
+      for (let j = 0; j < this.output.y; j++) {
+        let sum = 0
+        for (let x = 0; x < this.kernel.x; x++) {
+          for (let y = 0; y < this.kernel.y; y++) {
+            const k = this.test.x * (j + y) + (i + x)
+            const l = y * this.kernel.x + x
+            sum += this.test.data[k] * this.kernel.data[l]
+          }
+        }
+        this.output.data[j * this.output.x + i] = sum;
+      }
+    }
     return this.output;
   }
 
