@@ -4,9 +4,9 @@ import { CPUMatrix } from "../src/cpu/matrix.ts";
 import { CPUNetwork } from "../src/cpu/network.ts";
 
 const kernel = new Float32Array([
-  1, 0, 1,
-  1, 0, 1,
-  1, 0, 1,
+  1, 1, 1,
+  1, 1, 1,
+  1, 1, 1,
 ])
 
 const net = await new NeuralNetwork({
@@ -17,7 +17,8 @@ const net = await new NeuralNetwork({
       activation: "sigmoid", 
       kernel: kernel,
       kernelSize: {x: 3, y: 3},
-      padding: 2
+      padding: 2,
+      stride: 2,
      }),
     new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
@@ -35,5 +36,5 @@ const buf = new Float32Array([
 const input = new CPUMatrix(buf, 5, 5);
 (net.network as CPUNetwork).initialize({ x: 5, y: 5 }, 1);
 (net.network as CPUNetwork).layers[0].feedForward(input);
-console.log(((net.network as CPUNetwork).layers[0] as ConvCPULayer).test.fmt())
+console.log(((net.network as CPUNetwork).layers[0] as ConvCPULayer).padded.fmt())
 console.log(((net.network as CPUNetwork).layers[0] as ConvCPULayer).output.fmt())
