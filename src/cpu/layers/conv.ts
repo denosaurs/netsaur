@@ -1,4 +1,4 @@
-import { Activation, ConvLayerConfig, Size, Size2D } from "../../types.ts";
+import { Activation, ConvLayerConfig, LayerJSON, Size, Size2D } from "../../types.ts";
 import { ActivationError } from "../../util.ts";
 import {
   CPUActivationFn,
@@ -42,10 +42,10 @@ export class ConvCPULayer {
     this.setActivation(config.activation);
   }
 
-  reset(batches: number) {
+  reset(_batches: number) {
   }
 
-  initialize(inputSize: Size, batches: number) {
+  initialize(inputSize: Size, _batches: number) {
     const size = inputSize as Size2D;
     const wp = size.x + 2 * this.padding;
     const hp = size.y + 2 * this.padding;
@@ -114,13 +114,14 @@ export class ConvCPULayer {
     return this.output;
   }
 
-  backPropagate(error: CPUMatrix, rate: number) {
+  backPropagate(_error: CPUMatrix, _rate: number) {
   }
 
-  toJSON() {
+  toJSON(): LayerJSON {
     return {
       outputSize: this.outputSize,
       activation: this.activationFn,
+      type: "conv"
     };
   }
 }

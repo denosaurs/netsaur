@@ -1,11 +1,13 @@
 import { DataTypeArray } from "../../deps.ts";
 import {
+ConvLayerConfig,
   Cost,
   CPULayer,
   DataSet,
   Layer,
   Network,
   NetworkConfig,
+  NetworkJSON,
   Size,
 } from "../types.ts";
 import { to1D } from "../util.ts";
@@ -20,6 +22,7 @@ export class CPUNetwork implements Network {
   output: CPULayer;
   silent: boolean;
   costFn: CPUCostFunction = new CrossEntropy();
+  
   constructor(config: NetworkConfig) {
     this.input = config.input;
     this.silent = config.silent ?? false;
@@ -45,7 +48,10 @@ export class CPUNetwork implements Network {
         this.layers.push(new DenseCPULayer(layer.config));
         break;
       case "conv":
-        this.layers.push(new ConvCPULayer(layer.config));
+        this.layers.push(new ConvCPULayer(layer.config as ConvLayerConfig));
+        break;
+        default:
+          throw new Error(`${layer.type.charAt(0).toUpperCase() + layer.type.slice(1)}Layer not implemented for the CPU backend`)
     }
   }
 
@@ -80,11 +86,13 @@ export class CPUNetwork implements Network {
       );
     }
     this.output.backPropagate(error, rate);
-    let weights = this.output.weights;
+      // todo: update for convolutional layer
+    let weights = (this.output as DenseCPULayer).weights;
     for (let i = this.layers.length - 1; i >= 0; i--) {
       error = CPUMatrix.dot(error, CPUMatrix.transpose(weights));
       this.layers[i].backPropagate(error, rate);
-      weights = this.layers[i].weights;
+      // todo: update for convolutional layer
+      weights = (this.layers[i] as DenseCPULayer).weights;
     }
   }
 
@@ -146,7 +154,7 @@ export class CPUNetwork implements Network {
     return this.feedForward(input).data;
   }
 
-  toJSON() {
+  toJSON(): NetworkJSON {
     return {
       type: "NeuralNetwork",
       sizes: this.layers.map((layer) => layer.outputSize),
@@ -156,11 +164,11 @@ export class CPUNetwork implements Network {
     };
   }
 
-  get weights(): CPUMatrix[] {
-    return this.layers.map((layer) => layer.weights);
+  getWeights(): CPUMatrix[] {
+    return this.layers.map((layer) => (layer as DenseCPULayer).weights);
   }
 
-  get biases(): CPUMatrix[] {
-    return this.layers.map((layer) => layer.biases);
+  getBiases(): CPUMatrix[] {
+    return this.layers.map((layer) => (layer as DenseCPULayer).biases);
   }
 }

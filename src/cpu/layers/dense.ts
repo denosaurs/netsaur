@@ -1,4 +1,4 @@
-import { Activation, DenseLayerConfig, Size } from "../../types.ts";
+import { Activation, DenseLayerConfig, LayerJSON, Size } from "../../types.ts";
 import { ActivationError, to1D } from "../../util.ts";
 import {
   CPUActivationFn,
@@ -103,10 +103,11 @@ export class DenseCPULayer {
     }
   }
 
-  toJSON() {
+  toJSON(): LayerJSON {
     return {
       outputSize: this.outputSize,
       activation: this.activationFn,
+      type: "dense"
     };
   }
 }

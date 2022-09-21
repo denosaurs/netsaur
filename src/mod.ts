@@ -9,6 +9,7 @@ import {
   Layer,
   Network,
   NetworkConfig,
+  NetworkJSON,
 } from "./types.ts";
 
 /**
@@ -78,14 +79,36 @@ export class NeuralNetwork {
   /**
    * get output of network
    */
-  getOutput() {
-    return this.network.getOutput();
+  async getOutput() {
+    return await this.network.getOutput();
   }
+
   /**
    * use network to predict data
    */
-  predict(data: DataTypeArray) {
-    return this.network.predict(data);
+  async predict(data: DataTypeArray) {
+    return await this.network.predict(data);
+  }
+
+  /**
+   * Export the network in a JSON format
+   */
+  toJSON(): NetworkJSON {
+    return this.network.toJSON();
+  }
+
+  /**
+   * get the weights of the network
+   */
+  getWeights() {
+    return this.network.getWeights();
+  }
+
+  /**
+   * get the biases of the network
+   */
+  getBiases() {
+    return this.network.getBiases();
   }
 }
 

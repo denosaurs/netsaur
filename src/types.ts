@@ -3,10 +3,29 @@ import { DenseLayer,ConvLayer } from "./mod.ts";
 import { ConvCPULayer } from "./cpu/layers/conv.ts";
 import { DenseCPULayer } from "./cpu/layers/dense.ts";
 import { DenseGPULayer } from "./gpu/layers/dense.ts";
+import { CPUActivationFn } from "./cpu/activation.ts";
+import { GPUActivationFn } from "./gpu/activation.ts";
+import { GPUMatrix } from "./gpu/matrix.ts";
+import { CPUMatrix } from "./cpu/matrix.ts";
+
+export interface LayerJSON {
+  outputSize: number | Size2D;
+  activation: CPUActivationFn | GPUActivationFn;
+  type: string;
+}
+
+export interface NetworkJSON {
+  type: "NeuralNetwork";
+  sizes: (number | Size2D)[]
+  input: Size | undefined;
+  layers: LayerJSON[];
+  output: LayerJSON;
+}
 
 export interface Network<T extends DataType = DataType> {
   addLayer(layer: Layer): void;
-  getOutput(): DataTypeArray<T>;
+  // deno-lint-ignore no-explicit-any
+  getOutput(): DataTypeArray<T> | any;
   train(
     datasets: DataSet[],
     epochs: number,
@@ -15,6 +34,11 @@ export interface Network<T extends DataType = DataType> {
   ): void;
   // deno-lint-ignore no-explicit-any
   predict(input: DataTypeArray<T>): DataTypeArray<T> | any;
+  toJSON(): NetworkJSON;
+  // deno-lint-ignore no-explicit-any
+  getWeights(): (GPUMatrix | CPUMatrix | any)[]
+  // deno-lint-ignore no-explicit-any
+  getBiases(): (GPUMatrix | CPUMatrix | any)[]
 }
 
 /**

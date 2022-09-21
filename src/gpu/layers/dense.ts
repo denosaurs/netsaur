@@ -1,6 +1,6 @@
 import { DataType, WebGPUBackend } from "../../../deps.ts";
-import { Activation, DenseLayerConfig } from "../../types.ts";
-import { ActivationError, fromType } from "../../util.ts";
+import { Activation, DenseLayerConfig, LayerJSON, Size } from "../../types.ts";
+import { ActivationError, fromType, to1D } from "../../util.ts";
 import {
   Elu,
   GPUActivationFn,
@@ -25,7 +25,7 @@ export class DenseGPULayer {
   activationFn: GPUActivationFn = new Sigmoid();
   costFunction: GPUCostFunction = new CrossEntropy();
 
-  inputs!: GPUMatrix;
+  input!: GPUMatrix;
   weights!: GPUMatrix;
   biases!: GPUMatrix;
   output!: GPUMatrix;
@@ -35,7 +35,7 @@ export class DenseGPULayer {
   #backend: WebGPUBackend;
 
   constructor(config: DenseLayerConfig, backend: WebGPUBackend) {
-    this.outputSize = config.size as number;
+    this.outputSize = to1D(config.size);
     this.setActivation(config.activation);
     this.#backend = backend;
   }
@@ -49,14 +49,19 @@ export class DenseGPULayer {
     }
   }
 
-  async initialize(type: DataType, inputSize: number, batches: number) {
+  async initialize(type: DataType, inputSize: Size, batches: number) {
     const b = this.#backend;
-    const weights = new (fromType(type))(this.outputSize * inputSize)
+    const weights = new (fromType(type))(this.outputSize * to1D(inputSize))
       .map(() => Math.random() * 2 - 1);
     const biases = new (fromType(type))(this.outputSize)
       .map(() => Math.random() * 2 - 1);
     if (!this.weights) {
-      this.weights = await GPUMatrix.with(b, this.outputSize, inputSize, type);
+      this.weights = await GPUMatrix.with(
+        b,
+        this.outputSize,
+        to1D(inputSize),
+        type,
+      );
       this.biases = await GPUMatrix.with(b, this.outputSize, 1, type);
       this.output = await GPUMatrix.with(b, this.outputSize, batches, type);
       this.error = await GPUMatrix.with(b, this.outputSize, batches, type);
@@ -98,10 +103,10 @@ export class DenseGPULayer {
   }
 
   async feedForward(input: GPUMatrix): Promise<GPUMatrix> {
-    this.inputs = input;
+    this.input = input;
     await feedForward(
       this.#backend,
-      this.inputs,
+      this.input,
       this.weights,
       this.biases,
       this.output,
@@ -115,10 +120,11 @@ export class DenseGPULayer {
     prev: GPUMatrix,
     rate: number,
     last: number,
+    costFn: GPUCostFunction = this.costFunction
   ): Promise<GPUMatrix> {
     await backPropagate(
       this.#backend,
-      this.inputs,
+      this.input,
       this.weights,
       this.biases,
       this.output,
@@ -129,15 +135,16 @@ export class DenseGPULayer {
       rate,
       last,
       this.activationFn.prime(error.type),
-      this.costFunction.prime(error.type),
+      costFn.prime(error.type),
     );
     return this.output;
   }
 
-  toJSON() {
+  toJSON(): LayerJSON {
     return {
       outputSize: this.outputSize,
       activation: this.activationFn,
+      type: "dense"
     };
   }
 }
