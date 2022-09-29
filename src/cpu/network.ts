@@ -10,7 +10,7 @@ ConvLayerConfig,
   NetworkJSON,
   Size,
 } from "../types.ts";
-import { to1D } from "../util.ts";
+import { to1D, iterate1D } from "../util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
@@ -112,7 +112,7 @@ export class CPUNetwork implements Network {
         dataset.outputs = new Float32Array(dataset.outputs);
       }
     }
-    for (let e = 0; e < epochs; e++) {
+    iterate1D(epochs, (e: number) => {
       if (!this.silent) console.log(`Epoch ${e + 1}/${epochs}`);
       for (const dataset of datasets) {
         const input = new CPUMatrix(
@@ -123,7 +123,7 @@ export class CPUNetwork implements Network {
         this.feedForward(input);
         this.backpropagate(dataset.outputs as DataTypeArray, rate);
       }
-    }
+    })
   }
 
   getCostLoss(output: DataTypeArray) {

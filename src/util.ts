@@ -4,6 +4,7 @@ import {
   DataTypeArrayConstructor,
   WebGPUBackend,
 } from "../deps.ts";
+import { CPUMatrix } from "./cpu/matrix.ts";
 import type { CPULayer, GPULayer, Layer, Size, Size2D } from "./types.ts";
 import { ConvLayer } from "./mod.ts";
 import { ConvCPULayer } from "./cpu/layers/conv.ts";
@@ -169,5 +170,19 @@ export function to1D(size: Size): number {
     return size2d.x * size2d.y
   } else {
     return size as number
+  }
+}
+
+export function iterate2D(mat: { x: number, y: number} | CPUMatrix, callback: (i: number, j: number) => void): void {
+  for (let i = 0; i < mat.x; i++) {
+    for (let j = 0; j < mat.y; j++) {
+      callback(i,j);
+    }
+  }
+}
+
+export function iterate1D(length: number, callback: (i: number) => void): void {
+  for (let i = 0; i < length; i++) {
+    callback(i);
   }
 }
