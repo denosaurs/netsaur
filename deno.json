@@ -5,6 +5,5 @@
     "train_emoticon": "deno run -A --unstable ./examples/train_emoticon.ts",
     "train_conv": "deno run -A --unstable ./examples/train_conv.ts",
     "perf_test": "deno run -A --unstable ./examples/perf_test.ts"
-  },
-  "importMap": "./import_map.json"
+  }
 }
