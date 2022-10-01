@@ -10,6 +10,7 @@ import {
   Network,
   NetworkConfig,
   NetworkJSON,
+PoolLayerConfig,
 } from "./types.ts";
 
 /**
@@ -121,3 +122,9 @@ export class ConvLayer {
   public type = "conv";
   constructor(public config: ConvLayerConfig) {}
 }
+
+export class PoolLayer {
+  public type = "pool";
+  constructor(public config: PoolLayerConfig) {}
+}
+

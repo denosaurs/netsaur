@@ -1,33 +1,39 @@
 import { DataTypeArray } from "../../deps.ts";
 import {
-ConvLayerConfig,
+  ConvLayerConfig,
   Cost,
   CPULayer,
   DataSet,
+  DenseLayerConfig,
   Layer,
   Network,
   NetworkConfig,
   NetworkJSON,
+  PoolLayerConfig,
   Size,
 } from "../types.ts";
 import { to1D } from "../util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
+import { PoolCPULayer } from "./layers/pool.ts";
 import { CPUMatrix } from "./matrix.ts";
+
+type OutputLayer = DenseCPULayer;
 
 export class CPUNetwork implements Network {
   input?: Size;
   layers: CPULayer[] = [];
-  output: CPULayer;
+  output: OutputLayer;
   silent: boolean;
   costFn: CPUCostFunction = new CrossEntropy();
-  
+
   constructor(config: NetworkConfig) {
     this.input = config.input;
     this.silent = config.silent ?? false;
     config.layers.slice(0, -1).map(this.addLayer.bind(this));
-    this.output = new DenseCPULayer(config.layers.at(-1)!.config);
+    const output = config.layers[config.layers.length - 1];
+    this.output = new DenseCPULayer(output.config as DenseLayerConfig);
     this.setCost(config.cost);
   }
 
@@ -45,13 +51,20 @@ export class CPUNetwork implements Network {
   addLayer(layer: Layer): void {
     switch (layer.type) {
       case "dense":
-        this.layers.push(new DenseCPULayer(layer.config));
+        this.layers.push(new DenseCPULayer(layer.config as DenseLayerConfig));
         break;
       case "conv":
         this.layers.push(new ConvCPULayer(layer.config as ConvLayerConfig));
         break;
-        default:
-          throw new Error(`${layer.type.charAt(0).toUpperCase() + layer.type.slice(1)}Layer not implemented for the CPU backend`)
+      case "pool":
+        this.layers.push(new PoolCPULayer(layer.config as PoolLayerConfig));
+        break;
+      default:
+        throw new Error(
+          `${
+            layer.type.charAt(0).toUpperCase() + layer.type.slice(1)
+          }Layer not implemented for the CPU backend`,
+        );
     }
   }
 
@@ -86,7 +99,7 @@ export class CPUNetwork implements Network {
       );
     }
     this.output.backPropagate(error, rate);
-      // todo: update for convolutional layer
+    // todo: update for convolutional layer
     let weights = (this.output as DenseCPULayer).weights;
     for (let i = this.layers.length - 1; i >= 0; i--) {
       error = CPUMatrix.dot(error, CPUMatrix.transpose(weights));

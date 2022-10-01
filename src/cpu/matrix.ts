@@ -1,9 +1,9 @@
-import { DataType, DataTypeArray } from "../../deps.ts";
+import { DataTypeArray } from "../../deps.ts";
 
-export class CPUMatrix<T extends DataType = DataType> {
-  deltas: DataTypeArray<T>;
+export class CPUMatrix {
+  deltas: DataTypeArray;
   constructor(
-    public data: DataTypeArray<T>,
+    public data: DataTypeArray,
     public x: number,
     public y: number,
   ) {
@@ -130,14 +130,14 @@ export class CPUMatrix<T extends DataType = DataType> {
     };
   }
   fmt() {
-    let res = ""
+    let res = "";
     for (let i = 0; i < this.y; i++) {
-      const row = this.data.slice(i * this.x, (i+ 1) * this.x)
+      const row = this.data.slice(i * this.x, (i + 1) * this.x);
       for (let j = 0; j < row.length; j++) {
-        res += row[j].toString() + " "
+        res += row[j].toString() + " ";
       }
-      res += "\n"
+      res += "\n";
     }
-    return res
+    return res;
   }
 }

@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { DenseLayer,ConvLayer } from "./mod.ts";
+import { DenseLayer,ConvLayer, PoolLayer } from "./mod.ts";
 import { ConvCPULayer } from "./cpu/layers/conv.ts";
 import { DenseCPULayer } from "./cpu/layers/dense.ts";
 import { DenseGPULayer } from "./gpu/layers/dense.ts";
@@ -7,10 +7,11 @@ import { CPUActivationFn } from "./cpu/activation.ts";
 import { GPUActivationFn } from "./gpu/activation.ts";
 import { GPUMatrix } from "./gpu/matrix.ts";
 import { CPUMatrix } from "./cpu/matrix.ts";
+import { PoolCPULayer } from "./cpu/layers/pool.ts";
 
 export interface LayerJSON {
   outputSize: number | Size2D;
-  activation: CPUActivationFn | GPUActivationFn;
+  activation?: CPUActivationFn | GPUActivationFn;
   type: string;
 }
 
@@ -51,9 +52,9 @@ export interface NetworkConfig {
   silent?: boolean;
 }
 
-export type Layer = DenseLayer | ConvLayer;
+export type Layer = DenseLayer | ConvLayer | PoolLayer;
 
-export type CPULayer = ConvCPULayer | DenseCPULayer;
+export type CPULayer = ConvCPULayer | DenseCPULayer | PoolCPULayer;
 
 export type GPULayer = DenseGPULayer;
 
@@ -63,12 +64,15 @@ export interface DenseLayerConfig {
 }
 
 export interface ConvLayerConfig {
-  size: Size;
   activation: Activation;
   kernel: DataTypeArray;
   kernelSize: Size2D;
   padding?: number;
   stride?: number;
+}
+
+export interface PoolLayerConfig {
+  stride: number;
 }
 
 export type Size = number | Size2D
