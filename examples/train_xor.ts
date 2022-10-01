@@ -1,18 +1,16 @@
-import { NeuralNetwork } from "../mod.ts";
+import { DenseLayer, NeuralNetwork } from "../mod.ts";
 
-const time = Date.now();
 
 const net = await new NeuralNetwork({
   silent: true,
-  hidden: [
-    { size: 3, activation: "sigmoid" },
+  layers: [
+    new DenseLayer({ size: 3, activation: "sigmoid" }),
+    new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-  output: { size: 1, activation: "sigmoid" },
-  input: {
-    type: "f32",
-  },
-}).setupBackend(true);
+}).setupBackend("cpu");
+
+const time = Date.now();
 
 await net.train(
   [
@@ -23,8 +21,8 @@ await net.train(
   0.1,
 );
 
+console.log(`training time: ${Date.now() - time}ms`);
 console.log(await net.predict(new Float32Array([0, 0])));
 console.log(await net.predict(new Float32Array([1, 0])));
 console.log(await net.predict(new Float32Array([0, 1])));
 console.log(await net.predict(new Float32Array([1, 1])));
-console.log(Date.now() - time);

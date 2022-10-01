@@ -1,15 +1,15 @@
 import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
+import { CPUMatrix } from "./cpu/matrix.ts";
+import type { Size, Size2D } from "./types.ts";
 
-export function getType<T extends DataType>(type: DataTypeArray<T>) {
+export function getType(type: DataTypeArray<DataType>) {
   return (
     type instanceof Uint32Array
       ? "u32"
       : type instanceof Int32Array
       ? "i32"
-      : type instanceof Float32Array
-      ? "f32"
-      : undefined
-  )! as T;
+      : "f32"
+  );
 }
 export function fromType<T extends DataType>(type: string) {
   return (
@@ -139,3 +139,29 @@ export const mse = (errors: Float32Array): number => {
   }
   return sum / errors.length;
 };
+
+export function to1D(size: Size): number {
+  const size2d = (size as Size2D);
+  if (size2d.y) {
+    return size2d.x * size2d.y;
+  } else {
+    return size as number;
+  }
+}
+
+export function iterate2D(
+  mat: { x: number; y: number } | CPUMatrix,
+  callback: (i: number, j: number) => void,
+): void {
+  for (let i = 0; i < mat.x; i++) {
+    for (let j = 0; j < mat.y; j++) {
+      callback(i, j);
+    }
+  }
+}
+
+export function iterate1D(length: number, callback: (i: number) => void): void {
+  for (let i = 0; i < length; i++) {
+    callback(i);
+  }
+}

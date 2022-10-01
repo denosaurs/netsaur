@@ -1,28 +1,36 @@
-import { DataType, DataTypeArray, WebGPUBackend, Core } from "../deps.ts";
+import { Core, DataTypeArray, WebGPUBackend } from "../deps.ts";
 import { CPUNetwork } from "./cpu/network.ts";
 import { GPUNetwork } from "./gpu/network.ts";
-import { DataSet, LayerConfig, Network, NetworkConfig } from "./types.ts";
+import {
+  Backend,
+  ConvLayerConfig,
+  DataSet,
+  DenseLayerConfig,
+  Layer,
+  Network,
+  NetworkConfig,
+  NetworkJSON,
+PoolLayerConfig,
+} from "./types.ts";
 
 /**
  * base class for neural network
  */
-export class NeuralNetwork<T extends DataType = DataType> {
+export class NeuralNetwork {
   network!: Network;
   /**
    * create a neural network
    */
-  constructor(
-    public config: NetworkConfig,
-  ) {
+  constructor(public config: NetworkConfig) {
     this.network = new CPUNetwork(this.config);
   }
 
   /**
    * setup backend and initialize network
    */
-  async setupBackend(gpu = true) {
+  async setupBackend(backendType: Backend | boolean = false) {
     const silent = this.config.silent;
-    if (!gpu) {
+    if (!backendType || backendType === "CPU" || backendType === "cpu") {
       this.network = new CPUNetwork(this.config);
       return this;
     }
@@ -51,10 +59,10 @@ export class NeuralNetwork<T extends DataType = DataType> {
   // }
 
   /**
-   * add layers to network
+   * add layer to network
    */
-  addLayers(layer: LayerConfig[]) {
-    this.network.addLayers(layer);
+  addLayer(layer: Layer) {
+    this.network.addLayer(layer);
   }
 
   /**
@@ -72,13 +80,51 @@ export class NeuralNetwork<T extends DataType = DataType> {
   /**
    * get output of network
    */
-  getOutput() {
-    return this.network.getOutput();
+  async getOutput() {
+    return await this.network.getOutput();
   }
+
   /**
    * use network to predict data
    */
-  predict(data: DataTypeArray<T>) {
-    return this.network.predict(data);
+  async predict(data: DataTypeArray) {
+    return await this.network.predict(data);
+  }
+
+  /**
+   * Export the network in a JSON format
+   */
+  toJSON(): NetworkJSON {
+    return this.network.toJSON();
+  }
+
+  /**
+   * get the weights of the network
+   */
+  getWeights() {
+    return this.network.getWeights();
+  }
+
+  /**
+   * get the biases of the network
+   */
+  getBiases() {
+    return this.network.getBiases();
   }
 }
+
+export class DenseLayer {
+  public type = "dense";
+  constructor(public config: DenseLayerConfig) {}
+}
+
+export class ConvLayer {
+  public type = "conv";
+  constructor(public config: ConvLayerConfig) {}
+}
+
+export class PoolLayer {
+  public type = "pool";
+  constructor(public config: PoolLayerConfig) {}
+}
+

@@ -1,6 +1,6 @@
 export interface CPUActivationFn {
   activate(val: number): number;
-  prime(val: number): number;
+  prime(val: number, error?: number): number;
 }
 
 /**
@@ -11,8 +11,8 @@ export class Linear implements CPUActivationFn {
     return val;
   }
 
-  prime(_val: number): number {
-    return 1;
+  prime(_val: number, error = 1): number {
+    return error;
   }
 }
 
@@ -24,8 +24,8 @@ export class Sigmoid implements CPUActivationFn {
     return 1 / (1 + Math.exp(-val));
   }
 
-  prime(val: number): number {
-    return val * (1 - val);
+  prime(val: number, error = 1): number {
+    return val * (1 - val) * error;
   }
 }
 
@@ -38,8 +38,8 @@ export class Tanh implements CPUActivationFn {
     return Math.tanh(val);
   }
 
-  prime(val: number): number {
-    return 1 - (val * val);
+  prime(val: number, error = 1): number {
+    return (1 - (val * val)) * error;
   }
 }
 
@@ -52,8 +52,8 @@ export class Relu implements CPUActivationFn {
     return Math.max(0, val);
   }
 
-  prime(val: number): number {
-    return val > 0 ? 1 : 0;
+  prime(val: number, error = 1): number {
+    return (val > 0 ? error : 0);
   }
 }
 
@@ -66,8 +66,8 @@ export class Relu6 implements CPUActivationFn {
     return Math.min(Math.max(0, val), 6);
   }
 
-  prime(val: number): number {
-    return val > 0 ? 1 : 0;
+  prime(val: number, error = 1): number {
+    return (val > 0 ? error : 0);
   }
 }
 
@@ -79,8 +79,8 @@ export class LeakyRelu implements CPUActivationFn {
     return val > 0 ? val : 0.01 * val;
   }
 
-  prime(val: number): number {
-    return val > 0 ? 1 : 0.01;
+  prime(val: number, error = 1): number {
+    return val > 0 ? error : 0.01;
   }
 }
 
@@ -93,8 +93,8 @@ export class Elu implements CPUActivationFn {
     return val >= 0 ? val : Math.exp(val) - 1;
   }
 
-  prime(val: number): number {
-    return val > 0 ? 1 : Math.exp(val);
+  prime(val: number, error = 1): number {
+    return val > 0 ? error : Math.exp(val);
   }
 }
 
@@ -107,7 +107,7 @@ export class Selu implements CPUActivationFn {
     return val >= 0 ? val : 1.0507 * (Math.exp(val) - 1);
   }
 
-  prime(val: number): number {
-    return val > 0 ? 1 : 1.0507 * Math.exp(val);
+  prime(val: number, error = 1): number {
+    return val > 0 ? error : 1.0507 * Math.exp(val);
   }
 }

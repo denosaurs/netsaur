@@ -1,28 +1,39 @@
-import { DataType, DataTypeArray } from "../../deps.ts";
+import { DataTypeArray } from "../../deps.ts";
 import {
+  ConvLayerConfig,
   Cost,
+  CPULayer,
   DataSet,
-  InputConfig,
-  LayerConfig,
+  DenseLayerConfig,
+  Layer,
   Network,
   NetworkConfig,
+  NetworkJSON,
+  PoolLayerConfig,
+  Size,
 } from "../types.ts";
-import { fromType, getType } from "../util.ts";
+import { to1D, iterate1D } from "../util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
-import { BaseCPULayer } from "./layers/base.ts";
+import { ConvCPULayer } from "./layers/conv.ts";
+import { DenseCPULayer } from "./layers/dense.ts";
+import { PoolCPULayer } from "./layers/pool.ts";
 import { CPUMatrix } from "./matrix.ts";
 
-export class CPUNetwork<T extends DataType = DataType> implements Network {
-  input?: InputConfig;
-  hidden: BaseCPULayer[];
-  output: BaseCPULayer;
+type OutputLayer = DenseCPULayer;
+
+export class CPUNetwork implements Network {
+  input?: Size;
+  layers: CPULayer[] = [];
+  output: OutputLayer;
   silent: boolean;
   costFn: CPUCostFunction = new CrossEntropy();
+
   constructor(config: NetworkConfig) {
-    this.silent = config.silent ?? false;
     this.input = config.input;
-    this.hidden = config.hidden.map((layer) => new BaseCPULayer(layer));
-    this.output = new BaseCPULayer(config.output);
+    this.silent = config.silent ?? false;
+    config.layers.slice(0, -1).map(this.addLayer.bind(this));
+    const output = config.layers[config.layers.length - 1];
+    this.output = new DenseCPULayer(output.config as DenseLayerConfig);
     this.setCost(config.cost);
   }
 
@@ -37,34 +48,50 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
     }
   }
 
-  addLayers(layers: LayerConfig[]): void {
-    this.hidden.push(...layers.map((layer) => new BaseCPULayer(layer)));
+  addLayer(layer: Layer): void {
+    switch (layer.type) {
+      case "dense":
+        this.layers.push(new DenseCPULayer(layer.config as DenseLayerConfig));
+        break;
+      case "conv":
+        this.layers.push(new ConvCPULayer(layer.config as ConvLayerConfig));
+        break;
+      case "pool":
+        this.layers.push(new PoolCPULayer(layer.config as PoolLayerConfig));
+        break;
+      default:
+        throw new Error(
+          `${
+            layer.type.charAt(0).toUpperCase() + layer.type.slice(1)
+          }Layer not implemented for the CPU backend`,
+        );
+    }
   }
 
-  initialize(type: DataType, inputSize: number, batches: number) {
-    this.hidden[0].initialize(type, inputSize, batches);
+  initialize(inputSize: Size, batches: number) {
+    this.layers[0].initialize(inputSize, batches);
 
-    for (let i = 1; i < this.hidden.length; i++) {
-      const current = this.hidden[i];
-      const previous = this.hidden[i - 1];
-      current.initialize(type, previous.outputSize, batches);
+    for (let i = 1; i < this.layers.length; i++) {
+      const current = this.layers[i];
+      const previous = this.layers[i - 1];
+      current.initialize(previous.outputSize, batches);
     }
 
-    const lastLayer = this.hidden[this.hidden.length - 1];
-    this.output.initialize(type, lastLayer.outputSize, batches);
+    const lastLayer = this.layers[this.layers.length - 1];
+    this.output.initialize(lastLayer.outputSize, batches);
   }
 
-  feedForward(input: CPUMatrix<T>): CPUMatrix<T> {
-    for (const layer of this.hidden) {
+  feedForward(input: CPUMatrix): CPUMatrix {
+    for (const layer of this.layers) {
       input = layer.feedForward(input);
     }
     input = this.output.feedForward(input);
     return input;
   }
 
-  backpropagate(output: DataTypeArray<T>, rate: number) {
-    const { x, y, type } = this.output.output;
-    let error = CPUMatrix.with(x, y, type);
+  backpropagate(output: DataTypeArray, rate: number) {
+    const { x, y } = this.output.output;
+    let error = CPUMatrix.with(x, y);
     for (const i in this.output.output.data) {
       error.data[i] = this.costFn.prime(
         output[i],
@@ -72,11 +99,13 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
       );
     }
     this.output.backPropagate(error, rate);
-    let weights = this.output.weights;
-    for (let i = this.hidden.length - 1; i >= 0; i--) {
+    // todo: update for convolutional layer
+    let weights = (this.output as DenseCPULayer).weights;
+    for (let i = this.layers.length - 1; i >= 0; i--) {
       error = CPUMatrix.dot(error, CPUMatrix.transpose(weights));
-      this.hidden[i].backPropagate(error, rate);
-      weights = this.hidden[i].weights;
+      this.layers[i].backPropagate(error, rate);
+      // todo: update for convolutional layer
+      weights = (this.layers[i] as DenseCPULayer).weights;
     }
   }
 
@@ -86,41 +115,33 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
     batches: number,
     rate: number,
   ): void {
-    const type = this.input?.type ||
-      getType(datasets[0].inputs as DataTypeArray<T>);
-    const inputSize = this.input?.size || datasets[0].inputs.length / batches;
+    const inputSize = this.input || datasets[0].inputs.length / batches;
 
-    this.initialize(type, inputSize, batches);
+    this.initialize(inputSize, batches);
 
-    if (!(datasets[0].inputs as DataTypeArray<T>).BYTES_PER_ELEMENT) {
+    if (!(datasets[0].inputs as DataTypeArray).BYTES_PER_ELEMENT) {
       for (const dataset of datasets) {
-        dataset.inputs = new (fromType(type))(dataset.inputs) as DataTypeArray<
-          T
-        >;
-        dataset.outputs = new (fromType(type))(
-          dataset.outputs,
-        ) as DataTypeArray<T>;
+        dataset.inputs = new Float32Array(dataset.inputs);
+        dataset.outputs = new Float32Array(dataset.outputs);
       }
     }
-    for (let e = 0; e < epochs; e++) {
-      if (!this.silent) console.log(`Epoch ${e + 1}`);
+    iterate1D(epochs, (e: number) => {
+      if (!this.silent) console.log(`Epoch ${e + 1}/${epochs}`);
       for (const dataset of datasets) {
         const input = new CPUMatrix(
-          dataset.inputs as DataTypeArray<T>,
-          inputSize,
+          dataset.inputs as DataTypeArray,
+          to1D(inputSize),
           batches,
-          type,
         );
-        // TODO: do something with this output
         this.feedForward(input);
-        this.backpropagate(dataset.outputs as DataTypeArray<T>, rate);
+        this.backpropagate(dataset.outputs as DataTypeArray, rate);
       }
-    }
+    })
   }
 
-  getCostLoss(output: DataTypeArray<T>) {
-    const { x, y, type } = this.output.output;
-    const cost = CPUMatrix.with(x, y, type);
+  getCostLoss(output: DataTypeArray) {
+    const { x, y } = this.output.output;
+    const cost = CPUMatrix.with(x, y);
     for (const i in this.output.output.data) {
       const activation = this.output.activationFn.prime(
         this.output.output.data[i],
@@ -133,35 +154,34 @@ export class CPUNetwork<T extends DataType = DataType> implements Network {
     return cost;
   }
 
-  getOutput(): DataTypeArray<T> {
-    return this.output.output.data as DataTypeArray<T>;
+  getOutput(): DataTypeArray {
+    return this.output.output.data as DataTypeArray;
   }
 
-  predict(data: DataTypeArray<T>) {
-    const type = this.input?.type || getType(data);
-    const input = new CPUMatrix(data, data.length, 1, type);
-    for (const layer of this.hidden) {
-      layer.reset(type, 1);
+  predict(data: DataTypeArray) {
+    const input = new CPUMatrix(data, data.length, 1);
+    for (const layer of this.layers) {
+      layer.reset(1);
     }
-    this.output.reset(type, 1);
+    this.output.reset(1);
     return this.feedForward(input).data;
   }
 
-  toJSON() {
+  toJSON(): NetworkJSON {
     return {
       type: "NeuralNetwork",
-      sizes: this.hidden.map((layer) => layer.outputSize),
+      sizes: this.layers.map((layer) => layer.outputSize),
       input: this.input,
-      hidden: this.hidden.map((layer) => layer.toJSON()),
+      layers: this.layers.map((layer) => layer.toJSON()),
       output: this.output.toJSON(),
     };
   }
 
-  get weights(): CPUMatrix<T>[] {
-    return this.hidden.map((layer) => layer.weights);
+  getWeights(): CPUMatrix[] {
+    return this.layers.map((layer) => (layer as DenseCPULayer).weights);
   }
 
-  get biases(): CPUMatrix<T>[] {
-    return this.hidden.map((layer) => layer.biases);
+  getBiases(): CPUMatrix[] {
+    return this.layers.map((layer) => (layer as DenseCPULayer).biases);
   }
 }

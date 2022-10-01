@@ -1,6 +1,5 @@
-import { DataType } from "../../../deps.ts";
-import { Activation, LayerConfig } from "../../types.ts";
-import { ActivationError } from "../../util.ts";
+import { Activation, DenseLayerConfig, LayerJSON, Size } from "../../types.ts";
+import { ActivationError, to1D } from "../../util.ts";
 import {
   CPUActivationFn,
   Elu,
@@ -20,7 +19,7 @@ import { CPUMatrix } from "../matrix.ts";
 /**
  * Base class for all layers.
  */
-export class BaseCPULayer {
+export class DenseCPULayer {
   outputSize: number;
   activationFn: CPUActivationFn = new Sigmoid();
 
@@ -29,21 +28,21 @@ export class BaseCPULayer {
   biases!: CPUMatrix;
   output!: CPUMatrix;
 
-  constructor(config: LayerConfig) {
-    this.outputSize = config.size;
+  constructor(config: DenseLayerConfig) {
+    this.outputSize = to1D(config.size);
     this.setActivation(config.activation);
   }
 
-  reset(type: DataType, batches: number) {
-    this.output = CPUMatrix.with(this.outputSize, batches, type);
+  reset(batches: number) {
+    this.output = CPUMatrix.with(this.outputSize, batches);
   }
 
-  initialize(type: DataType, inputSize: number, batches: number) {
-    this.weights = CPUMatrix.with(this.outputSize, inputSize, type);
+  initialize(inputSize: Size, batches: number) {
+    this.weights = CPUMatrix.with(this.outputSize, to1D(inputSize));
     this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
-    this.biases = CPUMatrix.with(this.outputSize, 1, type);
+    this.biases = CPUMatrix.with(this.outputSize, 1);
     this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
-    this.reset(type, batches);
+    this.reset(batches)
   }
 
   setActivation(activation: Activation) {
@@ -89,7 +88,7 @@ export class BaseCPULayer {
   }
 
   backPropagate(error: CPUMatrix, rate: number) {
-    const cost = CPUMatrix.with(error.x, error.y, error.type);
+    const cost = CPUMatrix.with(error.x, error.y);
     for (const i in cost.data) {
       const activation = this.activationFn.prime(this.output.data[i]);
       cost.data[i] = error.data[i] * activation;
@@ -104,10 +103,11 @@ export class BaseCPULayer {
     }
   }
 
-  toJSON() {
+  toJSON(): LayerJSON {
     return {
       outputSize: this.outputSize,
       activation: this.activationFn,
+      type: "dense"
     };
   }
 }
