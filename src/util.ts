@@ -1,14 +1,6 @@
-import {
-  DataType,
-  DataTypeArray,
-  DataTypeArrayConstructor,
-  WebGPUBackend,
-} from "../deps.ts";
-import type { CPULayer, GPULayer, Layer, Size, Size2D } from "./types.ts";
-import { ConvLayer } from "./mod.ts";
-import { ConvCPULayer } from "./cpu/layers/conv.ts";
-import { DenseCPULayer } from "./cpu/layers/dense.ts";
-import { DenseGPULayer } from "./gpu/layers/dense.ts";
+import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
+import { CPUMatrix } from "./cpu/matrix.ts";
+import type { Size, Size2D } from "./types.ts";
 
 export function getType(type: DataTypeArray<DataType>) {
   return (
@@ -148,26 +140,28 @@ export const mse = (errors: Float32Array): number => {
   return sum / errors.length;
 };
 
-export function setLayerCPU(layer: Layer): CPULayer {
-  if (layer instanceof ConvLayer) {
-    return new ConvCPULayer(layer.config);
+export function to1D(size: Size): number {
+  const size2d = (size as Size2D);
+  if (size2d.y) {
+    return size2d.x * size2d.y;
   } else {
-    return new DenseCPULayer(layer.config);
+    return size as number;
   }
 }
 
-export function setLayerGPU(layer: Layer, backend: WebGPUBackend): GPULayer {
-  if (layer instanceof ConvLayer) {
-    throw new Error("gpu convolutional layer not implemented");
-  } else {
-    return new DenseGPULayer(layer.config, backend);
+export function iterate2D(
+  mat: { x: number; y: number } | CPUMatrix,
+  callback: (i: number, j: number) => void,
+): void {
+  for (let i = 0; i < mat.x; i++) {
+    for (let j = 0; j < mat.y; j++) {
+      callback(i, j);
+    }
   }
 }
-export function to1D(size: Size): number {
-  const size2d = (size as Size2D)
-  if (size2d.y) {
-    return size2d.x * size2d.y
-  } else {
-    return size as number
+
+export function iterate1D(length: number, callback: (i: number) => void): void {
+  for (let i = 0; i < length; i++) {
+    callback(i);
   }
 }

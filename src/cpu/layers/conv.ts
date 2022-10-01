@@ -1,4 +1,5 @@
 import { ConvLayerConfig, LayerJSON, Size, Size2D } from "../../types.ts";
+import { iterate2D } from "../../util.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -43,31 +44,24 @@ export class ConvCPULayer {
     this.outputSize = {x: wo, y: ho}
   }
 
-  feedForward(input: CPUMatrix) {
+  feedForward(input: CPUMatrix): CPUMatrix {
     if (this.padding > 0) {
-      for (let i = 0; i < input.x; i++) {
-        for (let j = 0; j < input.y; j++) {
-          const idx = this.padded.x * (this.padding + j) + this.padding + i;
-          this.padded.data[idx] = input.data[j * input.x + i];
-        }
-      }
+      iterate2D(input, (i: number, j: number) => {
+        const idx = this.padded.x * (this.padding + j) + this.padding + i;
+        this.padded.data[idx] = input.data[j * input.x + i];
+      });
     } else {
       this.padded = input;
     }
-    for (let i = 0; i < this.output.x; i++) {
-      for (let j = 0; j < this.output.y; j++) {
-        let sum = 0;
-        for (let x = 0; x < this.kernel.x; x++) {
-          for (let y = 0; y < this.kernel.y; y++) {
-            const k = this.padded.x * (j * this.stride + y) +
-              (i * this.stride + x);
-            const l = y * this.kernel.x + x;
-            sum += this.padded.data[k] * this.kernel.data[l];
-          }
-        }
-        this.output.data[j * this.output.x + i] = sum;
-      }
-    }
+    iterate2D(this.output, (i: number, j: number) => {
+      let sum = 0;
+      iterate2D(this.kernel, (x: number, y: number) => {
+        const k = this.padded.x * (j * this.stride + y) + (i * this.stride + x);
+        const l = y * this.kernel.x + x;
+        sum += this.padded.data[k] * this.kernel.data[l];
+      });
+      this.output.data[j * this.output.x + i] = sum;
+    });
     return this.output;
   }
 

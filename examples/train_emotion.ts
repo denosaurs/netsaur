@@ -76,8 +76,8 @@ net.train(
   0.1,
 );
 
-console.log(toChar(net.predict(happy))); // 😀
-console.log(toChar(net.predict(sad))); // 😔
+console.log(toChar(await net.predict(happy))); // 😀
+console.log(toChar(await net.predict(sad))); // 😔
 
 function toChar<T extends DataType>(x: DataTypeArray<T>) {
   const str = String.fromCharCode(Math.round(x[0] * 255));

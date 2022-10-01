@@ -1,9 +1,9 @@
-import { DataTypeArray } from "../../deps.ts";
-
-export class CPUMatrix {
-  deltas: DataTypeArray;
+import { DataTypeArray, DataType } from "../../deps.ts";
+import { iterate1D } from "../util.ts";
+export class CPUMatrix<T extends DataType = DataType> {
+  deltas: DataTypeArray<T>;
   constructor(
-    public data: DataTypeArray,
+    public data: DataTypeArray<T>,
     public x: number,
     public y: number,
   ) {
@@ -34,7 +34,7 @@ export class CPUMatrix {
         for (let k = 0; k < matA.x; k++) {
           const a = k + y * matA.x;
           const b = x + k * matB.x;
-          sum += matA.data[a] * matB.data[b];
+           sum += matA.data[a] * matB.data[b];
         }
         const idx = x + y * matB.x;
         res.data[idx] = sum;
@@ -48,7 +48,7 @@ export class CPUMatrix {
     for (let x = 0; x < matB.y; x++) {
       for (let y = 0; y < matA.y; y++) {
         let sum = 0;
-        for (let k = 0; k < matA.x; k++) {
+        for (let k = 0; k < matA.x;  k++) {
           const a = k + y * matA.x;
           const b = k + x * matB.x;
           sum += matA.data[a] * matB.data[b];
@@ -131,13 +131,13 @@ export class CPUMatrix {
   }
   fmt() {
     let res = "";
-    for (let i = 0; i < this.y; i++) {
-      const row = this.data.slice(i * this.x, (i + 1) * this.x);
-      for (let j = 0; j < row.length; j++) {
-        res += row[j].toString() + " ";
-      }
+    iterate1D(this.y, (i: number) => {
+      const row = this.data.slice(i * this.x, (i+ 1) * this.x);
+      iterate1D(row.length, (j: number) => {
+        res += row[j].toString() + " "
+      });
       res += "\n";
-    }
+    })
     return res;
   }
 }

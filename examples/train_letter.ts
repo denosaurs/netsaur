@@ -54,9 +54,9 @@ net.train(
   0.1,
 );
 
-console.log(toChar(net.predict(a)));
-console.log(toChar(net.predict(b)));
-console.log(toChar(net.predict(c)));
+console.log(toChar(await net.predict(a)));
+console.log(toChar(await net.predict(b)));
+console.log(toChar(await net.predict(c)));
 
 function toChar<T extends DataType>(x: DataTypeArray<T>) {
   return String.fromCharCode(Math.round(x[0] * 255));

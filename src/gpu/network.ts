@@ -18,6 +18,7 @@ import {
 } from "../../deps.ts";
 import { fromType, getType, to1D } from "../util.ts";
 import { GPUMatrix } from "./matrix.ts";
+import { DenseLayer } from "../mod.ts";
 
 export class GPUNetwork<T extends DataType = DataType> implements Network {
   input?: Size;
@@ -32,7 +33,7 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     this.input = config.input;
     this.silent = config.silent ?? false;
     config.layers.slice(0, -1).map(this.addLayer.bind(this));
-    this.output = new DenseGPULayer(config.layers.at(-1)!.config, backend);
+    this.output = new DenseGPULayer((config.layers.at(-1) as DenseLayer)!.config , backend);
     this.setCost(config.cost);
   }
 
@@ -50,7 +51,7 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
   addLayer(layer: Layer): void {
     switch (layer.type) {
       case "dense":
-        this.layers.push(new DenseGPULayer(layer.config, this.backend));
+        this.layers.push(new DenseGPULayer((layer as DenseLayer).config, this.backend));
         break;
       case "conv":
         throw new Error(`ConvLayer not implemented for the GPU backend`);
