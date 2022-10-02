@@ -72,9 +72,8 @@ void network_back_prop(Network* network, Matrix* target, float learning_rate) {
 }
 
 void network_train(Network* network, unsigned int num_datasets, Dataset** datasets, unsigned int epochs, float learning_rate) {
-  clock_t start = clock();
   for (unsigned int i = 0; i < epochs; i++) {
-    printf("Epoch %d\n", i + 1);
+    // printf("Epoch %d\n", i + 1);
     for (unsigned int j = 0; j < num_datasets; j++) {
       Dataset* dataset = datasets[j];
       for (unsigned int i = 0; i < network->num_layers; i++) {
@@ -84,9 +83,6 @@ void network_train(Network* network, unsigned int num_datasets, Dataset** datase
       network_back_prop(network, dataset->outputs, learning_rate);
     }
   }
-  clock_t end = clock();
-  float elapsed = (float) (end - start) / CLOCKS_PER_SEC * 1000;
-  printf("Completed %d epochs in %dms\n", epochs, (unsigned int) elapsed);
 }
 
 void network_save(Network* network, const char* filename) {

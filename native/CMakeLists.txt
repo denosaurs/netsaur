@@ -23,7 +23,7 @@ target_link_libraries(netsaur_test m)
 target_link_libraries(netsaur gomp)
 target_link_libraries(netsaur_test gomp)
 
-set (COMPILE_OPTIONS -Ofast -Wno-unused-result -march=native -fopenmp)
+set (COMPILE_OPTIONS -Ofast -Wno-unused-result -march=native -fPIC -fopenmp)
 
 target_compile_options(netsaur PRIVATE ${COMPILE_OPTIONS})
 target_compile_options(netsaur_test PRIVATE ${COMPILE_OPTIONS})

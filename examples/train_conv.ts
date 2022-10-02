@@ -6,18 +6,24 @@ import { CPUNetwork } from "../src/cpu/network.ts";
 import { PoolLayer } from "../src/mod.ts";
 
 const kernel = new Float32Array([
-  1, 1, 1,
-  1, 1, 1,
-  1, 1, 1,
-])
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+]);
 
 const net = await new NeuralNetwork({
   silent: true,
   layers: [
-    new ConvLayer({ 
-      activation: "sigmoid", 
+    new ConvLayer({
+      activation: "sigmoid",
       kernel: kernel,
-      kernelSize: {x: 3, y: 3},
+      kernelSize: { x: 3, y: 3 },
       padding: 2,
       stride: 2,
     }),
@@ -29,19 +35,39 @@ const net = await new NeuralNetwork({
 }).setupBackend("cpu");
 
 const buf = new Float32Array([
-    1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1,
-])
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+]);
 const input = new CPUMatrix(buf, 5, 5);
-const network = net.network as CPUNetwork
-const conv = network.layers[0] as ConvCPULayer
-const pool = network.layers[1] as PoolCPULayer
+const network = net.network as CPUNetwork;
+const conv = network.layers[0] as ConvCPULayer;
+const pool = network.layers[1] as PoolCPULayer;
 network.initialize({ x: 5, y: 5 }, 1);
 network.layers[0].feedForward(input);
 network.layers[1].feedForward(conv.output);
-console.log(conv.padded.fmt())
-console.log(conv.output.fmt())
-console.log(pool.output.fmt())
+console.log(conv.padded.fmt());
+console.log(conv.output.fmt());
+console.log(pool.output.fmt());

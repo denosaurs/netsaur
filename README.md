@@ -27,7 +27,7 @@
 ### Usage
 
 ```typescript
-import { NeuralNetwork, DenseLayer } from "https://deno.land/x/netsaur/mod.ts";
+import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
 
 const net = await new NeuralNetwork({
   silent: true,
@@ -37,7 +37,6 @@ const net = await new NeuralNetwork({
   ],
   cost: "crossentropy",
 }).setupBackend("cpu");
-
 
 await net.train(
   [

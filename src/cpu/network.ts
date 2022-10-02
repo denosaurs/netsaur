@@ -12,7 +12,7 @@ import {
   PoolLayerConfig,
   Size,
 } from "../types.ts";
-import { to1D, iterate1D } from "../util.ts";
+import { iterate1D, to1D } from "../util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
@@ -136,7 +136,7 @@ export class CPUNetwork implements Network {
         this.feedForward(input);
         this.backpropagate(dataset.outputs as DataTypeArray, rate);
       }
-    })
+    });
   }
 
   getCostLoss(output: DataTypeArray) {

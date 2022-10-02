@@ -87,7 +87,7 @@ export class CPUMatrix<T extends DataType = DataType> {
     });
     return res;
   }
-  
+
   fill(val: number) {
     this.data.fill(val);
   }

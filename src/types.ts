@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { DenseLayer,ConvLayer, PoolLayer } from "./mod.ts";
+import { ConvLayer, DenseLayer, PoolLayer } from "./mod.ts";
 import { ConvCPULayer } from "./cpu/layers/conv.ts";
 import { DenseCPULayer } from "./cpu/layers/dense.ts";
 import { DenseGPULayer } from "./gpu/layers/dense.ts";
@@ -17,7 +17,7 @@ export interface LayerJSON {
 
 export interface NetworkJSON {
   type: "NeuralNetwork";
-  sizes: (number | Size2D)[]
+  sizes: (number | Size2D)[];
   input: Size | undefined;
   layers: LayerJSON[];
   output: LayerJSON;
@@ -37,9 +37,9 @@ export interface Network<T extends DataType = DataType> {
   predict(input: DataTypeArray<T>): DataTypeArray<T> | any;
   toJSON(): NetworkJSON;
   // deno-lint-ignore no-explicit-any
-  getWeights(): (GPUMatrix | CPUMatrix | any)[]
+  getWeights(): (GPUMatrix | CPUMatrix | any)[];
   // deno-lint-ignore no-explicit-any
-  getBiases(): (GPUMatrix | CPUMatrix | any)[]
+  getBiases(): (GPUMatrix | CPUMatrix | any)[];
 }
 
 /**
@@ -75,9 +75,9 @@ export interface PoolLayerConfig {
   stride: number;
 }
 
-export type Size = number | Size2D
+export type Size = number | Size2D;
 
-export type Size2D = {x: number, y: number}
+export type Size2D = { x: number; y: number };
 
 export type Backend = "gpu" | "cpu" | "GPU" | "CPU";
 /**

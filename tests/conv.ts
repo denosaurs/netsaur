@@ -32,9 +32,15 @@ for (let i = 0; i < dim * dim; i++) {
 }
 
 const kernel = new Float32Array([
-  -1, 1, 0,
-  -1, 1, 0,
-  -1, 1, 0,
+  -1,
+  1,
+  0,
+  -1,
+  1,
+  0,
+  -1,
+  1,
+  0,
 ]) as DataTypeArray<"f32">;
 
 const net = await new NeuralNetwork({
@@ -66,24 +72,26 @@ const out = pool.output;
 
 for (let i = 0; i < dim; i++) {
   for (let j = 0; j < dim; j++) {
-    const pixel = buf[j * dim + i]
-    ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`
-    ctx.fillRect(i * 10, j * 10, 10, 10)
+    const pixel = buf[j * dim + i];
+    ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
+    ctx.fillRect(i * 10, j * 10, 10, 10);
   }
 }
 
 for (let i = 0; i < cv.x; i++) {
   for (let j = 0; j < cv.y; j++) {
-    const pixel = Math.round(Math.max(Math.min(cv.data[j * cv.x + i], 255), 0))
-    ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`
-    ctx.fillRect(i * 10 + dim * 10, j * 10, 10, 10)
+    const pixel = Math.round(Math.max(Math.min(cv.data[j * cv.x + i], 255), 0));
+    ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
+    ctx.fillRect(i * 10 + dim * 10, j * 10, 10, 10);
   }
 }
 
 for (let i = 0; i < out.x; i++) {
   for (let j = 0; j < out.y; j++) {
-    const pixel = Math.round(Math.max(Math.min(out.data[j * out.x + i], 255), 0))
-    ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`
-    ctx.fillRect(i * 20 + dim * 10, j * 20 + dim * 10, 20, 20)
+    const pixel = Math.round(
+      Math.max(Math.min(out.data[j * out.x + i], 255), 0),
+    );
+    ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
+    ctx.fillRect(i * 20 + dim * 10, j * 20 + dim * 10, 20, 20);
   }
 }
