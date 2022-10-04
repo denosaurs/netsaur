@@ -1,15 +1,17 @@
-import { Layer, Matrix, Network } from "./src/native/mod.ts";
+import { NeuralNetwork, DenseLayer } from "../mod.ts";
+import { Native } from "../src/native/mod.ts";
+import { Matrix } from "../src/native/matrix.ts";
 
 const start = Date.now();
 
-const network = new Network({
-  inputSize: 2,
+const network = await new NeuralNetwork({
+  input: 2,
   layers: [
-    Layer.dense({ units: 3, activation: "sigmoid" }),
-    Layer.dense({ units: 1, activation: "sigmoid" }),
+    new DenseLayer({ size: 3, activation: "sigmoid" }),
+    new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-});
+}).setupBackend(Native);
 
 network.train(
   [

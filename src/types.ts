@@ -23,19 +23,21 @@ export interface NetworkJSON {
   output: LayerJSON;
 }
 
-export interface Network<T extends DataType = DataType> {
-  addLayer(layer: Layer): void;
+export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
-  getOutput(): DataTypeArray<T> | any;
+  addLayer(layer: Layer | any): void;
+  // getOutput(): DataTypeArray<T> | any;
   train(
-    datasets: DataSet[],
+    // deno-lint-ignore no-explicit-any
+    datasets: DataSet[] | any,
     epochs: number,
     batches: number,
     learningRate: number,
   ): void;
   // deno-lint-ignore no-explicit-any
-  predict(input: DataTypeArray<T>): DataTypeArray<T> | any;
-  toJSON(): NetworkJSON;
+  predict(input: DataTypeArray<T> | any): DataTypeArray<T> | any;
+  save(input: string): void;
+  toJSON(): NetworkJSON | undefined;
   // deno-lint-ignore no-explicit-any
   getWeights(): (GPUMatrix | CPUMatrix | any)[];
   // deno-lint-ignore no-explicit-any
@@ -79,7 +81,6 @@ export type Size = number | Size2D;
 
 export type Size2D = { x: number; y: number };
 
-export type Backend = "gpu" | "cpu" | "GPU" | "CPU";
 /**
  * Activation functions are used to transform the output of a layer into a new output.
  */
@@ -93,7 +94,7 @@ export type Activation =
   | "linear"
   | "selu";
 
-export type Cost = "crossentropy" | "hinge";
+export type Cost = "crossentropy" | "hinge" | "mse";
 
 export type Shape = number;
 /**
@@ -101,7 +102,10 @@ export type Shape = number;
  */
 export type NumberArray<T extends DataType = DataType> =
   | DataTypeArray<T>
-  | Array<number>;
+  | Array<number>
+  // TODO: fix
+  // deno-lint-ignore no-explicit-any
+  | any;
 /**
  * DataSet is a container for training data.
  */

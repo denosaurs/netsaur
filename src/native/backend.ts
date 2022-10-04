@@ -1,6 +1,15 @@
+import {
+  Backend,
+  DenseLayerConfig,
+  Layer,
+  NetworkConfig,
+} from "../types.ts";
+import { to1D } from "../util.ts";
 import ffi, { cstr } from "./ffi.ts";
-import { Layer } from "./layer.ts";
+import { DenseNativeLayer } from "./layers/Dense.ts";
 import { Matrix } from "./matrix.ts";
+
+
 const {
   network_free,
   network_create,
@@ -16,25 +25,21 @@ const NetworkFinalizer = new FinalizationRegistry(
   },
 );
 
-enum C_COST {
-  crossentropy = 1,
-  mse = 0,
-}
+const C_COST: { [key: string]: number } = {
+  crossentropy: 1,
+  mse: 0,
+};
 
-export type Cost = keyof typeof C_COST;
+export type NativeLayer = DenseNativeLayer;
 
-export interface NetworkConfig {
-  inputSize: number;
-  layers: Layer[];
-  cost: Cost;
-}
+
 
 export interface Dataset {
   inputs: Matrix<"f32">;
   outputs: Matrix<"f32">;
 }
 
-export class Network {
+export class NativeBackend implements Backend {
   #ptr: Deno.PointerValue;
   #token: { ptr: Deno.PointerValue } = { ptr: 0 };
 
@@ -45,14 +50,33 @@ export class Network {
   constructor(config: NetworkConfig | Deno.PointerValue) {
     this.#ptr = typeof config === "object"
       ? network_create(
-        config.inputSize,
-        C_COST[config.cost],
+        to1D(config.input!),
+        C_COST[config.cost === "crossentropy" ? 1 : 0],
         config.layers.length,
-        new BigUint64Array(config.layers.map((e) => BigInt(e.unsafePointer))),
+        new BigUint64Array(
+          config.layers.map((e) => BigInt(this.encodeLayer(e).unsafePointer)),
+        ),
       )
       : config;
     this.#token.ptr = this.#ptr;
     NetworkFinalizer.register(this, this.#ptr, this.#token);
+  }
+
+  addLayer(_layer: Layer): void {
+      
+  }
+
+  encodeLayer(layer: Layer): NativeLayer {
+    switch (layer.type) {
+      case "dense":
+        return (new DenseNativeLayer(layer.config as DenseLayerConfig));
+      default:
+        throw new Error(
+          `${
+            layer.type.charAt(0).toUpperCase() + layer.type.slice(1)
+          }Layer not implemented for the CPU backend`,
+        );
+    }
   }
 
   predict(input: Matrix<"f32">): Matrix<"f32"> {
@@ -77,8 +101,8 @@ export class Network {
     );
   }
 
-  static load(path: string): Network {
-    return new Network(network_load(cstr(path)));
+  static load(path: string): NativeBackend {
+    return new NativeBackend(network_load(cstr(path)));
   }
 
   save(path: string) {
@@ -91,5 +115,17 @@ export class Network {
       this.#ptr = 0;
       NetworkFinalizer.unregister(this.#token);
     }
+  }
+
+  toJSON(): undefined {
+    return;
+  }
+
+  getWeights() {
+    return [];
+  }
+
+  getBiases() {
+    return [];
   }
 }

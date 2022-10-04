@@ -1,4 +1,6 @@
-import { Dataset, Matrix } from "../../src/native/mod.ts";
+import { Dataset } from "../../src/native/backend.ts";
+import { Matrix } from "../../src/native/matrix.ts";
+
 
 export function assert(condition: boolean, message?: string) {
   if (!condition) {

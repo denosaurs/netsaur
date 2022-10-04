@@ -1,7 +1,8 @@
-import { DataType, Matrix, Network } from "../../src/native/mod.ts";
+import { NativeBackend } from "../../src/native/backend.ts";
+import { DataType, Matrix } from "../../src/native/matrix.ts";
 import { loadDataset } from "./common.ts";
 
-const network = Network.load("digit_model.bin");
+const network = NativeBackend.load("digit_model.bin");
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx");
 

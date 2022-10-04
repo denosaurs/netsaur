@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 import * as tf from '@tensorflow/tfjs-node';
 
 const model = tf.sequential();

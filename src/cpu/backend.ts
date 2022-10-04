@@ -1,12 +1,12 @@
-import { DataTypeArray } from "../../deps.ts";
-import {
+import type { DataTypeArray } from "../../deps.ts";
+import type {
+  Backend,
   ConvLayerConfig,
   Cost,
   CPULayer,
   DataSet,
   DenseLayerConfig,
   Layer,
-  Network,
   NetworkConfig,
   NetworkJSON,
   PoolLayerConfig,
@@ -21,7 +21,7 @@ import { CPUMatrix } from "./matrix.ts";
 
 type OutputLayer = DenseCPULayer;
 
-export class CPUBackend implements Network {
+export class CPUBackend implements Backend {
   input?: Size;
   layers: CPULayer[] = [];
   output: OutputLayer;
@@ -38,7 +38,6 @@ export class CPUBackend implements Network {
   }
 
   static load() {
-
   }
 
   setCost(activation: Cost): void {
@@ -158,10 +157,6 @@ export class CPUBackend implements Network {
     return cost;
   }
 
-  getOutput(): DataTypeArray {
-    return this.output.output.data as DataTypeArray;
-  }
-
   predict(data: DataTypeArray) {
     const input = new CPUMatrix(data, data.length, 1);
     for (const layer of this.layers) {
@@ -179,6 +174,10 @@ export class CPUBackend implements Network {
       layers: this.layers.map((layer) => layer.toJSON()),
       output: this.output.toJSON(),
     };
+  }
+
+  save(_str: string): void {
+    throw new Error("Not implemented");
   }
 
   getWeights(): CPUMatrix[] {
