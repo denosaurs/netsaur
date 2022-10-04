@@ -7,6 +7,12 @@ const {
 enum C_ACTIVATION {
   sigmoid = 0,
   tanh = 1,
+  relu = 2,
+  linear = 3,
+  leaky_relu = 4,
+  relu6 = 5,
+  elu = 6,
+  selu = 7,
 }
 
 export type Activation = keyof typeof C_ACTIVATION;

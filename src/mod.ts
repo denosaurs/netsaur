@@ -1,6 +1,6 @@
 import { Core, DataTypeArray, WebGPUBackend } from "../deps.ts";
-import { CPUNetwork } from "./cpu/network.ts";
-import { GPUNetwork } from "./gpu/network.ts";
+import { CPUBackend } from "./cpu/backend.ts";
+import { GPUBackend } from "./gpu/backend.ts";
 import {
   Backend,
   ConvLayerConfig,
@@ -22,7 +22,7 @@ export class NeuralNetwork {
    * create a neural network
    */
   constructor(public config: NetworkConfig) {
-    this.network = new CPUNetwork(this.config);
+    this.network = new CPUBackend(this.config);
   }
 
   /**
@@ -31,7 +31,7 @@ export class NeuralNetwork {
   async setupBackend(backendType: Backend | boolean = false) {
     const silent = this.config.silent;
     if (!backendType || backendType === "CPU" || backendType === "cpu") {
-      this.network = new CPUNetwork(this.config);
+      this.network = new CPUBackend(this.config);
       return this;
     }
     const core = new Core();
@@ -42,10 +42,10 @@ export class NeuralNetwork {
       const features = [...backend.adapter.features.values()];
       if (!silent) console.log(`Supported features: ${features.join(", ")}`);
 
-      this.network = new GPUNetwork(this.config, backend);
+      this.network = new GPUBackend(this.config, backend);
     } else {
       console.error("No adapter found");
-      this.network = new CPUNetwork(this.config);
+      this.network = new CPUBackend(this.config);
     }
 
     return this;
@@ -55,7 +55,7 @@ export class NeuralNetwork {
   //   console.log(`Using adapter: ${adapter.name}`);
   //   const features = [...adapter.features.values()];
   //   console.log(`Supported features: ${features.join(", ")}`);
-  //   this.network = new GPUNetwork(this.config);
+  //   this.network = new GPUBackend(this.config);
   // }
 
   /**

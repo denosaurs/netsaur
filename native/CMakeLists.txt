@@ -13,6 +13,8 @@ set(
     src/network.c
     src/layers/common.c
     src/layers/dense.c
+    src/layers/conv2d.c
+    src/layers/maxpool2d.c
 )
 
 add_executable(netsaur_test src/main.c ${SOURCES})

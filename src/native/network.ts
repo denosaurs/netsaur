@@ -1,7 +1,6 @@
 import ffi, { cstr } from "./ffi.ts";
 import { Layer } from "./layer.ts";
 import { Matrix } from "./matrix.ts";
-
 const {
   network_free,
   network_create,
@@ -18,8 +17,8 @@ const NetworkFinalizer = new FinalizationRegistry(
 );
 
 enum C_COST {
-  crossentropy = 0,
-  mse = 1,
+  crossentropy = 1,
+  mse = 0,
 }
 
 export type Cost = keyof typeof C_COST;

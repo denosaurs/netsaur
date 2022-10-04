@@ -19,6 +19,12 @@ void layer_serialize(Layer *layer, FILE *file)
   case LAYER_DENSE:
     layer_dense_serialize(layer, file);
     break;
+  case LAYER_CONV2D:
+    layer_conv2d_serialize(layer, file);
+    break;
+  case LAYER_MAXPOOL2D:
+    layer_max_pool2d_serialize(layer, file);
+    break;
   }
 }
 
@@ -30,6 +36,10 @@ Layer *layer_deserialize(FILE *file)
   {
   case LAYER_DENSE:
     return layer_dense_deserialize(file);
+  case LAYER_CONV2D:
+    return layer_conv2d_deserialize(file);
+  case LAYER_MAXPOOL2D:
+    return layer_max_pool2d_deserialize(file);
   }
   return NULL;
 }

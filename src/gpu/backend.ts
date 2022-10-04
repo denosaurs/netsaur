@@ -20,7 +20,7 @@ import { fromType, getType, to1D } from "../util.ts";
 import { GPUMatrix } from "./matrix.ts";
 import { DenseLayer } from "../mod.ts";
 
-export class GPUNetwork<T extends DataType = DataType> implements Network {
+export class GPUBackend<T extends DataType = DataType> implements Network {
   input?: Size;
   layers: GPULayer[] = [];
   output: GPULayer;

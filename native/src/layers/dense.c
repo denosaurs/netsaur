@@ -45,7 +45,7 @@ void layer_dense_back_prop(Layer *layer, Matrix *error, float learning_rate)
   float *output_data = (float *)layer->output->data;
   for (int i = 0; i < error->rows * error->cols; i++)
   {
-    cost_data[i] = layer->activation->dfx(output_data[i]) * error_data[i];
+    cost_data[i] = layer->activation->dfx(output_data[i], error_data[i]);
   }
 
   Matrix *input_transpose = matrix_transpose(layer->input);

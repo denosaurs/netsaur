@@ -21,7 +21,7 @@ import { CPUMatrix } from "./matrix.ts";
 
 type OutputLayer = DenseCPULayer;
 
-export class CPUNetwork implements Network {
+export class CPUBackend implements Network {
   input?: Size;
   layers: CPULayer[] = [];
   output: OutputLayer;
@@ -35,6 +35,10 @@ export class CPUNetwork implements Network {
     const output = config.layers[config.layers.length - 1];
     this.output = new DenseCPULayer(output.config as DenseLayerConfig);
     this.setCost(config.cost);
+  }
+
+  static load() {
+
   }
 
   setCost(activation: Cost): void {
