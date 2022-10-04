@@ -29,10 +29,10 @@ network.train(
   0.1,
 );
 
-console.log("training time", Date.now() - start);
+console.log("training time", Date.now() - start, "milliseconds");
 
 console.log(
-  network.predict(
+  await network.predict(
     Matrix.of([
       [0, 0],
       [0, 1],

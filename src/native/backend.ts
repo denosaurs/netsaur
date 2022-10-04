@@ -6,7 +6,7 @@ import {
 } from "../types.ts";
 import { to1D } from "../util.ts";
 import ffi, { cstr } from "./ffi.ts";
-import { DenseNativeLayer } from "./layers/Dense.ts";
+import { DenseNativeLayer } from "./layers/dense.ts";
 import { Matrix } from "./matrix.ts";
 
 
@@ -25,10 +25,10 @@ const NetworkFinalizer = new FinalizationRegistry(
   },
 );
 
-const C_COST: { [key: string]: number } = {
-  crossentropy: 1,
-  mse: 0,
-};
+// const C_COST: { [key: string]: number } = {
+//   crossentropy: 1,
+//   mse: 0,
+// };
 
 export type NativeLayer = DenseNativeLayer;
 
@@ -51,7 +51,7 @@ export class NativeBackend implements Backend {
     this.#ptr = typeof config === "object"
       ? network_create(
         to1D(config.input!),
-        C_COST[config.cost === "crossentropy" ? 1 : 0],
+        config.cost === "crossentropy" ? 1 : 0,
         config.layers.length,
         new BigUint64Array(
           config.layers.map((e) => BigInt(this.encodeLayer(e).unsafePointer)),
