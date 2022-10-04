@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(netsaur VERSION 0.1.0)
 
-set (CMAKE_BUILD_TYPE Release)
+set (CMAKE_BUILD_TYPE Debug)
+# set (COMPILE_OPTIONS -Ofast -Wno-unused-result -march=native -fPIC -fopenmp)
+set (COMPILE_OPTIONS -g -Wno-unused-result -march=native -fPIC -fopenmp)
 
 set(
   SOURCES
@@ -22,8 +24,6 @@ target_link_libraries(netsaur_test m)
 
 target_link_libraries(netsaur gomp)
 target_link_libraries(netsaur_test gomp)
-
-set (COMPILE_OPTIONS -Ofast -Wno-unused-result -march=native -fPIC -fopenmp)
 
 target_compile_options(netsaur PRIVATE ${COMPILE_OPTIONS})
 target_compile_options(netsaur_test PRIVATE ${COMPILE_OPTIONS})
