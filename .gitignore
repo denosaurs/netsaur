@@ -2,3 +2,5 @@
 .idea/
 build/
 xor_model.bin
+node_modules/
+digit_model.bin
