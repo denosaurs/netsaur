@@ -166,7 +166,7 @@ const symbols = {
 } as const;
 
 export default Deno.dlopen(
-  "/workspaces/netsaur/native/build/libnetsaur.so",
+  new URL(`../../native/build/${Deno.build.os === "windows" ? "" : "lib"}netsaur.${Deno.build.os === "linux" ? "so" : Deno.build.os === "darwin" ? "dylib" : "dll"}`, import.meta.url),
   symbols,
 )
   .symbols;
