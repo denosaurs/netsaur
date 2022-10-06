@@ -54,4 +54,4 @@ jobs:
           files: |
             native/build/libnetsaur.so
             native/build/libnetsaur.dylib
-            native/build/netsaur.dll
+            native/build/libnetsaur.dll

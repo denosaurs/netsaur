@@ -1,3 +1,5 @@
+import { prepare } from "https://deno.land/x/plug@0.5.2/plug.ts"
+
 const symbols = {
   matrix_new: {
     parameters: ["i32", "i32", "u8"],
@@ -165,11 +167,35 @@ const symbols = {
   },
 } as const;
 
-export default Deno.dlopen(
-  new URL(`../../native/build/${Deno.build.os === "windows" ? "" : "lib"}netsaur.${Deno.build.os === "linux" ? "so" : Deno.build.os === "darwin" ? "dylib" : "dll"}`, import.meta.url),
-  symbols,
+const url = new URL(
+  "https://github.com/denosaurs/netsaur/releases/download/1.1.3/",
+  import.meta.url,
 )
-  .symbols;
+let uri = url.toString()
+if (!uri.endsWith("/")) uri += "/"
+
+let darwin: string | { aarch64: string; x86_64: string } = uri + "libnetsaur.dylib"
+
+if (url.protocol !== "file:") {
+  darwin = {
+    aarch64: uri + "libnetsaur_arm64.dylib",
+    x86_64: uri + "libnetsaur.dylib",
+  }
+}
+
+const opts = {
+  name: "netsaur",
+  urls: {
+    darwin,
+    windows: uri + "libnetsaur.dll",
+    linux: uri + "libnetsaur.so",
+  },
+  policy: undefined,
+}
+
+
+const mod = await prepare(opts, symbols);
+export default mod.symbols;
 
 export function cstr(str: string) {
   return new TextEncoder().encode(str + "\0");
