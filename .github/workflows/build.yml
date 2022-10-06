@@ -30,22 +30,11 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          cmake --build ./ --target all
+          cmake --build ../ --target all
           cd ../..
-      - name: Build on Mac
+      - name: Build on Mac & Linux
         shell: bash
-        if: startsWith(matrix.os, 'macOs')
-        run: |
-          set -xeuo pipefail
-          cd native
-          mkdir build
-          cd build
-          cmake ..
-          make
-          cd ../..
-      - name: Build on Linux
-        shell: bash
-        if: startsWith(matrix.os, 'linux')
+        if: runner.os != 'Windows'
         run: |
           set -xeuo pipefail
           cd native
