@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
+        compiler: [gcc, clang]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -30,7 +31,7 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          cmake --build ../ --target all
+          make
           cd ../..
       - name: Build on Mac & Linux
         shell: bash
