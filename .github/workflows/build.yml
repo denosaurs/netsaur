@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main, actions]
+  pull_request:
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.12
+        with:
+          cmake-version: '3.24.2'
+
+      - name: Build
+        shell: bash
+        run: |
+          set -xeuo pipefail
+          cd native
+          mkdir build
+          cd build
+          cmake ..
+          make
+          cd ../..
+      - name: Release
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "release draft"
+          draft: true
+          files: |
+            native/build/libnetsaur.so
+            native/build/libnetsaur.dylib
+            native/build/netsaur.dll
