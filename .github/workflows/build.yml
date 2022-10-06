@@ -21,18 +21,37 @@ jobs:
         with:
           cmake-version: '3.24.2'
 
-      - name: Build
+      - name: Build on Windows
         shell: bash
+        if: startsWith(matrix.os, 'windows')
         run: |
           set -xeuo pipefail
           cd native
           mkdir build
           cd build
           cmake ..
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            make
-          if [ "$RUNNER_OS" == "macOs" ]; then
-            make
+          cd ../..
+      - name: Build on Mac
+        shell: bash
+        if: startsWith(matrix.os, 'macOs')
+        run: |
+          set -xeuo pipefail
+          cd native
+          mkdir build
+          cd build
+          cmake ..
+          make
+          cd ../..
+      - name: Build on Linux
+        shell: bash
+        if: startsWith(matrix.os, 'linux')
+        run: |
+          set -xeuo pipefail
+          cd native
+          mkdir build
+          cd build
+          cmake ..
+          make
           cd ../..
       - name: Release
         uses: softprops/action-gh-release@master
