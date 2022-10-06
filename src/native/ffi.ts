@@ -194,7 +194,7 @@ const opts = {
 }
 
 
-const mod = await prepare(opts, symbols);
+const mod = await dlopen(opts, symbols);
 export default mod.symbols;
 
 export function cstr(str: string) {
