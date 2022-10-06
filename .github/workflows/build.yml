@@ -29,8 +29,11 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          make
-          cd ../..
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            cd ../..
+          else
+            make
+            cd ../..
       - name: Release
         uses: softprops/action-gh-release@master
         env:
