@@ -30,7 +30,7 @@ jobs:
           cd native
           mkdir build
           cd build
-          cmake .. -G "NMake Makefiles"
+          cmake .. -G "Unix Makefiles"
           make
           cd ../..
       - name: Build on Mac & Linux
