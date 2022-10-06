@@ -1,4 +1,4 @@
-import { dlopen } from "https://deno.land/x/plug@1.0.0-rc.3/mod.ts"
+import { dlopen, FetchOptions } from "https://deno.land/x/plug@1.0.0-rc.3/mod.ts"
 
 const symbols = {
   matrix_new: {
@@ -167,32 +167,15 @@ const symbols = {
   },
 } as const;
 
-const url = new URL(
-  "https://github.com/denosaurs/netsaur/releases/download/0.1.4/",
-  import.meta.url,
-)
-let uri = url.toString()
-if (!uri.endsWith("/")) uri += "/"
-
-let darwin: string | { aarch64: string; x86_64: string } = uri + "libnetsaur.dylib"
-
-if (url.protocol !== "file:") {
-  darwin = {
-    aarch64: uri + "libnetsaur_arm64.dylib",
-    x86_64: uri + "libnetsaur.dylib",
-  }
-}
-
-const opts = {
+const opts: FetchOptions = {
   name: "netsaur",
-  urls: {
-    darwin,
-    windows: uri + "libnetsaur.dll",
-    linux: uri + "libnetsaur.so",
-  },
-  policy: undefined,
-}
-
+  url: "https://github.com/denosaurs/netsaur/releases/download/0.1.4/",
+  prefixes: {
+    darwin: "lib",
+    windows: "lib",
+    linux: "lib",
+  }
+};
 
 const mod = await dlopen(opts, symbols);
 export default mod.symbols;
