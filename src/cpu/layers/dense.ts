@@ -42,7 +42,7 @@ export class DenseCPULayer {
     this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
     this.biases = CPUMatrix.with(this.outputSize, 1);
     this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
-    this.reset(batches)
+    this.reset(batches);
   }
 
   setActivation(activation: Activation) {
@@ -107,7 +107,7 @@ export class DenseCPULayer {
     return {
       outputSize: this.outputSize,
       activation: this.activationFn,
-      type: "dense"
+      type: "dense",
     };
   }
 }

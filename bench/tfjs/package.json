@@ -1,0 +1,15 @@
+{
+  "name": "bench",
+  "version": "1.0.0",
+  "description": "",
+  "main": "xor.mjs",
+  "scripts": {
+    "start": "node xor.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^3.20.0"
+  }
+}

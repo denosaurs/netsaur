@@ -1,10 +1,10 @@
 import { DenseGPULayer } from "./layers/dense.ts";
-import {
+import type {
+  Backend,
   Cost,
   DataSet,
   GPULayer,
   Layer,
-  Network,
   NetworkConfig,
   NetworkJSON,
   Size,
@@ -20,7 +20,7 @@ import { fromType, getType, to1D } from "../util.ts";
 import { GPUMatrix } from "./matrix.ts";
 import { DenseLayer } from "../mod.ts";
 
-export class GPUNetwork<T extends DataType = DataType> implements Network {
+export class GPUBackend<T extends DataType = DataType> implements Backend {
   input?: Size;
   layers: GPULayer[] = [];
   output: GPULayer;
@@ -33,7 +33,10 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     this.input = config.input;
     this.silent = config.silent ?? false;
     config.layers.slice(0, -1).map(this.addLayer.bind(this));
-    this.output = new DenseGPULayer((config.layers.at(-1) as DenseLayer)!.config , backend);
+    this.output = new DenseGPULayer(
+      (config.layers.at(-1) as DenseLayer)!.config,
+      backend,
+    );
     this.setCost(config.cost);
   }
 
@@ -51,7 +54,9 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
   addLayer(layer: Layer): void {
     switch (layer.type) {
       case "dense":
-        this.layers.push(new DenseGPULayer((layer as DenseLayer).config, this.backend));
+        this.layers.push(
+          new DenseGPULayer((layer as DenseLayer).config, this.backend),
+        );
         break;
       case "conv":
         throw new Error(`ConvLayer not implemented for the GPU backend`);
@@ -150,10 +155,6 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
     throw new Error("Not implemented");
   }
 
-  async getOutput(): Promise<DataTypeArray<T>> {
-    return await this.output.output.data.get() as DataTypeArray<T>;
-  }
-
   async predict(data: DataTypeArray<T>) {
     const type = getType(data);
     const gpuData = await WebGPUData.from(this.backend, data);
@@ -173,6 +174,10 @@ export class GPUNetwork<T extends DataType = DataType> implements Network {
       layers: this.layers.map((layer) => layer.toJSON()),
       output: this.output.toJSON(),
     };
+  }
+
+  save(_str: string): void {
+    throw new Error("Not implemented");
   }
 
   getWeights(): GPUMatrix[] {

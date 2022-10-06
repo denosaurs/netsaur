@@ -1,5 +1,6 @@
 import { DataType, DataTypeArray } from "../deps.ts";
 import { DenseLayer, NeuralNetwork } from "../mod.ts";
+import { CPU } from "../backends/cpu.ts";
 
 const character = (string: string): Float32Array =>
   Float32Array.from(string.trim().split("").map(integer));
@@ -64,7 +65,7 @@ const net = await new NeuralNetwork({
     new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-}).setupBackend("cpu");
+}).setupBackend(CPU);
 
 net.train(
   [

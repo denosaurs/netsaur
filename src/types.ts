@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { DenseLayer,ConvLayer, PoolLayer } from "./mod.ts";
+import { ConvLayer, DenseLayer, PoolLayer } from "./mod.ts";
 import { ConvCPULayer } from "./cpu/layers/conv.ts";
 import { DenseCPULayer } from "./cpu/layers/dense.ts";
 import { DenseGPULayer } from "./gpu/layers/dense.ts";
@@ -17,29 +17,31 @@ export interface LayerJSON {
 
 export interface NetworkJSON {
   type: "NeuralNetwork";
-  sizes: (number | Size2D)[]
+  sizes: (number | Size2D)[];
   input: Size | undefined;
   layers: LayerJSON[];
   output: LayerJSON;
 }
 
-export interface Network<T extends DataType = DataType> {
-  addLayer(layer: Layer): void;
+export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
-  getOutput(): DataTypeArray<T> | any;
+  addLayer(layer: Layer | any): void;
+  // getOutput(): DataTypeArray<T> | any;
   train(
-    datasets: DataSet[],
+    // deno-lint-ignore no-explicit-any
+    datasets: DataSet[] | any,
     epochs: number,
     batches: number,
     learningRate: number,
   ): void;
   // deno-lint-ignore no-explicit-any
-  predict(input: DataTypeArray<T>): DataTypeArray<T> | any;
-  toJSON(): NetworkJSON;
+  predict(input: DataTypeArray<T> | any): DataTypeArray<T> | any;
+  save(input: string): void;
+  toJSON(): NetworkJSON | undefined;
   // deno-lint-ignore no-explicit-any
-  getWeights(): (GPUMatrix | CPUMatrix | any)[]
+  getWeights(): (GPUMatrix | CPUMatrix | any)[];
   // deno-lint-ignore no-explicit-any
-  getBiases(): (GPUMatrix | CPUMatrix | any)[]
+  getBiases(): (GPUMatrix | CPUMatrix | any)[];
 }
 
 /**
@@ -75,11 +77,10 @@ export interface PoolLayerConfig {
   stride: number;
 }
 
-export type Size = number | Size2D
+export type Size = number | Size2D;
 
-export type Size2D = {x: number, y: number}
+export type Size2D = { x: number; y: number };
 
-export type Backend = "gpu" | "cpu" | "GPU" | "CPU";
 /**
  * Activation functions are used to transform the output of a layer into a new output.
  */
@@ -93,7 +94,7 @@ export type Activation =
   | "linear"
   | "selu";
 
-export type Cost = "crossentropy" | "hinge";
+export type Cost = "crossentropy" | "hinge" | "mse";
 
 export type Shape = number;
 /**
@@ -101,7 +102,10 @@ export type Shape = number;
  */
 export type NumberArray<T extends DataType = DataType> =
   | DataTypeArray<T>
-  | Array<number>;
+  | Array<number>
+  // TODO: fix
+  // deno-lint-ignore no-explicit-any
+  | any;
 /**
  * DataSet is a container for training data.
  */

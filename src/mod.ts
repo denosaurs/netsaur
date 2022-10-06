@@ -1,68 +1,42 @@
-import { Core, DataTypeArray, WebGPUBackend } from "../deps.ts";
-import { CPUNetwork } from "./cpu/network.ts";
-import { GPUNetwork } from "./gpu/network.ts";
+import { DataTypeArray } from "../deps.ts";
+import { CPUBackend } from "./cpu/backend.ts";
 import {
-  Backend,
   ConvLayerConfig,
   DataSet,
   DenseLayerConfig,
   Layer,
-  Network,
+  Backend,
   NetworkConfig,
   NetworkJSON,
-PoolLayerConfig,
+  PoolLayerConfig,
 } from "./types.ts";
 
 /**
  * base class for neural network
  */
 export class NeuralNetwork {
-  network!: Network;
+  backend!: Backend;
   /**
    * create a neural network
    */
   constructor(public config: NetworkConfig) {
-    this.network = new CPUNetwork(this.config);
+    this.backend = new CPUBackend(this.config);
   }
 
   /**
    * setup backend and initialize network
    */
-  async setupBackend(backendType: Backend | boolean = false) {
-    const silent = this.config.silent;
-    if (!backendType || backendType === "CPU" || backendType === "cpu") {
-      this.network = new CPUNetwork(this.config);
-      return this;
-    }
-    const core = new Core();
-    await core.initialize();
-    const backend = core.backends.get("webgpu")! as WebGPUBackend;
-    if (backend.adapter) {
-      if (!silent) console.log(`Using adapter: ${backend.adapter}`);
-      const features = [...backend.adapter.features.values()];
-      if (!silent) console.log(`Supported features: ${features.join(", ")}`);
-
-      this.network = new GPUNetwork(this.config, backend);
-    } else {
-      console.error("No adapter found");
-      this.network = new CPUNetwork(this.config);
-    }
-
+  async setupBackend(backendLoader: (config: NetworkConfig) => Promise<Backend>) {
+    const backend = await backendLoader(this.config);
+    this.backend = backend ?? new CPUBackend(this.config);
     return this;
   }
-
-  // public withDevice(adapter: GPUAdapter, device: GPUDevice) {
-  //   console.log(`Using adapter: ${adapter.name}`);
-  //   const features = [...adapter.features.values()];
-  //   console.log(`Supported features: ${features.join(", ")}`);
-  //   this.network = new GPUNetwork(this.config);
-  // }
 
   /**
    * add layer to network
    */
   addLayer(layer: Layer) {
-    this.network.addLayer(layer);
+    this.backend.addLayer(layer);
   }
 
   /**
@@ -74,42 +48,48 @@ export class NeuralNetwork {
     batches = 1,
     learningRate = 0.1,
   ) {
-    await this.network.train(datasets, epochs, batches, learningRate);
+    await this.backend.train(datasets, epochs, batches, learningRate);
   }
-
-  /**
-   * get output of network
-   */
-  async getOutput() {
-    return await this.network.getOutput();
-  }
-
   /**
    * use network to predict data
    */
-  async predict(data: DataTypeArray) {
-    return await this.network.predict(data);
+  // deno-lint-ignore no-explicit-any
+  async predict(data: DataTypeArray | any) {
+    return await this.backend.predict(data);
   }
 
   /**
    * Export the network in a JSON format
    */
-  toJSON(): NetworkJSON {
-    return this.network.toJSON();
+  toJSON(): NetworkJSON | undefined{
+    return this.backend.toJSON();
   }
 
+  /**
+   * Load model from binary file
+   */
+  static load(_str: string) {
+
+  }
+
+  /**
+   * save model to binary file
+   */
+   save(str: string) {
+    this.backend.save(str);
+  }
   /**
    * get the weights of the network
    */
   getWeights() {
-    return this.network.getWeights();
+    return this.backend.getWeights();
   }
 
   /**
    * get the biases of the network
    */
   getBiases() {
-    return this.network.getBiases();
+    return this.backend.getBiases();
   }
 }
 
@@ -127,4 +107,3 @@ export class PoolLayer {
   public type = "pool";
   constructor(public config: PoolLayerConfig) {}
 }
-

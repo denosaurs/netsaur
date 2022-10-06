@@ -1,18 +1,18 @@
-import { DataTypeArray } from "../../deps.ts";
-import {
+import type { DataTypeArray } from "../../deps.ts";
+import type {
+  Backend,
   ConvLayerConfig,
   Cost,
   CPULayer,
   DataSet,
   DenseLayerConfig,
   Layer,
-  Network,
   NetworkConfig,
   NetworkJSON,
   PoolLayerConfig,
   Size,
 } from "../types.ts";
-import { to1D, iterate1D } from "../util.ts";
+import { iterate1D, to1D } from "../util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
@@ -21,7 +21,7 @@ import { CPUMatrix } from "./matrix.ts";
 
 type OutputLayer = DenseCPULayer;
 
-export class CPUNetwork implements Network {
+export class CPUBackend implements Backend {
   input?: Size;
   layers: CPULayer[] = [];
   output: OutputLayer;
@@ -35,6 +35,9 @@ export class CPUNetwork implements Network {
     const output = config.layers[config.layers.length - 1];
     this.output = new DenseCPULayer(output.config as DenseLayerConfig);
     this.setCost(config.cost);
+  }
+
+  static load() {
   }
 
   setCost(activation: Cost): void {
@@ -136,7 +139,7 @@ export class CPUNetwork implements Network {
         this.feedForward(input);
         this.backpropagate(dataset.outputs as DataTypeArray, rate);
       }
-    })
+    });
   }
 
   getCostLoss(output: DataTypeArray) {
@@ -152,10 +155,6 @@ export class CPUNetwork implements Network {
       );
     }
     return cost;
-  }
-
-  getOutput(): DataTypeArray {
-    return this.output.output.data as DataTypeArray;
   }
 
   predict(data: DataTypeArray) {
@@ -175,6 +174,10 @@ export class CPUNetwork implements Network {
       layers: this.layers.map((layer) => layer.toJSON()),
       output: this.output.toJSON(),
     };
+  }
+
+  save(_str: string): void {
+    throw new Error("Not implemented");
   }
 
   getWeights(): CPUMatrix[] {

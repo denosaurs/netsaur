@@ -27,17 +27,16 @@
 ### Usage
 
 ```typescript
-import { NeuralNetwork, DenseLayer } from "https://deno.land/x/netsaur/mod.ts";
+import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
 
-const net = await new NeuralNetwork({
+const net = new NeuralNetwork({
   silent: true,
   layers: [
     new DenseLayer({ size: 3, activation: "sigmoid" }),
     new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-}).setupBackend("cpu");
-
+});
 
 await net.train(
   [
@@ -52,4 +51,47 @@ console.log(await net.predict(new Float32Array([0, 0])));
 console.log(await net.predict(new Float32Array([1, 0])));
 console.log(await net.predict(new Float32Array([0, 1])));
 console.log(await net.predict(new Float32Array([1, 1])));
+```
+
+#### Use the Native Backend
+
+```typescript
+import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
+import { Matrix, Native } from "https://deno.land/x/netsaur/backends/native.ts";
+
+const network = await new NeuralNetwork({
+  input: 2,
+  layers: [
+    new DenseLayer({ size: 3, activation: "sigmoid" }),
+    new DenseLayer({ size: 1, activation: "sigmoid" }),
+  ],
+  cost: "crossentropy",
+}).setupBackend(Native);
+
+network.train(
+  [
+    {
+      inputs: Matrix.of([
+        [0, 0],
+        [0, 1],
+        [1, 0],
+        [1, 1],
+      ]),
+      outputs: Matrix.column([0, 1, 1, 0]),
+    },
+  ],
+  5000,
+  0.1,
+);
+
+console.log(
+  await network.predict(
+    Matrix.of([
+      [0, 0],
+      [0, 1],
+      [1, 0],
+      [1, 1],
+    ]),
+  ),
+);
 ```

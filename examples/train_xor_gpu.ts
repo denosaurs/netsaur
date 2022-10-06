@@ -1,5 +1,5 @@
 import { DenseLayer, NeuralNetwork } from "../mod.ts";
-
+import { GPU } from "../backends/gpu.ts";
 
 const net = await new NeuralNetwork({
   silent: true,
@@ -8,7 +8,7 @@ const net = await new NeuralNetwork({
     new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-}).setupBackend("cpu");
+}).setupBackend(GPU);
 
 const time = Date.now();
 

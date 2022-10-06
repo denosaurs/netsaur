@@ -120,7 +120,7 @@ export class DenseGPULayer {
     prev: GPUMatrix,
     rate: number,
     last: number,
-    costFn: GPUCostFunction = this.costFunction
+    costFn: GPUCostFunction = this.costFunction,
   ): Promise<GPUMatrix> {
     await backPropagate(
       this.#backend,
@@ -144,7 +144,7 @@ export class DenseGPULayer {
     return {
       outputSize: this.outputSize,
       activation: this.activationFn,
-      type: "dense"
+      type: "dense",
     };
   }
 }

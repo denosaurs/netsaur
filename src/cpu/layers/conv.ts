@@ -36,12 +36,12 @@ export class ConvCPULayer {
     const hp = (inputSize as Size2D).y + 2 * this.padding;
     if (this.padding > 0) {
       this.padded = CPUMatrix.with(wp, hp);
-      this.padded.fill(255)
+      this.padded.fill(255);
     }
     const wo = 1 + Math.floor((wp - this.kernel.x) / this.stride);
     const ho = 1 + Math.floor((hp - this.kernel.y) / this.stride);
     this.output = CPUMatrix.with(wo, ho);
-    this.outputSize = {x: wo, y: ho}
+    this.outputSize = { x: wo, y: ho };
   }
 
   feedForward(input: CPUMatrix): CPUMatrix {
@@ -71,7 +71,7 @@ export class ConvCPULayer {
   toJSON(): LayerJSON {
     return {
       outputSize: this.outputSize,
-      type: "conv"
+      type: "conv",
     };
   }
 }
