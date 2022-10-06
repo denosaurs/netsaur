@@ -168,7 +168,7 @@ const symbols = {
 } as const;
 
 const url = new URL(
-  "https://github.com/denosaurs/netsaur/releases/download/0.1.3/",
+  "https://github.com/denosaurs/netsaur/releases/download/0.1.4/",
   import.meta.url,
 )
 let uri = url.toString()
