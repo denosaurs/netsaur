@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        compiler: [clang]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.12
+        with:
+          cmake-version: '3.24.2'
+
+      - name: Build on Windows
+        shell: bash
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          set -xeuo pipefail
+          cd native
+          mkdir build
+          cd build
+          cmake .. -G "Unix Makefiles"
+          make
+          cd ../..
+      - name: Build on Mac & Linux
+        shell: bash
+        if: runner.os != 'Windows'
+        run: |
+          set -xeuo pipefail
+          cd native
+          mkdir build
+          cd build
+          cmake ..
+          make
+          cd ../..
+      - name: Release
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "release draft"
+          draft: true
+          files: |
+            native/build/libnetsaur.so
+            native/build/libnetsaur.dylib
+            native/build/libnetsaur.dll

@@ -1,3 +1,5 @@
+import { dlopen, FetchOptions } from "https://deno.land/x/plug@1.0.0-rc.3/mod.ts"
+
 const symbols = {
   matrix_new: {
     parameters: ["i32", "i32", "u8"],
@@ -165,11 +167,18 @@ const symbols = {
   },
 } as const;
 
-export default Deno.dlopen(
-  new URL(`../../native/build/${Deno.build.os === "windows" ? "" : "lib"}netsaur.${Deno.build.os === "linux" ? "so" : Deno.build.os === "darwin" ? "dylib" : "dll"}`, import.meta.url),
-  symbols,
-)
-  .symbols;
+const opts: FetchOptions = {
+  name: "netsaur",
+  url: "https://github.com/denosaurs/netsaur/releases/download/0.1.4/",
+  prefixes: {
+    darwin: "lib",
+    windows: "lib",
+    linux: "lib",
+  }
+};
+
+const mod = await dlopen(opts, symbols);
+export default mod.symbols;
 
 export function cstr(str: string) {
   return new TextEncoder().encode(str + "\0");
