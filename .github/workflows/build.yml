@@ -30,8 +30,8 @@ jobs:
           cd native
           mkdir build
           cd build
-          cmake ..
-          make CC=${{matrix.compiler}}
+          cmake .. -G "NMake Makefiles"
+          make
           cd ../..
       - name: Build on Mac & Linux
         shell: bash
