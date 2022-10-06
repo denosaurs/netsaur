@@ -29,11 +29,11 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            cd ../..
-          else
+          if [ "$RUNNER_OS" == "Linux" ]; then
             make
-            cd ../..
+          if [ "$RUNNER_OS" == "macOs" ]; then
+            make
+          cd ../..
       - name: Release
         uses: softprops/action-gh-release@master
         env:
