@@ -3,7 +3,7 @@ import { ConvCPULayer } from "../src/cpu/layers/conv.ts";
 import { PoolCPULayer } from "../src/cpu/layers/pool.ts";
 import { CPUMatrix } from "../src/cpu/matrix.ts";
 import { CPUBackend } from "../src/cpu/backend.ts";
-import { CPU } from "../src/cpu/mod.ts";
+import { CPU } from "../backends/cpu.ts";
 
 const kernel = new Float32Array([
   1,

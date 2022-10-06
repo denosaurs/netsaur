@@ -1,6 +1,5 @@
 import { NeuralNetwork, DenseLayer } from "../mod.ts";
-import { Native } from "../src/native/mod.ts";
-import { Matrix } from "../src/native/matrix.ts";
+import { Native, Matrix } from "../backends/native.ts";
 
 const start = Date.now();
 

@@ -1,6 +1,6 @@
 import { DataType, DataTypeArray } from "../deps.ts";
 import { DenseLayer, NeuralNetwork } from "../mod.ts";
-import { CPU } from "../src/cpu/mod.ts";
+import { CPU } from "../backends/cpu.ts";
 
 const character = (string: string): Float32Array =>
   Float32Array.from(string.trim().split("").map(integer));
