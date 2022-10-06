@@ -29,6 +29,7 @@ jobs:
           cd native
           mkdir build
           cd build
+          cmake ..
           cmake --build ./ --target all
           cd ../..
       - name: Build on Mac
