@@ -1,4 +1,4 @@
-import { prepare } from "https://deno.land/x/plug@0.5.2/plug.ts"
+import { dlopen } from "https://deno.land/x/plug@1.0.0-rc.3/mod.ts"
 
 const symbols = {
   matrix_new: {
