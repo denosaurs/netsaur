@@ -1,1 +1,1 @@
-export { CPU } from "../src/cpu/mod.ts";
+export { CPU, CPUModel } from "../src/cpu/mod.ts";

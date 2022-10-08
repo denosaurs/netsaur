@@ -1,16 +1,16 @@
 import { DataTypeArray } from "../deps.ts";
 import { CPUBackend } from "./cpu/backend.ts";
 import {
+  Activation,
+  Backend,
   ConvLayerConfig,
   DataSet,
   DenseLayerConfig,
   Layer,
-  Backend,
+  LayerJSON,
   NetworkConfig,
   NetworkJSON,
   PoolLayerConfig,
-Activation,
-LayerJSON,
 } from "./types.ts";
 
 /**
@@ -28,7 +28,9 @@ export class NeuralNetwork {
   /**
    * setup backend and initialize network
    */
-  async setupBackend(backendLoader: (config: NetworkConfig) => Promise<Backend>) {
+  async setupBackend(
+    backendLoader: (config: NetworkConfig) => Promise<Backend>,
+  ) {
     const backend = await backendLoader(this.config);
     this.backend = backend ?? new CPUBackend(this.config);
     return this;
@@ -63,21 +65,28 @@ export class NeuralNetwork {
   /**
    * Export the network in a JSON format
    */
-  toJSON(): NetworkJSON | undefined{
-    return this.backend.toJSON();
+  async toJSON() {
+    return await this.backend.toJSON();
   }
-
+  /**
+   * Import the network in a JSON format
+   */
+  static async fromJSON(
+    data: NetworkJSON,
+    helper?: (data: NetworkJSON, silent: boolean) => Promise<Backend>,
+    silent = false,
+  ) {
+    return helper ? await helper(data, silent) : CPUBackend.fromJSON(data);
+  }
   /**
    * Load model from binary file
    */
   static load(_str: string) {
-
   }
-
   /**
    * save model to binary file
    */
-   save(str: string) {
+  save(str: string) {
     this.backend.save(str);
   }
   /**
@@ -101,7 +110,10 @@ export class DenseLayer {
   data?: LayerJSON;
   constructor(public config: DenseLayerConfig) {}
   static fromJSON(layerJSON: LayerJSON): DenseLayer {
-    const layer = new DenseLayer({ size: layerJSON.outputSize, activation: (layerJSON.activationFn as Activation) || "sigmoid"});
+    const layer = new DenseLayer({
+      size: layerJSON.outputSize,
+      activation: (layerJSON.activationFn as Activation) || "sigmoid",
+    });
     layer.load = true;
     layer.data = layerJSON;
     return layer;
@@ -114,7 +126,12 @@ export class ConvLayer {
   data?: LayerJSON;
   constructor(public config: ConvLayerConfig) {}
   static fromJSON(layerJSON: LayerJSON): ConvLayer {
-    const layer = new ConvLayer({ kernel: layerJSON.kernel!.data, kernelSize: { x: layerJSON.kernel!.x,  y: layerJSON.kernel!.y}, padding: layerJSON.padding, stride: layerJSON.stride});
+    const layer = new ConvLayer({
+      kernel: layerJSON.kernel!.data,
+      kernelSize: { x: layerJSON.kernel!.x, y: layerJSON.kernel!.y },
+      padding: layerJSON.padding,
+      stride: layerJSON.stride,
+    });
     layer.load = true;
     layer.data = layerJSON;
     return layer;
@@ -127,7 +144,7 @@ export class PoolLayer {
   data?: LayerJSON;
   constructor(public config: PoolLayerConfig) {}
   static fromJSON(layerJSON: LayerJSON): PoolLayer {
-    const layer = new PoolLayer({stride: layerJSON.stride!});
+    const layer = new PoolLayer({ stride: layerJSON.stride! });
     layer.load = true;
     layer.data = layerJSON;
     return layer;

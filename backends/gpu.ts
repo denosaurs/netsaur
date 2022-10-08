@@ -1,1 +1,1 @@
-export { GPU } from "../src/gpu/mod.ts";
+export { GPU, GPUModel } from "../src/gpu/mod.ts";

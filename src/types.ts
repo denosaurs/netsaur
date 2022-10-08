@@ -42,7 +42,7 @@ export interface MatrixJSON {
 }
 export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
-  addLayer(layer: Layer | any): void;
+  addLayer(layer: Layer | any, index?: number): void;
   // getOutput(): DataTypeArray<T> | any;
   train(
     // deno-lint-ignore no-explicit-any
@@ -54,7 +54,7 @@ export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
   predict(input: DataTypeArray<T> | any): DataTypeArray<T> | any;
   save(input: string): void;
-  toJSON(): NetworkJSON | undefined;
+  toJSON(): NetworkJSON | Promise<NetworkJSON>| undefined;
   // deno-lint-ignore no-explicit-any
   getWeights(): (GPUMatrix | CPUMatrix | any)[];
   // deno-lint-ignore no-explicit-any

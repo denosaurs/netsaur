@@ -1,7 +1,7 @@
-// import { CPU } from "../../backends/cpu.ts";
-import { CPUBackend } from "../../src/cpu/backend.ts";
+import { CPUModel } from "../../backends/cpu.ts";
+import { NeuralNetwork } from "../../mod.ts";
 
-const net = CPUBackend.fromJSON(JSON.parse(Deno.readTextFileSync("./examples/train_and_run/network.json")));
+const net = await NeuralNetwork.fromJSON(JSON.parse(Deno.readTextFileSync("./examples/train_and_run/network.json")), CPUModel);
 
 
 

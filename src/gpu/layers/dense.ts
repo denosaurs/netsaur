@@ -1,4 +1,4 @@
-import { DataType, WebGPUBackend } from "../../../deps.ts";
+import { DataType, WebGPUBackend, WebGPUData } from "../../../deps.ts";
 import { Activation, DenseLayerConfig, LayerJSON, Size } from "../../types.ts";
 import { ActivationError, fromType, to1D } from "../../util.ts";
 import {
@@ -160,5 +160,49 @@ export class DenseGPULayer {
       error,
       cost,
     };
+  }
+
+  static async fromJSON(
+    { outputSize, activationFn, type, input, weights, biases, output }:
+      LayerJSON,
+    backend: WebGPUBackend,
+  ): Promise<DenseGPULayer> {
+    if (type !== "dense") {
+      throw new Error(
+        "Cannot cannot create a Dense layer from a" +
+          type.charAt(0).toUpperCase() + type.slice(1) + "Layer",
+      );
+    }
+    const layer = new DenseGPULayer({
+      size: outputSize,
+      activation: (activationFn as Activation) || "sigmoid",
+    }, backend);
+    layer.input = new GPUMatrix(
+      await WebGPUData.from(backend, input.data, "f32"),
+      input.x,
+      input.y,
+    );
+    if (weights === undefined) {
+      throw new Error("Layer imported must be initialized");
+    }
+    layer.weights = new GPUMatrix(
+      await WebGPUData.from(backend, weights.data, "f32"),
+      weights.x,
+      weights.y,
+    );
+    if (biases === undefined) {
+      throw new Error("Layer imported must be initialized");
+    }
+    layer.biases = new GPUMatrix(
+      await WebGPUData.from(backend, biases.data, "f32"),
+      biases.x,
+      biases.y,
+    );
+    layer.output = new GPUMatrix(
+      await WebGPUData.from(backend, output.data, "f32"),
+      output.x,
+      output.y,
+    );
+    return layer;
   }
 }
