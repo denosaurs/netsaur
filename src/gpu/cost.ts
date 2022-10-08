@@ -2,6 +2,7 @@
 import { WebGPUData } from "../../deps.ts";
 
 export interface GPUCostFunction {
+  name: string;
   /** Return the cost associated with an output `a` and desired output `y`. */
   cost(type: string): string;
 
@@ -13,6 +14,7 @@ export interface GPUCostFunction {
  * Cross entropy cost function is the standard cost function for binary classification.
  */
 export class CrossEntropy implements GPUCostFunction {
+  name = "crossentropy"
   cost(type: string) {
     return `var sum: ${type} = ${type}(0);
     for (var i = ${type}(0); i < yHat.length; i++) {
@@ -30,6 +32,7 @@ export class CrossEntropy implements GPUCostFunction {
  * Hinge cost function is the standard cost function for multiclass classification.
  */
 export class Hinge implements GPUCostFunction {
+  name = "hinge"
   cost(type: string) {
     return `var max: ${type} = ${type}(0);
     for (var i = ${type}(0); i < yHat.length; i++) {

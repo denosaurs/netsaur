@@ -9,6 +9,8 @@ import {
   NetworkConfig,
   NetworkJSON,
   PoolLayerConfig,
+Activation,
+LayerJSON,
 } from "./types.ts";
 
 /**
@@ -94,16 +96,40 @@ export class NeuralNetwork {
 }
 
 export class DenseLayer {
-  public type = "dense";
+  type = "dense";
+  load = false;
+  data?: LayerJSON;
   constructor(public config: DenseLayerConfig) {}
+  static fromJSON(layerJSON: LayerJSON): DenseLayer {
+    const layer = new DenseLayer({ size: layerJSON.outputSize, activation: (layerJSON.activationFn as Activation) || "sigmoid"});
+    layer.load = true;
+    layer.data = layerJSON;
+    return layer;
+  }
 }
 
 export class ConvLayer {
-  public type = "conv";
+  type = "conv";
+  load = false;
+  data?: LayerJSON;
   constructor(public config: ConvLayerConfig) {}
+  static fromJSON(layerJSON: LayerJSON): ConvLayer {
+    const layer = new ConvLayer({ kernel: layerJSON.kernel!.data, kernelSize: { x: layerJSON.kernel!.x,  y: layerJSON.kernel!.y}, padding: layerJSON.padding, stride: layerJSON.stride});
+    layer.load = true;
+    layer.data = layerJSON;
+    return layer;
+  }
 }
 
 export class PoolLayer {
-  public type = "pool";
+  type = "pool";
+  load = false;
+  data?: LayerJSON;
   constructor(public config: PoolLayerConfig) {}
+  static fromJSON(layerJSON: LayerJSON): PoolLayer {
+    const layer = new PoolLayer({stride: layerJSON.stride!});
+    layer.load = true;
+    layer.data = layerJSON;
+    return layer;
+  }
 }

@@ -140,11 +140,25 @@ export class DenseGPULayer {
     return this.output;
   }
 
-  toJSON(): LayerJSON {
+  async toJSON(): Promise<LayerJSON> {
+    const input = await this.input.toJSON();
+    const weights = await this.weights.toJSON();
+    const biases = await this.biases.toJSON();
+    const output = await this.output.toJSON();
+    const error = await this.error.toJSON();
+    const cost = await this.cost.toJSON();
+
     return {
       outputSize: this.outputSize,
-      activation: this.activationFn,
+      activationFn: this.activationFn.name,
+      costFn: this.costFunction.name,
       type: "dense",
+      input,
+      weights,
+      biases,
+      output,
+      error,
+      cost,
     };
   }
 }

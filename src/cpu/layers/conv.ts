@@ -72,6 +72,27 @@ export class ConvCPULayer {
     return {
       outputSize: this.outputSize,
       type: "conv",
+      input: this.input.toJSON(),
+      kernel: this.kernel.toJSON(),
+      padded: this.padded.toJSON(),
+      output: this.output.toJSON(),
+      stride: this.stride,
+      padding: this.padding
     };
+  }
+
+  static fromJSON({ outputSize, type, input, kernel, padded, output, stride, padding }: LayerJSON): ConvCPULayer {
+    if (type !== "conv") throw new Error("Cannot cannot create a Convolutional layer from a" + 
+      type.charAt(0).toUpperCase() + type.slice(1)+ "Layer"
+    );
+
+    if (kernel === undefined) throw new Error("Layer imported must be initialized");
+    const layer = new ConvCPULayer({ kernel: kernel.data, kernelSize: { x: kernel.x,  y: kernel.y}, padding, stride});
+    layer.input = new CPUMatrix(input.data, input.x, input.y);
+    layer.outputSize = outputSize as Size2D;
+    if (padded === undefined) throw new Error("Layer imported must be initialized");
+    layer.padded = new CPUMatrix(padded.data, padded.x, padded.y);
+    layer.output = new CPUMatrix(output.data, output.x, output.y);
+    return layer;
   }
 }

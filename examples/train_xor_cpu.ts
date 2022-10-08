@@ -1,5 +1,6 @@
 import { DenseLayer, NeuralNetwork } from "../mod.ts";
 import { CPU } from "../backends/cpu.ts";
+import { CPUBackend } from "../src/cpu/backend.ts";
 
 const net = await new NeuralNetwork({
   silent: true,
@@ -10,7 +11,7 @@ const net = await new NeuralNetwork({
   cost: "crossentropy",
 }).setupBackend(CPU);
 
-const time = Date.now();
+const time = performance.now();
 
 await net.train(
   [
@@ -21,8 +22,12 @@ await net.train(
   0.1,
 );
 
-console.log(`training time: ${Date.now() - time}ms`);
+console.log(`training time: ${performance.now() - time}ms`);
 console.log(await net.predict(new Float32Array([0, 0])));
 console.log(await net.predict(new Float32Array([1, 0])));
 console.log(await net.predict(new Float32Array([0, 1])));
 console.log(await net.predict(new Float32Array([1, 1])));
+
+// console.log((net.backend as CPUBackend).layers)
+Deno.writeTextFileSync("layer0.json", JSON.stringify((net.backend as CPUBackend).layers[0].toJSON()));
+Deno.writeTextFileSync("layer1.json", JSON.stringify((net.backend as CPUBackend).output.toJSON()));

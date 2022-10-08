@@ -1,4 +1,5 @@
 import type { DataTypeArray } from "../../deps.ts";
+import { ConvLayer, DenseLayer, PoolLayer } from "../mod.ts";
 import type {
   Backend,
   ConvLayerConfig,
@@ -33,7 +34,9 @@ export class CPUBackend implements Backend {
     this.silent = config.silent ?? false;
     config.layers.slice(0, -1).map(this.addLayer.bind(this));
     const output = config.layers[config.layers.length - 1];
-    this.output = new DenseCPULayer(output.config as DenseLayerConfig);
+    this.output = output.load
+      ? DenseCPULayer.fromJSON(output.data!)
+      : new DenseCPULayer(output.config as DenseLayerConfig);
     this.setCost(config.cost);
   }
 
@@ -54,13 +57,25 @@ export class CPUBackend implements Backend {
   addLayer(layer: Layer): void {
     switch (layer.type) {
       case "dense":
-        this.layers.push(new DenseCPULayer(layer.config as DenseLayerConfig));
+        this.layers.push(
+          layer.load
+            ? DenseCPULayer.fromJSON(layer.data!)
+            : new DenseCPULayer(layer.config as DenseLayerConfig),
+        );
         break;
       case "conv":
-        this.layers.push(new ConvCPULayer(layer.config as ConvLayerConfig));
+        this.layers.push(
+          layer.load
+            ? ConvCPULayer.fromJSON(layer.data!)
+            : new ConvCPULayer(layer.config as ConvLayerConfig),
+        );
         break;
       case "pool":
-        this.layers.push(new PoolCPULayer(layer.config as PoolLayerConfig));
+        this.layers.push(
+          layer.load
+            ? PoolCPULayer.fromJSON(layer.data!)
+            : new PoolCPULayer(layer.config as PoolLayerConfig),
+        );
         break;
       default:
         throw new Error(
@@ -168,12 +183,39 @@ export class CPUBackend implements Backend {
 
   toJSON(): NetworkJSON {
     return {
+      costFn: this.costFn.name,
       type: "NeuralNetwork",
       sizes: this.layers.map((layer) => layer.outputSize),
       input: this.input,
       layers: this.layers.map((layer) => layer.toJSON()),
       output: this.output.toJSON(),
     };
+  }
+
+  static fromJSON(data: NetworkJSON): CPUBackend {
+    const layers = data.layers.map((layer) => {
+      switch (layer.type) {
+        case "dense":
+          return DenseLayer.fromJSON(layer);
+        case "conv":
+          return ConvLayer.fromJSON(layer);
+        case "pool":
+          return PoolLayer.fromJSON(layer);
+        default:
+          throw new Error(
+            `${
+              layer.type.charAt(0).toUpperCase() + layer.type.slice(1)
+            }Layer not implemented for the CPU backend`,
+          );
+      }
+    });
+    layers.push(DenseLayer.fromJSON(data.output));
+    const backend = new CPUBackend({
+      input: data.input,
+      layers,
+      cost: data.costFn! as Cost,
+    });
+    return backend;
   }
 
   save(_str: string): void {

@@ -2,6 +2,7 @@ import { DataType, DataTypeArray } from "../../deps.ts";
 import { iterate1D } from "../util.ts";
 
 export interface CPUCostFunction<T extends DataType = DataType> {
+  name: string;
   /** Return the cost associated with an output `a` and desired output `y`. */
   cost(yHat: DataTypeArray<T>, y: DataTypeArray<T>): number;
 
@@ -14,6 +15,7 @@ export interface CPUCostFunction<T extends DataType = DataType> {
  */
 export class CrossEntropy<T extends DataType = DataType>
   implements CPUCostFunction {
+  name = "crossentropy";
   cost(yHat: DataTypeArray<T>, y: DataTypeArray<T>) {
     let sum = 0;
     iterate1D(yHat.length, (i: number) => {
@@ -31,6 +33,7 @@ export class CrossEntropy<T extends DataType = DataType>
  * Hinge cost function is the standard cost function for multiclass classification.
  */
 export class Hinge<T extends DataType = DataType> implements CPUCostFunction {
+  name = "hinge";
   cost(yHat: DataTypeArray<T>, y: DataTypeArray<T>) {
     let max = -Infinity;
     iterate1D(yHat.length, (i: number) => {

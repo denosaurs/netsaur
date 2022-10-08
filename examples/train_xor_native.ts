@@ -1,7 +1,7 @@
 import { NeuralNetwork, DenseLayer } from "../mod.ts";
 import { Native, Matrix } from "../backends/native.ts";
 
-const start = Date.now();
+const start = performance.now();
 
 const network = await new NeuralNetwork({
   input: 2,
@@ -28,7 +28,7 @@ network.train(
   0.1,
 );
 
-console.log("training time", Date.now() - start, "milliseconds");
+console.log("training time", performance.now() - start, "milliseconds");
 
 console.log(
   await network.predict(

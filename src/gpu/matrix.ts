@@ -4,6 +4,7 @@ import {
   WebGPUBackend,
   WebGPUData,
 } from "../../deps.ts";
+import { MatrixJSON } from "../types.ts";
 import { fromType } from "../util.ts";
 
 export class GPUMatrix<T extends DataType = DataType> {
@@ -35,9 +36,10 @@ export class GPUMatrix<T extends DataType = DataType> {
     const buf = await WebGPUData.from(backend, data);
     return new this(buf, x, y, type);
   }
-  toJSON() {
+  async toJSON(): Promise<MatrixJSON> {
+    const data = await this.data.get();
     return {
-      data: this.data,
+      data,
       x: this.x,
       y: this.y,
       type: this.type,

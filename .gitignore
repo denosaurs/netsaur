@@ -4,4 +4,4 @@ build/
 xor_model.bin
 node_modules/
 digit_model.bin
-bench/tfjs/node_modules
+package-lock.json

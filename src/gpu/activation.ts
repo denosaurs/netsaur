@@ -1,4 +1,5 @@
 export interface GPUActivationFn {
+  name: string;
   activate(type: string): string;
   prime(type: string): string;
 }
@@ -7,6 +8,7 @@ export interface GPUActivationFn {
  * Linear activation function f(x) = x
  */
 export class Linear implements GPUActivationFn {
+  name = "linear";
   activate(_: string): string {
     return `return weighted_sum`;
   }
@@ -20,6 +22,7 @@ export class Linear implements GPUActivationFn {
  * Sigmoid activation function f(x) = 1 / (1 + e^(-x))
  */
 export class Sigmoid implements GPUActivationFn {
+  name = "sigmoid";
   activate(type: string): string {
     return `return ${type}(1) / (${type}(1) + exp(-weighted_sum))`;
   }
@@ -34,6 +37,7 @@ export class Sigmoid implements GPUActivationFn {
  * This is the same as the sigmoid function, but is more robust to outliers
  */
 export class Tanh implements GPUActivationFn {
+  name = "tanh";
   activate(_: string): string {
     return `return tanh(weighted_sum)`;
   }
@@ -48,6 +52,7 @@ export class Tanh implements GPUActivationFn {
  * This is a rectified linear unit, which is a smooth approximation to the sigmoid function.
  */
 export class Relu implements GPUActivationFn {
+  name = "relu";
   activate(type: string): string {
     return `return max(${type}(0), weighted_sum)`;
   }
@@ -65,6 +70,7 @@ export class Relu implements GPUActivationFn {
  * This is a rectified linear unit with a 6-value output range.
  */
 export class Relu6 implements GPUActivationFn {
+  name = "relu6";
   activate(type: string): string {
     return `return min(max(${type}(0), weighted_sum), ${type}(6))`;
   }
@@ -84,6 +90,7 @@ export class Relu6 implements GPUActivationFn {
  * Leaky ReLU activation function f(x) = x if x > 0, 0.01 * x otherwise
  */
 export class LeakyRelu implements GPUActivationFn {
+  name = "leakyrelu";
   activate(type: string): string {
     return `if (weighted_sum > ${type}(0)) {
             return weighted_sum;
@@ -104,6 +111,7 @@ export class LeakyRelu implements GPUActivationFn {
  * This is a rectified linear unit with an exponential output range.
  */
 export class Elu implements GPUActivationFn {
+  name = "elu";
   activate(type: string): string {
     return `if (weighted_sum > ${type}(0)) {
             return weighted_sum;
@@ -124,6 +132,7 @@ export class Elu implements GPUActivationFn {
  * This is a scaled version of the Elu function, which is a smoother approximation to the ReLU function.
  */
 export class Selu implements GPUActivationFn {
+  name = "selu";
   activate(type: string): string {
     return `return ${type}(weighted_sum) + ${type}(weighted_sum) * (${type}(1) - ${type}(weighted_sum)) * ${type}(1.67326)`;
   }

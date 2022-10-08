@@ -3,19 +3,29 @@ import { ConvLayer, DenseLayer, PoolLayer } from "./mod.ts";
 import { ConvCPULayer } from "./cpu/layers/conv.ts";
 import { DenseCPULayer } from "./cpu/layers/dense.ts";
 import { DenseGPULayer } from "./gpu/layers/dense.ts";
-import { CPUActivationFn } from "./cpu/activation.ts";
-import { GPUActivationFn } from "./gpu/activation.ts";
 import { GPUMatrix } from "./gpu/matrix.ts";
 import { CPUMatrix } from "./cpu/matrix.ts";
 import { PoolCPULayer } from "./cpu/layers/pool.ts";
 
 export interface LayerJSON {
   outputSize: number | Size2D;
-  activation?: CPUActivationFn | GPUActivationFn;
+  activationFn?: string;
+  costFn?: string;
   type: string;
+  input: MatrixJSON;
+  weights?: MatrixJSON;
+  biases?: MatrixJSON;
+  output: MatrixJSON;
+  error?: MatrixJSON;
+  cost?: MatrixJSON;
+  kernel?: MatrixJSON;
+  padded?: MatrixJSON;
+  stride?: number;
+  padding?: number;
 }
 
 export interface NetworkJSON {
+  costFn?: string;
   type: "NeuralNetwork";
   sizes: (number | Size2D)[];
   input: Size | undefined;
@@ -23,6 +33,13 @@ export interface NetworkJSON {
   output: LayerJSON;
 }
 
+export interface MatrixJSON {
+  // deno-lint-ignore no-explicit-any
+  data: any;
+  x: number;
+  y: number;
+  type?: DataType
+}
 export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
   addLayer(layer: Layer | any): void;
@@ -66,7 +83,7 @@ export interface DenseLayerConfig {
 }
 
 export interface ConvLayerConfig {
-  activation: Activation;
+  activation?: Activation;
   kernel: DataTypeArray;
   kernelSize: Size2D;
   padding?: number;
@@ -95,6 +112,7 @@ export type Activation =
   | "selu";
 
 export type Cost = "crossentropy" | "hinge" | "mse";
+
 
 export type Shape = number;
 /**

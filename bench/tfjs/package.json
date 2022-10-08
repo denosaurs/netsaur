@@ -4,7 +4,7 @@
   "description": "",
   "main": "xor.mjs",
   "scripts": {
-    "start": "node xor.mjs"
+    "xor": "node xor.mjs"
   },
   "keywords": [],
   "author": "",

@@ -5,6 +5,8 @@
     "train_letter": "deno run -A --unstable ./examples/train_letter.ts",
     "train_emoticon": "deno run -A --unstable ./examples/train_emoticon.ts",
     "train_conv": "deno run -A --unstable ./examples/train_conv.ts",
+    "test_train": "deno run -A --unstable ./examples/train_and_run/train.ts",
+    "test_run": "deno run -A --unstable ./examples/train_and_run/run.ts",
     "perf_test": "deno run -A --unstable ./examples/perf_test.ts",
     "build": "cd native/build && cmake .. && make"
   }

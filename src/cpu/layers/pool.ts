@@ -52,6 +52,21 @@ export class PoolCPULayer {
     return {
       outputSize: this.outputSize,
       type: "pool",
+      input: this.input.toJSON(),
+      output: this.output.toJSON(),
+      stride: this.stride,
     };
+  }
+
+  static fromJSON({ outputSize, type, input, output, stride, }: LayerJSON): PoolCPULayer {
+    if (type !== "pool") throw new Error("Cannot cannot create a MaxPool layer from a" + 
+      type.charAt(0).toUpperCase() + type.slice(1)+ "Layer"
+    );
+    if (stride === undefined) throw new Error("Layer imported must be initialized");
+    const layer = new PoolCPULayer({stride});
+    layer.input = new CPUMatrix(input.data, input.x, input.y);
+    layer.outputSize = outputSize as Size2D;
+    layer.output = new CPUMatrix(output.data, output.x, output.y);
+    return layer;
   }
 }

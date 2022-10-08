@@ -1,4 +1,5 @@
 export interface CPUActivationFn {
+  name: string;
   activate(val: number): number;
   prime(val: number, error?: number): number;
 }
@@ -7,6 +8,7 @@ export interface CPUActivationFn {
  * Linear activation function f(x) = x
  */
 export class Linear implements CPUActivationFn {
+  name = "linear";
   activate(val: number): number {
     return val;
   }
@@ -20,6 +22,7 @@ export class Linear implements CPUActivationFn {
  * Sigmoid activation function f(x) = 1 / (1 + e^(-x))
  */
 export class Sigmoid implements CPUActivationFn {
+  name = "sigmoid";
   activate(val: number): number {
     return 1 / (1 + Math.exp(-val));
   }
@@ -34,6 +37,7 @@ export class Sigmoid implements CPUActivationFn {
  * This is the same as the sigmoid function, but is more robust to outliers
  */
 export class Tanh implements CPUActivationFn {
+  name = "tanh";
   activate(val: number): number {
     return Math.tanh(val);
   }
@@ -48,6 +52,7 @@ export class Tanh implements CPUActivationFn {
  * This is a rectified linear unit, which is a smooth approximation to the sigmoid function.
  */
 export class Relu implements CPUActivationFn {
+  name = "relu";
   activate(val: number): number {
     return Math.max(0, val);
   }
@@ -62,6 +67,7 @@ export class Relu implements CPUActivationFn {
  * This is a rectified linear unit with a 6-value output range.
  */
 export class Relu6 implements CPUActivationFn {
+  name = "relu6";
   activate(val: number): number {
     return Math.min(Math.max(0, val), 6);
   }
@@ -75,6 +81,7 @@ export class Relu6 implements CPUActivationFn {
  * Leaky ReLU activation function f(x) = x if x > 0, 0.01 * x otherwise
  */
 export class LeakyRelu implements CPUActivationFn {
+  name = "leakyrelu";
   activate(val: number): number {
     return val > 0 ? val : 0.01 * val;
   }
@@ -89,6 +96,7 @@ export class LeakyRelu implements CPUActivationFn {
  * This is a rectified linear unit with an exponential output range.
  */
 export class Elu implements CPUActivationFn {
+  name = "elu";
   activate(val: number): number {
     return val >= 0 ? val : Math.exp(val) - 1;
   }
@@ -103,6 +111,7 @@ export class Elu implements CPUActivationFn {
  * This is a scaled version of the Elu function, which is a smoother approximation to the ReLU function.
  */
 export class Selu implements CPUActivationFn {
+  name = "selu";
   activate(val: number): number {
     return val >= 0 ? val : 1.0507 * (Math.exp(val) - 1);
   }
