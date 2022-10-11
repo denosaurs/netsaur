@@ -1,5 +1,11 @@
-import { Activation, DenseLayerConfig, LayerJSON, Size } from "../../types.ts";
-import { ActivationError, to1D } from "../../util.ts";
+import {
+  Activation,
+  DenseLayerConfig,
+  LayerJSON,
+  MatrixJSON,
+  Size,
+} from "../../../core/types.ts";
+import { ActivationError, to1D } from "../../../core/util.ts";
 import {
   CPUActivationFn,
   Elu,
@@ -115,16 +121,24 @@ export class DenseCPULayer {
     };
   }
 
-  static fromJSON({ outputSize, activationFn, type, input, weights, biases, output }: LayerJSON): DenseCPULayer {
-    if (type !== "dense") throw new Error("Cannot cannot create a Dense layer from a" + 
-      type.charAt(0).toUpperCase() + type.slice(1)+ "Layer"
-    );
-    const layer = new DenseCPULayer({ size: outputSize, activation: (activationFn as Activation) || "sigmoid"});
+  static fromJSON(
+    { outputSize, activationFn, input, weights, biases, output }: LayerJSON,
+  ): DenseCPULayer {
+    const layer = new DenseCPULayer({
+      size: outputSize,
+      activation: (activationFn as Activation) || "sigmoid",
+    });
     layer.input = new CPUMatrix(input.data, input.x, input.y);
-    if (weights === undefined) throw new Error("Layer imported must be initialized");
-    layer.weights = new CPUMatrix(weights.data, weights.x, weights.y);
-    if (biases === undefined) throw new Error("Layer imported must be initialized");
-    layer.biases = new CPUMatrix(biases.data, biases.x, biases.y);
+    layer.weights = new CPUMatrix(
+      (weights as MatrixJSON).data,
+      (weights as MatrixJSON).x,
+      (weights as MatrixJSON).y,
+    );
+    layer.biases = new CPUMatrix(
+      (biases as MatrixJSON).data,
+      (biases as MatrixJSON).x,
+      (biases as MatrixJSON).y,
+    );
     layer.output = new CPUMatrix(output.data, output.x, output.y);
     return layer;
   }

@@ -1,4 +1,7 @@
-import { dlopen, FetchOptions } from "https://deno.land/x/plug@1.0.0-rc.3/mod.ts"
+import {
+  dlopen,
+  FetchOptions,
+} from "https://deno.land/x/plug@1.0.0-rc.3/mod.ts";
 
 const symbols = {
   matrix_new: {
@@ -174,7 +177,7 @@ const opts: FetchOptions = {
     darwin: "lib",
     windows: "lib",
     linux: "lib",
-  }
+  },
 };
 
 const mod = await dlopen(opts, symbols);

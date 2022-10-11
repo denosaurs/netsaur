@@ -3,12 +3,11 @@ import {
   DenseLayerConfig,
   Layer,
   NetworkConfig,
-} from "../types.ts";
-import { to1D } from "../util.ts";
+} from "../../core/types.ts";
+import { to1D } from "../../core/util.ts";
 import ffi, { cstr } from "./ffi.ts";
 import { DenseNativeLayer } from "./layers/dense.ts";
 import { Matrix } from "./matrix.ts";
-
 
 const {
   network_free,
@@ -31,8 +30,6 @@ const NetworkFinalizer = new FinalizationRegistry(
 // };
 
 export type NativeLayer = DenseNativeLayer;
-
-
 
 export interface Dataset {
   inputs: Matrix<"f32">;
@@ -63,7 +60,6 @@ export class NativeBackend implements Backend {
   }
 
   addLayer(_layer: Layer): void {
-      
   }
 
   encodeLayer(layer: Layer): NativeLayer {

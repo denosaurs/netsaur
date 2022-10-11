@@ -57,7 +57,7 @@ console.log(await net.predict(new Float32Array([1, 1])));
 
 ```typescript
 import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
-import { Matrix, Native } from "https://deno.land/x/netsaur/backends/native.ts";
+import { Matrix, Native } from "https://deno.land/x/netsaur/backends/native/mod.ts";
 
 const network = await new NeuralNetwork({
   input: 2,

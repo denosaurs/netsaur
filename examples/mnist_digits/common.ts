@@ -1,6 +1,5 @@
-import type { Dataset } from "../../backends/native.ts";
-import { Matrix } from "../../backends/native.ts";
-
+import type { Dataset } from "../../backends/native/mod.ts";
+import { Matrix } from "../../backends/native/mod.ts";
 
 export function assert(condition: boolean, message?: string) {
   if (!condition) {

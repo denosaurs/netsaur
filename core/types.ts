@@ -1,11 +1,11 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { ConvLayer, DenseLayer, PoolLayer } from "./mod.ts";
-import { ConvCPULayer } from "./cpu/layers/conv.ts";
-import { DenseCPULayer } from "./cpu/layers/dense.ts";
-import { DenseGPULayer } from "./gpu/layers/dense.ts";
-import { GPUMatrix } from "./gpu/matrix.ts";
-import { CPUMatrix } from "./cpu/matrix.ts";
-import { PoolCPULayer } from "./cpu/layers/pool.ts";
+import { ConvLayer, DenseLayer, PoolLayer } from "../mod.ts";
+import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
+import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
+import { DenseGPULayer } from "../backends/gpu/layers/dense.ts";
+import { GPUMatrix } from "../backends/gpu/matrix.ts";
+import { CPUMatrix } from "../backends/cpu/matrix.ts";
+import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
 
 export interface LayerJSON {
   outputSize: number | Size2D;

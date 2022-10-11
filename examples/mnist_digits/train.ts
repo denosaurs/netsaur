@@ -1,5 +1,5 @@
 import { DenseLayer, NeuralNetwork } from "../../mod.ts";
-import { Native } from "../../backends/native.ts";
+import { Native } from "../../backends/native/mod.ts";
 import { loadDataset } from "./common.ts";
 
 const network = await new NeuralNetwork({

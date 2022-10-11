@@ -1,5 +1,11 @@
-import { ConvLayerConfig, LayerJSON, Size, Size2D } from "../../types.ts";
-import { iterate2D } from "../../util.ts";
+import {
+  ConvLayerConfig,
+  LayerJSON,
+  MatrixJSON,
+  Size,
+  Size2D,
+} from "../../../core/types.ts";
+import { iterate2D } from "../../../core/util.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -77,21 +83,26 @@ export class ConvCPULayer {
       padded: this.padded.toJSON(),
       output: this.output.toJSON(),
       stride: this.stride,
-      padding: this.padding
+      padding: this.padding,
     };
   }
 
-  static fromJSON({ outputSize, type, input, kernel, padded, output, stride, padding }: LayerJSON): ConvCPULayer {
-    if (type !== "conv") throw new Error("Cannot cannot create a Convolutional layer from a" + 
-      type.charAt(0).toUpperCase() + type.slice(1)+ "Layer"
-    );
-
-    if (kernel === undefined) throw new Error("Layer imported must be initialized");
-    const layer = new ConvCPULayer({ kernel: kernel.data, kernelSize: { x: kernel.x,  y: kernel.y}, padding, stride});
+  static fromJSON(
+    { outputSize, input, kernel, padded, output, stride, padding }: LayerJSON,
+  ): ConvCPULayer {
+    const layer = new ConvCPULayer({
+      kernel: (kernel as MatrixJSON).data,
+      kernelSize: { x: (kernel as MatrixJSON).x, y: (kernel as MatrixJSON).y },
+      padding,
+      stride,
+    });
     layer.input = new CPUMatrix(input.data, input.x, input.y);
     layer.outputSize = outputSize as Size2D;
-    if (padded === undefined) throw new Error("Layer imported must be initialized");
-    layer.padded = new CPUMatrix(padded.data, padded.x, padded.y);
+    layer.padded = new CPUMatrix(
+      (padded as MatrixJSON).data,
+      (padded as MatrixJSON).x,
+      (padded as MatrixJSON).y,
+    );
     layer.output = new CPUMatrix(output.data, output.x, output.y);
     return layer;
   }

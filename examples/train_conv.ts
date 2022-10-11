@@ -1,9 +1,7 @@
 import { ConvLayer, DenseLayer, NeuralNetwork, PoolLayer } from "../mod.ts";
-import { ConvCPULayer } from "../src/cpu/layers/conv.ts";
-import { PoolCPULayer } from "../src/cpu/layers/pool.ts";
-import { CPUMatrix } from "../src/cpu/matrix.ts";
-import { CPUBackend } from "../src/cpu/backend.ts";
-import { CPU } from "../backends/cpu.ts";
+import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
+import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
+import { CPU, CPUMatrix, CPUBackend } from "../backends/cpu/mod.ts";
 
 const kernel = new Float32Array([
   1,

@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../../deps.ts";
-import { iterate1D, iterate2D } from "../util.ts";
+import { iterate1D, iterate2D } from "../../core/util.ts";
 export class CPUMatrix<T extends DataType = DataType> {
   deltas: DataTypeArray<T>;
   constructor(

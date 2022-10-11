@@ -1,6 +1,6 @@
 import { DataType, DataTypeArray } from "../deps.ts";
 import { DenseLayer, NeuralNetwork } from "../mod.ts";
-import { CPU } from "../backends/cpu.ts";
+import { CPU } from "../backends/cpu/mod.ts";
 
 // https://github.com/BrainJS/brain.js/blob/master/examples/typescript/which-letter-simple.ts
 const character = (string: string): Float32Array =>

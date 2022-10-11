@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../../deps.ts";
-import { iterate1D } from "../util.ts";
+import { iterate1D } from "../../core/util.ts";
 
 export interface CPUCostFunction<T extends DataType = DataType> {
   name: string;

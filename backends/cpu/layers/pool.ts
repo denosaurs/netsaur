@@ -1,4 +1,9 @@
-import { LayerJSON, PoolLayerConfig, Size, Size2D } from "../../types.ts";
+import {
+  LayerJSON,
+  PoolLayerConfig,
+  Size,
+  Size2D,
+} from "../../../core/types.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -58,12 +63,10 @@ export class PoolCPULayer {
     };
   }
 
-  static fromJSON({ outputSize, type, input, output, stride, }: LayerJSON): PoolCPULayer {
-    if (type !== "pool") throw new Error("Cannot cannot create a MaxPool layer from a" + 
-      type.charAt(0).toUpperCase() + type.slice(1)+ "Layer"
-    );
-    if (stride === undefined) throw new Error("Layer imported must be initialized");
-    const layer = new PoolCPULayer({stride});
+  static fromJSON(
+    { outputSize, input, output, stride }: LayerJSON,
+  ): PoolCPULayer {
+    const layer = new PoolCPULayer({ stride: stride as number });
     layer.input = new CPUMatrix(input.data, input.x, input.y);
     layer.outputSize = outputSize as Size2D;
     layer.output = new CPUMatrix(output.data, output.x, output.y);

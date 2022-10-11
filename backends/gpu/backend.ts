@@ -8,7 +8,7 @@ import type {
   NetworkConfig,
   NetworkJSON,
   Size,
-} from "../types.ts";
+} from "../../core/types.ts";
 import { CrossEntropy, GPUCostFunction, Hinge } from "./cost.ts";
 import {
   DataType,
@@ -16,9 +16,9 @@ import {
   WebGPUBackend,
   WebGPUData,
 } from "../../deps.ts";
-import { fromType, getType, to1D } from "../util.ts";
+import { fromType, getType, to1D } from "../../core/util.ts";
 import { GPUMatrix } from "./matrix.ts";
-import { DenseLayer } from "../mod.ts";
+import { DenseLayer } from "../../mod.ts";
 
 export class GPUBackend<T extends DataType = DataType> implements Backend {
   input?: Size;

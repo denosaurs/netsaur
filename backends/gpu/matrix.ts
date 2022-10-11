@@ -4,8 +4,8 @@ import {
   WebGPUBackend,
   WebGPUData,
 } from "../../deps.ts";
-import { MatrixJSON } from "../types.ts";
-import { fromType } from "../util.ts";
+import { MatrixJSON } from "../../core/types.ts";
+import { fromType } from "../../core/util.ts";
 
 export class GPUMatrix<T extends DataType = DataType> {
   constructor(

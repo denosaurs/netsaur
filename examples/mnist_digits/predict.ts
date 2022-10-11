@@ -1,5 +1,4 @@
-import { NativeBackend } from "../../src/native/backend.ts";
-import { DataType, Matrix } from "../../backends/native.ts";
+import { DataType, Matrix, NativeBackend } from "../../backends/native/mod.ts";
 import { loadDataset } from "./common.ts";
 
 const network = NativeBackend.load("digit_model.bin");
@@ -25,4 +24,6 @@ const correct = testSet.filter((e) => {
 });
 
 console.log(`${correct.length} / ${testSet.length} correct`);
-console.log(`accuracy: ${((correct.length / testSet.length) * 100).toFixed(2)}%`);
+console.log(
+  `accuracy: ${((correct.length / testSet.length) * 100).toFixed(2)}%`,
+);

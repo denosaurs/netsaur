@@ -1,5 +1,5 @@
 import type { DataTypeArray } from "../../deps.ts";
-import { ConvLayer, DenseLayer, PoolLayer } from "../mod.ts";
+import { ConvLayer, DenseLayer, PoolLayer } from "../../mod.ts";
 import type {
   Backend,
   ConvLayerConfig,
@@ -12,8 +12,8 @@ import type {
   NetworkJSON,
   PoolLayerConfig,
   Size,
-} from "../types.ts";
-import { iterate1D, to1D } from "../util.ts";
+} from "../../core/types.ts";
+import { iterate1D, to1D } from "../../core/util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";

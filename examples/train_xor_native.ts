@@ -1,5 +1,5 @@
 import { NeuralNetwork, DenseLayer } from "../mod.ts";
-import { Native, Matrix } from "../backends/native.ts";
+import { Native, Matrix } from "../backends/native/mod.ts";
 
 const start = performance.now();
 

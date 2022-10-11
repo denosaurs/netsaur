@@ -2,6 +2,7 @@
   "tasks": {
     "train_xor": "deno run -A --unstable ./examples/train_xor_cpu.ts",
     "train_xor_gpu": "deno run -A --unstable ./examples/train_xor_gpu.ts",
+    "train_xor_native": "deno run -A --unstable ./examples/train_xor_native.ts",
     "train_letter": "deno run -A --unstable ./examples/train_letter.ts",
     "train_emoticon": "deno run -A --unstable ./examples/train_emoticon.ts",
     "train_conv": "deno run -A --unstable ./examples/train_conv.ts",

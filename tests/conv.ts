@@ -1,14 +1,11 @@
 import { ConvLayer, DenseLayer, NeuralNetwork } from "../mod.ts";
-import { ConvCPULayer } from "../src/cpu/layers/conv.ts";
-import { CPUMatrix } from "../src/cpu/matrix.ts";
-import { CPUBackend } from "../src/cpu/backend.ts";
-import { CPU } from "../backends/cpu.ts";
-import { PoolCPULayer } from "../src/cpu/layers/pool.ts";
-import { PoolLayer } from "../src/mod.ts";
+import { CPU, CPUBackend, CPUMatrix } from "../backends/cpu/mod.ts";
+import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
+import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
+import { PoolLayer } from "../layers/mod.ts";
 
 import { decode } from "https://deno.land/x/pngs@0.1.1/mod.ts";
 import { DataTypeArray } from "../deps.ts";
-
 
 import { Canvas } from "https://deno.land/x/neko@1.1.3/canvas/mod.ts";
 

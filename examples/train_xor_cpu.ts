@@ -1,6 +1,5 @@
 import { DenseLayer, NeuralNetwork } from "../mod.ts";
-import { CPU } from "../backends/cpu.ts";
-import { CPUBackend } from "../src/cpu/backend.ts";
+import { CPU } from "../backends/cpu/mod.ts";
 
 const net = await new NeuralNetwork({
   silent: true,
@@ -27,7 +26,3 @@ console.log(await net.predict(new Float32Array([0, 0])));
 console.log(await net.predict(new Float32Array([1, 0])));
 console.log(await net.predict(new Float32Array([0, 1])));
 console.log(await net.predict(new Float32Array([1, 1])));
-
-// console.log((net.backend as CPUBackend).layers)
-Deno.writeTextFileSync("layer0.json", JSON.stringify((net.backend as CPUBackend).layers[0].toJSON()));
-Deno.writeTextFileSync("layer1.json", JSON.stringify((net.backend as CPUBackend).output.toJSON()));

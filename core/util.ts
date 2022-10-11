@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
-import { CPUMatrix } from "./cpu/matrix.ts";
+import { CPUMatrix } from "../backends/cpu/matrix.ts";
 import type { Size, Size2D } from "./types.ts";
 
 export function getType(type: DataTypeArray<DataType>) {

@@ -1,16 +1,11 @@
 import { DataTypeArray } from "../deps.ts";
-import { CPUBackend } from "./cpu/backend.ts";
+import { CPUBackend } from "../backends/cpu/backend.ts";
 import {
-  Activation,
   Backend,
-  ConvLayerConfig,
   DataSet,
-  DenseLayerConfig,
   Layer,
-  LayerJSON,
   NetworkConfig,
   NetworkJSON,
-  PoolLayerConfig,
 } from "./types.ts";
 
 /**
@@ -104,49 +99,5 @@ export class NeuralNetwork {
   }
 }
 
-export class DenseLayer {
-  type = "dense";
-  load = false;
-  data?: LayerJSON;
-  constructor(public config: DenseLayerConfig) {}
-  static fromJSON(layerJSON: LayerJSON): DenseLayer {
-    const layer = new DenseLayer({
-      size: layerJSON.outputSize,
-      activation: (layerJSON.activationFn as Activation) || "sigmoid",
-    });
-    layer.load = true;
-    layer.data = layerJSON;
-    return layer;
-  }
-}
 
-export class ConvLayer {
-  type = "conv";
-  load = false;
-  data?: LayerJSON;
-  constructor(public config: ConvLayerConfig) {}
-  static fromJSON(layerJSON: LayerJSON): ConvLayer {
-    const layer = new ConvLayer({
-      kernel: layerJSON.kernel!.data,
-      kernelSize: { x: layerJSON.kernel!.x, y: layerJSON.kernel!.y },
-      padding: layerJSON.padding,
-      stride: layerJSON.stride,
-    });
-    layer.load = true;
-    layer.data = layerJSON;
-    return layer;
-  }
-}
 
-export class PoolLayer {
-  type = "pool";
-  load = false;
-  data?: LayerJSON;
-  constructor(public config: PoolLayerConfig) {}
-  static fromJSON(layerJSON: LayerJSON): PoolLayer {
-    const layer = new PoolLayer({ stride: layerJSON.stride! });
-    layer.load = true;
-    layer.data = layerJSON;
-    return layer;
-  }
-}
