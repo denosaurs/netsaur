@@ -38,7 +38,7 @@ export interface MatrixJSON {
   data: any;
   x: number;
   y: number;
-  type?: DataType
+  type?: DataType;
 }
 export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
@@ -54,7 +54,7 @@ export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
   predict(input: DataTypeArray<T> | any): DataTypeArray<T> | any;
   save(input: string): void;
-  toJSON(): NetworkJSON | Promise<NetworkJSON>| undefined;
+  toJSON(): NetworkJSON | Promise<NetworkJSON> | undefined;
   // deno-lint-ignore no-explicit-any
   getWeights(): (GPUMatrix | CPUMatrix | any)[];
   // deno-lint-ignore no-explicit-any
@@ -113,8 +113,45 @@ export type Activation =
 
 export type Cost = "crossentropy" | "hinge" | "mse";
 
+export enum Rank {
+  R0 = "R0",
+  R1 = "R1",
+  R2 = "R2",
+  R3 = "R3",
+  R4 = "R4",
+  R5 = "R5",
+  R6 = "R6",
+}
 
 export type Shape = number;
+
+/** @docalias number[] */
+export interface ShapeMap {
+  R0: number[];
+  R1: [number];
+  R2: [number, number];
+  R3: [number, number, number];
+  R4: [number, number, number, number];
+  R5: [number, number, number, number, number];
+  R6: [number, number, number, number, number, number];
+}
+
+/** @docalias number[] */
+export interface ArrayMap {
+  R0: number;
+  R1: number[];
+  R2: number[][];
+  R3: number[][][];
+  R4: number[][][][];
+  R5: number[][][][][];
+  R6: number[][][][][][];
+}
+
+export type TypedArray = Float32Array | Int32Array | Uint8Array;
+// deno-lint-ignore no-explicit-any
+export interface RecursiveArray<T extends any> {
+  [index: number]: T | RecursiveArray<T>;
+}
 /**
  * NumberArray is a typed array of numbers.
  */
@@ -131,3 +168,84 @@ export type DataSet = {
   inputs: NumberArray;
   outputs: NumberArray;
 };
+
+/** @docalias TypedArray|Array */
+export type TensorLike =
+  | TypedArray
+  | number
+  | boolean
+  | string
+  | RecursiveArray<number | number[] | TypedArray>
+  | RecursiveArray<boolean>
+  | RecursiveArray<string>
+  | Uint8Array[];
+
+export type ScalarLike = number | boolean | string | Uint8Array;
+
+/** @docalias TypedArray|Array */
+export type TensorLike1D =
+  | TypedArray
+  | number[]
+  | boolean[]
+  | string[]
+  | Uint8Array[];
+
+/** @docalias TypedArray|Array */
+export type TensorLike2D =
+  | TypedArray
+  | number[]
+  | number[][]
+  | boolean[]
+  | boolean[][]
+  | string[]
+  | string[][]
+  | Uint8Array[]
+  | Uint8Array[][];
+
+/** @docalias TypedArray|Array */
+export type TensorLike3D =
+  | TypedArray
+  | number[]
+  | number[][][]
+  | boolean[]
+  | boolean[][][]
+  | string[]
+  | string[][][]
+  | Uint8Array[]
+  | Uint8Array[][][];
+
+/** @docalias TypedArray|Array */
+export type TensorLike4D =
+  | TypedArray
+  | number[]
+  | number[][][][]
+  | boolean[]
+  | boolean[][][][]
+  | string[]
+  | string[][][][]
+  | Uint8Array[]
+  | Uint8Array[][][][];
+
+/** @docalias TypedArray|Array */
+export type TensorLike5D =
+  | TypedArray
+  | number[]
+  | number[][][][][]
+  | boolean[]
+  | boolean[][][][][]
+  | string[]
+  | string[][][][][]
+  | Uint8Array[]
+  | Uint8Array[][][][][];
+
+/** @docalias TypedArray|Array */
+export type TensorLike6D =
+  | TypedArray
+  | number[]
+  | number[][][][][][]
+  | boolean[]
+  | boolean[][][][][][]
+  | string[]
+  | string[][][][][][]
+  | Uint8Array[]
+  | Uint8Array[][][][][];
