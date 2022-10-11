@@ -1,11 +1,11 @@
-import { ConvLayer, DenseLayer, NeuralNetwork } from "../mod.ts";
-import { CPU, CPUBackend, CPUMatrix } from "../backends/cpu/mod.ts";
-import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
-import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
-import { PoolLayer } from "../layers/mod.ts";
+import { ConvLayer, DenseLayer, NeuralNetwork } from "../../mod.ts";
+import { CPU, CPUBackend, CPUMatrix } from "../../backends/cpu/mod.ts";
+import { ConvCPULayer } from "../../backends/cpu/layers/conv.ts";
+import { PoolCPULayer } from "../../backends/cpu/layers/pool.ts";
+import { PoolLayer } from "../../layers/mod.ts";
 
 import { decode } from "https://deno.land/x/pngs@0.1.1/mod.ts";
-import { DataTypeArray } from "../deps.ts";
+import { DataTypeArray } from "../../deps.ts";
 
 import { Canvas } from "https://deno.land/x/neko@1.1.3/canvas/mod.ts";
 
@@ -23,7 +23,7 @@ ctx.fillRect(0, 0, 600, 600);
 const dim = 28;
 
 //Credit: Hashrock (https://github.com/hashrock)
-const img = decode(Deno.readFileSync("./tests/deno.png")).image;
+const img = decode(Deno.readFileSync("./examples/filters/deno.png")).image;
 const buf = new Float32Array(dim * dim) as DataTypeArray<"f32">;
 
 for (let i = 0; i < dim * dim; i++) {

@@ -2,6 +2,8 @@
 .idea/
 build/
 xor_model.bin
+esr.bin
 node_modules/
 digit_model.bin
 package-lock.json
+test.ts
