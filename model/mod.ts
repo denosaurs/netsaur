@@ -3,6 +3,9 @@ import { NeuralNetwork } from "../core/mod.ts";
 import { ModelFormat } from "./types.ts";
 import { JSONModel } from "./json.ts";
 
+/**
+ * Model Loader Class
+ */
 export class Model {
   static async load(
     path: string,
@@ -21,3 +24,4 @@ export class Model {
     await format.save(path, net);
   }
 }
+

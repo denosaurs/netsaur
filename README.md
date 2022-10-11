@@ -95,3 +95,43 @@ console.log(
   ),
 );
 ```
+
+### Saving Models
+
+```typescript
+import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
+import { Model } from "https://deno.land/x/netsaur/model/mod.ts";
+
+const net = new NeuralNetwork({
+  silent: true,
+  layers: [
+    new DenseLayer({ size: 3, activation: "sigmoid" }),
+    new DenseLayer({ size: 1, activation: "sigmoid" }),
+  ],
+  cost: "crossentropy",
+});
+
+await net.train(
+  [
+    { inputs: [0, 0, 1, 0, 0, 1, 1, 1], outputs: [0, 1, 1, 0] },
+  ],
+  5000,
+  4,
+  0.1,
+);
+
+
+await Model.save("./network.json", net);
+```
+### Loading & Running Models
+
+```typescript
+import { Model } from "https://deno.land/x/netsaur/model/mod.ts";
+
+const net = await Model.load("./network.json");
+
+console.log(await net.predict(new Float32Array([0, 0])));
+console.log(await net.predict(new Float32Array([1, 0])));
+console.log(await net.predict(new Float32Array([0, 1])));
+console.log(await net.predict(new Float32Array([1, 1])));
+```

@@ -26,7 +26,9 @@ export async function GPUModel(
   if (!silent) console.log(`Using adapter: ${backend.adapter}`);
   const features = [...backend.adapter.features.values()];
   if (!silent) console.log(`Supported features: ${features.join(", ")}`);
-  return GPUBackend.fromJSON(data, backend);
+  const gpubackend = await GPUBackend.fromJSON(data, backend);
+  console.log(gpubackend)
+  return gpubackend;
 }
 
 export { GPUBackend };
