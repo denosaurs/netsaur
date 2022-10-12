@@ -4,6 +4,7 @@ import {
   Size,
   Size2D,
 } from "../../../core/types.ts";
+import { to2D } from "../../../core/util.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -14,21 +15,21 @@ import { CPUMatrix } from "../matrix.ts";
  */
 export class PoolCPULayer {
   outputSize!: Size2D;
-  stride: number;
+  strides: Size2D;
 
   input!: CPUMatrix;
   output!: CPUMatrix;
 
   constructor(config: PoolLayerConfig) {
-    this.stride = config.stride;
+    this.strides = to2D(config.strides);
   }
 
   reset(_batches: number) {
   }
 
   initialize(inputSize: Size, _batches: number) {
-    const w = (inputSize as Size2D).x / this.stride;
-    const h = (inputSize as Size2D).y / this.stride;
+    const w = (inputSize as Size2D).x / this.strides.x;
+    const h = (inputSize as Size2D).y / this.strides.y;
     this.output = CPUMatrix.with(w, h);
     this.outputSize = { x: w, y: h };
   }
@@ -37,10 +38,10 @@ export class PoolCPULayer {
     for (let i = 0; i < this.output.x; i++) {
       for (let j = 0; j < this.output.y; j++) {
         const pool = [];
-        for (let x = 0; x < this.stride; x++) {
-          for (let y = 0; y < this.stride; y++) {
-            const idx = (j * this.stride + y) * input.x +
-              i * this.stride + x;
+        for (let x = 0; x < this.strides.x; x++) {
+          for (let y = 0; y < this.strides.y; y++) {
+            const idx = (j * this.strides.y + y) * input.x +
+              i * this.strides.x + x;
             pool.push(input.data[idx]);
           }
         }
@@ -59,14 +60,14 @@ export class PoolCPULayer {
       type: "pool",
       input: this.input.toJSON(),
       output: this.output.toJSON(),
-      stride: this.stride,
+      strides: this.strides,
     };
   }
 
   static fromJSON(
-    { outputSize, input, output, stride }: LayerJSON,
+    { outputSize, input, output, strides }: LayerJSON,
   ): PoolCPULayer {
-    const layer = new PoolCPULayer({ stride: stride as number });
+    const layer = new PoolCPULayer({ strides: strides });
     layer.input = new CPUMatrix(input.data, input.x, input.y);
     layer.outputSize = outputSize as Size2D;
     layer.output = new CPUMatrix(output.data, output.x, output.y);

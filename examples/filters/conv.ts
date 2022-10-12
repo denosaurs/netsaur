@@ -1,5 +1,5 @@
 import { ConvLayer, DenseLayer, NeuralNetwork } from "../../mod.ts";
-import { CPU, CPUBackend, CPUMatrix } from "../../backends/cpu/mod.ts";
+import { CPU, CPUMatrix } from "../../backends/cpu/mod.ts";
 import { ConvCPULayer } from "../../backends/cpu/layers/conv.ts";
 import { PoolCPULayer } from "../../backends/cpu/layers/pool.ts";
 import { PoolLayer } from "../../layers/mod.ts";
@@ -7,14 +7,16 @@ import { PoolLayer } from "../../layers/mod.ts";
 import { decode } from "https://deno.land/x/pngs@0.1.1/mod.ts";
 import { DataTypeArray } from "../../deps.ts";
 
-import { Canvas } from "https://deno.land/x/neko@1.1.3/canvas/mod.ts";
+// import { Canvas } from "https://deno.land/x/neko@1.1.3/canvas/mod.ts";
+import { createCanvas } from "https://deno.land/x/canvas@v1.4.1/mod.ts";
 
-const canvas = new Canvas({
-  title: "Netsaur Convolutions",
-  width: 600,
-  height: 600,
-  fps: 60,
-});
+const canvas = createCanvas(600, 600);
+// const canvas = new Canvas({
+//   title: "Netsaur Convolutions",
+//   width: 600,
+//   height: 600,
+//   fps: 60,
+// });
 
 const ctx = canvas.getContext("2d");
 ctx.fillStyle = "white";
@@ -50,9 +52,9 @@ const net = await new NeuralNetwork({
       kernel: kernel,
       kernelSize: { x: 3, y: 3 },
       padding: 1,
-      stride: 1,
+      strides: 1,
     }),
-    new PoolLayer({ stride: 2 }),
+    new PoolLayer({ strides: 2 }),
     new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
@@ -60,14 +62,13 @@ const net = await new NeuralNetwork({
 }).setupBackend(CPU);
 
 const input = new CPUMatrix(buf, dim, dim);
-const network = net.backend as CPUBackend;
-const conv = network.layers[0] as ConvCPULayer;
-const pool = network.layers[1] as PoolCPULayer;
-network.initialize({ x: dim, y: dim }, 1);
-network.layers[0].feedForward(input);
-network.layers[1].feedForward(conv.output);
-const cv = conv.output;
-const out = pool.output;
+
+const conv = net.getLayer(0) as ConvCPULayer;
+const pool = net.getLayer(1) as PoolCPULayer;
+
+
+net.initialize({ x: dim, y: dim }, 1);
+net.feedForward(input);
 
 for (let i = 0; i < dim; i++) {
   for (let j = 0; j < dim; j++) {
@@ -77,20 +78,21 @@ for (let i = 0; i < dim; i++) {
   }
 }
 
-for (let i = 0; i < cv.x; i++) {
-  for (let j = 0; j < cv.y; j++) {
-    const pixel = Math.round(Math.max(Math.min(cv.data[j * cv.x + i], 255), 0));
+for (let i = 0; i <  conv.output.x; i++) {
+  for (let j = 0; j <  conv.output.y; j++) {
+    const pixel = Math.round(Math.max(Math.min( conv.output.data[j *  conv.output.x + i], 255), 0));
     ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
     ctx.fillRect(i * 10 + dim * 10, j * 10, 10, 10);
   }
 }
 
-for (let i = 0; i < out.x; i++) {
-  for (let j = 0; j < out.y; j++) {
+for (let i = 0; i < pool.output.x; i++) {
+  for (let j = 0; j < pool.output.y; j++) {
     const pixel = Math.round(
-      Math.max(Math.min(out.data[j * out.x + i], 255), 0),
+      Math.max(Math.min(pool.output.data[j * pool.output.x + i], 255), 0),
     );
     ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
     ctx.fillRect(i * 20 + dim * 10, j * 20 + dim * 10, 20, 20);
   }
 }
+await Deno.writeFile("./examples/filters/output.png", canvas.toBuffer());

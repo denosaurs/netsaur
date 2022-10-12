@@ -3,6 +3,7 @@ import {
   DenseLayerConfig,
   Layer,
   NetworkConfig,
+  Size,
 } from "../../core/types.ts";
 import { to1D } from "../../core/util.ts";
 import ffi, { cstr } from "./ffi.ts";
@@ -43,7 +44,10 @@ export class NativeBackend implements Backend {
   get unsafePointer() {
     return this.#ptr;
   }
-
+  get layers() {
+    // TODO: get layers from backend
+    return [];
+  }
   constructor(config: NetworkConfig | Deno.PointerValue) {
     this.#ptr = typeof config === "object"
       ? network_create(
@@ -61,7 +65,8 @@ export class NativeBackend implements Backend {
 
   addLayer(_layer: Layer): void {
   }
-
+  initialize(_inputSize: Size, _batches: number): void {
+  }
   encodeLayer(layer: Layer): NativeLayer {
     switch (layer.type) {
       case "dense":
@@ -76,6 +81,10 @@ export class NativeBackend implements Backend {
   }
 
   predict(input: Matrix<"f32">): Matrix<"f32"> {
+    return new Matrix(network_feed_forward(this.#ptr, input.unsafePointer));
+  }
+
+  feedForward(input: Matrix<"f32">): Matrix<"f32"> {
     return new Matrix(network_feed_forward(this.#ptr, input.unsafePointer));
   }
 

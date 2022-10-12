@@ -70,7 +70,7 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     }
   }
 
-  async initialize(type: DataType, inputSize: Size, batches: number) {
+  async initialize(inputSize: Size, batches: number, type: DataType) {
     await this.layers[0].initialize(type, inputSize, batches);
     for (let i = 1; i < this.layers.length; i++) {
       const current = this.layers[i];
@@ -132,7 +132,7 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     const inputSize = this.input || datasets[0].inputs.length / batches;
     const outputSize = datasets[0].outputs.length / batches;
 
-    await this.initialize(type, inputSize, batches);
+    await this.initialize(inputSize, batches, type);
 
     const databuffers = [];
     for (const dataset of datasets) {

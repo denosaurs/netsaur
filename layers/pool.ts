@@ -16,10 +16,10 @@ export class PoolLayer {
           "Layer",
       );
     }
-    if (layerJSON.stride === undefined) {
+    if (layerJSON.strides === undefined) {
       throw new Error("Layer imported must be initialized");
     }
-    const layer = new PoolLayer({ stride: layerJSON.stride! });
+    const layer = new PoolLayer({ strides: layerJSON.strides! });
     layer.load = true;
     layer.data = layerJSON;
     return layer;

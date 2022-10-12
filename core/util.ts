@@ -156,6 +156,12 @@ export function to1D(size: Size): number {
   }
 }
 
+export function to2D(size: Size = 1): Size2D {
+  return Number(size)
+    ? { x: size as number, y: size as number } as Size2D
+    : size as Size2D;
+}
+
 export function iterate2D(
   mat: { x: number; y: number } | CPUMatrix,
   callback: (i: number, j: number) => void,

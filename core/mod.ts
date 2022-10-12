@@ -6,6 +6,7 @@ import {
   Layer,
   NetworkConfig,
   NetworkJSON,
+Size,
 } from "./types.ts";
 
 /**
@@ -32,12 +33,26 @@ export class NeuralNetwork {
   }
 
   /**
+   * initialize the backend
+   */
+  initialize(inputSize: Size, batches = 1) {
+    this.backend.initialize(inputSize, batches);
+  }
+
+  /**
    * add layer to network
    */
   addLayer(layer: Layer) {
     this.backend.addLayer(layer);
   }
 
+  /**
+   * feed an input through the layers
+   */
+  // deno-lint-ignore no-explicit-any
+  async feedForward(input: any): Promise<any> {
+    return await this.backend.feedForward(input);
+  }
   /**
    * train network
    */
@@ -96,6 +111,12 @@ export class NeuralNetwork {
    */
   getBiases() {
     return this.backend.getBiases();
+  }
+  /**
+   * get layers from the backend
+   */
+  getLayer(index: number) {
+    return this.backend.layers[index];
   }
 }
 

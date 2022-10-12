@@ -20,7 +20,7 @@ export interface LayerJSON {
   cost?: MatrixJSON;
   kernel?: MatrixJSON;
   padded?: MatrixJSON;
-  stride?: number;
+  strides?: Size;
   padding?: number;
 }
 
@@ -42,8 +42,14 @@ export interface MatrixJSON {
 }
 export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
+  layers: Array<any>;
+  initialize(
+    inputSize: Size,
+    batches: number,
+    type?: DataType,
+  ): void | Promise<void>;
+  // deno-lint-ignore no-explicit-any
   addLayer(layer: Layer | any, index?: number): void;
-  // getOutput(): DataTypeArray<T> | any;
   train(
     // deno-lint-ignore no-explicit-any
     datasets: DataSet[] | any,
@@ -53,6 +59,8 @@ export interface Backend<T extends DataType = DataType> {
   ): void;
   // deno-lint-ignore no-explicit-any
   predict(input: DataTypeArray<T> | any): DataTypeArray<T> | any;
+  // deno-lint-ignore no-explicit-any
+  feedForward(input: any): Promise<any> | any;
   save(input: string): void;
   toJSON(): NetworkJSON | Promise<NetworkJSON> | undefined;
   // deno-lint-ignore no-explicit-any
@@ -87,11 +95,11 @@ export interface ConvLayerConfig {
   kernel: DataTypeArray;
   kernelSize: Size2D;
   padding?: number;
-  stride?: number;
+  strides?: Size;
 }
 
 export interface PoolLayerConfig {
-  stride: number;
+  strides?: Size;
 }
 
 export type Size = number | Size2D;

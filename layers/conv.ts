@@ -23,7 +23,7 @@ export class ConvLayer {
       kernel: layerJSON.kernel!.data,
       kernelSize: { x: layerJSON.kernel!.x, y: layerJSON.kernel!.y },
       padding: layerJSON.padding,
-      stride: layerJSON.stride,
+      strides: layerJSON.strides,
     });
     layer.load = true;
     layer.data = layerJSON;

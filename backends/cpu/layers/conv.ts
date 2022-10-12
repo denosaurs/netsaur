@@ -5,7 +5,7 @@ import {
   Size,
   Size2D,
 } from "../../../core/types.ts";
-import { iterate2D } from "../../../core/util.ts";
+import { iterate2D, to2D } from "../../../core/util.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -17,7 +17,7 @@ import { CPUMatrix } from "../matrix.ts";
 export class ConvCPULayer {
   outputSize!: Size2D;
   padding: number;
-  stride: number;
+  strides: Size2D;
 
   input!: CPUMatrix;
   kernel!: CPUMatrix;
@@ -31,7 +31,7 @@ export class ConvCPULayer {
       config.kernelSize.y,
     );
     this.padding = config.padding || 0;
-    this.stride = config.stride || 1;
+    this.strides = to2D(config.strides);
   }
 
   reset(_batches: number) {
@@ -44,8 +44,8 @@ export class ConvCPULayer {
       this.padded = CPUMatrix.with(wp, hp);
       this.padded.fill(255);
     }
-    const wo = 1 + Math.floor((wp - this.kernel.x) / this.stride);
-    const ho = 1 + Math.floor((hp - this.kernel.y) / this.stride);
+    const wo = 1 + Math.floor((wp - this.kernel.x) / this.strides.x);
+    const ho = 1 + Math.floor((hp - this.kernel.y) / this.strides.y);
     this.output = CPUMatrix.with(wo, ho);
     this.outputSize = { x: wo, y: ho };
   }
@@ -62,7 +62,7 @@ export class ConvCPULayer {
     iterate2D(this.output, (i: number, j: number) => {
       let sum = 0;
       iterate2D(this.kernel, (x: number, y: number) => {
-        const k = this.padded.x * (j * this.stride + y) + (i * this.stride + x);
+        const k = this.padded.x * (j * this.strides.y + y) + (i * this.strides.x + x);
         const l = y * this.kernel.x + x;
         sum += this.padded.data[k] * this.kernel.data[l];
       });
@@ -82,19 +82,19 @@ export class ConvCPULayer {
       kernel: this.kernel.toJSON(),
       padded: this.padded.toJSON(),
       output: this.output.toJSON(),
-      stride: this.stride,
+      strides: this.strides,
       padding: this.padding,
     };
   }
 
   static fromJSON(
-    { outputSize, input, kernel, padded, output, stride, padding }: LayerJSON,
+    { outputSize, input, kernel, padded, output, strides, padding }: LayerJSON,
   ): ConvCPULayer {
     const layer = new ConvCPULayer({
       kernel: (kernel as MatrixJSON).data,
       kernelSize: { x: (kernel as MatrixJSON).x, y: (kernel as MatrixJSON).y },
       padding,
-      stride,
+      strides,
     });
     layer.input = new CPUMatrix(input.data, input.x, input.y);
     layer.outputSize = outputSize as Size2D;

@@ -4,6 +4,7 @@ build/
 xor_model.bin
 esr.bin
 node_modules/
+output.png
 digit_model.bin
 package-lock.json
 test.ts
