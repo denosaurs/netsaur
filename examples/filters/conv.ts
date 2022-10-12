@@ -54,7 +54,7 @@ const net = await new NeuralNetwork({
       padding: 1,
       strides: 1,
     }),
-    new PoolLayer({ strides: 2 }),
+    new PoolLayer({ strides: 2, mode: "max" }),
     new DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",

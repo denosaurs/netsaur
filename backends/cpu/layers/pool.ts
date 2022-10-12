@@ -4,7 +4,7 @@ import {
   Size,
   Size2D,
 } from "../../../core/types.ts";
-import { to2D } from "../../../core/util.ts";
+import { average, to2D } from "../../../core/util.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -16,12 +16,13 @@ import { CPUMatrix } from "../matrix.ts";
 export class PoolCPULayer {
   outputSize!: Size2D;
   strides: Size2D;
-
+  mode: "max" | "avg";
   input!: CPUMatrix;
   output!: CPUMatrix;
 
   constructor(config: PoolLayerConfig) {
     this.strides = to2D(config.strides);
+    this.mode = config.mode ?? "max";
   }
 
   reset(_batches: number) {
@@ -45,7 +46,7 @@ export class PoolCPULayer {
             pool.push(input.data[idx]);
           }
         }
-        this.output.data[j * this.output.x + i] = Math.max(...pool);
+        this.output.data[j * this.output.x + i] = (this.mode === "max" ? Math.max : average)(...pool);
       }
     }
     return this.output;
@@ -61,13 +62,14 @@ export class PoolCPULayer {
       input: this.input.toJSON(),
       output: this.output.toJSON(),
       strides: this.strides,
+      mode: this.mode,
     };
   }
 
   static fromJSON(
-    { outputSize, input, output, strides }: LayerJSON,
+    { outputSize, input, output, strides, mode }: LayerJSON,
   ): PoolCPULayer {
-    const layer = new PoolCPULayer({ strides: strides });
+    const layer = new PoolCPULayer({ strides, mode });
     layer.input = new CPUMatrix(input.data, input.x, input.y);
     layer.outputSize = outputSize as Size2D;
     layer.output = new CPUMatrix(output.data, output.x, output.y);

@@ -22,6 +22,7 @@ export interface LayerJSON {
   padded?: MatrixJSON;
   strides?: Size;
   padding?: number;
+  mode?: "max" | "avg"
 }
 
 export interface NetworkJSON {
@@ -100,6 +101,7 @@ export interface ConvLayerConfig {
 
 export interface PoolLayerConfig {
   strides?: Size;
+  mode?: "max" | "avg"
 }
 
 export type Size = number | Size2D;

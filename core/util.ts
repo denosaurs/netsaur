@@ -328,3 +328,6 @@ export function toNestedArray(
 
   return createNestedArray(0, shape, a, isComplex);
 }
+
+export const average = (...args: number[]) =>
+  args.reduce((a, b) => a + b) / args.length;
