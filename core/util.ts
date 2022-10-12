@@ -1,6 +1,12 @@
 import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
 import { CPUMatrix } from "../backends/cpu/matrix.ts";
-import type { RecursiveArray, Size, Size2D, TypedArray } from "./types.ts";
+import type {
+  RecursiveArray,
+  Size,
+  Size2D,
+  TensorLike,
+  TypedArray,
+} from "./types.ts";
 
 export const isTypedArray = (
   // deno-lint-ignore ban-types
@@ -239,7 +245,7 @@ export function randUniform(a: number, b: number) {
 }
 
 export function flatten<
-  T extends number | boolean | string | Promise<number> | TypedArray,
+  T extends number | Promise<number> | TypedArray,
 >(
   arr: T | RecursiveArray<T>,
   result: T[] = [],
@@ -331,3 +337,30 @@ export function toNestedArray(
 
 export const average = (...args: number[]) =>
   args.reduce((a, b) => a + b) / args.length;
+
+export function inferShape(val: TensorLike): number[] {
+  let firstElem: typeof val = val;
+
+  if (isTypedArray(val)) {
+    return [val.length];
+  }
+  if (!Array.isArray(val)) {
+    return [];
+  }
+  const shape: number[] = [];
+
+  while (
+    Array.isArray(firstElem) ||
+    isTypedArray(firstElem)
+  ) {
+    shape.push(firstElem.length);
+    firstElem = firstElem[0];
+  }
+  if (
+    Array.isArray(val)
+  ) {
+    // TODO: assert shape
+  }
+
+  return shape;
+}

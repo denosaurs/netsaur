@@ -22,7 +22,7 @@ export interface LayerJSON {
   padded?: MatrixJSON;
   strides?: Size;
   padding?: number;
-  mode?: "max" | "avg"
+  mode?: "max" | "avg";
 }
 
 export interface NetworkJSON {
@@ -101,10 +101,12 @@ export interface ConvLayerConfig {
 
 export interface PoolLayerConfig {
   strides?: Size;
-  mode?: "max" | "avg"
+  mode?: "max" | "avg";
 }
 
 export type Size = number | Size2D;
+
+export type Size1D = number | { x: number };
 
 export type Size2D = { x: number; y: number };
 
@@ -183,21 +185,15 @@ export type DataSet = {
 export type TensorLike =
   | TypedArray
   | number
-  | boolean
-  | string
   | RecursiveArray<number | number[] | TypedArray>
-  | RecursiveArray<boolean>
-  | RecursiveArray<string>
   | Uint8Array[];
 
-export type ScalarLike = number | boolean | string | Uint8Array;
+export type ScalarLike = number | Uint8Array;
 
 /** @docalias TypedArray|Array */
 export type TensorLike1D =
   | TypedArray
   | number[]
-  | boolean[]
-  | string[]
   | Uint8Array[];
 
 /** @docalias TypedArray|Array */
@@ -205,10 +201,6 @@ export type TensorLike2D =
   | TypedArray
   | number[]
   | number[][]
-  | boolean[]
-  | boolean[][]
-  | string[]
-  | string[][]
   | Uint8Array[]
   | Uint8Array[][];
 
@@ -217,10 +209,6 @@ export type TensorLike3D =
   | TypedArray
   | number[]
   | number[][][]
-  | boolean[]
-  | boolean[][][]
-  | string[]
-  | string[][][]
   | Uint8Array[]
   | Uint8Array[][][];
 
@@ -229,10 +217,6 @@ export type TensorLike4D =
   | TypedArray
   | number[]
   | number[][][][]
-  | boolean[]
-  | boolean[][][][]
-  | string[]
-  | string[][][][]
   | Uint8Array[]
   | Uint8Array[][][][];
 
@@ -241,10 +225,6 @@ export type TensorLike5D =
   | TypedArray
   | number[]
   | number[][][][][]
-  | boolean[]
-  | boolean[][][][][]
-  | string[]
-  | string[][][][][]
   | Uint8Array[]
   | Uint8Array[][][][][];
 
@@ -253,9 +233,5 @@ export type TensorLike6D =
   | TypedArray
   | number[]
   | number[][][][][][]
-  | boolean[]
-  | boolean[][][][][][]
-  | string[]
-  | string[][][][][][]
   | Uint8Array[]
   | Uint8Array[][][][][];
