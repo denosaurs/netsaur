@@ -71,22 +71,22 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
   }
 
   async initialize(inputSize: Size, batches: number, type: DataType) {
-    await this.layers[0].initialize(type, inputSize, batches);
+    await this.layers[0].initialize( inputSize, batches, type);
     for (let i = 1; i < this.layers.length; i++) {
       const current = this.layers[i];
       const previous = this.layers[i - 1];
       await current.initialize(
-        type,
         previous.outputSize,
         batches,
+        type,
       );
     }
 
     const lastLayer = this.layers[this.layers.length - 1];
     await this.output.initialize(
-      type,
       lastLayer.outputSize,
       batches,
+      type,
     );
   }
 

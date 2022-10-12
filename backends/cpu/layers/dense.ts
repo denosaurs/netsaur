@@ -17,6 +17,7 @@ import {
   Sigmoid,
   Tanh,
 } from "../activation.ts";
+import { CPUCostFunction, CrossEntropy } from "../cost.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -28,6 +29,7 @@ import { CPUMatrix } from "../matrix.ts";
 export class DenseCPULayer {
   outputSize: number;
   activationFn: CPUActivationFn = new Sigmoid();
+  costFunction: CPUCostFunction = new CrossEntropy();
 
   input!: CPUMatrix;
   weights!: CPUMatrix;
@@ -93,7 +95,7 @@ export class DenseCPULayer {
     return this.output;
   }
 
-  backPropagate(error: CPUMatrix, rate: number) {
+  backPropagate(error: CPUMatrix, rate: number, _costFn: CPUCostFunction = this.costFunction,) {
     const cost = CPUMatrix.with(error.x, error.y);
     for (const i in cost.data) {
       const activation = this.activationFn.prime(this.output.data[i]);
@@ -113,6 +115,7 @@ export class DenseCPULayer {
     return {
       outputSize: this.outputSize,
       activationFn: this.activationFn.name,
+      costFn: this.costFunction.name,
       type: "dense",
       input: this.input.toJSON(),
       weights: this.weights.toJSON(),

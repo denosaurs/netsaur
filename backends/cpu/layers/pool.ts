@@ -11,7 +11,7 @@ import { CPUMatrix } from "../matrix.ts";
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
 
 /**
- * MaxPool layer.
+ * Pooling layer.
  */
 export class PoolCPULayer {
   outputSize!: Size2D;

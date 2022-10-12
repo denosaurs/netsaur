@@ -19,7 +19,7 @@ const net = await new NeuralNetwork({
   silent: true,
   layers: [
     new ConvLayer({
-      activation: "sigmoid",
+      activation: "linear",
       kernel: kernel,
       kernelSize: { x: 3, y: 3 },
       padding: 2,

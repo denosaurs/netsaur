@@ -55,7 +55,7 @@ export class DenseGPULayer {
     }
   }
 
-  async initialize(type: DataType, inputSize: Size, batches: number) {
+  async initialize(inputSize: Size, batches: number, type: DataType) {
     const b = this.#backend;
     const weights = new (fromType(type))(this.outputSize * to1D(inputSize))
       .map(() => Math.random() * 2 - 1);
