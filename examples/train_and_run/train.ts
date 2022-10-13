@@ -1,4 +1,4 @@
-import { DenseLayer, NeuralNetwork } from "../../mod.ts";
+import { DenseLayer, NeuralNetwork, Rank, Tensor } from "../../mod.ts";
 import { CPU } from "../../backends/cpu/mod.ts";
 import { Model } from "../../model/mod.ts";
 
@@ -15,7 +15,15 @@ const time = performance.now();
 
 await net.train(
   [
-    { inputs: [0, 0, 1, 0, 0, 1, 1, 1], outputs: [0, 1, 1, 0] },
+    {
+      inputs: new Tensor<Rank.R2>([
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ]).flatten(),
+      outputs: [0, 1, 1, 0],
+    },
   ],
   5000,
   4,

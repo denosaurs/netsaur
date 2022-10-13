@@ -1,4 +1,4 @@
-import { DataType } from "../deps.ts";
+import { DataType, DataTypeArray } from "../deps.ts";
 import { Rank, ShapeMap, TensorLike, TypedArray } from "./types.ts";
 import { computeStrides, flatten, inferShape, sizeFromShape } from "./util.ts";
 
@@ -26,8 +26,8 @@ export class Tensor<R extends Rank = Rank> {
     return this.shape.length;
   }
   
-  flatten() {
-    if (this.rank > 2) return this.data;
-    return flatten(this.data as TypedArray)
+  flatten(): DataTypeArray {
+    if (this.rank > 2) return this.data as DataTypeArray;
+    return flatten(this.data as TypedArray) as DataTypeArray
   }
 }

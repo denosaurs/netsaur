@@ -1,4 +1,10 @@
-import { ConvLayer, DenseLayer, NeuralNetwork } from "../../mod.ts";
+import {
+  ConvLayer,
+  DenseLayer,
+  NeuralNetwork,
+  Rank,
+  Tensor,
+} from "../../mod.ts";
 import { CPU, CPUMatrix } from "../../backends/cpu/mod.ts";
 import { ConvCPULayer } from "../../backends/cpu/layers/conv.ts";
 import { PoolCPULayer } from "../../backends/cpu/layers/pool.ts";
@@ -32,25 +38,19 @@ for (let i = 0; i < dim * dim; i++) {
   buf[i] = img[i * 4];
 }
 
-const kernel = new Float32Array([
-  -1,
-  1,
-  0,
-  -1,
-  1,
-  0,
-  -1,
-  1,
-  0,
-]) as DataTypeArray<"f32">;
+const kernel = new Tensor<Rank.R2>([
+  [-1, 1, 0],
+  [-1, 1, 0],
+  [-1, 1, 0],
+]);
 
 const net = await new NeuralNetwork({
   silent: true,
   layers: [
     new ConvLayer({
       activation: "linear",
-      kernel: kernel,
-      kernelSize: { x: 3, y: 3 },
+      kernel: new Float32Array(kernel.flatten()),
+      kernelSize: { x: kernel.shape[1], y: kernel.shape[0] },
       padding: 1,
       strides: 1,
     }),
@@ -66,7 +66,6 @@ const input = new CPUMatrix(buf, dim, dim);
 const conv = net.getLayer(0) as ConvCPULayer;
 const pool = net.getLayer(1) as PoolCPULayer;
 
-
 net.initialize({ x: dim, y: dim }, 1);
 net.feedForward(input);
 
@@ -78,9 +77,11 @@ for (let i = 0; i < dim; i++) {
   }
 }
 
-for (let i = 0; i <  conv.output.x; i++) {
-  for (let j = 0; j <  conv.output.y; j++) {
-    const pixel = Math.round(Math.max(Math.min( conv.output.data[j *  conv.output.x + i], 255), 0));
+for (let i = 0; i < conv.output.x; i++) {
+  for (let j = 0; j < conv.output.y; j++) {
+    const pixel = Math.round(
+      Math.max(Math.min(conv.output.data[j * conv.output.x + i], 255), 0),
+    );
     ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
     ctx.fillRect(i * 10 + dim * 10, j * 10, 10, 10);
   }

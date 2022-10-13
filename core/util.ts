@@ -250,7 +250,7 @@ export function flatten<
   arr: T | RecursiveArray<T>,
   result: T[] = [],
   skipTypedArray = false,
-): T[] {
+): T[] | ArrayBufferLike {
   if (result == null) {
     result = [];
   }
