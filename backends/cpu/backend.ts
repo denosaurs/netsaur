@@ -129,17 +129,19 @@ export class CPUBackend implements Backend {
 
   train(
     datasets: DataSet[],
-    epochs: number,
-    batches: number,
-    rate: number,
+    epochs = 5000,
+    batches = 1,
+    rate = 0.1,
   ): void {
-    const inputSize = this.input || datasets[0].inputs.length / batches;
+    batches = datasets[0].inputs.tensor ? datasets[0].inputs.size.y : batches;
+    const inputSize = datasets[0].inputs.tensor ? datasets[0].inputs.size.x : (this.input || datasets[0].inputs.length / batches);
 
-    this.initialize(inputSize, batches);
+    this.initialize(inputSize, batches ?? datasets[0].inputs.size.y);
 
     if (!(datasets[0].inputs as DataTypeArray).BYTES_PER_ELEMENT) {
       for (const dataset of datasets) {
-        dataset.inputs = new Float32Array(dataset.inputs);
+        
+        dataset.inputs = new Float32Array(dataset.inputs.tensor ? dataset.inputs.data : dataset.inputs);
         dataset.outputs = new Float32Array(dataset.outputs);
       }
     }
@@ -147,7 +149,7 @@ export class CPUBackend implements Backend {
       if (!this.silent) console.log(`Epoch ${e + 1}/${epochs}`);
       for (const dataset of datasets) {
         const input = new CPUMatrix(
-          dataset.inputs as DataTypeArray,
+          (dataset.inputs.tensor ? dataset.inputs.data : dataset.inputs) as DataTypeArray,
           to1D(inputSize),
           batches,
         );

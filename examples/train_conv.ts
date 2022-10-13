@@ -45,6 +45,7 @@ const input = new CPUMatrix(
   buf.size.x,
   buf.size.y,
 );
+
 const conv = net.getLayer(0) as ConvCPULayer;
 const pool = net.getLayer(1) as PoolCPULayer;
 net.initialize(buf.size, 1);

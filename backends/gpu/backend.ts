@@ -124,10 +124,11 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
 
   async train(
     datasets: DataSet[],
-    epochs: number,
-    batches: number,
-    rate: number,
+    epochs = 5000,
+    batches = 1,
+    rate = 0.1,
   ) {
+    if (datasets[0].inputs.tensor) throw new Error("Tensors not supported for gpu")
     const type = getType(datasets[0].inputs as DataTypeArray<T>);
     const inputSize = this.input || datasets[0].inputs.length / batches;
     const outputSize = datasets[0].outputs.length / batches;

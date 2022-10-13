@@ -20,13 +20,11 @@ await net.train(
         [1, 0],
         [0, 1],
         [1, 1],
-      ]).data,
+      ]),
       outputs: [0, 1, 1, 0],
     },
   ],
   5000,
-  4,
-  0.1,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);

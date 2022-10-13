@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { ConvLayer, DenseLayer, PoolLayer } from "../mod.ts";
+import { ConvLayer, DenseLayer, PoolLayer, Tensor } from "../mod.ts";
 import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
 import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
 import { DenseGPULayer } from "../backends/gpu/layers/dense.ts";
@@ -176,11 +176,12 @@ export type NumberArray<T extends DataType = DataType> =
   // TODO: fix
   // deno-lint-ignore no-explicit-any
   | any;
+
 /**
  * DataSet is a container for training data.
  */
 export type DataSet = {
-  inputs: NumberArray;
+  inputs: NumberArray | { data: DataTypeArray; tensor: Tensor<Rank.R2>, size: Size2D };
   outputs: NumberArray;
 };
 

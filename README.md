@@ -27,7 +27,7 @@
 ### Usage
 
 ```typescript
-import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
+import { DenseLayer, NeuralNetwork, tensor2D } from "https://deno.land/x/netsaur/mod.ts";
 
 const net = new NeuralNetwork({
   silent: true,
@@ -40,11 +40,17 @@ const net = new NeuralNetwork({
 
 await net.train(
   [
-    { inputs: [0, 0, 1, 0, 0, 1, 1, 1], outputs: [0, 1, 1, 0] },
+    {
+      inputs: tensor2D([
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ]),
+      outputs: [0, 1, 1, 0],
+    },
   ],
   5000,
-  4,
-  0.1,
 );
 
 console.log(await net.predict(new Float32Array([0, 0])));
