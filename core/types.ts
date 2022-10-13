@@ -110,6 +110,9 @@ export type Size1D = number | { x: number };
 
 export type Size2D = { x: number; y: number };
 
+export type Size3D = { x: number; y: number, z: number };
+
+
 /**
  * Activation functions are used to transform the output of a layer into a new output.
  */

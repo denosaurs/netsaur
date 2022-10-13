@@ -1,4 +1,4 @@
-import { DenseLayer, NeuralNetwork, Rank, Tensor } from "../mod.ts";
+import { DenseLayer, NeuralNetwork, tensor2D } from "../mod.ts";
 import { GPU } from "../backends/gpu/mod.ts";
 
 const net = await new NeuralNetwork({
@@ -15,12 +15,12 @@ const time = performance.now();
 await net.train(
   [
     {
-      inputs: new Tensor<Rank.R2>([
+      inputs: tensor2D([
         [0, 0],
         [1, 0],
         [0, 1],
         [1, 1],
-      ]).flatten(),
+      ]).data,
       outputs: [0, 1, 1, 0],
     },
   ],

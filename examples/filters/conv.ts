@@ -2,8 +2,7 @@ import {
   ConvLayer,
   DenseLayer,
   NeuralNetwork,
-  Rank,
-  Tensor,
+  tensor2D,
 } from "../../mod.ts";
 import { CPU, CPUMatrix } from "../../backends/cpu/mod.ts";
 import { ConvCPULayer } from "../../backends/cpu/layers/conv.ts";
@@ -38,7 +37,7 @@ for (let i = 0; i < dim * dim; i++) {
   buf[i] = img[i * 4];
 }
 
-const kernel = new Tensor<Rank.R2>([
+const kernel = tensor2D([
   [-1, 1, 0],
   [-1, 1, 0],
   [-1, 1, 0],
@@ -49,8 +48,8 @@ const net = await new NeuralNetwork({
   layers: [
     new ConvLayer({
       activation: "linear",
-      kernel: new Float32Array(kernel.flatten()),
-      kernelSize: { x: kernel.shape[1], y: kernel.shape[0] },
+      kernel: new Float32Array(kernel.data),
+      kernelSize: kernel.size,
       padding: 1,
       strides: 1,
     }),
