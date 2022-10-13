@@ -56,6 +56,7 @@ export class ActivationError extends Error {
 }
 
 export const zeros = (size: number): Float32Array => new Float32Array(size);
+
 export const zeros2D = (width: number, height: number): Float32Array[] => {
   const result: Float32Array[] = new Array(height);
   for (let y = 0; y < height; y++) {
@@ -63,6 +64,7 @@ export const zeros2D = (width: number, height: number): Float32Array[] => {
   }
   return result;
 };
+
 export const zeros3D = (
   width: number,
   height: number,
@@ -74,6 +76,7 @@ export const zeros3D = (
   }
   return result;
 };
+
 export const ones = (size: number): Float32Array =>
   new Float32Array(size).fill(1);
 export const ones2D = (width: number, height: number): Float32Array[] => {

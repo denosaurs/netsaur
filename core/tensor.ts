@@ -1,6 +1,6 @@
 import { DataType, DataTypeArray } from "../deps.ts";
 import { Rank, ShapeMap, Size2D, Size3D, TensorLike, TypedArray } from "./types.ts";
-import { computeStrides, flatten, inferShape, sizeFromShape } from "./util.ts";
+import { computeStrides, flatten, inferShape, sizeFromShape, zeros2D } from "./util.ts";
 
 export class Tensor<R extends Rank = Rank> {
   readonly dtype: DataType;
@@ -36,10 +36,11 @@ export function tensor2D(
   values: TensorLike,
   shape?: ShapeMap[Rank.R2],
   dtype: DataType = "f32",
-): { data: DataTypeArray; size: Size2D } {
+): { data: DataTypeArray; tensor: Tensor<Rank.R2>, size: Size2D } {
   const _tensor = new Tensor<Rank.R2>(values, shape, dtype);
   return {
     data: _tensor.flatten(),
+    tensor: _tensor,
     size: {
       x: _tensor.shape[1],
       y: _tensor.shape[0],
@@ -51,15 +52,26 @@ export function tensor3D(
   values: TensorLike,
   shape?: ShapeMap[Rank.R3],
   dtype: DataType = "f32",
-): { data: DataTypeArray; size: Size3D } {
+): { data: DataTypeArray; tensor: Tensor<Rank.R3>, size: Size3D } {
   const _tensor = new Tensor<Rank.R3>(values, shape, dtype);
   return {
     data: _tensor.flatten(),
+    tensor: _tensor,
     size: {
-      x: _tensor.shape[1],
-      y: _tensor.shape[0],
-      z: _tensor.shape[2]
+      x: _tensor.shape[2],
+      y: _tensor.shape[1],
+      z: _tensor.shape[0]
     },
   };
+}
+
+export function tensorZeros2D(x: number, y: number) {
+  const array = zeros2D(x, y);
+  return tensor2D(array);
+}
+
+export function tensorRandom2D(x: number, y: number) {
+  const array = zeros2D(x, y).map(a => a.map(() => Math.random() * 2 - 1));
+  return tensor2D(array);
 }
 
