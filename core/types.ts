@@ -41,6 +41,7 @@ export interface MatrixJSON {
   y: number;
   type?: DataType;
 }
+
 export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
   layers: Array<any>;
@@ -79,11 +80,9 @@ export type Tensor2DCPU = CPUMatrix;
 export type Tensor2DGPU = GPUMatrix;
 // deno-lint-ignore no-explicit-any
 export type Tensor2DNative = any;
-// deno-lint-ignore no-explicit-any
-export type Tensor2D = Tensor2DCPU | any;
+export type Tensor2D = Tensor2DCPU | Tensor2DGPU | Tensor2DNative;
 // deno-lint-ignore no-explicit-any
 export type Tensor1D = Float32Array | any;
-
 
 /**
  * NetworkConfig represents the configuration of a neural network.
@@ -125,8 +124,7 @@ export type Size1D = number | { x: number };
 
 export type Size2D = { x: number; y: number };
 
-export type Size3D = { x: number; y: number, z: number };
-
+export type Size3D = { x: number; y: number; z: number };
 
 /**
  * Activation functions are used to transform the output of a layer into a new output.
@@ -143,12 +141,7 @@ export type Activation =
 
 export type Cost = "crossentropy" | "hinge" | "mse";
 
-
-
-export type Shape = number;
-
-
-export type ArrayMap = 
+export type ArrayMap =
   | number
   | number[]
   | number[][]
@@ -157,13 +150,11 @@ export type ArrayMap =
   | number[][][][][]
   | number[][][][][][];
 
-
 export type TypedArray = Float32Array | Int32Array | Uint8Array;
 
 export type NumberArray<T extends DataType = DataType> =
   | DataTypeArray<T>
   | Array<number>
-  // TODO: fix
   // deno-lint-ignore no-explicit-any
   | any;
 
@@ -171,16 +162,17 @@ export type NumberArray<T extends DataType = DataType> =
  * DataSet is a container for training data.
  */
 export type DataSet = {
-  inputs: NumberArray | Tensor2D;
-  outputs: NumberArray;
+  inputs: Tensor2D;
+  outputs: Tensor1D;
 };
 
 /** @docalias TypedArray|Array */
 export type TensorLike =
   | TypedArray
   | number[][]
+  | number[]
   | ArrayMap
-  | Uint8Array[];
+  | TypedArray[];
 
 export type ScalarLike = number | Uint8Array;
 
@@ -205,27 +197,3 @@ export type TensorLike3D =
   | number[][][]
   | Uint8Array[]
   | Uint8Array[][][];
-
-/** @docalias TypedArray|Array */
-export type TensorLike4D =
-  | TypedArray
-  | number[]
-  | number[][][][]
-  | Uint8Array[]
-  | Uint8Array[][][][];
-
-/** @docalias TypedArray|Array */
-export type TensorLike5D =
-  | TypedArray
-  | number[]
-  | number[][][][][]
-  | Uint8Array[]
-  | Uint8Array[][][][][];
-
-/** @docalias TypedArray|Array */
-export type TensorLike6D =
-  | TypedArray
-  | number[]
-  | number[][][][][][]
-  | Uint8Array[]
-  | Uint8Array[][][][][];

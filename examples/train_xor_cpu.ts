@@ -1,4 +1,4 @@
-import { DenseLayer, NeuralNetwork, tensor2D, tensor1D } from "../mod.ts";
+import { DenseLayer, NeuralNetwork, tensor1D, tensor2D } from "../mod.ts";
 import { CPU } from "../backends/cpu/mod.ts";
 
 const net = await new NeuralNetwork({
@@ -21,7 +21,7 @@ await net.train(
         [0, 1],
         [1, 1],
       ]),
-      outputs:  await tensor1D([0, 1, 1, 0]),
+      outputs: await tensor1D([0, 1, 1, 0]),
     },
   ],
   5000,

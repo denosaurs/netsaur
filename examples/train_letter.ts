@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { DenseLayer, NeuralNetwork } from "../mod.ts";
+import { DenseLayer, NeuralNetwork, tensor1D, tensor2D } from "../mod.ts";
 import { CPU } from "../backends/cpu/mod.ts";
 
 // https://github.com/BrainJS/brain.js/blob/master/examples/typescript/which-letter-simple.ts
@@ -46,9 +46,14 @@ const net = await new NeuralNetwork({
 
 net.train(
   [
-    { inputs: a, outputs: ["a".charCodeAt(0) / 255] },
-    { inputs: b, outputs: ["b".charCodeAt(0) / 255] },
-    { inputs: c, outputs: ["c".charCodeAt(0) / 255] },
+    {
+      inputs: await tensor2D([a, b, c]),
+      outputs: await tensor1D([
+        "a".charCodeAt(0) / 255,
+        "b".charCodeAt(0) / 255,
+        "c".charCodeAt(0) / 255,
+      ]),
+    },
   ],
   5000,
   1,

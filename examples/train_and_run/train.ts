@@ -1,4 +1,4 @@
-import { DenseLayer, NeuralNetwork, tensor2D } from "../../mod.ts";
+import { DenseLayer, NeuralNetwork, tensor1D, tensor2D } from "../../mod.ts";
 import { CPU } from "../../backends/cpu/mod.ts";
 import { Model } from "../../model/mod.ts";
 
@@ -16,13 +16,13 @@ const time = performance.now();
 await net.train(
   [
     {
-      inputs: tensor2D([
+      inputs: await tensor2D([
         [0, 0],
         [1, 0],
         [0, 1],
         [1, 1],
-      ]).data,
-      outputs: [0, 1, 1, 0],
+      ]),
+      outputs: await tensor1D([0, 1, 1, 0]),
     },
   ],
   5000,

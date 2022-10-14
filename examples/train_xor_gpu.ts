@@ -27,8 +27,6 @@ await net.train(
     },
   ],
   5000,
-  // 4,
-  // 0.1,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);

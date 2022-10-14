@@ -1,9 +1,9 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { DenseLayer, NeuralNetwork } from "../mod.ts";
+import { DenseLayer, NeuralNetwork, tensor1D, tensor2D } from "../mod.ts";
 import { CPU } from "../backends/cpu/mod.ts";
 
-const character = (string: string): Float32Array =>
-  Float32Array.from(string.trim().split("").map(integer));
+const character = (string: string) =>
+  Array.from(string.trim().split("").map(integer));
 
 const integer = (character: string): number => character === "#" ? 1 : 0;
 
@@ -69,8 +69,14 @@ const net = await new NeuralNetwork({
 
 net.train(
   [
-    { inputs: happy, outputs: ["a".charCodeAt(0) / 255] },
-    { inputs: sad, outputs: ["b".charCodeAt(0) / 255] },
+    {
+      inputs: await tensor2D([happy]),
+      outputs: await tensor1D(["a".charCodeAt(0) / 255]),
+    },
+    {
+      inputs: await tensor2D([sad]),
+      outputs: await tensor1D(["b".charCodeAt(0) / 255]),
+    },
   ],
   5000,
   1,

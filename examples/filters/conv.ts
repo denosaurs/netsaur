@@ -1,9 +1,4 @@
-import {
-  ConvLayer,
-  DenseLayer,
-  NeuralNetwork,
-  tensor2D,
-} from "../../mod.ts";
+import { ConvLayer, DenseLayer, NeuralNetwork } from "../../mod.ts";
 import { CPU, CPUMatrix } from "../../backends/cpu/mod.ts";
 import { ConvCPULayer } from "../../backends/cpu/layers/conv.ts";
 import { PoolCPULayer } from "../../backends/cpu/layers/pool.ts";
@@ -37,19 +32,19 @@ for (let i = 0; i < dim * dim; i++) {
   buf[i] = img[i * 4];
 }
 
-const kernel = tensor2D([
+const kernel = [
   [-1, 1, 0],
   [-1, 1, 0],
   [-1, 1, 0],
-]);
+].flat();
 
 const net = await new NeuralNetwork({
   silent: true,
   layers: [
     new ConvLayer({
       activation: "linear",
-      kernel: new Float32Array(kernel.data),
-      kernelSize: kernel.size,
+      kernel: new Float32Array(kernel),
+      kernelSize: { x: 3, y: 3 },
       padding: 1,
       strides: 1,
     }),
