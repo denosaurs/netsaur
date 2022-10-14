@@ -1,5 +1,7 @@
-import { DenseLayer, NeuralNetwork, tensor2D } from "../mod.ts";
+import { DenseLayer, NeuralNetwork, Tensor, tensor2D, tensor1D } from "../mod.ts";
 import { GPU } from "../backends/gpu/mod.ts";
+
+Tensor.setupBackend(GPU);
 
 const net = await new NeuralNetwork({
   silent: true,
@@ -15,18 +17,18 @@ const time = performance.now();
 await net.train(
   [
     {
-      inputs: tensor2D([
+      inputs: await tensor2D([
         [0, 0],
         [1, 0],
         [0, 1],
         [1, 1],
-      ]).data,
-      outputs: [0, 1, 1, 0],
+      ]),
+      outputs: await tensor1D([0, 1, 1, 0]),
     },
   ],
   5000,
-  4,
-  0.1,
+  // 4,
+  // 0.1,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);

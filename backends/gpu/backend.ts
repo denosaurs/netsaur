@@ -16,7 +16,7 @@ import {
   WebGPUBackend,
   WebGPUData,
 } from "../../deps.ts";
-import { fromType, getType, to1D } from "../../core/util.ts";
+import { fromType, getType } from "../../core/util.ts";
 import { GPUMatrix } from "./matrix.ts";
 import { DenseLayer } from "../../mod.ts";
 
@@ -128,32 +128,24 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     batches = 1,
     rate = 0.1,
   ) {
-    if (datasets[0].inputs.tensor) throw new Error("Tensors not supported for gpu")
-    const type = getType(datasets[0].inputs as DataTypeArray<T>);
-    const inputSize = this.input || datasets[0].inputs.length / batches;
+    const type = (datasets[0].inputs as GPUMatrix).type;
+    batches = (datasets[0].inputs as GPUMatrix).y || batches;
+    const inputSize = (datasets[0].inputs as GPUMatrix).x || this.input;
     const outputSize = datasets[0].outputs.length / batches;
 
-    await this.initialize(inputSize, batches, type);
+
+    await this.initialize(inputSize!, batches, type);
 
     const databuffers = [];
     for (const dataset of datasets) {
-      const inputArray = new (fromType(type))(dataset.inputs);
       const outputArray = new (fromType(type))(dataset.outputs);
-
-      const input = await GPUMatrix.from(
-        this.backend,
-        inputArray,
-        to1D(inputSize),
-        batches,
-      );
       const output = await GPUMatrix.from(
         this.backend,
         outputArray,
         outputSize,
         batches,
       );
-
-      databuffers.push({ input, output });
+      databuffers.push({ input: dataset.inputs, output });
     }
 
     for (let e = 0; e < epochs; e++) {

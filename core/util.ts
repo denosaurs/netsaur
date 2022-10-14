@@ -1,7 +1,6 @@
 import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
 import { CPUMatrix } from "../backends/cpu/matrix.ts";
 import type {
-  RecursiveArray,
   Size,
   Size2D,
   TensorLike,
@@ -250,7 +249,7 @@ export function randUniform(a: number, b: number) {
 export function flatten<
   T extends number | Promise<number> | TypedArray,
 >(
-  arr: T | RecursiveArray<T>,
+  arr: T,
   result: T[] = [],
   skipTypedArray = false,
 ): T[] | ArrayBufferLike {

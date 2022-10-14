@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { ConvLayer, DenseLayer, PoolLayer, Tensor } from "../mod.ts";
+import { ConvLayer, DenseLayer, PoolLayer } from "../mod.ts";
 import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
 import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
 import { DenseGPULayer } from "../backends/gpu/layers/dense.ts";
@@ -70,6 +70,19 @@ export interface Backend<T extends DataType = DataType> {
   getBiases(): (GPUMatrix | CPUMatrix | any)[];
 }
 
+export interface TensorBackend {
+  tensor2D(values: TensorLike, width: number, height: number): Tensor2D;
+  tensor1D(values: TensorLike): Tensor1D;
+}
+
+export type Tensor2DCPU = CPUMatrix;
+export type Tensor2DGPU = GPUMatrix;
+
+// deno-lint-ignore no-explicit-any
+export type Tensor2D = Tensor2DCPU | any;
+export type Tensor1D = Float32Array;
+
+
 /**
  * NetworkConfig represents the configuration of a neural network.
  */
@@ -128,48 +141,23 @@ export type Activation =
 
 export type Cost = "crossentropy" | "hinge" | "mse";
 
-export enum Rank {
-  R0 = "R0",
-  R1 = "R1",
-  R2 = "R2",
-  R3 = "R3",
-  R4 = "R4",
-  R5 = "R5",
-  R6 = "R6",
-}
+
 
 export type Shape = number;
 
-/** @docalias number[] */
-export interface ShapeMap {
-  R0: number[];
-  R1: [number];
-  R2: [number, number];
-  R3: [number, number, number];
-  R4: [number, number, number, number];
-  R5: [number, number, number, number, number];
-  R6: [number, number, number, number, number, number];
-}
 
-/** @docalias number[] */
-export interface ArrayMap {
-  R0: number;
-  R1: number[];
-  R2: number[][];
-  R3: number[][][];
-  R4: number[][][][];
-  R5: number[][][][][];
-  R6: number[][][][][][];
-}
+export type ArrayMap = 
+  | number
+  | number[]
+  | number[][]
+  | number[][][]
+  | number[][][][]
+  | number[][][][][]
+  | number[][][][][][];
+
 
 export type TypedArray = Float32Array | Int32Array | Uint8Array;
-// deno-lint-ignore no-explicit-any
-export interface RecursiveArray<T extends any> {
-  [index: number]: T | RecursiveArray<T>;
-}
-/**
- * NumberArray is a typed array of numbers.
- */
+
 export type NumberArray<T extends DataType = DataType> =
   | DataTypeArray<T>
   | Array<number>
@@ -181,15 +169,14 @@ export type NumberArray<T extends DataType = DataType> =
  * DataSet is a container for training data.
  */
 export type DataSet = {
-  inputs: NumberArray | { data: DataTypeArray; tensor: Tensor<Rank.R2>, size: Size2D };
+  inputs: NumberArray | Tensor2D;
   outputs: NumberArray;
 };
 
 /** @docalias TypedArray|Array */
 export type TensorLike =
   | TypedArray
-  | number
-  | RecursiveArray<number | number[] | TypedArray>
+  | ArrayMap
   | Uint8Array[];
 
 export type ScalarLike = number | Uint8Array;

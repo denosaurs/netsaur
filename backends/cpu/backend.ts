@@ -13,7 +13,7 @@ import type {
   PoolLayerConfig,
   Size,
 } from "../../core/types.ts";
-import { iterate1D, to1D } from "../../core/util.ts";
+import { iterate1D } from "../../core/util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
@@ -133,27 +133,16 @@ export class CPUBackend implements Backend {
     batches = 1,
     rate = 0.1,
   ): void {
-    batches = datasets[0].inputs.tensor ? datasets[0].inputs.size.y : batches;
-    const inputSize = datasets[0].inputs.tensor ? datasets[0].inputs.size.x : (this.input || datasets[0].inputs.length / batches);
+    
+    batches = datasets[0].inputs.y || batches;
+    const inputSize = datasets[0].inputs.x || this.input;
 
-    this.initialize(inputSize, batches ?? datasets[0].inputs.size.y);
+    this.initialize(inputSize, batches);
 
-    if (!(datasets[0].inputs as DataTypeArray).BYTES_PER_ELEMENT) {
-      for (const dataset of datasets) {
-        
-        dataset.inputs = new Float32Array(dataset.inputs.tensor ? dataset.inputs.data : dataset.inputs);
-        dataset.outputs = new Float32Array(dataset.outputs);
-      }
-    }
     iterate1D(epochs, (e: number) => {
       if (!this.silent) console.log(`Epoch ${e + 1}/${epochs}`);
       for (const dataset of datasets) {
-        const input = new CPUMatrix(
-          (dataset.inputs.tensor ? dataset.inputs.data : dataset.inputs) as DataTypeArray,
-          to1D(inputSize),
-          batches,
-        );
-        this.feedForward(input);
+        this.feedForward(dataset.inputs);
         this.backpropagate(dataset.outputs as DataTypeArray, rate);
       }
     });
