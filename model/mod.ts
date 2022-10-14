@@ -9,11 +9,16 @@ import { JSONModel } from "./json.ts";
 export class Model {
   static async load(
     path: string,
-    helper?: (data: NetworkJSON, silent: boolean) => Promise<Backend>,
+    helper?: {
+      model: (data: NetworkJSON, silent: boolean) => Promise<Backend>;
+    },
     format: ModelFormat = JSONModel,
     // deno-lint-ignore no-explicit-any
   ): Promise<any> {
-    return await NeuralNetwork.fromJSON(await format.load(path), helper);
+    return await NeuralNetwork.fromJSON(
+      await format.load(path),
+      helper ? helper.model : undefined,
+    );
   }
 
   static async save(
@@ -24,4 +29,3 @@ export class Model {
     await format.save(path, net);
   }
 }
-

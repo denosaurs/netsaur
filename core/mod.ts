@@ -25,9 +25,9 @@ export class NeuralNetwork {
    * setup backend and initialize network
    */
   async setupBackend(
-    backendLoader: (config: NetworkConfig) => Promise<Backend>,
+    backendLoader: {backend: (config: NetworkConfig) => Promise<Backend>},
   ) {
-    const backend = await backendLoader(this.config);
+    const backend = await backendLoader.backend(this.config);
     this.backend = backend ?? new CPUBackend(this.config);
     return this;
   }
