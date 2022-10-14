@@ -16,7 +16,7 @@ import {
   WebGPUBackend,
   WebGPUData,
 } from "../../deps.ts";
-import { fromType, getType } from "../../core/util.ts";
+import { getType } from "../../core/util.ts";
 import { GPUMatrix } from "./matrix.ts";
 import { DenseLayer } from "../../mod.ts";
 
@@ -138,10 +138,10 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
 
     const databuffers = [];
     for (const dataset of datasets) {
-      const outputArray = new (fromType(type))(dataset.outputs);
+      // const outputArray = new (fromType(type))();
       const output = await GPUMatrix.from(
         this.backend,
-        outputArray,
+        dataset.outputs,
         outputSize,
         batches,
       );

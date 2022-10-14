@@ -77,10 +77,12 @@ export interface TensorBackend {
 
 export type Tensor2DCPU = CPUMatrix;
 export type Tensor2DGPU = GPUMatrix;
-
+// deno-lint-ignore no-explicit-any
+export type Tensor2DNative = any;
 // deno-lint-ignore no-explicit-any
 export type Tensor2D = Tensor2DCPU | any;
-export type Tensor1D = Float32Array;
+// deno-lint-ignore no-explicit-any
+export type Tensor1D = Float32Array | any;
 
 
 /**
@@ -176,6 +178,7 @@ export type DataSet = {
 /** @docalias TypedArray|Array */
 export type TensorLike =
   | TypedArray
+  | number[][]
   | ArrayMap
   | Uint8Array[];
 

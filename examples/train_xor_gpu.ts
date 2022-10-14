@@ -1,7 +1,7 @@
 import { DenseLayer, NeuralNetwork, Tensor, tensor2D, tensor1D } from "../mod.ts";
 import { GPU } from "../backends/gpu/mod.ts";
 
-Tensor.setupBackend(GPU);
+await Tensor.setupBackend(GPU);
 
 const net = await new NeuralNetwork({
   silent: true,

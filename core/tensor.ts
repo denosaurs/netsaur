@@ -1,12 +1,14 @@
 import { TensorCPUBackend } from "../backends/cpu/tensor.ts";
-import {  TensorLike, TensorBackend } from "./types.ts";
-import {  inferShape } from "./util.ts";
+import { TensorBackend, TensorLike } from "./types.ts";
+import { inferShape } from "./util.ts";
 
 export class Tensor {
   static backend: TensorBackend = new TensorCPUBackend();
 
-  static setupBackend(backend: { tensor: TensorBackend}) {
-    Tensor.backend = backend.tensor;
+  static async setupBackend(
+    backend: { tensor: () => TensorBackend | Promise<TensorBackend> },
+  ) {
+    Tensor.backend = await backend.tensor();
   }
 }
 
@@ -20,8 +22,9 @@ export async function tensor2D(
 }
 
 export async function tensor1D(
-  values: TensorLike
+  values: TensorLike,
 ) {
-  if (Array.isArray(values[0])) throw new Error("Invalid 1D Tensor");
+  // deno-lint-ignore no-explicit-any
+  if (Array.isArray((values as any)[0])) throw new Error("Invalid 1D Tensor");
   return await Tensor.backend.tensor1D(values);
 }

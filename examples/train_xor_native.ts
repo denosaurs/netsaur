@@ -1,6 +1,7 @@
-import { NeuralNetwork, DenseLayer } from "../mod.ts";
-import { Native, Matrix } from "../backends/native/mod.ts";
+import { NeuralNetwork, DenseLayer, Tensor, tensor2D, tensor1D } from "../mod.ts";
+import { Native } from "../backends/native/mod.ts";
 
+Tensor.setupBackend(Native);
 const start = performance.now();
 
 const network = await new NeuralNetwork({
@@ -15,13 +16,13 @@ const network = await new NeuralNetwork({
 network.train(
   [
     {
-      inputs: Matrix.of([
+      inputs: await tensor2D([
         [0, 0],
         [0, 1],
         [1, 0],
         [1, 1],
       ]),
-      outputs: Matrix.column([0, 1, 1, 0]),
+      outputs: await tensor1D([0, 1, 1, 0]),
     },
   ],
   5000,
@@ -32,7 +33,7 @@ console.log("training time", performance.now() - start, "milliseconds");
 
 console.log(
   await network.predict(
-    Matrix.of([
+    await tensor2D([
       [0, 0],
       [0, 1],
       [1, 0],

@@ -4,39 +4,36 @@ import { Core, WebGPUBackend } from "../../deps.ts";
 import { GPUBackend } from "./backend.ts";
 import { TensorGPUBackend } from "./tensor.ts";
 
-export const GPU = {
-  core: new Core(),
-  initialized: false,
-  init: async () => {
-    if (GPU.initialized) {
-      return GPU.core.backends.get("webgpu")! as WebGPUBackend;
-    }
-    await GPU.core.initialize();
-    return GPU.core.backends.get("webgpu")! as WebGPUBackend;
-  },
 
-  backend: async (config: NetworkConfig): Promise<Backend> => {
-    const silent = config.silent;
-    const backend = await GPU.init();
-    if (!backend.adapter) throw new Error("No backend adapter found!");
-    if (!silent) console.log(`Using adapter: ${backend.adapter}`);
-    const features = [...backend.adapter.features.values()];
+class GPUInstance {
+  static core = new Core();
+  static backend?: WebGPUBackend;
+  static initialized = false;
+
+  static async init(silent = false): Promise<void> {
+    if (GPUInstance.initialized) return;
+    await GPUInstance.core.initialize();
+    GPUInstance.backend = GPUInstance.core.backends.get("webgpu")! as WebGPUBackend;
+    GPUInstance.initialized = true;
+    if (!GPUInstance.backend.adapter) throw new Error("No backend adapter found!");
+    if (!silent) console.log(`Using adapter: ${GPUInstance.backend.adapter}`);
+    const features = [...GPUInstance.backend.adapter.features.values()];
     if (!silent) console.log(`Supported features: ${features.join(", ")}`);
-    return new GPUBackend(config, backend);
+  }
+}
+export const GPU = {
+  backend: async (config: NetworkConfig): Promise<Backend> => {
+    await GPUInstance.init(config.silent);
+    return new GPUBackend(config, GPUInstance.backend!);
   },
   model: async (data: NetworkJSON, silent = false): Promise<Backend> => {
-    const backend = await GPU.init();
-    if (!backend.adapter) throw new Error("No backend adapter found!");
-    if (!silent) console.log(`Using adapter: ${backend.adapter}`);
-    const features = [...backend.adapter.features.values()];
-    if (!silent) console.log(`Supported features: ${features.join(", ")}`);
-    const gpubackend = await GPUBackend.fromJSON(data, backend);
-    console.log(gpubackend);
+    await GPUInstance.init(silent);
+    const gpubackend = await GPUBackend.fromJSON(data, GPUInstance.backend!);
     return gpubackend;
   },
   tensor: async () => {
-    const _backend = await GPU.init();
-    return new TensorGPUBackend(_backend);
+    await GPUInstance.init(true);
+    return new TensorGPUBackend(GPUInstance.backend!);
   },
 };
 

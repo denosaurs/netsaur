@@ -18,7 +18,8 @@ export class TensorGPUBackend implements TensorBackend {
   ): Promise<Tensor2DGPU> {
     return await GPUMatrix.from(
       this.backend,
-      flatten(values as TypedArray) as Float32Array,
+      // deno-lint-ignore no-explicit-any
+      new Float32Array(flatten(values as TypedArray) as any),
       width,
       height,
     );

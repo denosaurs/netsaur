@@ -65,8 +65,7 @@ export class NativeBackend implements Backend {
 
   addLayer(_layer: Layer): void {
   }
-  initialize(_inputSize: Size, _batches: number): void {
-  }
+
   encodeLayer(layer: Layer): NativeLayer {
     switch (layer.type) {
       case "dense":
@@ -80,15 +79,14 @@ export class NativeBackend implements Backend {
     }
   }
 
-  predict(input: Matrix<"f32">): Matrix<"f32"> {
-    return new Matrix(network_feed_forward(this.#ptr, input.unsafePointer));
+  initialize(_inputSize: Size, _batches: number): void {
   }
 
   feedForward(input: Matrix<"f32">): Matrix<"f32"> {
     return new Matrix(network_feed_forward(this.#ptr, input.unsafePointer));
   }
 
-  train(datasets: Dataset[], epochs: number, learningRate: number) {
+  train(datasets: Dataset[], epochs = 5000, _batches = 1, rate = 0.1) {
     const datasetBuffers = datasets.map((e) =>
       new BigUint64Array(
         [e.inputs.unsafePointer, e.outputs.unsafePointer].map(BigInt),
@@ -102,16 +100,20 @@ export class NativeBackend implements Backend {
       datasets.length,
       datasetBufferPointers,
       epochs,
-      learningRate,
+      rate,
     );
   }
 
-  static load(path: string): NativeBackend {
-    return new NativeBackend(network_load(cstr(path)));
+  predict(input: Matrix<"f32">): Matrix<"f32"> {
+    return new Matrix(network_feed_forward(this.#ptr, input.unsafePointer));
   }
 
   save(path: string) {
     network_save(this.#ptr, cstr(path));
+  }
+
+  static load(path: string): NativeBackend {
+    return new NativeBackend(network_load(cstr(path)));
   }
 
   free(): void {
