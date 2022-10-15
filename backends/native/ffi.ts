@@ -170,9 +170,11 @@ const symbols = {
   },
 } as const;
 
+const customPath = Deno.env.get("NETSAUR_NATIVE_PATH");
+
 const opts: FetchOptions = {
   name: "netsaur",
-  url: "https://github.com/denosaurs/netsaur/releases/download/0.1.5/",
+  url: "https://github.com/denosaurs/netsaur/releases/download/0.1.4/",
   prefixes: {
     darwin: "lib",
     windows: "lib",
@@ -180,7 +182,9 @@ const opts: FetchOptions = {
   },
 };
 
-const mod = await dlopen(opts, symbols);
+const mod = customPath
+  ? Deno.dlopen(customPath, symbols)
+  : await dlopen(opts, symbols);
 export default mod.symbols;
 
 export function cstr(str: string) {

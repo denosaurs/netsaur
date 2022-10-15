@@ -20,6 +20,8 @@ Matrix *layer_dense_feed_forward(Layer *layer, Matrix *input)
   DenseLayer *dense = layer->data;
 
   layer->input = input;
+  // matrix_print(input, "input");
+  // matrix_print(dense->weights, "weights");
   matrix_dot(input, dense->weights, layer->output);
   float *output_data = (float *)layer->output->data;
   float *bias_data = (float *)dense->biases->data;

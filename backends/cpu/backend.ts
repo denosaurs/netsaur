@@ -87,16 +87,16 @@ export class CPUBackend implements Backend {
   }
 
   initialize(inputSize: Size, batches: number) {
-    this.layers[0].initialize(inputSize, batches);
+    this.layers[0]?.initialize(inputSize, batches);
 
     for (let i = 1; i < this.layers.length; i++) {
       const current = this.layers[i];
       const previous = this.layers[i - 1];
-      current.initialize(previous.outputSize, batches);
+      current.initialize(previous?.outputSize || inputSize, batches);
     }
 
     const lastLayer = this.layers[this.layers.length - 1];
-    this.output.initialize(lastLayer.outputSize, batches);
+    this.output.initialize(lastLayer?.outputSize || inputSize, batches);
   }
 
   feedForward(input: CPUMatrix): CPUMatrix {
@@ -133,7 +133,6 @@ export class CPUBackend implements Backend {
     batches = 1,
     rate = 0.1,
   ): void {
-    
     batches = datasets[0].inputs.y || batches;
     const inputSize = datasets[0].inputs.x || this.input;
 
