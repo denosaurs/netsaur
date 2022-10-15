@@ -172,7 +172,7 @@ const symbols = {
 
 const opts: FetchOptions = {
   name: "netsaur",
-  url: "https://github.com/denosaurs/netsaur/releases/download/0.1.4/",
+  url: "https://github.com/denosaurs/netsaur/releases/download/0.1.5/",
   prefixes: {
     darwin: "lib",
     windows: "lib",
