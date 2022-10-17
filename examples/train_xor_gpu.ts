@@ -1,5 +1,7 @@
-import { DenseLayer, NeuralNetwork } from "../mod.ts";
-import { GPU } from "../backends/gpu.ts";
+import { DenseLayer, NeuralNetwork, Tensor, tensor2D, tensor1D } from "../mod.ts";
+import { GPU } from "../backends/gpu/mod.ts";
+
+await Tensor.setupBackend(GPU);
 
 const net = await new NeuralNetwork({
   silent: true,
@@ -10,18 +12,24 @@ const net = await new NeuralNetwork({
   cost: "crossentropy",
 }).setupBackend(GPU);
 
-const time = Date.now();
+const time = performance.now();
 
 await net.train(
   [
-    { inputs: [0, 0, 1, 0, 0, 1, 1, 1], outputs: [0, 1, 1, 0] },
+    {
+      inputs: await tensor2D([
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ]),
+      outputs: await tensor1D([0, 1, 1, 0]),
+    },
   ],
   5000,
-  4,
-  0.1,
 );
 
-console.log(`training time: ${Date.now() - time}ms`);
+console.log(`training time: ${performance.now() - time}ms`);
 console.log(await net.predict(new Float32Array([0, 0])));
 console.log(await net.predict(new Float32Array([1, 0])));
 console.log(await net.predict(new Float32Array([0, 1])));

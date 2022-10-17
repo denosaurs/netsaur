@@ -27,7 +27,12 @@
 ### Usage
 
 ```typescript
-import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
+import {
+  DenseLayer,
+  NeuralNetwork,
+  tensor1D,
+  tensor2D,
+} from "https://deno.land/x/netsaur/mod.ts";
 
 const net = new NeuralNetwork({
   silent: true,
@@ -40,11 +45,17 @@ const net = new NeuralNetwork({
 
 await net.train(
   [
-    { inputs: [0, 0, 1, 0, 0, 1, 1, 1], outputs: [0, 1, 1, 0] },
+    {
+      inputs: await tensor2D([
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ]),
+      outputs: await tensor1D([0, 1, 1, 0]),
+    },
   ],
   5000,
-  4,
-  0.1,
 );
 
 console.log(await net.predict(new Float32Array([0, 0])));
@@ -57,7 +68,10 @@ console.log(await net.predict(new Float32Array([1, 1])));
 
 ```typescript
 import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
-import { Matrix, Native } from "https://deno.land/x/netsaur/backends/native.ts";
+import {
+  Matrix,
+  Native,
+} from "https://deno.land/x/netsaur/backends/native/mod.ts";
 
 const network = await new NeuralNetwork({
   input: 2,
@@ -94,4 +108,55 @@ console.log(
     ]),
   ),
 );
+```
+
+### Saving Models
+
+```typescript
+import {
+  DenseLayer,
+  NeuralNetwork,
+  tensor1D,
+  tensor2D,
+} from "https://deno.land/x/netsaur/mod.ts";
+import { Model } from "https://deno.land/x/netsaur/model/mod.ts";
+
+const net = new NeuralNetwork({
+  silent: true,
+  layers: [
+    new DenseLayer({ size: 3, activation: "sigmoid" }),
+    new DenseLayer({ size: 1, activation: "sigmoid" }),
+  ],
+  cost: "crossentropy",
+});
+
+await net.train(
+  [
+    {
+      inputs: await tensor2D([
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ]),
+      outputs: await tensor1D([0, 1, 1, 0]),
+    },
+  ],
+  5000,
+);
+
+await Model.save("./network.json", net);
+```
+
+### Loading & Running Models
+
+```typescript
+import { Model } from "https://deno.land/x/netsaur/model/mod.ts";
+
+const net = await Model.load("./network.json");
+
+console.log(await net.predict(new Float32Array([0, 0])));
+console.log(await net.predict(new Float32Array([1, 0])));
+console.log(await net.predict(new Float32Array([0, 1])));
+console.log(await net.predict(new Float32Array([1, 1])));
 ```

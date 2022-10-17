@@ -1,5 +1,6 @@
-import { DenseLayer, NeuralNetwork, tensor1D, tensor2D } from "../mod.ts";
-import { CPU } from "../backends/cpu/mod.ts";
+import { DenseLayer, NeuralNetwork, tensor1D, tensor2D } from "../../mod.ts";
+import { CPU } from "../../backends/cpu/mod.ts";
+import { Model } from "../../model/mod.ts";
 
 const net = await new NeuralNetwork({
   silent: true,
@@ -25,10 +26,10 @@ await net.train(
     },
   ],
   5000,
+  4,
+  0.1,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
-console.log(await net.predict(new Float32Array([0, 0])));
-console.log(await net.predict(new Float32Array([1, 0])));
-console.log(await net.predict(new Float32Array([0, 1])));
-console.log(await net.predict(new Float32Array([1, 1])));
+
+await Model.save("./examples/train_and_run/network.json", net);
