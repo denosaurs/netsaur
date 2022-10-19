@@ -178,7 +178,7 @@ Matrix *matrix_dot(Matrix *a, Matrix *b, Matrix *result)
     return NULL;
   if (a->cols != b->rows)
   {
-    printf("Matrix dimensions do not match for dot product\n");
+    printf("Matrix dimensions do not match for dot product A: (%d, %d), B: (%d, %d)\n", a->rows, a->cols, b->rows, b->cols);
     return NULL;
   }
 

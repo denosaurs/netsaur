@@ -6,8 +6,9 @@ import {
   Layer,
   NetworkConfig,
   NetworkJSON,
-Size,
+  Size,
 } from "./types.ts";
+import { Data } from "../data/mod.ts";
 
 /**
  * base class for neural network
@@ -25,7 +26,7 @@ export class NeuralNetwork {
    * setup backend and initialize network
    */
   async setupBackend(
-    backendLoader: {backend: (config: NetworkConfig) => Promise<Backend>},
+    backendLoader: { backend: (config: NetworkConfig) => Promise<Backend> },
   ) {
     const backend = await backendLoader.backend(this.config);
     this.backend = backend ?? new CPUBackend(this.config);
@@ -57,7 +58,7 @@ export class NeuralNetwork {
    * train network
    */
   async train(
-    datasets: DataSet[],
+    datasets: (DataSet | Data)[],
     epochs = 1000,
     batches = 1,
     learningRate = 0.1,
@@ -119,6 +120,3 @@ export class NeuralNetwork {
     return this.backend.layers[index];
   }
 }
-
-
-
