@@ -2,11 +2,8 @@ import {
   DataType,
   ensureDataType,
   WebGPUBackend,
-  WebGPUData,
 } from "../../../deps.ts";
 import { GPUMatrix } from "../matrix.ts";
-
-let uniform: WebGPUData;
 
 export async function backPropagate<T extends DataType>(
   backend: WebGPUBackend,
@@ -24,18 +21,11 @@ export async function backPropagate<T extends DataType>(
   costFn: string,
 ) {
   const type = ensureDataType(error.type, weights.type);
-  const code = shader(type, activation, costFn, rate);
+  const code = shader(type, activation, costFn, rate, weights.y, weights.x, prev.x, error.y, last);
   const pipeline = await backend.register(code);
-  const buffer = new Uint32Array([weights.y, weights.x, prev.x, error.y, last]);
-  if (!uniform) {
-    const usage = GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM;
-    uniform = await WebGPUData.from(backend, buffer, "u32", usage);
-  } else {
-    backend.device.queue.writeBuffer(uniform.buffer, 0, buffer);
-  }
   backend.execute(
     pipeline,
-    [weights.x, error.y, 1],
+    [1, 1, 1],
     [
       inputs.data,
       weights.data,
@@ -45,7 +35,6 @@ export async function backPropagate<T extends DataType>(
       error.data,
       result.data,
       prev.data,
-      uniform,
     ],
   );
 }
@@ -55,15 +44,12 @@ const shader = (
   activation: string,
   cost: string,
   rate: number,
+  input: number,
+  output: number,
+  prev: number,
+  batches: number,
+  layer: number,
 ) => `
-  struct Data {
-    inputSize: u32,
-    outputSize: u32,
-    prevSize: u32,
-    batches: u32,
-    layer: u32,
-  };
-  
   struct Matrix {
     values: array<${type}>,
   };
@@ -84,9 +70,6 @@ const shader = (
   var<storage, read_write> result: Matrix;
   @group(0) @binding(7)
   var<storage, read> prev: Matrix;
-
-  @group(0) @binding(8)
-  var<uniform> data: Data;
   
   fn activationPrime(output: ${type}) -> ${type} {
     ${activation};
@@ -96,17 +79,17 @@ const shader = (
     ${cost};
   }
   
-  @compute @workgroup_size(8, 8, 1)
+  @compute @workgroup_size(${output}, ${Math.max(batches, input)}, 1)
   fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    if (global_id.x < data.outputSize && global_id.y < data.batches) {
-      let idx = global_id.x + global_id.y * data.outputSize;
-      if (data.layer == 0u) {
+    if (global_id.y < ${batches}u) {
+      let idx = global_id.x + global_id.y * ${output}u;
+      if (${layer == 0}) {
         result.values[idx] = costPrime(error.values[idx], output.values[idx]);
       } else {
         var weighted_sum = ${type}(0);
-        for (var k = 0u; k < data.prevSize; k++) {
-          var a = k + global_id.y * data.prevSize;
-          var b = k + global_id.x * data.prevSize;    
+        for (var k = 0u; k < ${prev}u; k++) {
+          var a = k + global_id.y * ${prev}u;
+          var b = k + global_id.x * ${prev}u;    
           weighted_sum += prev.values[b] * error.values[a];
         };
         result.values[idx] = weighted_sum;
@@ -114,21 +97,21 @@ const shader = (
       cost.values[idx] = result.values[idx] * activationPrime(output.values[idx]);
     };
 
-    if (global_id.x < data.outputSize && global_id.y < 1u) {
-      for (var k = 0u; k < data.batches; k++) {
-        let idx = global_id.x + k * data.outputSize;
+    if (global_id.y < 1u) {
+      for (var k = 0u; k < ${batches}u; k++) {
+        let idx = global_id.x + k * ${output}u;
         biases.values[global_id.x] += cost.values[idx] * ${rate};
       }
     };
 
-    if (global_id.x < data.outputSize && global_id.y < data.inputSize) {
+    if (global_id.y < ${input}u) {
       var weighted_sum = ${type}(0);
-      for (var k = 0u; k < data.batches; k++) {
-        var a = global_id.y + k * data.inputSize;
-        var b = global_id.x + k * data.outputSize;    
+      for (var k = 0u; k < ${batches}u; k++) {
+        var a = global_id.y + k * ${input}u;
+        var b = global_id.x + k * ${output}u;    
         weighted_sum += cost.values[b] * inputs.values[a];
       };
-      let idx = global_id.x + global_id.y * data.outputSize;
+      let idx = global_id.x + global_id.y * ${output}u;
       weights.values[idx] += weighted_sum * ${rate};
     };
   }

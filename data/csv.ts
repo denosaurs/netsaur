@@ -19,8 +19,8 @@ export async function loadCsv(
       .pipeThrough(new CsvStream())
   );
   const colConfigs = Object.entries(config.columns ?? {});
-  const xs: number[][] = [];
-  const ys: number[][] = [];
+  const train_x: number[][] = [];
+  const train_y: number[][] = [];
   const labelCols = colConfigs.filter(([, col]) => col.label);
   if (labelCols.length === 0) {
     throw new Error("No label column was set");
@@ -48,11 +48,11 @@ export async function loadCsv(
         x.push(Number(value));
       }
     }
-    xs.push(x);
-    ys.push(y);
+    train_x.push(x);
+    train_y.push(y);
   }
   return {
-    xs: await tensor2D(xs),
-    ys: await tensor2D(ys),
+    train_x: await tensor2D(train_x),
+    train_y: await tensor2D(train_y),
   };
 }
