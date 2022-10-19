@@ -138,7 +138,6 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
 
     const databuffers = [];
     for (const dataset of datasets) {
-      // const outputArray = new (fromType(type))();
       const output = await GPUMatrix.from(
         this.backend,
         dataset.outputs,
