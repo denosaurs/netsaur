@@ -24,7 +24,7 @@ import { feedForward } from "../kernels/feedforward.ts";
 import { GPUMatrix } from "../matrix.ts";
 
 /**
- * Base class for all layers.
+ * Regular Dense Layer
  */
 export class DenseGPULayer {
   outputSize: number;

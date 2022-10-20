@@ -17,8 +17,10 @@ const C_ACTIVATION: { [key: string]: number } = {
   "linear": 3,
   "selu": 7,
 };
-// export type Activation = keyof typeof C_ACTIVATION;
 
+/**
+ * Regular Dense Layer
+ */
 export class DenseNativeLayer {
   #ptr: Deno.PointerValue;
 

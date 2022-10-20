@@ -10,7 +10,7 @@ export class JSONModel {
   ): Promise<NetworkJSON> {
     if (!path.endsWith(".json")) path = path + ".json";
     return (path.startsWith("http://") || path.startsWith("https://"))
-      ? await (await fetch("https://api.github.com/users/denoland"))
+      ? await (await fetch(path))
         .json() as NetworkJSON
       : JSON.parse(await Deno.readTextFile(path)) as NetworkJSON;
   }

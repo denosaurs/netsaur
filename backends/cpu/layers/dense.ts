@@ -24,7 +24,7 @@ import { CPUMatrix } from "../matrix.ts";
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
 
 /**
- * Base class for all layers.
+ * Regular Dense Layer
  */
 export class DenseCPULayer {
   outputSize: number;
