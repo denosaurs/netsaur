@@ -4,7 +4,6 @@ import type {
   Cost,
   DataSet,
   GPULayer,
-  Layer,
   NetworkConfig,
   NetworkJSON,
   Size,
@@ -18,7 +17,7 @@ import {
 } from "../../deps.ts";
 import { getType } from "../../core/util.ts";
 import { GPUMatrix } from "./matrix.ts";
-import { DenseLayer } from "../../mod.ts";
+import { GPUInstance } from "./mod.ts";
 
 export class GPUBackend<T extends DataType = DataType> implements Backend {
   input?: Size;
@@ -34,10 +33,7 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     this.input = config.input;
     this.silent = config.silent ?? false;
     config.layers.slice(0, -1).map(this.addLayer.bind(this));
-    this.output = new DenseGPULayer(
-      (config.layers.at(-1) as DenseLayer)!.config,
-      backend,
-    );
+    this.output = config.layers.at(-1);
     this.setCost(config.cost);
   }
 
@@ -52,26 +48,13 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     }
   }
 
-  addLayer(layer: Layer): void {
-    switch (layer.type) {
-      case "dense":
-        this.layers.push(
-          new DenseGPULayer((layer as DenseLayer).config, this.backend),
-        );
-        break;
-      case "conv":
-        throw new Error(`ConvLayer not implemented for the GPU backend`);
-      default:
-        throw new Error(
-          `${
-            layer.type.charAt(0).toUpperCase() + layer.type.slice(1)
-          }Layer not implemented for the GPU backend`,
-        );
-    }
+  // deno-lint-ignore no-explicit-any
+  addLayer(layer: any): void {
+    this.layers.push(layer);
   }
 
   async initialize(inputSize: Size, batches: number, type: DataType) {
-    await this.layers[0].initialize( inputSize, batches, type);
+    await this.layers[0].initialize(inputSize, batches, type);
     for (let i = 1; i < this.layers.length; i++) {
       const current = this.layers[i];
       const previous = this.layers[i - 1];
@@ -133,7 +116,6 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     const inputSize = (datasets[0].inputs as GPUMatrix).x || this.input;
     const outputSize = datasets[0].outputs.length / batches;
 
-
     await this.initialize(inputSize!, batches, type);
 
     const databuffers = [];
@@ -187,14 +169,19 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     };
   }
 
-  static async fromJSON(
+  static fromJSON(
     data: NetworkJSON,
     backend: WebGPUBackend,
-  ): Promise<GPUBackend> {
+  ): GPUBackend {
+    if (!GPUInstance.backend) {
+      throw new Error(
+        "WebGPU backend not initialized, use loadBackend function",
+      );
+    }
     const layers = data.layers.map((layer) => {
       switch (layer.type) {
         case "dense":
-          return DenseLayer.fromJSON(layer);
+          return DenseGPULayer.fromJSON(layer, GPUInstance.backend!);
         default:
           throw new Error(
             `${
@@ -203,29 +190,12 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
           );
       }
     });
-    layers.push(DenseLayer.fromJSON(data.output));
+    layers.push(DenseGPULayer.fromJSON(data.output, GPUInstance.backend!));
     const gpubackend = new GPUBackend({
       input: data.input,
       layers,
       cost: data.costFn! as Cost,
     }, backend);
-    gpubackend.output = await DenseGPULayer.fromJSON(
-      (layers.at(-1) as DenseLayer)!.data!,
-      backend,
-    );
-    layers.slice(0, -1).forEach(async (layer) => {
-      if (layer.type === "dense") {
-        gpubackend.layers.push(
-          await DenseGPULayer.fromJSON(layer.data!, backend),
-        );
-      } else {
-        throw new Error(
-          `${
-            layer.type.charAt(0).toUpperCase() + layer.type.slice(1)
-          }Layer not implemented for the GPU backend`,
-        );
-      }
-    });
     return gpubackend;
   }
 

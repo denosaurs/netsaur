@@ -37,8 +37,8 @@ import {
 const net = new NeuralNetwork({
   silent: true,
   layers: [
-    new DenseLayer({ size: 3, activation: "sigmoid" }),
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: 3, activation: "sigmoid" }),
+    DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
 });
@@ -67,20 +67,22 @@ console.log(await net.predict(new Float32Array([1, 1])));
 #### Use the Native Backend
 
 ```typescript
-import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
+import { DenseLayer, NeuralNetwork, setupBackend } from "https://deno.land/x/netsaur/mod.ts";
 import {
   Matrix,
   Native,
 } from "https://deno.land/x/netsaur/backends/native/mod.ts";
 
+await setupBackend(Native);
+
 const network = await new NeuralNetwork({
   input: 2,
   layers: [
-    new DenseLayer({ size: 3, activation: "sigmoid" }),
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: 3, activation: "sigmoid" }),
+    DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-}).setupBackend(Native);
+}).;
 
 network.train(
   [
@@ -124,8 +126,8 @@ import { Model } from "https://deno.land/x/netsaur/model/mod.ts";
 const net = new NeuralNetwork({
   silent: true,
   layers: [
-    new DenseLayer({ size: 3, activation: "sigmoid" }),
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: 3, activation: "sigmoid" }),
+    DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
 });

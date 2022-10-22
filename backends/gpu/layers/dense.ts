@@ -169,10 +169,20 @@ export class DenseGPULayer {
   }
 
   static async fromJSON(
-    { outputSize, activationFn, input, weights, biases, output }:
+    { outputSize, type, activationFn, input, weights, biases, output }:
       LayerJSON,
     backend: WebGPUBackend,
   ): Promise<DenseGPULayer> {
+    if (type !== "dense") {
+      throw new Error(
+        "Cannot cannot create a Dense layer from a" +
+          type.charAt(0).toUpperCase() + type.slice(1) +
+          "Layer",
+      );
+    }
+    if (weights === undefined || biases === undefined) {
+      throw new Error("Layer imported must be initialized");
+    }
     const layer = new DenseGPULayer({
       size: outputSize,
       activation: (activationFn as Activation) || "sigmoid",

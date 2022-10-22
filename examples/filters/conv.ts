@@ -1,5 +1,5 @@
 import { ConvLayer, DenseLayer, NeuralNetwork } from "../../mod.ts";
-import { CPU, CPUMatrix } from "../../backends/cpu/mod.ts";
+import { CPUMatrix } from "../../backends/cpu/mod.ts";
 import { ConvCPULayer } from "../../backends/cpu/layers/conv.ts";
 import { PoolCPULayer } from "../../backends/cpu/layers/pool.ts";
 import { PoolLayer } from "../../layers/mod.ts";
@@ -38,22 +38,22 @@ const kernel = [
   [-1, 1, 0],
 ].flat();
 
-const net = await new NeuralNetwork({
+const net = new NeuralNetwork({
   silent: true,
   layers: [
-    new ConvLayer({
+    ConvLayer({
       activation: "linear",
       kernel: new Float32Array(kernel),
       kernelSize: { x: 3, y: 3 },
       padding: 1,
       strides: 1,
     }),
-    new PoolLayer({ strides: 2, mode: "max" }),
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
+    PoolLayer({ strides: 2, mode: "max" }),
+    DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
   input: 2,
-}).setupBackend(CPU);
+});
 
 const input = new CPUMatrix(buf, dim, dim);
 

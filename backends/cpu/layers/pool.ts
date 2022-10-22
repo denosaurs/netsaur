@@ -46,7 +46,8 @@ export class PoolCPULayer {
             pool.push(input.data[idx]);
           }
         }
-        this.output.data[j * this.output.x + i] = (this.mode === "max" ? Math.max : average)(...pool);
+        this.output.data[j * this.output.x + i] =
+          (this.mode === "max" ? Math.max : average)(...pool);
       }
     }
     return this.output;
@@ -67,8 +68,18 @@ export class PoolCPULayer {
   }
 
   static fromJSON(
-    { outputSize, input, output, strides, mode }: LayerJSON,
+    { outputSize, input, type, output, strides, mode }: LayerJSON,
   ): PoolCPULayer {
+    if (type !== "pool") {
+      throw new Error(
+        "Cannot cannot create a MaxPooling layer from a" +
+          type.charAt(0).toUpperCase() + type.slice(1) +
+          "Layer",
+      );
+    }
+    if (strides === undefined) {
+      throw new Error("Layer imported must be initialized");
+    }
     const layer = new PoolCPULayer({ strides, mode });
     layer.input = new CPUMatrix(input.data, input.x, input.y);
     layer.outputSize = outputSize as Size2D;

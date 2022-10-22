@@ -3,28 +3,31 @@ import {
   DenseLayer,
   NeuralNetwork,
   PoolLayer,
+  setupBackend,
   tensor2D,
 } from "../mod.ts";
 import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
 import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
 import { CPU } from "../backends/cpu/mod.ts";
 
-const net = await new NeuralNetwork({
+await setupBackend(CPU);
+
+const net = new NeuralNetwork({
   silent: true,
   layers: [
-    new ConvLayer({
+    ConvLayer({
       activation: "linear",
       kernel: new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1]),
       kernelSize: { x: 3, y: 3 },
       padding: 2,
       strides: 2,
     }),
-    new PoolLayer({ strides: 2 }),
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
+    PoolLayer({ strides: 2 }),
+    DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
   input: 2,
-}).setupBackend(CPU);
+});
 
 const input = await tensor2D([
   [1, 1, 1, 1, 1],

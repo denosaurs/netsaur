@@ -1,5 +1,8 @@
 import { CPU } from "../../backends/cpu/mod.ts";
+import { setupBackend } from "../../core/mod.ts";
 import { Model } from "../../model/mod.ts";
+
+await setupBackend(CPU);
 
 const net = await Model.load("./examples/train_and_run/network.json", CPU);
 

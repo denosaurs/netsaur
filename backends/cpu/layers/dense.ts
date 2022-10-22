@@ -125,8 +125,18 @@ export class DenseCPULayer {
   }
 
   static fromJSON(
-    { outputSize, activationFn, input, weights, biases, output }: LayerJSON,
+    { outputSize, activationFn, type, input, weights, biases, output }: LayerJSON,
   ): DenseCPULayer {
+    if (type !== "dense") {
+      throw new Error(
+        "Cannot cannot create a Dense layer from a" +
+          type.charAt(0).toUpperCase() + type.slice(1) +
+          "Layer",
+      );
+    }
+    if (weights === undefined || biases === undefined) {
+      throw new Error("Layer imported must be initialized");
+    }
     const layer = new DenseCPULayer({
       size: outputSize,
       activation: (activationFn as Activation) || "sigmoid",

@@ -55,7 +55,7 @@ export class NativeBackend implements Backend {
         config.cost === "crossentropy" ? 1 : 0,
         config.layers.length,
         new BigUint64Array(
-          config.layers.map((e) => BigInt(this.encodeLayer(e).unsafePointer)),
+          config.layers.map((e) => BigInt(e.unsafePointer)),
         ),
       )
       : config;

@@ -3,12 +3,12 @@ import { CPUBackend } from "../backends/cpu/backend.ts";
 import {
   Backend,
   DataSet,
-  Layer,
   NetworkConfig,
   NetworkJSON,
   Size,
 } from "./types.ts";
 import { Data } from "../data/mod.ts";
+import { Engine } from "./engine.ts";
 
 /**
  * base class for neural network
@@ -19,18 +19,7 @@ export class NeuralNetwork {
    * create a neural network
    */
   constructor(public config: NetworkConfig) {
-    this.backend = new CPUBackend(this.config);
-  }
-
-  /**
-   * setup backend and initialize network
-   */
-  async setupBackend(
-    backendLoader: { backend: (config: NetworkConfig) => Promise<Backend> },
-  ) {
-    const backend = await backendLoader.backend(this.config);
-    this.backend = backend ?? new CPUBackend(this.config);
-    return this;
+    this.backend = Engine.backendLoader(this.config);
   }
 
   /**
@@ -43,7 +32,8 @@ export class NeuralNetwork {
   /**
    * add layer to network
    */
-  addLayer(layer: Layer) {
+  // deno-lint-ignore no-explicit-any
+  addLayer(layer: any) {
     this.backend.addLayer(layer);
   }
 
@@ -119,4 +109,11 @@ export class NeuralNetwork {
   getLayer(index: number) {
     return this.backend.layers[index];
   }
+}
+
+export async function setupBackend(
+  { setup }: { setup: (silent: boolean) => Promise<void> | void },
+  silent = false,
+) {
+  await setup(silent);
 }

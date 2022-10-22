@@ -1,16 +1,11 @@
 import type { DataTypeArray } from "../../deps.ts";
-import { ConvLayer, DenseLayer, PoolLayer } from "../../mod.ts";
 import type {
   Backend,
-  ConvLayerConfig,
   Cost,
   CPULayer,
   DataSet,
-  DenseLayerConfig,
-  Layer,
   NetworkConfig,
   NetworkJSON,
-  PoolLayerConfig,
   Size,
 } from "../../core/types.ts";
 import { iterate1D } from "../../core/util.ts";
@@ -33,10 +28,7 @@ export class CPUBackend implements Backend {
     this.input = config.input;
     this.silent = config.silent ?? false;
     config.layers.slice(0, -1).map(this.addLayer.bind(this));
-    const output = config.layers[config.layers.length - 1];
-    this.output = output.load
-      ? DenseCPULayer.fromJSON(output.data!)
-      : new DenseCPULayer(output.config as DenseLayerConfig);
+    this.output = config.layers[config.layers.length - 1];
     this.setCost(config.cost);
   }
 
@@ -54,36 +46,9 @@ export class CPUBackend implements Backend {
     }
   }
 
-  addLayer(layer: Layer): void {
-    switch (layer.type) {
-      case "dense":
-        this.layers.push(
-          layer.load
-            ? DenseCPULayer.fromJSON(layer.data!)
-            : new DenseCPULayer(layer.config as DenseLayerConfig),
-        );
-        break;
-      case "conv":
-        this.layers.push(
-          layer.load
-            ? ConvCPULayer.fromJSON(layer.data!)
-            : new ConvCPULayer(layer.config as ConvLayerConfig),
-        );
-        break;
-      case "pool":
-        this.layers.push(
-          layer.load
-            ? PoolCPULayer.fromJSON(layer.data!)
-            : new PoolCPULayer(layer.config as PoolLayerConfig),
-        );
-        break;
-      default:
-        throw new Error(
-          `${
-            layer.type.charAt(0).toUpperCase() + layer.type.slice(1)
-          }Layer not implemented for the CPU backend`,
-        );
-    }
+  // deno-lint-ignore no-explicit-any
+  addLayer(layer: any): void {
+    this.layers.push(layer);
   }
 
   initialize(inputSize: Size, batches: number) {
@@ -186,11 +151,11 @@ export class CPUBackend implements Backend {
     const layers = data.layers.map((layer) => {
       switch (layer.type) {
         case "dense":
-          return DenseLayer.fromJSON(layer);
+          return DenseCPULayer.fromJSON(layer);
         case "conv":
-          return ConvLayer.fromJSON(layer);
+          return ConvCPULayer.fromJSON(layer);
         case "pool":
-          return PoolLayer.fromJSON(layer);
+          return PoolCPULayer.fromJSON(layer);
         default:
           throw new Error(
             `${
@@ -199,7 +164,7 @@ export class CPUBackend implements Backend {
           );
       }
     });
-    layers.push(DenseLayer.fromJSON(data.output));
+    layers.push(DenseCPULayer.fromJSON(data.output));
     const backend = new CPUBackend({
       input: data.input,
       layers,

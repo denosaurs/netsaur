@@ -1,17 +1,17 @@
-import { NeuralNetwork, DenseLayer, Tensor, tensor2D, tensor1D } from "../mod.ts";
+import { NeuralNetwork, DenseLayer, tensor2D, tensor1D, setupBackend } from "../mod.ts";
 import { Native } from "../backends/native/mod.ts";
 
-Tensor.setupBackend(Native);
+await setupBackend(Native);
 const start = performance.now();
 
-const network = await new NeuralNetwork({
+const network = new NeuralNetwork({
   input: 2,
   layers: [
-    new DenseLayer({ size: 3, activation: "sigmoid" }),
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: 3, activation: "sigmoid" }),
+    DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-}).setupBackend(Native);
+});
 
 network.train(
   [

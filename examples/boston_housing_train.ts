@@ -1,7 +1,7 @@
-import { Data, DenseLayer, NeuralNetwork, Tensor } from "../mod.ts";
+import { Data, DenseLayer, NeuralNetwork, setupBackend } from "../mod.ts";
 import { Matrix, Native } from "../backends/native/mod.ts";
 
-Tensor.setupBackend(Native);
+await setupBackend(Native);
 
 const data = await Data.csv(
   "https://storage.googleapis.com/tfjs-examples/multivariate-linear-regression/data/boston-housing-train.csv",
@@ -17,13 +17,13 @@ const data = await Data.csv(
 // data.inputs = data.inputs.div(100);
 // data.outputs = data.outputs.div(100);
 
-const network = await new NeuralNetwork({
+const network = new NeuralNetwork({
   input: { x: 1, y: data.inputs.cols },
   layers: [
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "mse",
-}).setupBackend(Native);
+});
 
 await network.train([data], 10, data.inputs.rows, 0.01);
 

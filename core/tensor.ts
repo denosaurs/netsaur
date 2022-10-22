@@ -4,12 +4,6 @@ import { inferShape } from "./util.ts";
 
 export class Tensor {
   static backend: TensorBackend = new TensorCPUBackend();
-
-  static async setupBackend(
-    backend: { tensor: () => TensorBackend | Promise<TensorBackend> },
-  ) {
-    Tensor.backend = await backend.tensor();
-  }
 }
 
 export async function tensor2D(

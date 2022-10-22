@@ -1,5 +1,4 @@
 import { DataType, DataTypeArray } from "../deps.ts";
-import { ConvLayer, DenseLayer, PoolLayer } from "../mod.ts";
 import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
 import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
 import { DenseGPULayer } from "../backends/gpu/layers/dense.ts";
@@ -94,7 +93,8 @@ export interface NetworkConfig {
   silent?: boolean;
 }
 
-export type Layer = DenseLayer | ConvLayer | PoolLayer;
+// deno-lint-ignore no-explicit-any
+export type Layer = any;
 
 export type CPULayer = ConvCPULayer | DenseCPULayer | PoolCPULayer;
 

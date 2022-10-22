@@ -134,8 +134,19 @@ export class ConvCPULayer {
   }
 
   static fromJSON(
-    { outputSize, input, kernel, padded, output, strides, padding }: LayerJSON,
+    { outputSize, input, kernel, type, padded, output, strides, padding }:
+      LayerJSON,
   ): ConvCPULayer {
+    if (type !== "conv") {
+      throw new Error(
+        "Cannot cannot create a Convolutional layer from a" +
+          type.charAt(0).toUpperCase() + type.slice(1) +
+          "Layer",
+      );
+    }
+    if (padded === undefined || kernel === undefined) {
+      throw new Error("Layer imported must be initialized");
+    }
     const layer = new ConvCPULayer({
       kernel: (kernel as MatrixJSON).data,
       kernelSize: { x: (kernel as MatrixJSON).x, y: (kernel as MatrixJSON).y },

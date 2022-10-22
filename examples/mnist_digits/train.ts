@@ -1,15 +1,16 @@
-import { DenseLayer, NeuralNetwork } from "../../mod.ts";
+import { DenseLayer, NeuralNetwork, setupBackend } from "../../mod.ts";
 import { Native } from "../../backends/native/mod.ts";
 import { loadDataset } from "./common.ts";
 
-const network = await new NeuralNetwork({
+await setupBackend(Native);
+const network = new NeuralNetwork({
   input: 784,
   layers: [
-    new DenseLayer({ size: 28 * 2, activation: "sigmoid" }),
-    new DenseLayer({ size: 10, activation: "sigmoid" }),
+    DenseLayer({ size: 28 * 2, activation: "sigmoid" }),
+    DenseLayer({ size: 10, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-}).setupBackend(Native);
+});
 
 console.log("Loading training dataset...");
 const trainSet = loadDataset("train-images.idx", "train-labels.idx");
