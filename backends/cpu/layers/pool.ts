@@ -4,12 +4,7 @@ import {
   Size,
   Size2D,
 } from "../../../core/types.ts";
-import {
-  average,
-  iterate2D,
-  maxIdx,
-  to2D,
-} from "../../../core/util.ts";
+import { average, iterate2D, maxIdx, to2D } from "../../../core/util.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -68,20 +63,31 @@ export class PoolCPULayer {
         this.output.data[j * this.output.x + i] = average(pool);
       });
     }
-    this.input = input
+    this.input = input;
     return this.output;
   }
 
   backPropagate(error: CPUMatrix, _rate: number) {
-    this.error = error
+    this.error = error;
   }
 
   getError(): CPUMatrix {
-    const error = CPUMatrix.with(this.input.x, this.input.y)
-    for (let i = 0; i < this.error.data.length; i++) {
-      error.data[this.indices[i]] = this.error.data[i]
+    const error = CPUMatrix.with(this.input.x, this.input.y);
+    if (this.mode == "max") {
+      for (let i = 0; i < this.error.data.length; i++) {
+        error.data[this.indices[i]] = this.error.data[i];
+      }
+    } else if (this.mode == "avg") {
+      iterate2D(this.output, (i: number, j: number) => {
+        const meanError = this.error.data[j * this.error.x + i];
+        iterate2D(this.strides, (x: number, y: number) => {
+          const idx = (j * this.strides.y + y) * error.x +
+            i * this.strides.x + x;
+          error.data[idx] = meanError / this.strides.x / this.strides.y;
+        });
+      });
     }
-    return error
+    return error;
   }
 
   toJSON(): LayerJSON {
