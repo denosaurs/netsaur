@@ -35,6 +35,7 @@ export class DenseCPULayer {
   weights!: CPUMatrix;
   biases!: CPUMatrix;
   output!: CPUMatrix;
+  error!: CPUMatrix;
 
   constructor(config: DenseLayerConfig) {
     this.outputSize = to1D(config.size);
@@ -109,6 +110,11 @@ export class DenseCPULayer {
       if (j >= this.biases.x) j = 0;
       this.biases.data[j] += cost.data[i] * rate;
     }
+    this.error = error
+  }
+
+  getError(): CPUMatrix {
+    return CPUMatrix.dot(this.error, CPUMatrix.transpose(this.weights));
   }
 
   toJSON(): LayerJSON {

@@ -4,7 +4,12 @@ import {
   Size,
   Size2D,
 } from "../../../core/types.ts";
-import { average, to2D } from "../../../core/util.ts";
+import {
+  average,
+  iterate2D,
+  maxIdx,
+  to2D,
+} from "../../../core/util.ts";
 import { CPUMatrix } from "../matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -17,7 +22,9 @@ export class PoolCPULayer {
   outputSize!: Size2D;
   strides: Size2D;
   mode: "max" | "avg";
+  indices: number[] = [];
   input!: CPUMatrix;
+  error!: CPUMatrix;
   output!: CPUMatrix;
 
   constructor(config: PoolLayerConfig) {
@@ -36,24 +43,45 @@ export class PoolCPULayer {
   }
 
   feedForward(input: CPUMatrix) {
-    for (let i = 0; i < this.output.x; i++) {
-      for (let j = 0; j < this.output.y; j++) {
-        const pool = [];
-        for (let x = 0; x < this.strides.x; x++) {
-          for (let y = 0; y < this.strides.y; y++) {
-            const idx = (j * this.strides.y + y) * input.x +
-              i * this.strides.x + x;
-            pool.push(input.data[idx]);
-          }
-        }
-        this.output.data[j * this.output.x + i] =
-          (this.mode === "max" ? Math.max : average)(...pool);
-      }
+    if (this.mode == "max") {
+      iterate2D(this.output, (i: number, j: number) => {
+        const pool: number[] = [];
+        const indices: number[] = [];
+        iterate2D(this.strides, (x: number, y: number) => {
+          const idx = (j * this.strides.y + y) * input.x +
+            i * this.strides.x + x;
+          pool.push(input.data[idx]);
+          indices.push(idx);
+        });
+        const max = maxIdx(pool);
+        this.indices[j * this.output.x + i] = indices[max];
+        this.output.data[j * this.output.x + i] = pool[max];
+      });
+    } else if (this.mode == "avg") {
+      iterate2D(this.output, (i: number, j: number) => {
+        const pool: number[] = [];
+        iterate2D(this.strides, (x: number, y: number) => {
+          const idx = (j * this.strides.y + y) * input.x +
+            i * this.strides.x + x;
+          pool.push(input.data[idx]);
+        });
+        this.output.data[j * this.output.x + i] = average(pool);
+      });
     }
+    this.input = input
     return this.output;
   }
 
-  backPropagate(_error: CPUMatrix, _rate: number) {
+  backPropagate(error: CPUMatrix, _rate: number) {
+    this.error = error
+  }
+
+  getError(): CPUMatrix {
+    const error = CPUMatrix.with(this.input.x, this.input.y)
+    for (let i = 0; i < this.error.data.length; i++) {
+      error.data[this.indices[i]] = this.error.data[i]
+    }
+    return error
   }
 
   toJSON(): LayerJSON {

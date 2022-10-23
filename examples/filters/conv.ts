@@ -7,16 +7,16 @@ import { PoolLayer } from "../../layers/mod.ts";
 import { decode } from "https://deno.land/x/pngs@0.1.1/mod.ts";
 import { DataTypeArray } from "../../deps.ts";
 
-// import { Canvas } from "https://deno.land/x/neko@1.1.3/canvas/mod.ts";
-import { createCanvas } from "https://deno.land/x/canvas@v1.4.1/mod.ts";
+import { Canvas } from "https://deno.land/x/neko@1.1.3/canvas/mod.ts";
+// import { createCanvas } from "https://deno.land/x/canvas@v1.4.1/mod.ts";
 
-const canvas = createCanvas(600, 600);
-// const canvas = new Canvas({
-//   title: "Netsaur Convolutions",
-//   width: 600,
-//   height: 600,
-//   fps: 60,
-// });
+// const canvas = createCanvas(600, 600);
+const canvas = new Canvas({
+  title: "Netsaur Convolutions",
+  width: 600,
+  height: 600,
+  fps: 60,
+});
 
 const ctx = canvas.getContext("2d");
 ctx.fillStyle = "white";
@@ -90,4 +90,4 @@ for (let i = 0; i < pool.output.x; i++) {
     ctx.fillRect(i * 20 + dim * 10, j * 20 + dim * 10, 20, 20);
   }
 }
-await Deno.writeFile("./examples/filters/output.png", canvas.toBuffer());
+// await Deno.writeFile("./examples/filters/output.png", canvas.toBuffer());

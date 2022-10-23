@@ -27,7 +27,7 @@ export class CPUBackend implements Backend {
   constructor(config: NetworkConfig) {
     this.input = config.input;
     this.silent = config.silent ?? false;
-    config.layers.slice(0, -1).map(this.addLayer.bind(this));
+    config.layers.map(this.addLayer.bind(this));
     this.output = config.layers[config.layers.length - 1];
     this.setCost(config.cost);
   }
@@ -59,16 +59,12 @@ export class CPUBackend implements Backend {
       const previous = this.layers[i - 1];
       current.initialize(previous?.outputSize || inputSize, batches);
     }
-
-    const lastLayer = this.layers[this.layers.length - 1];
-    this.output.initialize(lastLayer?.outputSize || inputSize, batches);
   }
 
   feedForward(input: CPUMatrix): CPUMatrix {
     for (const layer of this.layers) {
       input = layer.feedForward(input);
     }
-    input = this.output.feedForward(input);
     return input;
   }
 
@@ -82,13 +78,9 @@ export class CPUBackend implements Backend {
       );
     }
     this.output.backPropagate(error, rate);
-    // todo: update for convolutional layer
-    let weights = (this.output as DenseCPULayer).weights;
-    for (let i = this.layers.length - 1; i >= 0; i--) {
-      error = CPUMatrix.dot(error, CPUMatrix.transpose(weights));
+    for (let i = this.layers.length - 2; i >= 0; i--) {
+      error = (this.layers[i + 1] as DenseCPULayer).getError()
       this.layers[i].backPropagate(error, rate);
-      // todo: update for convolutional layer
-      weights = (this.layers[i] as DenseCPULayer).weights;
     }
   }
 
@@ -112,27 +104,26 @@ export class CPUBackend implements Backend {
     });
   }
 
-  getCostLoss(output: DataTypeArray) {
-    const { x, y } = this.output.output;
-    const cost = CPUMatrix.with(x, y);
-    for (const i in this.output.output.data) {
-      const activation = this.output.activationFn.prime(
-        this.output.output.data[i],
-      );
-      cost.data[i] = activation * this.costFn.prime(
-        output[i],
-        this.output.output.data[i],
-      );
-    }
-    return cost;
-  }
+  // getCostLoss(output: DataTypeArray) {
+  //   const { x, y } = this.output.output;
+  //   const cost = CPUMatrix.with(x, y);
+  //   for (const i in this.output.output.data) {
+  //     const activation = this.output.activationFn.prime(
+  //       this.output.output.data[i],
+  //     );
+  //     cost.data[i] = activation * this.costFn.prime(
+  //       output[i],
+  //       this.output.output.data[i],
+  //     );
+  //   }
+  //   return cost;
+  // }
 
   predict(data: DataTypeArray) {
     const input = new CPUMatrix(data, data.length, 1);
     for (const layer of this.layers) {
       layer.reset(1);
     }
-    this.output.reset(1);
     return this.feedForward(input).data;
   }
 

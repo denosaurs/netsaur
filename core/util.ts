@@ -279,8 +279,11 @@ export function toNestedArray(
   return createNestedArray(0, shape, a, isComplex);
 }
 
-export const average = (...args: number[]) =>
+export const average = (args: number[]) =>
   args.reduce((a, b) => a + b) / args.length;
+
+export const maxIdx = (args: number[]) =>
+  args.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
 
 export function inferShape(val: TensorLike): number[] {
   let firstElem: typeof val = val;
