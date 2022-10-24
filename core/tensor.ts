@@ -8,7 +8,7 @@ export class Tensor {
 
 export async function tensor2D(
   values: TensorLike,
-  shape: Size2D | [number, number],
+  shape?: Size2D | [number, number],
 ) {
   const outputShape = shape === undefined
     ? inferShape(values).slice()
