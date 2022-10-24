@@ -47,6 +47,7 @@ const net = new NeuralNetwork({
       kernelSize: { x: 3, y: 3 },
       padding: 1,
       strides: 1,
+      unbiased: true
     }),
     PoolLayer({ strides: 2, mode: "max" }),
     DenseLayer({ size: 1, activation: "sigmoid" }),

@@ -31,8 +31,17 @@ export class PoolCPULayer {
   }
 
   initialize(inputSize: Size, _batches: number) {
-    const w = (inputSize as Size2D).x / this.strides.x;
-    const h = (inputSize as Size2D).y / this.strides.y;
+    const size = inputSize as Size2D;
+    if (size.x % this.strides.x || size.y % this.strides.y) {
+      throw new Error(
+        `Cannot pool shape [${size.x}, ${size.y}] with stride ${this.strides.x}`,
+      );
+    }
+    if (this.strides.x == 1) {
+      throw new Error(`Cannot pool with stride 1`);
+    }
+    const w = size.x / this.strides.x;
+    const h = size.x / this.strides.y;
     this.output = CPUMatrix.with(w, h);
     this.outputSize = { x: w, y: h };
   }

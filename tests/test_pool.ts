@@ -2,13 +2,13 @@ import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
 import { CPUMatrix } from "../backends/cpu/matrix.ts";
 import { PoolLayer } from "../layers/mod.ts";
 
-const pool = PoolLayer({ strides: 2 }) as PoolCPULayer;
+const pool = PoolLayer({ strides: 1 }) as PoolCPULayer;
 
 const input = new CPUMatrix(new Float32Array([
-    1, 0, 0, 1,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    1, 0, 0, 1,
+    1, 2, 3, 1,
+    4, 5, 2, 4,
+    2, 3, 3, 2,
+    1, 4, 5, 1,
 ]), 4, 4)
 pool.initialize({x: 4, y: 4}, 1)
 const output = pool.feedForward(input)!

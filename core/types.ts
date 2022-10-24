@@ -102,14 +102,15 @@ export type GPULayer = DenseGPULayer;
 
 export interface DenseLayerConfig {
   size: Size;
-  activation: Activation;
+  activation?: Activation;
 }
 
 export interface ConvLayerConfig {
   activation?: Activation;
-  kernel: DataTypeArray;
+  kernel?: DataTypeArray;
   kernelSize: Size2D;
   padding?: number;
+  unbiased?: boolean;
   strides?: Size;
 }
 

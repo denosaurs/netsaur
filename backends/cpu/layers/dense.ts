@@ -39,7 +39,7 @@ export class DenseCPULayer {
 
   constructor(config: DenseLayerConfig) {
     this.outputSize = to1D(config.size);
-    this.setActivation(config.activation);
+    this.setActivation(config.activation || "linear");
   }
 
   reset(batches: number) {

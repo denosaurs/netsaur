@@ -27,6 +27,7 @@ import { CPUMatrix } from "../matrix.ts";
  * Convolutional 2D layer.
  */
 export class ConvCPULayer {
+  config: ConvLayerConfig;
   outputSize!: Size2D;
   padding: number;
   strides: Size2D;
@@ -35,14 +36,17 @@ export class ConvCPULayer {
   input!: CPUMatrix;
   kernel!: CPUMatrix;
   padded!: CPUMatrix;
+  biases!: CPUMatrix;
   output!: CPUMatrix;
 
   constructor(config: ConvLayerConfig) {
-    this.kernel = new CPUMatrix(
-      config.kernel,
-      config.kernelSize.x,
-      config.kernelSize.y,
-    );
+    this.config = config;
+    const { x, y } = config.kernelSize;
+    if (config.kernel) {
+      this.kernel = new CPUMatrix(config.kernel, x, y);
+    } else {
+      this.kernel = CPUMatrix.with(x, y);
+    }
     this.padding = config.padding || 0;
     this.strides = to2D(config.strides);
     this.setActivation(config.activation ?? "linear");
@@ -58,8 +62,15 @@ export class ConvCPULayer {
       this.padded = CPUMatrix.with(wp, hp);
       this.padded.fill(255);
     }
+    if (!this.config.kernel) {
+      this.kernel.data = this.kernel.data.map(() => Math.random() * 2 - 1);
+    }
     const wo = 1 + Math.floor((wp - this.kernel.x) / this.strides.x);
     const ho = 1 + Math.floor((hp - this.kernel.y) / this.strides.y);
+    this.biases = CPUMatrix.with(wo, ho);
+    if (!this.config.unbiased) {
+      this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
+    }
     this.output = CPUMatrix.with(wo, ho);
     this.outputSize = { x: wo, y: ho };
   }
@@ -112,12 +123,32 @@ export class ConvCPULayer {
         const l = y * this.kernel.x + x;
         sum += this.padded.data[k] * this.kernel.data[l];
       });
+      sum += this.biases.data[j * this.output.x + i];
       this.output.data[j * this.output.x + i] = this.activationFn.activate(sum);
     });
     return this.output;
   }
 
-  backPropagate(_error: CPUMatrix, _rate: number) {
+  backPropagate(error: CPUMatrix, rate: number) {
+    const cost = CPUMatrix.with(error.x, error.y);
+    for (const i in cost.data) {
+      const activation = this.activationFn.prime(this.output.data[i]);
+      cost.data[i] = error.data[i] * activation;
+    }
+    iterate2D(this.kernel, (i: number, j: number) => {
+      let sum = 0;
+      iterate2D(cost, (x: number, y: number) => {
+        const k = this.padded.x * (j * this.strides.y + y) +
+          (i * this.strides.x + x);
+        const l = y * cost.x + x;
+        sum += this.padded.data[k] * cost.data[l];
+      });
+      const idx = j * this.kernel.x + i;
+      this.kernel.data[idx] += this.activationFn.activate(sum) * rate;
+    });
+    for (let i = 0; i < cost.data.length; i++) {
+      this.biases.data[i] += cost.data[i]
+    }
   }
 
   toJSON(): LayerJSON {
