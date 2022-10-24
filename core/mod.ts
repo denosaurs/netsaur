@@ -1,12 +1,6 @@
 import { DataTypeArray } from "../deps.ts";
 import { CPUBackend } from "../backends/cpu/backend.ts";
-import {
-  Backend,
-  DataSet,
-  NetworkConfig,
-  NetworkJSON,
-  Size,
-} from "./types.ts";
+import { Backend, DataSet, NetworkConfig, NetworkJSON, Size } from "./types.ts";
 import { Data } from "../data/mod.ts";
 import { Engine } from "./engine.ts";
 
@@ -15,12 +9,38 @@ import { Engine } from "./engine.ts";
  */
 export class NeuralNetwork {
   backend!: Backend;
+  // input?: Size;
+  // layers: Layer[] = [];
+  // output: any;
+  // silent: boolean;
+  // costFn: any;
   /**
    * create a neural network
    */
   constructor(public config: NetworkConfig) {
     this.backend = Engine.backendLoader(this.config);
+    // this.silent = config.silent ?? false;
+    // config.layers.map(this.addLayer.bind(this));
+    // this.output = config.layers[config.layers.length - 1];
+    // this.setCost(config.cost);
   }
+
+  // setCost(activation: Cost) {
+  //   switch (activation) {
+  //     case "crossentropy":
+  //       this.costFn = {
+  //         cost: Engine.ops.crossentropy,
+  //         prime: Engine.ops.crossentropy_prime,
+  //       };
+  //       break;
+  //     case "hinge":
+  //       this.costFn = {
+  //         cost: Engine.ops.hinge,
+  //         prime: Engine.ops.hinge_prime,
+  //       };
+  //       break;
+  //   }
+  // }
 
   /**
    * initialize the backend
@@ -35,6 +55,7 @@ export class NeuralNetwork {
   // deno-lint-ignore no-explicit-any
   addLayer(layer: any) {
     this.backend.addLayer(layer);
+    // this.layers.push(layer);
   }
 
   /**

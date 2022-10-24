@@ -1,5 +1,5 @@
 import { CPUBackend } from "../backends/cpu/backend.ts";
-import * as CPUOps from "../backends/cpu/ops/mod.ts";
+import * as CPUKernels from "../backends/cpu/kernels/mod.ts";
 import { Backend, NetworkConfig } from "./types.ts";
 
 export class Engine {
@@ -7,5 +7,5 @@ export class Engine {
     config: NetworkConfig,
   ) => new CPUBackend(config);
   // deno-lint-ignore no-explicit-any
-  static ops: any = CPUOps;
+  static kernels: any = CPUKernels;
 }
