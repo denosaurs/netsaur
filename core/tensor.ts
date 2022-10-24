@@ -1,9 +1,19 @@
-import { TensorCPUBackend } from "../backends/cpu/tensor.ts";
-import { Size2D, TensorBackend, TensorLike } from "./types.ts";
+import { Rank, ShapeMap, Size2D, TensorLike } from "./types.ts";
 import { inferShape } from "./util.ts";
 
-export class Tensor {
-  static backend: TensorBackend = new TensorCPUBackend();
+export class Tensor<R extends Rank, > {
+  shape: ShapeMap[R];
+  data: Data;
+  size: number;
+  rank = Rank.R1;
+  constructor(values: TensorLike, shape?: ShapeMap[R]) {
+    this.shape = shape || inferShape(values);
+    this.size = sizeFromShape(this.shape);
+  }
+
+  static dot() {
+    
+  }
 }
 
 export async function tensor2D(

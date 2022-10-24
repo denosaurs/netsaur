@@ -121,11 +121,30 @@ export interface PoolLayerConfig {
 
 export type Size = number | Size2D;
 
-export type Size1D = number | { x: number };
+export type Size1D = [number];
+export type Size2D = [number, number];
+export type Size3D = [number, number, number];
+export type Size4D = [number, number, number, number];
+export type Size5D = [number, number, number, number, number];
+export type Size6D = [number, number, number, number, number, number];
 
-export type Size2D = { x: number; y: number };
+export enum Rank {
+  R1 = "R1", // Scalar   (magnitude only)
+  R2 = "R2",	// Vector   (magnitude and direction)
+  R3 = "R3", // Matrix   (table of numbers)
+  R4 = "R4",	// 3-Tensor (cube of numbers)
+  R5 = "R5",
+  R6 = "R6",
+}
 
-export type Size3D = { x: number; y: number; z: number };
+export interface ShapeMap {
+  R1: Size1D;
+  R2: Size2D;
+  R3: Size3D;
+  R4: Size4D;
+  R5: Size5D;
+  R6: Size6D;
+}
 
 /**
  * Activation functions are used to transform the output of a layer into a new output.
@@ -153,8 +172,7 @@ export type ArrayMap =
 
 export type TypedArray = Float32Array | Int32Array | Uint8Array;
 
-export type NumberArray<T extends DataType = DataType> =
-  | DataTypeArray<T>
+export type NumberA  | DataTypeArray<T>
   | Array<number>
   // deno-lint-ignore no-explicit-any
   | any;
@@ -171,30 +189,8 @@ export type DataSet = {
 export type TensorLike =
   | TypedArray
   | number[][]
-  | number[]
-  | ArrayMap
-  | TypedArray[];
 
-export type ScalarLike = number | Uint8Array;
-
-/** @docalias TypedArray|Array */
-export type TensorLike1D =
-  | TypedArray
-  | number[]
-  | Uint8Array[];
-
-/** @docalias TypedArray|Array */
-export type TensorLike2D =
-  | TypedArray
-  | number[]
-  | number[][]
-  | Uint8Array[]
-  | Uint8Array[][];
-
-/** @docalias TypedArray|Array */
-export type TensorLike3D =
-  | TypedArray
-  | number[]
+  | TypedArray[][]
   | number[][][]
   | Uint8Array[]
-  | Uint8Array[][][];
+  | Uint8Array[][][]
