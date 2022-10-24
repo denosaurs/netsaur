@@ -41,7 +41,7 @@ export class ConvCPULayer {
 
   constructor(config: ConvLayerConfig) {
     this.config = config;
-    const { x, y } = config.kernelSize;
+    const [ y, x ] = config.kernelSize;
     if (config.kernel) {
       this.kernel = new CPUMatrix(config.kernel, x, y);
     } else {
@@ -56,8 +56,8 @@ export class ConvCPULayer {
   }
 
   initialize(inputSize: Size, _batches: number) {
-    const wp = (inputSize as Size2D).x + 2 * this.padding;
-    const hp = (inputSize as Size2D).y + 2 * this.padding;
+    const wp = (inputSize as Size2D)[1] /**x */ + 2 * this.padding;
+    const hp = (inputSize as Size2D)[0] /**y */ + 2 * this.padding;
     if (this.padding > 0) {
       this.padded = CPUMatrix.with(wp, hp);
       this.padded.fill(255);
@@ -65,14 +65,14 @@ export class ConvCPULayer {
     if (!this.config.kernel) {
       this.kernel.data = this.kernel.data.map(() => Math.random() * 2 - 1);
     }
-    const wo = 1 + Math.floor((wp - this.kernel.x) / this.strides.x);
-    const ho = 1 + Math.floor((hp - this.kernel.y) / this.strides.y);
+    const wo = 1 + Math.floor((wp - this.kernel.x) / this.strides[1]);
+    const ho = 1 + Math.floor((hp - this.kernel.y) / this.strides[0]);
     this.biases = CPUMatrix.with(wo, ho);
     if (!this.config.unbiased) {
       this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
     }
     this.output = CPUMatrix.with(wo, ho);
-    this.outputSize = { x: wo, y: ho };
+    this.outputSize = [ho, wo];
   }
 
   setActivation(activation: Activation) {
@@ -118,8 +118,8 @@ export class ConvCPULayer {
     iterate2D(this.output, (i: number, j: number) => {
       let sum = 0;
       iterate2D(this.kernel, (x: number, y: number) => {
-        const k = this.padded.x * (j * this.strides.y + y) +
-          (i * this.strides.x + x);
+        const k = this.padded.x * (j * this.strides[0] + y) +
+          (i * this.strides[1] + x);
         const l = y * this.kernel.x + x;
         sum += this.padded.data[k] * this.kernel.data[l];
       });
@@ -138,8 +138,8 @@ export class ConvCPULayer {
     iterate2D(this.kernel, (i: number, j: number) => {
       let sum = 0;
       iterate2D(cost, (x: number, y: number) => {
-        const k = this.padded.x * (j * this.strides.y + y) +
-          (i * this.strides.x + x);
+        const k = this.padded.x * (j * this.strides[0] + y) +
+          (i * this.strides[1] + x);
         const l = y * cost.x + x;
         sum += this.padded.data[k] * cost.data[l];
       });
@@ -180,7 +180,7 @@ export class ConvCPULayer {
     }
     const layer = new ConvCPULayer({
       kernel: (kernel as MatrixJSON).data,
-      kernelSize: { x: (kernel as MatrixJSON).x, y: (kernel as MatrixJSON).y },
+      kernelSize: [ (kernel as MatrixJSON).y, (kernel as MatrixJSON).x ],
       padding,
       strides,
     });

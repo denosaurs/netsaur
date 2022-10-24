@@ -32,18 +32,20 @@ export class PoolCPULayer {
 
   initialize(inputSize: Size, _batches: number) {
     const size = inputSize as Size2D;
-    if (size.x % this.strides.x || size.y % this.strides.y) {
+    if (size[1] % this.strides[1] || size[0] % this.strides[0]) {
       throw new Error(
-        `Cannot pool shape [${size.x}, ${size.y}] with stride ${this.strides.x}`,
+        `Cannot pool shape [${size[1]}, ${size[0]}] with stride ${
+          this.strides[1]
+        }`,
       );
     }
-    if (this.strides.x == 1) {
+    if (this.strides[1] == 1) {
       throw new Error(`Cannot pool with stride 1`);
     }
-    const w = size.x / this.strides.x;
-    const h = size.x / this.strides.y;
+    const w = size[1] / this.strides[1];
+    const h = size[0] / this.strides[0];
     this.output = CPUMatrix.with(w, h);
-    this.outputSize = { x: w, y: h };
+    this.outputSize = [h, w];
   }
 
   feedForward(input: CPUMatrix) {
@@ -52,8 +54,8 @@ export class PoolCPULayer {
         const pool: number[] = [];
         const indices: number[] = [];
         iterate2D(this.strides, (x: number, y: number) => {
-          const idx = (j * this.strides.y + y) * input.x +
-            i * this.strides.x + x;
+          const idx = (j * this.strides[0] + y) * input.x +
+            i * this.strides[1] + x;
           pool.push(input.data[idx]);
           indices.push(idx);
         });
@@ -65,8 +67,8 @@ export class PoolCPULayer {
       iterate2D(this.output, (i: number, j: number) => {
         const pool: number[] = [];
         iterate2D(this.strides, (x: number, y: number) => {
-          const idx = (j * this.strides.y + y) * input.x +
-            i * this.strides.x + x;
+          const idx = (j * this.strides[0] + y) * input.x +
+            i * this.strides[1] + x;
           pool.push(input.data[idx]);
         });
         this.output.data[j * this.output.x + i] = average(pool);
@@ -90,9 +92,9 @@ export class PoolCPULayer {
       iterate2D(this.output, (i: number, j: number) => {
         const meanError = this.error.data[j * this.error.x + i];
         iterate2D(this.strides, (x: number, y: number) => {
-          const idx = (j * this.strides.y + y) * error.x +
-            i * this.strides.x + x;
-          error.data[idx] = meanError / this.strides.x / this.strides.y;
+          const idx = (j * this.strides[0] + y) * error.x +
+            i * this.strides[1] + x;
+          error.data[idx] = meanError / this.strides[1] / this.strides[0];
         });
       });
     }

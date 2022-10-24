@@ -172,10 +172,6 @@ export type ArrayMap =
 
 export type TypedArray = Float32Array | Int32Array | Uint8Array;
 
-export type NumberA  | DataTypeArray<T>
-  | Array<number>
-  // deno-lint-ignore no-explicit-any
-  | any;
 
 /**
  * DataSet is a container for training data.
@@ -188,9 +184,11 @@ export type DataSet = {
 /** @docalias TypedArray|Array */
 export type TensorLike =
   | TypedArray
+  | number
+  | number[]
   | number[][]
-
-  | TypedArray[][]
   | number[][][]
-  | Uint8Array[]
-  | Uint8Array[][][]
+  | TypedArray
+  | TypedArray[]
+  | TypedArray[][]
+  | TypedArray[][][]
