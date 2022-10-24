@@ -1,5 +1,5 @@
 import { TensorCPUBackend } from "../backends/cpu/tensor.ts";
-import { TensorBackend, TensorLike } from "./types.ts";
+import { Size2D, TensorBackend, TensorLike } from "./types.ts";
 import { inferShape } from "./util.ts";
 
 export class Tensor {
@@ -8,11 +8,16 @@ export class Tensor {
 
 export async function tensor2D(
   values: TensorLike,
+  shape?: Size2D | [number, number],
 ) {
-  const shape = inferShape(values).slice();
-  if (shape.length > 2) throw new Error("Invalid 2D Tensor");
+  const outputShape = shape === undefined
+    ? inferShape(values).slice()
+    : shape instanceof Array
+    ? shape
+    : [shape.y, shape.x];
+  if (outputShape.length > 2) throw new Error("Invalid 2D Tensor");
   // values
-  return await Tensor.backend.tensor2D(values, shape[1], shape[0]);
+  return await Tensor.backend.tensor2D(values, outputShape[1], outputShape[0]);
 }
 
 export async function tensor1D(
