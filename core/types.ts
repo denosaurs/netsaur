@@ -1,13 +1,14 @@
-import { DataType, DataTypeArray } from "../deps.ts";
+import { DataType, DataTypeArray, WebGPUData } from "../deps.ts";
 import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
 import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
 import { DenseGPULayer } from "../backends/gpu/layers/dense.ts";
 import { GPUMatrix } from "../backends/gpu/matrix.ts";
-import { CPUMatrix } from "../backends/cpu/matrix.ts";
+import { CPUMatrix } from "../backends/cpu/kernels/matrix.ts";
 import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
+import { Tensor } from "./tensor.ts";
 
 export interface LayerJSON {
-  outputSize: number | Size2D;
+  outputSize: number | Shape[Rank.R2];
   activationFn?: string;
   costFn?: string;
   type: string;
@@ -19,7 +20,7 @@ export interface LayerJSON {
   cost?: MatrixJSON;
   kernel?: MatrixJSON;
   padded?: MatrixJSON;
-  strides?: Size;
+  strides?: Shape[Rank];
   padding?: number;
   mode?: "max" | "avg";
 }
@@ -27,8 +28,8 @@ export interface LayerJSON {
 export interface NetworkJSON {
   costFn?: string;
   type: "NeuralNetwork";
-  sizes: (number | Size2D)[];
-  input: Size | undefined;
+  sizes: (number | Shape[Rank.R2])[];
+  input: Shape[Rank] | undefined;
   layers: LayerJSON[];
   output: LayerJSON;
 }
@@ -45,7 +46,7 @@ export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
   layers: Array<any>;
   initialize(
-    inputSize: Size,
+    inputSize: Shape[Rank],
     batches: number,
     type?: DataType,
   ): void | Promise<void>;
@@ -70,24 +71,11 @@ export interface Backend<T extends DataType = DataType> {
   getBiases(): (GPUMatrix | CPUMatrix | any)[];
 }
 
-export interface TensorBackend {
-  tensor2D(values: TensorLike, width: number, height: number): Tensor2D;
-  tensor1D(values: TensorLike): Tensor1D;
-}
-
-export type Tensor2DCPU = CPUMatrix;
-export type Tensor2DGPU = GPUMatrix;
-// deno-lint-ignore no-explicit-any
-export type Tensor2DNative = any;
-export type Tensor2D = Tensor2DCPU | Tensor2DGPU | Tensor2DNative;
-// deno-lint-ignore no-explicit-any
-export type Tensor1D = Float32Array | any;
-
 /**
  * NetworkConfig represents the configuration of a neural network.
  */
 export interface NetworkConfig {
-  input?: Size;
+  input?: Shape[Rank];
   layers: Layer[];
   cost: Cost;
   silent?: boolean;
@@ -101,49 +89,47 @@ export type CPULayer = ConvCPULayer | DenseCPULayer | PoolCPULayer;
 export type GPULayer = DenseGPULayer;
 
 export interface DenseLayerConfig {
-  size: Size;
+  size: Shape1D;
   activation?: Activation;
 }
 
 export interface ConvLayerConfig {
   activation?: Activation;
   kernel?: DataTypeArray;
-  kernelSize: Size2D;
+  kernelSize: Shape2D;
   padding?: number;
   unbiased?: boolean;
-  strides?: Size;
+  strides?: Shape2D;
 }
 
 export interface PoolLayerConfig {
-  strides?: Size;
+  strides?: Shape2D;
   mode?: "max" | "avg";
 }
 
-export type Size = number | Size2D;
-
-export type Size1D = [number];
-export type Size2D = [number, number];
-export type Size3D = [number, number, number];
-export type Size4D = [number, number, number, number];
-export type Size5D = [number, number, number, number, number];
-export type Size6D = [number, number, number, number, number, number];
+export type Shape1D = [number];
+export type Shape2D = [number, number];
+export type Shape3D = [number, number, number];
+export type Shape4D = [number, number, number, number];
+export type Shape5D = [number, number, number, number, number];
+export type Shape6D = [number, number, number, number, number, number];
 
 export enum Rank {
-  R1 = "R1", // Scalar   (magnitude only)
-  R2 = "R2",	// Vector   (magnitude and direction)
-  R3 = "R3", // Matrix   (table of numbers)
-  R4 = "R4",	// 3-Tensor (cube of numbers)
-  R5 = "R5",
-  R6 = "R6",
+  R1 = 1, // Scalar   (magnitude only)
+  R2 = 2,	// Vector   (magnitude and direction)
+  R3 = 3, // Matrix   (table of numbers)
+  R4 = 4,	// 3-Tensor (cube of numbers)
+  R5 = 5,
+  R6 = 6,
 }
 
-export interface ShapeMap {
-  R1: Size1D;
-  R2: Size2D;
-  R3: Size3D;
-  R4: Size4D;
-  R5: Size5D;
-  R6: Size6D;
+export interface Shape {
+  1: Shape1D;
+  2: Shape2D;
+  3: Shape3D;
+  4: Shape4D;
+  5: Shape5D;
+  6: Shape6D;
 }
 
 /**
@@ -172,18 +158,26 @@ export type ArrayMap =
 
 export type TypedArray = Float32Array | Int32Array | Uint8Array;
 
+export type CPUTensor<R extends Rank> = Tensor<R, BackendType.CPU>
+export type GPUTensor<R extends Rank> = Tensor<R, BackendType.GPU>
+
 
 /**
  * DataSet is a container for training data.
  */
 export type DataSet = {
-  inputs: Tensor2D;
-  outputs: Tensor1D;
+  inputs: Tensor<Rank, BackendType>;
+  outputs: Tensor<Rank, BackendType>;
 };
+
+export enum BackendType {
+  CPU = "cpu",
+  GPU = "gpu",
+  // Native = "native",
+}
 
 /** @docalias TypedArray|Array */
 export type TensorLike =
-  | TypedArray
   | number
   | number[]
   | number[][]
@@ -192,3 +186,8 @@ export type TensorLike =
   | TypedArray[]
   | TypedArray[][]
   | TypedArray[][][]
+
+export interface TensorData {
+  cpu: DataTypeArray,
+  gpu: WebGPUData
+}

@@ -1,24 +1,27 @@
 import type { DataTypeArray } from "../../deps.ts";
 import type {
   Backend,
+  BackendType,
   Cost,
   CPULayer,
+  CPUTensor,
   DataSet,
   NetworkConfig,
   NetworkJSON,
-  Size,
+  Rank,
+  Shape,
 } from "../../core/types.ts";
 import { iterate1D } from "../../core/util.ts";
 import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
-import { CPUMatrix } from "./matrix.ts";
+import { Tensor } from "../../mod.ts";
 
 type OutputLayer = DenseCPULayer;
 
 export class CPUBackend implements Backend {
-  input?: Size;
+  input?: Shape[Rank];
   layers: CPULayer[] = [];
   output: OutputLayer;
   silent: boolean;
@@ -51,35 +54,36 @@ export class CPUBackend implements Backend {
     this.layers.push(layer);
   }
 
-  initialize(inputSize: Size, batches: number) {
-    this.layers[0]?.initialize(inputSize, batches);
+  initialize(shape: Shape[Rank]) {
+    this.layers[0]?.initialize(shape);
 
     for (let i = 1; i < this.layers.length; i++) {
       const current = this.layers[i];
       const previous = this.layers[i - 1];
-      current.initialize(previous?.outputSize || inputSize, batches);
+      current.initialize(previous.output.shape);
     }
   }
 
-  feedForward(input: CPUMatrix): CPUMatrix {
+  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
     for (const layer of this.layers) {
       input = layer.feedForward(input);
     }
     return input;
   }
 
-  backpropagate(output: DataTypeArray, rate: number) {
-    const { x, y } = this.output.output;
-    let error = CPUMatrix.with(x, y);
+  backpropagate(output: CPUTensor<Rank>, rate: number) {
+    const shape = this.output.output.shape;
+    let error = Tensor.zeroes<Rank, BackendType.CPU>(shape);
     for (const i in this.output.output.data) {
       error.data[i] = this.costFn.prime(
-        output[i],
+        output.data[i],
         this.output.output.data[i],
       );
     }
+    // console.log((this.layers[1] as DenseCPULayer).output.shape)
     this.output.backPropagate(error, rate);
     for (let i = this.layers.length - 2; i >= 0; i--) {
-      error = (this.layers[i + 1] as DenseCPULayer).getError()
+      error = (this.layers[i + 1] as DenseCPULayer).getError();
       this.layers[i].backPropagate(error, rate);
     }
   }
@@ -87,19 +91,16 @@ export class CPUBackend implements Backend {
   train(
     datasets: DataSet[],
     epochs = 5000,
-    batches = 1,
+    _batches = 1,
     rate = 0.1,
   ): void {
-    batches = datasets[0].inputs.y || batches;
-    const inputSize = datasets[0].inputs.x || this.input;
-
-    this.initialize(inputSize, batches);
+    this.initialize(datasets[0].inputs.shape);
 
     iterate1D(epochs, (e: number) => {
       if (!this.silent) console.log(`Epoch ${e + 1}/${epochs}`);
       for (const dataset of datasets) {
-        this.feedForward(dataset.inputs);
-        this.backpropagate(dataset.outputs as DataTypeArray, rate);
+        this.feedForward(dataset.inputs as CPUTensor<Rank>);
+        this.backpropagate(dataset.outputs as CPUTensor<Rank>, rate);
       }
     });
   }
@@ -120,7 +121,7 @@ export class CPUBackend implements Backend {
   // }
 
   predict(data: DataTypeArray) {
-    const input = new CPUMatrix(data, data.length, 1);
+    const input = new Tensor<Rank, BackendType.CPU>(data, [data.length, 1]);
     for (const layer of this.layers) {
       layer.reset(1);
     }
@@ -168,11 +169,11 @@ export class CPUBackend implements Backend {
     throw new Error("Not implemented");
   }
 
-  getWeights(): CPUMatrix[] {
+  getWeights(): CPUTensor<Rank>[] {
     return this.layers.map((layer) => (layer as DenseCPULayer).weights);
   }
 
-  getBiases(): CPUMatrix[] {
+  getBiases(): CPUTensor<Rank>[] {
     return this.layers.map((layer) => (layer as DenseCPULayer).biases);
   }
 }

@@ -2,6 +2,7 @@ import { Engine } from "../../core/engine.ts";
 import { Tensor } from "../../core/tensor.ts";
 import {
   Backend,
+  BackendType,
   DenseLayerConfig,
   NetworkConfig,
   NetworkJSON,
@@ -11,7 +12,6 @@ import { Core, WebGPUBackend } from "../../deps.ts";
 import { Layer } from "../../layers/mod.ts";
 import { GPUBackend } from "./backend.ts";
 import { DenseGPULayer } from "./layers/dense.ts";
-import { TensorGPUBackend } from "./tensor.ts";
 
 export class GPUInstance {
   static core = new Core();
@@ -59,12 +59,10 @@ const layers = {
 }
 const setup = async (silent = false) => {
   await GPUInstance.init(silent);
-  Tensor.backend = new TensorGPUBackend(GPUInstance.backend!);
+  Tensor.type = BackendType.GPU;
   Engine.backendLoader = loadBackend;
   Layer.layers = layers;
 };
-
-
 
 export const GPU = {
   loadBackend,

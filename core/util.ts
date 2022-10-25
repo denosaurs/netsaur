@@ -1,6 +1,13 @@
 import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
-import { CPUMatrix } from "../backends/cpu/matrix.ts";
-import type { Size, Size2D, TensorLike, TypedArray } from "./types.ts";
+import type {
+BackendType,
+  Rank,
+  Shape,
+  Shape2D,
+  TensorLike,
+  TypedArray,
+} from "./types.ts";
+import { Tensor } from "./tensor.ts";
 
 export const isTypedArray = (
   // deno-lint-ignore ban-types
@@ -97,26 +104,31 @@ export const mse = (errors: Float32Array): number => {
   return sum / errors.length;
 };
 
-export function to1D(size: Size): number {
-  const size2d = (size as Size2D);
-  if (size2d[0]) {
-    return size2d[1] * size2d[0];
+export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
+  if (rank < shape.length) {
+    const res = new Array(rank).fill(1);
+    res.forEach((_, i) => res[i] = shape[i]);
+    res[rank - 1] = 1;
+    for (let i = rank - 1; i < shape.length; i++) {
+      res[rank - 1] *= shape[i];
+    }
+    return res as Shape[R];
+  } else if (rank > shape.length) {
+    const res = new Array(rank).fill(1);
+    shape.map((val, i) => res[i] = val);
+    return res as Shape[R];
   } else {
-    return size as number;
+    return shape as Shape[R];
   }
 }
 
-export function to2D(size: Size = 1): Size2D {
-  return Number(size) ? [size, size] as Size2D : size as Size2D;
-}
-
 export function iterate2D(
-  mat: { x: number; y: number } | CPUMatrix | [number, number],
+  mat: Tensor<Rank.R2, BackendType> | Shape2D,
   callback: (i: number, j: number) => void,
 ): void {
-  mat = mat instanceof Array ? {x: mat[1], y: mat[0]} : mat;
-  for (let i = 0; i < mat.x; i++) {
-    for (let j = 0; j < mat.y; j++) {
+  mat = (Array.isArray(mat) ? mat : mat.shape) as Shape2D;
+  for (let i = 0; i < mat[0]; i++) {
+    for (let j = 0; j < mat[1]; j++) {
       callback(i, j);
     }
   }
@@ -187,24 +199,39 @@ export function randUniform(a: number, b: number) {
   return (b * r) + (1 - r) * a;
 }
 
-export function flatten<
-  T extends number | Promise<number> | TypedArray,
->(
-  arr: T,
-  result: T[] = [],
-  skipTypedArray = false,
-): T[] | ArrayBufferLike {
-  if (result == null) {
-    result = [];
-  }
-  if (Array.isArray(arr) || isTypedArray(arr) && !skipTypedArray) {
-    for (let i = 0; i < arr.length; ++i) {
-      flatten(arr[i], result, skipTypedArray);
+// export function flatten<
+//   T extends number | Promise<number> | TypedArray,
+// >(
+//   arr: T,
+//   result: T[] = [],
+//   skipTypedArray = false,
+// ): T[] | ArrayBufferLike {
+//   if (result == null) {
+//     result = [];
+//   }
+//   if (Array.isArray(arr) || isTypedArray(arr) && !skipTypedArray) {
+//     for (let i = 0; i < arr.length; ++i) {
+//       flatten(arr[i], result, skipTypedArray);
+//     }
+//   } else {
+//     result.push(arr as T);
+//   }
+//   return result;
+// }
+
+export function flatten(input: TensorLike): number[] {
+  // deno-lint-ignore no-explicit-any
+  const stack = [...input as any];
+  const res = [];
+  while (stack.length) {
+    const next = stack.pop()!;
+    if (next.length) {
+      stack.push(...next);
+    } else {
+      res.push(next);
     }
-  } else {
-    result.push(arr as T);
   }
-  return result;
+  return res.reverse();
 }
 
 export function sizeFromShape(shape: number[]): number {

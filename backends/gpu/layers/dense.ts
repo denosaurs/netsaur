@@ -4,9 +4,8 @@ import {
   DenseLayerConfig,
   LayerJSON,
   MatrixJSON,
-  Size,
 } from "../../../core/types.ts";
-import { ActivationError, fromType, to1D } from "../../../core/util.ts";
+import { ActivationError, fromType} from "../../../core/util.ts";
 import {
   Elu,
   GPUActivationFn,

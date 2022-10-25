@@ -12,8 +12,8 @@ await setupBackend(CPU);
 const net = new NeuralNetwork({
   silent: true,
   layers: [
-    DenseLayer({ size: 3, activation: "sigmoid" }),
-    DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: [3], activation: "sigmoid" }),
+    DenseLayer({ size: [1], activation: "sigmoid" }),
   ],
   cost: "crossentropy",
 });

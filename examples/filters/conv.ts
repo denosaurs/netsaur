@@ -1,4 +1,4 @@
-import { ConvLayer, DenseLayer, NeuralNetwork } from "../../mod.ts";
+import { ConvLayer, DenseLayer, NeuralNetwork, Tensor } from "../../mod.ts";
 import { CPUMatrix } from "../../backends/cpu/mod.ts";
 import { ConvCPULayer } from "../../backends/cpu/layers/conv.ts";
 import { PoolCPULayer } from "../../backends/cpu/layers/pool.ts";
@@ -46,22 +46,21 @@ const net = new NeuralNetwork({
       kernel: new Float32Array(kernel),
       kernelSize: [3, 3],
       padding: 1,
-      strides: 1,
+      strides: [1, 1],
       unbiased: true
     }),
-    PoolLayer({ strides: 2, mode: "max" }),
-    DenseLayer({ size: 1, activation: "sigmoid" }),
+    PoolLayer({ strides: [2, 2], mode: "max" }),
+    DenseLayer({ size: [1], activation: "sigmoid" }),
   ],
-  cost: "crossentropy",
-  input: 2,
+  cost: "crossentropy"
 });
 
-const input = new CPUMatrix(buf, dim, dim);
+const input = new Tensor(buf, [1, dim, dim]);
 
 const conv = net.getLayer(0) as ConvCPULayer;
 const pool = net.getLayer(1) as PoolCPULayer;
 
-net.initialize([dim, dim], 1);
+net.initialize([1, dim, dim], 1);
 net.feedForward(input);
 
 for (let i = 0; i < dim; i++) {
@@ -72,20 +71,20 @@ for (let i = 0; i < dim; i++) {
   }
 }
 
-for (let i = 0; i < conv.output.x; i++) {
-  for (let j = 0; j < conv.output.y; j++) {
+for (let i = 0; i < conv.output.y; i++) {
+  for (let j = 0; j < conv.output.z; j++) {
     const pixel = Math.round(
-      Math.max(Math.min(conv.output.data[j * conv.output.x + i], 255), 0),
+      Math.max(Math.min(conv.output.data[j * conv.output.y + i], 255), 0),
     );
     ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
     ctx.fillRect(i * 10 + dim * 10, j * 10, 10, 10);
   }
 }
 
-for (let i = 0; i < pool.output.x; i++) {
-  for (let j = 0; j < pool.output.y; j++) {
+for (let i = 0; i < pool.output.y; i++) {
+  for (let j = 0; j < pool.output.z; j++) {
     const pixel = Math.round(
-      Math.max(Math.min(pool.output.data[j * pool.output.x + i], 255), 0),
+      Math.max(Math.min(pool.output.data[j * pool.output.y + i], 255), 0),
     );
     ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
     ctx.fillRect(i * 20 + dim * 10, j * 20 + dim * 10, 20, 20);

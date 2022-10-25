@@ -1,6 +1,7 @@
 import { Engine } from "../../core/engine.ts";
 import {
   Backend,
+  BackendType,
   ConvLayerConfig,
   DenseLayerConfig,
   NetworkConfig,
@@ -14,7 +15,6 @@ import { CPUBackend } from "./backend.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
-import { TensorCPUBackend } from "./tensor.ts";
 import * as kernels from "./kernels/mod.ts"
 
 const loadBackend = (config: NetworkConfig): Backend => {
@@ -36,7 +36,7 @@ const layers = {
 };
 
 const setup = (_silent = false) => {
-  Tensor.backend = new TensorCPUBackend();
+  Tensor.type = BackendType.CPU;
   Engine.backendLoader = loadBackend;
   Layer.layers = layers;
   Engine.kernels = kernels;
@@ -50,5 +50,5 @@ export const CPU = {
   kernels
 };
 export { CPUBackend };
-export * from "./matrix.ts";
+export * from "./kernels/matrix.ts";
 export type { DataSet } from "../../core/types.ts";

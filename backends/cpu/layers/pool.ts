@@ -1,11 +1,15 @@
 import {
+  BackendType,
+  CPUTensor,
   LayerJSON,
   PoolLayerConfig,
-  Size,
-  Size2D,
+  Rank,
+  Shape,
+  Shape2D,
 } from "../../../core/types.ts";
-import { average, iterate2D, maxIdx, to2D } from "../../../core/util.ts";
-import { CPUMatrix } from "../matrix.ts";
+import { average, iterate2D, maxIdx, toShape } from "../../../core/util.ts";
+import { Tensor } from "../../../mod.ts";
+import { CPUMatrix } from "../kernels/matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
@@ -14,82 +18,81 @@ import { CPUMatrix } from "../matrix.ts";
  * Pooling layer.
  */
 export class PoolCPULayer {
-  outputSize!: Size2D;
-  strides: Size2D;
+  outputSize!: Shape2D;
+  strides: Shape2D;
   mode: "max" | "avg";
   indices: number[] = [];
-  input!: CPUMatrix;
-  error!: CPUMatrix;
-  output!: CPUMatrix;
+  input!: CPUTensor<Rank.R3>;
+  error!: CPUTensor<Rank.R3>;
+  output!: CPUTensor<Rank.R3>;
 
   constructor(config: PoolLayerConfig) {
-    this.strides = to2D(config.strides);
+    this.strides = config.strides || [1, 1];
     this.mode = config.mode ?? "max";
   }
 
   reset(_batches: number) {
   }
 
-  initialize(inputSize: Size, _batches: number) {
-    const size = inputSize as Size2D;
-    if (size[1] % this.strides[1] || size[0] % this.strides[0]) {
+  initialize(inputSize: Shape[Rank]) {
+    const size = toShape(inputSize, Rank.R3);
+    if (size[1] % this.strides[0] || size[2] % this.strides[1]) {
       throw new Error(
-        `Cannot pool shape [${size[1]}, ${size[0]}] with stride ${
-          this.strides[1]
-        }`,
+        `Cannot pool shape ${size} with stride ${this.strides}`,
       );
     }
-    if (this.strides[1] == 1) {
-      throw new Error(`Cannot pool with stride 1`);
+    if (this.strides[0] == 1 || this.strides[1] == 1) {
+      throw new Error(`Cannot pool with stride ${this.strides}`);
     }
-    const w = size[1] / this.strides[1];
-    const h = size[0] / this.strides[0];
-    this.output = CPUMatrix.with(w, h);
+    const w = size[1] / this.strides[0];
+    const h = size[2] / this.strides[1];
+    this.output = Tensor.zeroes([size[0], w, h]);
     this.outputSize = [h, w];
   }
 
-  feedForward(input: CPUMatrix) {
+  feedForward(input: CPUTensor<Rank>) {
     if (this.mode == "max") {
-      iterate2D(this.output, (i: number, j: number) => {
+      iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
         const pool: number[] = [];
         const indices: number[] = [];
         iterate2D(this.strides, (x: number, y: number) => {
-          const idx = (j * this.strides[0] + y) * input.x +
+          //TODO: batches
+          const idx = (j * this.strides[0] + y) * input.y +
             i * this.strides[1] + x;
           pool.push(input.data[idx]);
           indices.push(idx);
         });
         const max = maxIdx(pool);
-        this.indices[j * this.output.x + i] = indices[max];
-        this.output.data[j * this.output.x + i] = pool[max];
+        this.indices[j * this.output.y + i] = indices[max];
+        this.output.data[j * this.output.y + i] = pool[max];
       });
     } else if (this.mode == "avg") {
-      iterate2D(this.output, (i: number, j: number) => {
+      iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
         const pool: number[] = [];
         iterate2D(this.strides, (x: number, y: number) => {
-          const idx = (j * this.strides[0] + y) * input.x +
+          const idx = (j * this.strides[0] + y) * input.y +
             i * this.strides[1] + x;
           pool.push(input.data[idx]);
         });
-        this.output.data[j * this.output.x + i] = average(pool);
+        this.output.data[j * this.output.y + i] = average(pool);
       });
     }
-    this.input = input;
+    this.input = input.to3D();
     return this.output;
   }
 
-  backPropagate(error: CPUMatrix, _rate: number) {
-    this.error = error;
+  backPropagate(error: CPUTensor<Rank>, _rate: number) {
+    this.error = error.to3D();
   }
 
-  getError(): CPUMatrix {
-    const error = CPUMatrix.with(this.input.x, this.input.y);
+  getError(): CPUTensor<Rank> {
+    const error = Tensor.zeroes<Rank.R3, BackendType.CPU>(this.input.shape);
     if (this.mode == "max") {
       for (let i = 0; i < this.error.data.length; i++) {
         error.data[this.indices[i]] = this.error.data[i];
       }
     } else if (this.mode == "avg") {
-      iterate2D(this.output, (i: number, j: number) => {
+      iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
         const meanError = this.error.data[j * this.error.x + i];
         iterate2D(this.strides, (x: number, y: number) => {
           const idx = (j * this.strides[0] + y) * error.x +

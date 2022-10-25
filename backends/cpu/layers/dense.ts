@@ -1,11 +1,16 @@
+import { Tensor } from "../../../core/tensor.ts";
 import {
   Activation,
+  BackendType,
+  CPUTensor,
   DenseLayerConfig,
   LayerJSON,
   MatrixJSON,
-  Size,
+  Rank,
+  Shape,
+  Shape1D,
 } from "../../../core/types.ts";
-import { ActivationError, to1D } from "../../../core/util.ts";
+import { ActivationError, toShape } from "../../../core/util.ts";
 import {
   CPUActivationFn,
   Elu,
@@ -18,7 +23,7 @@ import {
   Tanh,
 } from "../activation.ts";
 import { CPUCostFunction, CrossEntropy } from "../cost.ts";
-import { CPUMatrix } from "../matrix.ts";
+import { CPUMatrix } from "../kernels/matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
@@ -27,31 +32,32 @@ import { CPUMatrix } from "../matrix.ts";
  * Regular Dense Layer
  */
 export class DenseCPULayer {
-  outputSize: number;
+  outputSize: Shape1D;
   activationFn: CPUActivationFn = new Sigmoid();
   costFunction: CPUCostFunction = new CrossEntropy();
 
-  input!: CPUMatrix;
-  weights!: CPUMatrix;
-  biases!: CPUMatrix;
-  output!: CPUMatrix;
-  error!: CPUMatrix;
+  input!: CPUTensor<Rank.R2>;
+  weights!: CPUTensor<Rank.R2>;
+  biases!: CPUTensor<Rank.R2>;
+  output!: CPUTensor<Rank.R2>;
+  error!: CPUTensor<Rank.R2>;
 
   constructor(config: DenseLayerConfig) {
-    this.outputSize = to1D(config.size);
+    this.outputSize = config.size;
     this.setActivation(config.activation || "linear");
   }
 
   reset(batches: number) {
-    this.output = CPUMatrix.with(this.outputSize, batches);
+    this.output = Tensor.zeroes([this.outputSize[0], batches]);
   }
 
-  initialize(inputSize: Size, batches: number) {
-    this.weights = CPUMatrix.with(this.outputSize, to1D(inputSize));
+  initialize(inputShape: Shape[Rank]) {
+    const shape = toShape(inputShape, Rank.R2);
+    this.weights = Tensor.zeroes([this.outputSize[0], shape[0]]);
     this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
-    this.biases = CPUMatrix.with(this.outputSize, 1);
+    this.biases = Tensor.zeroes([this.outputSize[0], 1]);
     this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
-    this.reset(batches);
+    this.reset(shape[1]);
   }
 
   setActivation(activation: Activation) {
@@ -85,9 +91,9 @@ export class DenseCPULayer {
     }
   }
 
-  feedForward(input: CPUMatrix): CPUMatrix {
-    this.input = input;
-    const product = CPUMatrix.dot(input, this.weights);
+  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
+    this.input = input.to2D();
+    const product = CPUMatrix.dot(this.input, this.weights);
     for (let i = 0, j = 0; i < product.data.length; i++, j++) {
       if (j >= this.biases.x) j = 0;
       const sum = product.data[i] + this.biases.data[j];
@@ -96,9 +102,12 @@ export class DenseCPULayer {
     return this.output;
   }
 
-  backPropagate(error: CPUMatrix, rate: number, _costFn: CPUCostFunction = this.costFunction,) {
-    const cost = CPUMatrix.with(error.x, error.y);
-    for (const i in cost.data) {
+  backPropagate(
+    error: CPUTensor<Rank>,
+    rate: number,
+  ) {
+    const cost = Tensor.zeroes<Rank.R2, BackendType.CPU>([error.x, error.y]);
+    for (let i = 0; i < cost.data.length; i++) {
       const activation = this.activationFn.prime(this.output.data[i]);
       cost.data[i] = error.data[i] * activation;
     }
@@ -110,10 +119,10 @@ export class DenseCPULayer {
       if (j >= this.biases.x) j = 0;
       this.biases.data[j] += cost.data[i] * rate;
     }
-    this.error = error
+    this.error = error.to2D();
   }
 
-  getError(): CPUMatrix {
+  getError(): CPUTensor<Rank> {
     return CPUMatrix.dot(this.error, CPUMatrix.transpose(this.weights));
   }
 
@@ -131,7 +140,8 @@ export class DenseCPULayer {
   }
 
   static fromJSON(
-    { outputSize, activationFn, type, input, weights, biases, output }: LayerJSON,
+    { outputSize, activationFn, type, input, weights, biases, output }:
+      LayerJSON,
   ): DenseCPULayer {
     if (type !== "dense") {
       throw new Error(
