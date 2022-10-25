@@ -18,7 +18,7 @@ const data = await Data.csv(
 // data.outputs = data.outputs.div(100);
 
 const network = new NeuralNetwork({
-  input: { x: 1, y: data.inputs.cols },
+  input: [data.inputs.cols, 1],
   layers: [
     DenseLayer({ size: 1, activation: "sigmoid" }),
   ],

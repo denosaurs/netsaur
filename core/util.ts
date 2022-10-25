@@ -99,23 +99,22 @@ export const mse = (errors: Float32Array): number => {
 
 export function to1D(size: Size): number {
   const size2d = (size as Size2D);
-  if (size2d.y) {
-    return size2d.x * size2d.y;
+  if (size2d[0]) {
+    return size2d[1] * size2d[0];
   } else {
     return size as number;
   }
 }
 
 export function to2D(size: Size = 1): Size2D {
-  return Number(size)
-    ? { x: size as number, y: size as number } as Size2D
-    : size as Size2D;
+  return Number(size) ? [size, size] as Size2D : size as Size2D;
 }
 
 export function iterate2D(
-  mat: { x: number; y: number } | CPUMatrix,
+  mat: { x: number; y: number } | CPUMatrix | [number, number],
   callback: (i: number, j: number) => void,
 ): void {
+  mat = mat instanceof Array ? {x: mat[1], y: mat[0]} : mat;
   for (let i = 0; i < mat.x; i++) {
     for (let j = 0; j < mat.y; j++) {
       callback(i, j);

@@ -2,7 +2,7 @@ import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
 import { CPUMatrix } from "../backends/cpu/matrix.ts";
 import { iterate1D } from "../core/util.ts";
 import { DataTypeArray } from "../deps.ts";
-import { DenseLayer, tensor1D, tensor2D } from "../mod.ts";
+import { CrossEntropy, DenseLayer, tensor1D, tensor2D } from "../mod.ts";
 
 const layer = DenseLayer({ size: 3, activation: "sigmoid" }) as DenseCPULayer;
 const output = DenseLayer({ size: 1, activation: "sigmoid" }) as DenseCPULayer;
@@ -17,7 +17,6 @@ const datasets = [{
   outputs: await tensor1D([0, 1, 1, 0]),
 }];
 
-const crossEntropyPrime = (yHat: number, y: number) => yHat - y;
 
 const batches = datasets[0].inputs.y;
 const inputSize = datasets[0].inputs.x;
@@ -36,9 +35,10 @@ iterate1D(epochs, (_e: number) => {
     const out = dataset.outputs;
     let error = CPUMatrix.with(output.output.x, output.output.y);
     for (const i in output.output.data) {
-      error.data[i] = crossEntropyPrime(
+      error.data[i] = CrossEntropy(
         out[i],
         output.output.data[i],
+        true,
       );
     }
     output.backPropagate(error, rate);

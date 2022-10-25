@@ -8,9 +8,6 @@ import {
   tensor1D,
 } from "../mod.ts";
 import { CPU } from "../backends/cpu/mod.ts";
-import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
-import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
-import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
 
 await setupBackend(CPU);
 
@@ -19,7 +16,7 @@ const net = new NeuralNetwork({
   layers: [
     ConvLayer({
       activation: "tanh",
-      kernelSize: { x: 3, y: 3 },
+      kernelSize: [3, 3],
       padding: 0,
       strides: 1,
     }),
@@ -28,7 +25,7 @@ const net = new NeuralNetwork({
     DenseLayer({ size: 1, activation: "sigmoid" }),
   ],
   cost: "crossentropy",
-  input: { x: 8, y: 8 },
+  input: [8,8],
 });
 
 const input_1 = await tensor2D([
