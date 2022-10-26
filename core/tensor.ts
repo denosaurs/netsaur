@@ -9,7 +9,7 @@ import {
   TensorLike,
   TypedArray,
 } from "./types.ts";
-import { flatten, inferShape, iterate1D, to1D, to2D, to3D } from "./util.ts";
+import { flatten, inferShape, iterate1D, Random, to1D, to2D, to3D } from "./util.ts";
 
 export class Tensor<R extends Rank, B extends BackendType> {
   static type: BackendType;
@@ -49,6 +49,17 @@ export class Tensor<R extends Rank, B extends BackendType> {
     value = 1,
   ): Tensor<R, B> {
     const data = new Float32Array(to1D(shape)[0]).fill(value);
+    return new Tensor(toData(data), shape);
+  }
+
+  static randomNormal<R extends Rank, B extends BackendType>(
+    shape: Shape[R],
+    mean = 0,
+    stdDev = 1,
+    seed?: number
+  ): Tensor<R, B> {
+    if (seed !== undefined) Random.setSeed(seed);
+    const data = new Float32Array(to1D(shape)[0]).fill(0).map( () => Random.gaussian(mean, stdDev));
     return new Tensor(toData(data), shape);
   }
 
@@ -139,6 +150,24 @@ export function toData<B extends BackendType>(
   }
 }
 
+export function tensor1D(
+  values: TensorLike,
+  shape?: Shape[Rank.R1],
+) {
+  // deno-lint-ignore no-explicit-any
+  if (Array.isArray((values as any)[0])) throw new Error("Invalid 1D Tensor");
+  const outputShape = shape || [(values as TypedArray).length];
+  return new Tensor(toData(values), outputShape);
+}
+
+export function zeros1D(shape: Shape[Rank.R1]) {
+  return Tensor.zeroes(shape);
+}
+
+export function randNormal1D(shape: Shape[Rank.R1]) {
+  return Tensor.randomNormal(shape);
+}
+
 export function tensor2D(
   values: TensorLike,
   shape?: Shape[Rank.R2],
@@ -149,12 +178,82 @@ export function tensor2D(
   return new Tensor(toData(values), [outputShape[1], outputShape[0]]);
 }
 
-export function tensor1D(
+export function zeros2D(shape: Shape[Rank.R2]) {
+  return Tensor.zeroes([shape[1], shape[0]]);
+}
+
+export function randNormal2D(shape: Shape[Rank.R2]) {
+  return Tensor.randomNormal([shape[1], shape[0]]);
+}
+
+export function tensor3D(
   values: TensorLike,
-  shape?: Shape[Rank.R1],
+  shape?: Shape[Rank.R3],
 ) {
-  // deno-lint-ignore no-explicit-any
-  if (Array.isArray((values as any)[0])) throw new Error("Invalid 1D Tensor");
-  const outputShape = shape || [(values as TypedArray).length];
-  return new Tensor(toData(values), outputShape);
+  const outputShape = shape || inferShape(values).slice();
+  if (outputShape.length > 3) throw new Error("Invalid 3D Tensor");
+  // values
+  return new Tensor(toData(values), [outputShape[2], outputShape[1], outputShape[0]]);
+}
+
+export function zeros3D(shape: Shape[Rank.R3]) {
+  return Tensor.zeroes([shape[2], shape[1], shape[0]]);
+}
+
+export function randNormal3D(shape: Shape[Rank.R3]) {
+  return Tensor.randomNormal([shape[2], shape[1], shape[0]]);
+}
+
+export function tensor4D(
+  values: TensorLike,
+  shape?: Shape[Rank.R4],
+) {
+  const outputShape = shape || inferShape(values).slice();
+  if (outputShape.length > 4) throw new Error("Invalid 4D Tensor");
+  // values
+  return new Tensor(toData(values), [outputShape[3], outputShape[2], outputShape[1], outputShape[0]]);
+}
+
+export function zeros4D(shape: Shape[Rank.R4]) {
+  return Tensor.zeroes([shape[3], shape[2], shape[1], shape[0]]);
+}
+
+export function randNormal4D(shape: Shape[Rank.R4]) {
+  return Tensor.randomNormal([shape[3], shape[2], shape[1], shape[0]]);
+}
+
+export function tensor5D(
+  values: TensorLike,
+  shape?: Shape[Rank.R5],
+) {
+  const outputShape = shape || inferShape(values).slice();
+  if (outputShape.length > 5) throw new Error("Invalid 5D Tensor");
+  // values
+  return new Tensor(toData(values), [outputShape[4], outputShape[3], outputShape[2], outputShape[1], outputShape[0]]);
+}
+
+export function zeros5D(shape: Shape[Rank.R5]) {
+  return Tensor.zeroes([shape[4], shape[3], shape[2], shape[1], shape[0]]);
+}
+
+export function randNormal5D(shape: Shape[Rank.R5]) {
+  return Tensor.randomNormal([shape[4], shape[3], shape[2], shape[1], shape[0]]);
+}
+
+export function tensor6D(
+  values: TensorLike,
+  shape?: Shape[Rank.R6],
+) {
+  const outputShape = shape || inferShape(values).slice();
+  if (outputShape.length > 6) throw new Error("Invalid 6D Tensor");
+  // values
+  return new Tensor(toData(values), [outputShape[5], outputShape[4], outputShape[3], outputShape[2], outputShape[1], outputShape[0]]);
+}
+
+export function zeros6D(shape: Shape[Rank.R6]) {
+  return Tensor.zeroes([shape[5], shape[4], shape[3], shape[2], shape[1], shape[0]]);
+}
+
+export function randNormal6D(shape: Shape[Rank.R6]) {
+  return Tensor.randomNormal([shape[5], shape[4], shape[3], shape[2], shape[1], shape[0]]);
 }

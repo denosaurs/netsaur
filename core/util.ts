@@ -1,6 +1,6 @@
 import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
 import {
-BackendType,
+  BackendType,
   Rank,
   Shape,
   Shape2D,
@@ -21,8 +21,8 @@ export function getType(type: DataTypeArray<DataType>) {
     type instanceof Uint32Array
       ? "u32"
       : type instanceof Int32Array
-      ? "i32"
-      : "f32"
+        ? "i32"
+        : "f32"
   );
 }
 export function fromType<T extends DataType>(type: string) {
@@ -30,10 +30,10 @@ export function fromType<T extends DataType>(type: string) {
     type === "u32"
       ? Uint32Array
       : type === "i32"
-      ? Int32Array
-      : type === "f32"
-      ? Float32Array
-      : Uint32Array
+        ? Int32Array
+        : type === "f32"
+          ? Float32Array
+          : Uint32Array
   ) as DataTypeArrayConstructor<T>;
 }
 export function toType<T extends DataType>(type: string) {
@@ -41,10 +41,10 @@ export function toType<T extends DataType>(type: string) {
     type === "u32"
       ? Uint32Array
       : type === "i32"
-      ? Int32Array
-      : type === "f32"
-      ? Float32Array
-      : Uint32Array
+        ? Int32Array
+        : type === "f32"
+          ? Float32Array
+          : Uint32Array
   ) as DataTypeArrayConstructor<T>;
 }
 
@@ -184,8 +184,8 @@ export function shuffleCombo(
   if (array.length !== array2.length) {
     throw new Error(
       `Array sizes must match to be shuffled together ` +
-        `First array length was ${array.length}` +
-        `Second array length was ${array2.length}`,
+      `First array length was ${array.length}` +
+      `Second array length was ${array2.length}`,
     );
   }
   let counter = array.length;
@@ -308,8 +308,7 @@ export function toNestedArray(
   }
   if (size !== a.length) {
     throw new Error(
-      `[${shape}] does not match the input size ${a.length}${
-        isComplex ? " for a complex tensor" : ""
+      `[${shape}] does not match the input size ${a.length}${isComplex ? " for a complex tensor" : ""
       }.`,
     );
   }
@@ -348,4 +347,76 @@ export function inferShape(val: TensorLike): number[] {
   }
 
   return shape;
+}
+
+export class Random {
+  static #y2 = 0;
+  static #previous_gaussian = false;
+  static #randomStateProp = '_lcg_random_state';
+  static #m = 4294967296;
+  static #a = 1664525;
+  static #c = 1013904223;
+
+  static lcg(stateProperty: string) {
+    // deno-lint-ignore no-explicit-any
+    (Random as any)[stateProperty] = (Random.#a * (Random as any)[stateProperty] + Random.#c) % Random.#m;
+    // deno-lint-ignore no-explicit-any
+    return (Random as any)[stateProperty] / Random.#m;
+  }
+
+  static #lcgSeed(stateProperty: string, val = Math.random() * Random.#m) {
+    // deno-lint-ignore no-explicit-any
+    (Random as any)[stateProperty] = val >>> 0;
+  }
+
+  static setSeed(seed: number) {
+    Random.#lcgSeed(Random.#randomStateProp, seed);
+    Random.#previous_gaussian = false;
+  }
+
+  static random(min?: number | number[], max?: number | number[]): number {
+    let rand;
+    // deno-lint-ignore no-explicit-any
+    if ((Random as any)[Random.#randomStateProp] != null) {
+      rand = Random.lcg(Random.#randomStateProp);
+    } else {
+      rand = Math.random();
+    }
+    if (typeof min === 'undefined') {
+      return rand;
+    } else if (typeof max === 'undefined') {
+      if (min instanceof Array) {
+        return min[Math.floor(rand * min.length)];
+      } else {
+        return rand * min;
+      }
+    } else {
+      if (min > max) {
+        const tmp = min;
+        min = max;
+        max = tmp;
+      }
+      return rand * ((max as number) - (min as number)) + (min as number);
+    }
+  }
+
+  static gaussian(mean: number, standard_deviation = 1) {
+    let y1, x1, x2, w;
+    if (Random.#previous_gaussian) {
+      y1 = Random.#y2;
+    } else {
+      do {
+        x1 = this.random(2) - 1;
+        x2 = this.random(2) - 1;
+        w = x1 * x1 + x2 * x2;
+      } while (w >= 1);
+      w = Math.sqrt(-2 * Math.log(w) / w);
+      y1 = x1 * w;
+      Random.#y2 = x2 * w;
+      Random.#previous_gaussian = true;
+    }
+
+    const m = mean || 0;
+    return y1 * standard_deviation + m;
+  }
 }
