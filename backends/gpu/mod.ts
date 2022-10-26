@@ -72,4 +72,3 @@ export const GPU = {
 };
 
 export { GPUBackend };
-export * from "./matrix.ts";

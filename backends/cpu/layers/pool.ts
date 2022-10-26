@@ -7,9 +7,8 @@ import {
   Shape,
   Shape2D,
 } from "../../../core/types.ts";
-import { average, iterate2D, maxIdx, toShape } from "../../../core/util.ts";
+import { average, iterate2D, maxIdx, to2D, to3D } from "../../../core/util.ts";
 import { Tensor } from "../../../mod.ts";
-import { CPUMatrix } from "../kernels/matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
@@ -35,7 +34,7 @@ export class PoolCPULayer {
   }
 
   initialize(inputSize: Shape[Rank]) {
-    const size = toShape(inputSize, Rank.R3);
+    const size = to3D(inputSize);
     if (size[1] % this.strides[0] || size[2] % this.strides[1]) {
       throw new Error(
         `Cannot pool shape ${size} with stride ${this.strides}`,
@@ -104,19 +103,17 @@ export class PoolCPULayer {
     return error;
   }
 
-  toJSON(): LayerJSON {
+  toJSON() {
     return {
       outputSize: this.outputSize,
       type: "pool",
-      input: this.input.toJSON(),
-      output: this.output.toJSON(),
       strides: this.strides,
       mode: this.mode,
     };
   }
 
   static fromJSON(
-    { outputSize, input, type, output, strides, mode }: LayerJSON,
+    { outputSize, type, strides, mode }: LayerJSON,
   ): PoolCPULayer {
     if (type !== "pool") {
       throw new Error(
@@ -128,10 +125,8 @@ export class PoolCPULayer {
     if (strides === undefined) {
       throw new Error("Layer imported must be initialized");
     }
-    const layer = new PoolCPULayer({ strides, mode });
-    layer.input = new CPUMatrix(input.data, input.x, input.y);
-    layer.outputSize = outputSize as Size2D;
-    layer.output = new CPUMatrix(output.data, output.x, output.y);
+    const layer = new PoolCPULayer({ strides: to2D(strides), mode });
+    layer.outputSize = to2D(outputSize);
     return layer;
   }
 }

@@ -31,7 +31,7 @@ export class CPUBackend implements Backend {
     this.input = config.input;
     this.silent = config.silent ?? false;
     config.layers.map(this.addLayer.bind(this));
-    this.output = config.layers[config.layers.length - 1];
+    this.output = config.layers.at(-1);
     this.setCost(config.cost);
   }
 
@@ -80,7 +80,6 @@ export class CPUBackend implements Backend {
         this.output.output.data[i],
       );
     }
-    // console.log((this.layers[1] as DenseCPULayer).output.shape)
     this.output.backPropagate(error, rate);
     for (let i = this.layers.length - 2; i >= 0; i--) {
       error = (this.layers[i + 1] as DenseCPULayer).getError();
@@ -128,14 +127,14 @@ export class CPUBackend implements Backend {
     return this.feedForward(input).data;
   }
 
-  toJSON(): NetworkJSON {
+  async toJSON() {
     return {
       costFn: this.costFn.name,
-      type: "NeuralNetwork",
       sizes: this.layers.map((layer) => layer.outputSize),
       input: this.input,
-      layers: this.layers.map((layer) => layer.toJSON()),
-      output: this.output.toJSON(),
+      layers: await Promise.all(
+        this.layers.map(async (layer) => await layer.toJSON()),
+      ),
     };
   }
 
@@ -156,12 +155,13 @@ export class CPUBackend implements Backend {
           );
       }
     });
-    layers.push(DenseCPULayer.fromJSON(data.output));
     const backend = new CPUBackend({
       input: data.input,
-      layers,
+      layers: [],
       cost: data.costFn! as Cost,
     });
+    backend.layers = layers
+    backend.output = layers.at(-1) as DenseCPULayer
     return backend;
   }
 

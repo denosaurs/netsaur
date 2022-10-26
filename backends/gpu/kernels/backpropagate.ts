@@ -1,27 +1,31 @@
-import {
-  DataType,
-  ensureDataType,
-  WebGPUBackend,
-} from "../../../deps.ts";
-import { GPUMatrix } from "../matrix.ts";
+import { GPUTensor, Rank } from "../../../core/types.ts";
+import { WebGPUBackend } from "../../../deps.ts";
 
-export async function backPropagate<T extends DataType>(
+export async function backPropagate(
   backend: WebGPUBackend,
-  inputs: GPUMatrix<T>,
-  weights: GPUMatrix<T>,
-  biases: GPUMatrix<T>,
-  output: GPUMatrix<T>,
-  cost: GPUMatrix<T>,
-  error: GPUMatrix<T>,
-  result: GPUMatrix<T>,
-  prev: GPUMatrix<T>,
+  inputs: GPUTensor<Rank.R2>,
+  weights: GPUTensor<Rank.R2>,
+  biases: GPUTensor<Rank.R2>,
+  output: GPUTensor<Rank.R2>,
+  cost: GPUTensor<Rank.R2>,
+  error: GPUTensor<Rank.R2>,
+  result: GPUTensor<Rank.R2>,
+  prev: GPUTensor<Rank.R2>,
   rate: number,
   last: number,
   activation: string,
   costFn: string,
 ) {
-  const type = ensureDataType(error.type, weights.type);
-  const code = shader(type, activation, costFn, rate, weights.y, weights.x, prev.x, error.y, last);
+  const code = shader(
+    activation,
+    costFn,
+    rate,
+    weights.y,
+    weights.x,
+    prev.x,
+    inputs.y,
+    last,
+  );
   const pipeline = await backend.register(code);
   backend.execute(
     pipeline,
@@ -40,7 +44,6 @@ export async function backPropagate<T extends DataType>(
 }
 
 const shader = (
-  type: DataType,
   activation: string,
   cost: string,
   rate: number,
@@ -51,7 +54,7 @@ const shader = (
   layer: number,
 ) => `
   struct Matrix {
-    values: array<${type}>,
+    values: array<f32>,
   };
   
   @group(0) @binding(0)
@@ -71,11 +74,11 @@ const shader = (
   @group(0) @binding(7)
   var<storage, read> prev: Matrix;
   
-  fn activationPrime(output: ${type}) -> ${type} {
+  fn activationPrime(output: f32) -> f32 {
     ${activation};
   }
 
-  fn costPrime(yHat: ${type}, y: ${type}) -> ${type} {
+  fn costPrime(yHat: f32, y: f32) -> f32 {
     ${cost};
   }
   
@@ -86,7 +89,7 @@ const shader = (
       if (${layer == 0}) {
         result.values[idx] = costPrime(error.values[idx], output.values[idx]);
       } else {
-        var weighted_sum = ${type}(0);
+        var weighted_sum = f32(0);
         for (var k = 0u; k < ${prev}u; k++) {
           var a = k + global_id.y * ${prev}u;
           var b = k + global_id.x * ${prev}u;    
@@ -105,7 +108,7 @@ const shader = (
     };
 
     if (global_id.y < ${input}u) {
-      var weighted_sum = ${type}(0);
+      var weighted_sum = f32(0);
       for (var k = 0u; k < ${batches}u; k++) {
         var a = global_id.y + k * ${input}u;
         var b = global_id.x + k * ${output}u;    

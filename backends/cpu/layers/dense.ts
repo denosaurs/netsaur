@@ -5,23 +5,12 @@ import {
   CPUTensor,
   DenseLayerConfig,
   LayerJSON,
-  MatrixJSON,
   Rank,
   Shape,
   Shape1D,
 } from "../../../core/types.ts";
-import { ActivationError, toShape } from "../../../core/util.ts";
-import {
-  CPUActivationFn,
-  Elu,
-  LeakyRelu,
-  Linear,
-  Relu,
-  Relu6,
-  Selu,
-  Sigmoid,
-  Tanh,
-} from "../activation.ts";
+import { to1D, to2D } from "../../../core/util.ts";
+import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 import { CPUCostFunction, CrossEntropy } from "../cost.ts";
 import { CPUMatrix } from "../kernels/matrix.ts";
 
@@ -52,7 +41,7 @@ export class DenseCPULayer {
   }
 
   initialize(inputShape: Shape[Rank]) {
-    const shape = toShape(inputShape, Rank.R2);
+    const shape = to2D(inputShape);
     this.weights = Tensor.zeroes([this.outputSize[0], shape[0]]);
     this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
     this.biases = Tensor.zeroes([this.outputSize[0], 1]);
@@ -61,34 +50,7 @@ export class DenseCPULayer {
   }
 
   setActivation(activation: Activation) {
-    switch (activation) {
-      case "sigmoid":
-        this.activationFn = new Sigmoid();
-        break;
-      case "leakyrelu":
-        this.activationFn = new LeakyRelu();
-        break;
-      case "tanh":
-        this.activationFn = new Tanh();
-        break;
-      case "relu":
-        this.activationFn = new Relu();
-        break;
-      case "relu6":
-        this.activationFn = new Relu6();
-        break;
-      case "elu":
-        this.activationFn = new Elu();
-        break;
-      case "selu":
-        this.activationFn = new Selu();
-        break;
-      case "linear":
-        this.activationFn = new Linear();
-        break;
-      default:
-        throw new ActivationError(activation);
-    }
+    this.activationFn = setActivation(activation);
   }
 
   feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
@@ -126,21 +88,19 @@ export class DenseCPULayer {
     return CPUMatrix.dot(this.error, CPUMatrix.transpose(this.weights));
   }
 
-  toJSON(): LayerJSON {
+  async toJSON() {
     return {
       outputSize: this.outputSize,
       activationFn: this.activationFn.name,
       costFn: this.costFunction.name,
       type: "dense",
-      input: this.input.toJSON(),
-      weights: this.weights.toJSON(),
-      biases: this.biases.toJSON(),
-      output: this.output.toJSON(),
+      weights: await this.weights.toJSON(),
+      biases: await this.biases.toJSON(),
     };
   }
 
   static fromJSON(
-    { outputSize, activationFn, type, input, weights, biases, output }:
+    { outputSize, activationFn, type, weights, biases }:
       LayerJSON,
   ): DenseCPULayer {
     if (type !== "dense") {
@@ -154,21 +114,11 @@ export class DenseCPULayer {
       throw new Error("Layer imported must be initialized");
     }
     const layer = new DenseCPULayer({
-      size: outputSize,
+      size: to1D(outputSize),
       activation: (activationFn as Activation) || "sigmoid",
     });
-    layer.input = new CPUMatrix(input.data, input.x, input.y);
-    layer.weights = new CPUMatrix(
-      (weights as MatrixJSON).data,
-      (weights as MatrixJSON).x,
-      (weights as MatrixJSON).y,
-    );
-    layer.biases = new CPUMatrix(
-      (biases as MatrixJSON).data,
-      (biases as MatrixJSON).x,
-      (biases as MatrixJSON).y,
-    );
-    layer.output = new CPUMatrix(output.data, output.x, output.y);
+    layer.weights = Tensor.fromJSON(weights);
+    layer.biases = Tensor.fromJSON(biases);
     return layer;
   }
 }

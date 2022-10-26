@@ -1,5 +1,5 @@
 import { DataType, DataTypeArray, DataTypeArrayConstructor } from "../deps.ts";
-import type {
+import {
 BackendType,
   Rank,
   Shape,
@@ -120,6 +120,18 @@ export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
   } else {
     return shape as Shape[R];
   }
+}
+
+export function to1D(shape: Shape[Rank]) {
+  return toShape(shape, Rank.R1)
+}
+
+export function to2D(shape: Shape[Rank]) {
+  return toShape(shape, Rank.R2)
+}
+
+export function to3D(shape: Shape[Rank]) {
+  return toShape(shape, Rank.R3)
 }
 
 export function iterate2D(

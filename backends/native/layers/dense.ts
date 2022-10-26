@@ -29,6 +29,6 @@ export class DenseNativeLayer {
   }
 
   constructor(config: DenseLayerConfig) {
-    this.#ptr = layer_dense(to1D(config.size), C_ACTIVATION[config.activation]);
+    this.#ptr = layer_dense(to1D(config.size)[0], C_ACTIVATION[config.activation!]);
   }
 }

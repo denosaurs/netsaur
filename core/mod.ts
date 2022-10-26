@@ -1,6 +1,6 @@
 import { DataTypeArray } from "../deps.ts";
 import { CPUBackend } from "../backends/cpu/backend.ts";
-import { Backend, DataSet, NetworkConfig, NetworkJSON, Size } from "./types.ts";
+import { Backend, DataSet, NetworkConfig, NetworkJSON, Rank, Shape } from "./types.ts";
 import { Data } from "../data/mod.ts";
 import { Engine } from "./engine.ts";
 
@@ -45,7 +45,7 @@ export class NeuralNetwork {
   /**
    * initialize the backend
    */
-  initialize(inputSize: Size, batches = 1) {
+  initialize(inputSize: Shape[Rank], batches = 1) {
     this.backend.initialize(inputSize, batches);
   }
 

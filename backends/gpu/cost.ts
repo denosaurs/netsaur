@@ -4,10 +4,10 @@ import { WebGPUData } from "../../deps.ts";
 export interface GPUCostFunction {
   name: string;
   /** Return the cost associated with an output `a` and desired output `y`. */
-  cost(type: string): string;
+  cost(...values: string[]): string;
 
   /** Return the error delta from the output layer. */
-  prime(type: string): string;
+  prime(...values: string[]): string;
 }
 
 /**
@@ -15,15 +15,15 @@ export interface GPUCostFunction {
  */
 export class CrossEntropy implements GPUCostFunction {
   name = "crossentropy"
-  cost(type: string) {
-    return `var sum: ${type} = ${type}(0);
-    for (var i = ${type}(0); i < yHat.length; i++) {
-      sum += -y[i] * log(yHat[i]) - (${type}(1) - y[i]) * log(${type}(1) - yHat[i]);
+  cost() {
+    return `var sum: f32 = f32(0);
+    for (var i = f32(0); i < yHat.length; i++) {
+      sum += -y[i] * log(yHat[i]) - (f32(1) - y[i]) * log(f32(1) - yHat[i]);
     }
     return sum;`;
   }
 
-  prime(_type: string) {
+  prime() {
     return `return yHat - y`;
   }
 }
@@ -33,16 +33,16 @@ export class CrossEntropy implements GPUCostFunction {
  */
 export class Hinge implements GPUCostFunction {
   name = "hinge"
-  cost(type: string) {
-    return `var max: ${type} = ${type}(0);
-    for (var i = ${type}(0); i < yHat.length; i++) {
-      var value: ${type} = y[i] - (1 - 2 * y[i]) * yHat[i];
+  cost() {
+    return `var max: f32 = f32(0);
+    for (var i = f32(0); i < yHat.length; i++) {
+      var value: f32 = y[i] - (1 - 2 * y[i]) * yHat[i];
       if (value > max) { max = value; }
     }
     return max;`;
   }
 
-  prime(type: string) {
-    return `if (y * yHat * ${type}(2) < ${type}(1)) { return -y * yHat; } return 0;`;
+  prime() {
+    return `if (y * yHat * f32(2) < f32(1)) { return -y * yHat; } return 0;`;
   }
 }

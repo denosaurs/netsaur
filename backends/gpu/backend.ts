@@ -1,26 +1,28 @@
 import { DenseGPULayer } from "./layers/dense.ts";
 import type {
   Backend,
+  BackendType,
   Cost,
   DataSet,
   GPULayer,
+  GPUTensor,
   NetworkConfig,
   NetworkJSON,
-  Size,
+  Rank,
+  Shape,
+  TensorData,
 } from "../../core/types.ts";
 import { CrossEntropy, GPUCostFunction, Hinge } from "./cost.ts";
 import {
   DataType,
   DataTypeArray,
   WebGPUBackend,
-  WebGPUData,
 } from "../../deps.ts";
-import { getType } from "../../core/util.ts";
-import { GPUMatrix } from "./matrix.ts";
 import { GPUInstance } from "./mod.ts";
+import { Tensor, toData } from "../../mod.ts";
 
 export class GPUBackend<T extends DataType = DataType> implements Backend {
-  input?: Size;
+  input?: Shape[Rank];
   layers: GPULayer[] = [];
   output: GPULayer;
   silent: boolean;
@@ -32,7 +34,7 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     this.backend = backend;
     this.input = config.input;
     this.silent = config.silent ?? false;
-    config.layers.slice(0, -1).map(this.addLayer.bind(this));
+    config.layers.map(this.addLayer.bind(this));
     this.output = config.layers.at(-1);
     this.setCost(config.cost);
   }
@@ -53,35 +55,23 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     this.layers.push(layer);
   }
 
-  async initialize(inputSize: Size, batches: number, type: DataType) {
-    await this.layers[0].initialize(inputSize, batches, type);
+  initialize(inputSize: Shape[Rank]) {
+    this.layers[0].initialize(inputSize);
     for (let i = 1; i < this.layers.length; i++) {
       const current = this.layers[i];
       const previous = this.layers[i - 1];
-      await current.initialize(
-        previous.outputSize,
-        batches,
-        type,
-      );
+      current.initialize(previous.output.shape);
     }
-
-    const lastLayer = this.layers[this.layers.length - 1];
-    await this.output.initialize(
-      lastLayer.outputSize,
-      batches,
-      type,
-    );
   }
 
-  async feedForward(input: GPUMatrix) {
+  async feedForward(input: GPUTensor<Rank>) {
     for (const layer of this.layers) {
       input = await layer.feedForward(input);
     }
-    input = await this.output.feedForward(input);
     return input;
   }
 
-  async backpropagate(output: GPUMatrix, rate: number) {
+  async backpropagate(output: GPUTensor<Rank>, rate: number) {
     await this.output.backPropagate(
       output,
       output,
@@ -90,68 +80,43 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
       this.costFn,
     );
     // todo: update for convolutional layer
-    let weights = this.output.weights;
-    let last = 1;
-    for (let i = this.layers.length - 1; i >= 0; i--) {
+    for (let i = this.layers.length - 2, last = 1; i >= 0; i--, last++) {
       await this.layers[i].backPropagate(
         this.output.error,
-        weights,
+        this.layers[i + 1].weights,
         rate,
         last,
       );
-      // todo: update for convolutional layer
-      weights = this.layers[i].weights;
-      last++;
     }
   }
 
   async train(
     datasets: DataSet[],
     epochs = 5000,
-    batches = 1,
+    _batches = 1,
     rate = 0.1,
   ) {
-    const type = (datasets[0].inputs as GPUMatrix).type;
-    batches = (datasets[0].inputs as GPUMatrix).y || batches;
-    const inputSize = (datasets[0].inputs as GPUMatrix).x || this.input;
-    const outputSize = datasets[0].outputs.length / batches;
-
-    await this.initialize(inputSize!, batches, type);
-
-    const databuffers = [];
-    for (const dataset of datasets) {
-      const output = await GPUMatrix.from(
-        this.backend,
-        dataset.outputs,
-        outputSize,
-        batches,
-      );
-      databuffers.push({ input: dataset.inputs, output });
-    }
+    this.initialize(datasets[0].inputs.shape);
 
     for (let e = 0; e < epochs; e++) {
       if (!this.silent) console.log(`Epoch ${e + 1}/${epochs}`);
-      for (const dataset of databuffers) {
-        await this.feedForward(dataset.input);
-        await this.backpropagate(dataset.output, rate);
+      for (const dataset of datasets) {
+        await this.feedForward(dataset.inputs as GPUTensor<Rank>);
+        await this.backpropagate(dataset.outputs as GPUTensor<Rank>, rate);
       }
     }
   }
 
-  // deno-lint-ignore require-await
-  async getCostLoss(_output: DataTypeArray<T>) {
-    throw new Error("Not implemented");
-  }
+  // async getCostLoss(_output: DataTypeArray<T>) {
+  //   throw new Error("Not implemented");
+  // }
 
-  async predict(data: DataTypeArray<T>) {
-    const type = getType(data);
-    const gpuData = await WebGPUData.from(this.backend, data);
-    const input = new GPUMatrix<DataType>(gpuData, gpuData.length, 1, type);
-    this.layers.forEach(async (layer) => {
-      await layer.reset(type, 1);
-    });
+  async predict(data: DataTypeArray) {
+    const gpuData = toData(data as Float32Array) as TensorData[BackendType.GPU];
+    const input = new Tensor<Rank, BackendType.GPU>(gpuData, [data.length, 1]);
+    this.layers.forEach((layer) => layer.reset(1));
 
-    await this.output.reset(type, 1);
+    this.output.reset(1);
     return await (await this.feedForward(input)).data.get();
   }
 
@@ -161,11 +126,9 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     );
     return {
       costFn: this.costFn.name,
-      type: "NeuralNetwork",
       sizes: this.layers.map((layer) => layer.outputSize),
       input: this.input,
       layers,
-      output: await this.output.toJSON(),
     };
   }
 
@@ -190,12 +153,13 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
           );
       }
     });
-    layers.push(DenseGPULayer.fromJSON(data.output, GPUInstance.backend!));
     const gpubackend = new GPUBackend({
       input: data.input,
-      layers,
+      layers: [],
       cost: data.costFn! as Cost,
     }, backend);
+    gpubackend.layers = layers;
+    gpubackend.output = layers.at(-1) as DenseGPULayer;
     return gpubackend;
   }
 
@@ -203,11 +167,11 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
     throw new Error("Not implemented");
   }
 
-  getWeights(): GPUMatrix[] {
+  getWeights(): GPUTensor<Rank>[] {
     return this.layers.map((layer) => (layer as DenseGPULayer).weights);
   }
 
-  getBiases(): GPUMatrix[] {
+  getBiases(): GPUTensor<Rank>[] {
     return this.layers.map((layer) => (layer as DenseGPULayer).biases);
   }
 }

@@ -23,13 +23,13 @@ const time = performance.now();
 await net.train(
   [
     {
-      inputs: await tensor2D([
+      inputs: tensor2D([
         [0, 0],
         [1, 0],
         [0, 1],
         [1, 1],
       ]),
-      outputs: await tensor1D([0, 1, 1, 0]),
+      outputs: tensor1D([0, 1, 1, 0]),
     },
   ],
   5000,

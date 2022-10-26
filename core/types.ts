@@ -2,24 +2,18 @@ import { DataType, DataTypeArray, WebGPUData } from "../deps.ts";
 import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
 import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
 import { DenseGPULayer } from "../backends/gpu/layers/dense.ts";
-import { GPUMatrix } from "../backends/gpu/matrix.ts";
-import { CPUMatrix } from "../backends/cpu/kernels/matrix.ts";
 import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
 import { Tensor } from "./tensor.ts";
+import { Matrix } from "../backends/native/matrix.ts";
 
 export interface LayerJSON {
-  outputSize: number | Shape[Rank.R2];
+  outputSize: Shape[Rank];
   activationFn?: string;
   costFn?: string;
   type: string;
-  input: MatrixJSON;
-  weights?: MatrixJSON;
-  biases?: MatrixJSON;
-  output: MatrixJSON;
-  error?: MatrixJSON;
-  cost?: MatrixJSON;
-  kernel?: MatrixJSON;
-  padded?: MatrixJSON;
+  weights?: TensorJSON;
+  biases?: TensorJSON;
+  kernel?: TensorJSON;
   strides?: Shape[Rank];
   padding?: number;
   mode?: "max" | "avg";
@@ -27,19 +21,14 @@ export interface LayerJSON {
 
 export interface NetworkJSON {
   costFn?: string;
-  type: "NeuralNetwork";
-  sizes: (number | Shape[Rank.R2])[];
+  sizes: Shape[Rank][];
   input: Shape[Rank] | undefined;
   layers: LayerJSON[];
-  output: LayerJSON;
 }
 
-export interface MatrixJSON {
-  // deno-lint-ignore no-explicit-any
-  data: any;
-  x: number;
-  y: number;
-  type?: DataType;
+export interface TensorJSON {
+  data: number[];
+  shape: Shape[Rank]
 }
 
 export interface Backend<T extends DataType = DataType> {
@@ -64,11 +53,9 @@ export interface Backend<T extends DataType = DataType> {
   // deno-lint-ignore no-explicit-any
   feedForward(input: any): Promise<any> | any;
   save(input: string): void;
-  toJSON(): NetworkJSON | Promise<NetworkJSON> | undefined;
-  // deno-lint-ignore no-explicit-any
-  getWeights(): (GPUMatrix | CPUMatrix | any)[];
-  // deno-lint-ignore no-explicit-any
-  getBiases(): (GPUMatrix | CPUMatrix | any)[];
+  toJSON(): Promise<NetworkJSON>;
+  getWeights(): Tensor<Rank, BackendType>[];
+  getBiases(): Tensor<Rank, BackendType>[];
 }
 
 /**
@@ -173,7 +160,7 @@ export type DataSet = {
 export enum BackendType {
   CPU = "cpu",
   GPU = "gpu",
-  // Native = "native",
+  Native = "native"
 }
 
 /** @docalias TypedArray|Array */
@@ -189,5 +176,6 @@ export type TensorLike =
 
 export interface TensorData {
   cpu: DataTypeArray,
-  gpu: WebGPUData
+  gpu: WebGPUData,
+  native: Matrix<"f32">
 }

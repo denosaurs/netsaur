@@ -5,16 +5,16 @@ import {
   Rank,
   Shape,
   TensorData,
+  TensorJSON,
   TensorLike,
   TypedArray,
 } from "./types.ts";
-import { flatten, inferShape, iterate1D, toShape } from "./util.ts";
+import { flatten, inferShape, iterate1D, to1D, to2D, to3D } from "./util.ts";
 
 export class Tensor<R extends Rank, B extends BackendType> {
   static type: BackendType;
   shape: Shape[R];
   data: TensorData[B];
-  rank = Rank.R1;
 
   get x() {
     return this.shape[0];
@@ -40,28 +40,28 @@ export class Tensor<R extends Rank, B extends BackendType> {
   static zeroes<R extends Rank, B extends BackendType>(
     shape: Shape[R],
   ): Tensor<R, B> {
-    const data = new Float32Array(toShape(shape, Rank.R1)[0]).fill(0);
-    return new Tensor(data as TensorData[B], shape);
+    const data = new Float32Array(to1D(shape)[0]).fill(0);
+    return new Tensor(toData(data), shape);
   }
 
   static ones<R extends Rank, B extends BackendType>(
     shape: Shape[R],
     value = 1,
   ): Tensor<R, B> {
-    const data = new Float32Array(toShape(shape, Rank.R1)[0]).fill(value);
-    return new Tensor(data as TensorData[B], shape);
+    const data = new Float32Array(to1D(shape)[0]).fill(value);
+    return new Tensor(toData(data), shape);
   }
 
   to1D(): Tensor<Rank.R1, B> {
-    return new Tensor(this.data, toShape(this.shape, Rank.R1));
+    return new Tensor(this.data, to1D(this.shape));
   }
 
   to2D(): Tensor<Rank.R2, B> {
-    return new Tensor(this.data, toShape(this.shape, Rank.R2));
+    return new Tensor(this.data, to2D(this.shape));
   }
 
   to3D(): Tensor<Rank.R3, B> {
-    return new Tensor(this.data, toShape(this.shape, Rank.R3));
+    return new Tensor(this.data, to3D(this.shape));
   }
 
   get(...indices: number[]) {
@@ -70,6 +70,42 @@ export class Tensor<R extends Rank, B extends BackendType> {
       index += indices[i] * this.shape[i];
     }
     return (this.data as TensorData[BackendType.CPU])[index];
+  }
+
+  async getData() {
+    switch (Tensor.type) {
+      case BackendType.CPU:
+      case BackendType.Native:
+        return Array.from(this.data as TypedArray);
+      case BackendType.GPU: {
+        const data = await (this.data as WebGPUData).get();
+        return Array.from(data);
+      }
+    }
+  }
+
+  setData(values: Float32Array) {
+    switch (Tensor.type) {
+      case BackendType.CPU:
+        return (this.data as Float32Array).set(values);
+      case BackendType.GPU: {
+        const data = (this.data as TensorData[BackendType.GPU]).buffer;
+        GPUInstance.backend!.device.queue.writeBuffer(data, 0, values);
+      }
+    }
+  }
+
+  async toJSON() {
+    return {
+      data: await this.getData(),
+      shape: this.shape,
+    };
+  }
+
+  static fromJSON<R extends Rank, B extends BackendType>(
+    tensor: TensorJSON,
+  ): Tensor<R, B> {
+    return new Tensor(toData(tensor.data), tensor.shape as Shape[R]);
   }
 
   fmt() {
@@ -87,20 +123,18 @@ export class Tensor<R extends Rank, B extends BackendType> {
     return res;
   }
 }
-
 export function toData<B extends BackendType>(
   values: TensorLike,
 ): TensorData[B] {
   switch (Tensor.type) {
+    case BackendType.Native:
     case BackendType.CPU:
       return new Float32Array(flatten(values)) as TensorData[B];
     case BackendType.GPU: {
-      const data = flatten(values);
-      return new WebGPUData(
-        GPUInstance.backend!,
-        "f32",
-        data.length,
-      ) as TensorData[B];
+      const data = new Float32Array(flatten(values));
+      const res = new WebGPUData(GPUInstance.backend!, "f32", data.length);
+      GPUInstance.backend!.device.queue.writeBuffer(res.buffer, 0, data);
+      return res as TensorData[B];
     }
   }
 }

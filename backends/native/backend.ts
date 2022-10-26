@@ -3,7 +3,8 @@ import {
   DenseLayerConfig,
   Layer,
   NetworkConfig,
-  Size,
+  Shape,
+  Rank
 } from "../../core/types.ts";
 import { to1D } from "../../core/util.ts";
 import ffi, { cstr } from "./ffi.ts";
@@ -51,7 +52,7 @@ export class NativeBackend implements Backend {
   constructor(config: NetworkConfig | Deno.PointerValue) {
     this.#ptr = typeof config === "object"
       ? network_create(
-        to1D(config.input!),
+        to1D(config.input!)[0],
         config.cost === "crossentropy" ? 1 : 0,
         config.layers.length,
         new BigUint64Array(
@@ -79,7 +80,7 @@ export class NativeBackend implements Backend {
     }
   }
 
-  initialize(_inputSize: Size, _batches: number): void {
+  initialize(_inputSize: Shape[Rank], _batches: number): void {
   }
 
   feedForward(input: Matrix<"f32">): Matrix<"f32"> {
@@ -124,8 +125,14 @@ export class NativeBackend implements Backend {
     }
   }
 
-  toJSON(): undefined {
-    return;
+  //deno-lint-ignore require-await
+  async toJSON() {
+    return {
+      costFn: "crossentropy",
+      sizes: [],
+      input: [1] as Shape[Rank.R1],
+      layers: [],
+    };
   }
 
   getWeights() {

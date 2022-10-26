@@ -1,27 +1,16 @@
 import {
   Activation,
+  BackendType,
   ConvLayerConfig,
-  LayerJSON,
-  MatrixJSON,
-  Shape,
-  Rank,
   CPUTensor,
-Shape2D,
+  LayerJSON,
+  Rank,
+  Shape,
+  Shape2D,
 } from "../../../core/types.ts";
-import { ActivationError, iterate2D, toShape } from "../../../core/util.ts";
+import { iterate2D, to2D, to3D } from "../../../core/util.ts";
 import { Tensor } from "../../../mod.ts";
-import {
-  CPUActivationFn,
-  Elu,
-  LeakyRelu,
-  Linear,
-  Relu,
-  Relu6,
-  Selu,
-  Sigmoid,
-  Tanh,
-} from "../activation.ts";
-import { CPUMatrix } from "../kernels/matrix.ts";
+import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
@@ -58,7 +47,7 @@ export class ConvCPULayer {
   }
 
   initialize(inputSize: Shape[Rank]) {
-    const size = toShape(inputSize, Rank.R3)
+    const size = to3D(inputSize);
     const wp = size[1] + 2 * this.padding;
     const hp = size[2] + 2 * this.padding;
     if (this.padding > 0) {
@@ -78,34 +67,7 @@ export class ConvCPULayer {
   }
 
   setActivation(activation: Activation) {
-    switch (activation) {
-      case "sigmoid":
-        this.activationFn = new Sigmoid();
-        break;
-      case "leakyrelu":
-        this.activationFn = new LeakyRelu();
-        break;
-      case "tanh":
-        this.activationFn = new Tanh();
-        break;
-      case "relu":
-        this.activationFn = new Relu();
-        break;
-      case "relu6":
-        this.activationFn = new Relu6();
-        break;
-      case "elu":
-        this.activationFn = new Elu();
-        break;
-      case "selu":
-        this.activationFn = new Selu();
-        break;
-      case "linear":
-        this.activationFn = new Linear();
-        break;
-      default:
-        throw new ActivationError(activation);
-    }
+    this.activationFn = setActivation(activation);
   }
 
   feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
@@ -120,8 +82,8 @@ export class ConvCPULayer {
     iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
       let sum = 0;
       iterate2D(this.kernel, (x: number, y: number) => {
-        const k = this.padded.y * (j * this.strides[0] + y) +
-          (i * this.strides[1] + x);
+        const k = this.padded.y * (j * this.strides[1] + y) +
+          (i * this.strides[0] + x);
         const l = y * this.kernel.y + x;
         sum += this.padded.data[k] * this.kernel.data[l];
       });
@@ -132,43 +94,41 @@ export class ConvCPULayer {
   }
 
   backPropagate(error: CPUTensor<Rank>, rate: number) {
-    const cost = CPUMatrix.with(error.x, error.y);
+    const cost = Tensor.zeroes<Rank.R3, BackendType.CPU>(to3D(error.shape));
     for (const i in cost.data) {
       const activation = this.activationFn.prime(this.output.data[i]);
       cost.data[i] = error.data[i] * activation;
     }
     iterate2D(this.kernel, (i: number, j: number) => {
       let sum = 0;
-      iterate2D(cost, (x: number, y: number) => {
-        const k = this.padded.x * (j * this.strides[0] + y) +
-          (i * this.strides[1] + x);
-        const l = y * cost.x + x;
+      iterate2D([cost.y, cost.z], (x: number, y: number) => {
+        const k = this.padded.y * (j * this.strides[1] + y) +
+          (i * this.strides[0] + x);
+        const l = y * cost.y + x;
         sum += this.padded.data[k] * cost.data[l];
       });
       const idx = j * this.kernel.x + i;
       this.kernel.data[idx] += this.activationFn.activate(sum) * rate;
     });
+    //TODO: fix batches
     for (let i = 0; i < cost.data.length; i++) {
-      this.biases.data[i] += cost.data[i]
+      this.biases.data[i] += cost.data[i];
     }
   }
 
-  toJSON(): LayerJSON {
+  async toJSON() {
     return {
       outputSize: this.outputSize,
       type: "conv",
-      input: this.input.toJSON(),
-      kernel: this.kernel.toJSON(),
-      padded: this.padded.toJSON(),
-      output: this.output.toJSON(),
+      kernel: await this.kernel.toJSON(),
+      biases: await this.biases.toJSON(),
       strides: this.strides,
       padding: this.padding,
     };
   }
 
   static fromJSON(
-    { outputSize, input, kernel, type, padded, output, strides, padding }:
-      LayerJSON,
+    { outputSize, kernel, type, biases, strides, padding }: LayerJSON,
   ): ConvCPULayer {
     if (type !== "conv") {
       throw new Error(
@@ -177,23 +137,17 @@ export class ConvCPULayer {
           "Layer",
       );
     }
-    if (padded === undefined || kernel === undefined) {
+    if (biases === undefined || kernel === undefined) {
       throw new Error("Layer imported must be initialized");
     }
     const layer = new ConvCPULayer({
-      kernel: (kernel as MatrixJSON).data,
-      kernelSize: [ (kernel as MatrixJSON).y, (kernel as MatrixJSON).x ],
+      kernelSize: to2D(kernel.shape),
       padding,
-      strides,
+      strides: to2D(strides!),
     });
-    layer.input = new CPUMatrix(input.data, input.x, input.y);
-    layer.outputSize = outputSize as Size2D;
-    layer.padded = new CPUMatrix(
-      (padded as MatrixJSON).data,
-      (padded as MatrixJSON).x,
-      (padded as MatrixJSON).y,
-    );
-    layer.output = new CPUMatrix(output.data, output.x, output.y);
+    layer.outputSize = to2D(outputSize);
+    layer.kernel = Tensor.fromJSON(kernel);
+    layer.biases = Tensor.fromJSON(biases);
     return layer;
   }
 }

@@ -1,3 +1,6 @@
+import { Activation } from "../../core/types.ts";
+import { ActivationError } from "../../core/util.ts";
+
 export interface CPUActivationFn {
   name: string;
   activate(val: number): number;
@@ -118,5 +121,28 @@ export class Selu implements CPUActivationFn {
 
   prime(val: number, error = 1): number {
     return val > 0 ? error : 1.0507 * Math.exp(val);
+  }
+}
+
+export function setActivation(activation: Activation) {
+  switch (activation) {
+    case "sigmoid":
+      return new Sigmoid();
+    case "leakyrelu":
+      return new LeakyRelu();
+    case "tanh":
+      return new Tanh();
+    case "relu":
+      return new Relu();
+    case "relu6":
+      return new Relu6();
+    case "elu":
+      return new Elu();
+    case "selu":
+      return new Selu();
+    case "linear":
+      return new Linear();
+    default:
+      throw new ActivationError(activation);
   }
 }

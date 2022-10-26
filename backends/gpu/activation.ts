@@ -1,7 +1,10 @@
+import { Activation } from "../../core/types.ts";
+import { ActivationError } from "../../core/util.ts";
+
 export interface GPUActivationFn {
   name: string;
-  activate(type: string): string;
-  prime(type: string): string;
+  activate(...values: string[]): string;
+  prime(...values: string[]): string;
 }
 
 /**
@@ -9,12 +12,12 @@ export interface GPUActivationFn {
  */
 export class Linear implements GPUActivationFn {
   name = "linear";
-  activate(_: string): string {
+  activate() {
     return `return weighted_sum`;
   }
 
-  prime(type: string): string {
-    return `return ${type}(1)`;
+  prime() {
+    return `return f32(1)`;
   }
 }
 
@@ -23,12 +26,12 @@ export class Linear implements GPUActivationFn {
  */
 export class Sigmoid implements GPUActivationFn {
   name = "sigmoid";
-  activate(type: string): string {
-    return `return ${type}(1) / (${type}(1) + exp(-weighted_sum))`;
+  activate() {
+    return `return f32(1) / (f32(1) + exp(-weighted_sum))`;
   }
 
-  prime(type: string): string {
-    return `return output * (${type}(1) - output)`;
+  prime() {
+    return `return output * (f32(1) - output)`;
   }
 }
 
@@ -38,12 +41,12 @@ export class Sigmoid implements GPUActivationFn {
  */
 export class Tanh implements GPUActivationFn {
   name = "tanh";
-  activate(_: string): string {
+  activate() {
     return `return tanh(weighted_sum)`;
   }
 
-  prime(type: string): string {
-    return `return ${type}(1) - output * output`;
+  prime() {
+    return `return f32(1) - output * output`;
   }
 }
 
@@ -53,13 +56,13 @@ export class Tanh implements GPUActivationFn {
  */
 export class Relu implements GPUActivationFn {
   name = "relu";
-  activate(type: string): string {
-    return `return max(${type}(0), weighted_sum)`;
+  activate() {
+    return `return max(f32(0), weighted_sum)`;
   }
 
-  prime(type: string): string {
-    return `if (weighted_sum <= ${type}(0)) {
-            return ${type}(0);
+  prime() {
+    return `if (weighted_sum <= f32(0)) {
+            return f32(0);
         }
         return errror;`;
   }
@@ -71,16 +74,16 @@ export class Relu implements GPUActivationFn {
  */
 export class Relu6 implements GPUActivationFn {
   name = "relu6";
-  activate(type: string): string {
-    return `return min(max(${type}(0), weighted_sum), ${type}(6))`;
+  activate() {
+    return `return min(max(f32(0), weighted_sum), f32(6))`;
   }
 
-  prime(type: string): string {
-    return `if (weighted_sum <= ${type}(0)) {
-            return ${type}(0);
+  prime() {
+    return `if (weighted_sum <= f32(0)) {
+            return f32(0);
         }
-        if (weighted_sum >= ${type}(6)) {
-            return ${type}(6);
+        if (weighted_sum >= f32(6)) {
+            return f32(6);
         }
         return error;`;
   }
@@ -91,18 +94,18 @@ export class Relu6 implements GPUActivationFn {
  */
 export class LeakyRelu implements GPUActivationFn {
   name = "leakyrelu";
-  activate(type: string): string {
-    return `if (weighted_sum > ${type}(0)) {
+  activate() {
+    return `if (weighted_sum > f32(0)) {
             return weighted_sum;
         }
-        return ${type}(f32(weighted_sum) * 0.01);`;
+        return f32(f32(weighted_sum) * 0.01);`;
   }
 
-  prime(type: string): string {
-    return `if (weighted_sum > ${type}(0)) {
+  prime() {
+    return `if (weighted_sum > f32(0)) {
             return error;
         }
-        return ${type}(f32(error) * 0.01);`;
+        return f32(f32(error) * 0.01);`;
   }
 }
 
@@ -112,18 +115,18 @@ export class LeakyRelu implements GPUActivationFn {
  */
 export class Elu implements GPUActivationFn {
   name = "elu";
-  activate(type: string): string {
-    return `if (weighted_sum > ${type}(0)) {
+  activate() {
+    return `if (weighted_sum > f32(0)) {
             return weighted_sum;
         }
-        return ${type}(exp(weighted_sum) - ${type}(1));`;
+        return f32(exp(weighted_sum) - f32(1));`;
   }
 
-  prime(type: string): string {
-    return `if (weighted_sum > ${type}(0)) {
+  prime() {
+    return `if (weighted_sum > f32(0)) {
             return error;
         }
-        return ${type}(exp(weighted_sum) - ${type}(1));`;
+        return f32(exp(weighted_sum) - f32(1));`;
   }
 }
 
@@ -133,14 +136,37 @@ export class Elu implements GPUActivationFn {
  */
 export class Selu implements GPUActivationFn {
   name = "selu";
-  activate(type: string): string {
-    return `return ${type}(weighted_sum) + ${type}(weighted_sum) * (${type}(1) - ${type}(weighted_sum)) * ${type}(1.67326)`;
+  activate() {
+    return `return f32(weighted_sum) + f32(weighted_sum) * (f32(1) - f32(weighted_sum)) * f32(1.67326)`;
   }
 
-  prime(type: string): string {
-    return `if (weighted_sum > ${type}(0)) {
+  prime() {
+    return `if (weighted_sum > f32(0)) {
             return error;
         }
-        return ${type}(error) * (${type}(1) - ${type}(weighted_sum)) * ${type}(1.67326);`;
+        return f32(error) * (f32(1) - f32(weighted_sum)) * f32(1.67326);`;
+  }
+}
+
+export function setActivation(activation: Activation) {
+  switch (activation) {
+    case "sigmoid":
+      return new Sigmoid();
+    case "leakyrelu":
+      return new LeakyRelu();
+    case "tanh":
+      return new Tanh();
+    case "relu":
+      return new Relu();
+    case "relu6":
+      return new Relu6();
+    case "elu":
+      return new Elu();
+    case "selu":
+      return new Selu();
+    case "linear":
+      return new Linear();
+    default:
+      throw new ActivationError(activation);
   }
 }
