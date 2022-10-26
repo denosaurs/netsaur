@@ -1,5 +1,4 @@
 import { ConvLayer, DenseLayer, NeuralNetwork, Tensor } from "../../mod.ts";
-import { CPUMatrix } from "../../backends/cpu/mod.ts";
 import { ConvCPULayer } from "../../backends/cpu/layers/conv.ts";
 import { PoolCPULayer } from "../../backends/cpu/layers/pool.ts";
 import { PoolLayer } from "../../layers/mod.ts";

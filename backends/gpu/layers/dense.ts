@@ -13,7 +13,7 @@ import { GPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 import { CrossEntropy, GPUCostFunction } from "../cost.ts";
 import { backPropagate } from "../kernels/backpropagate.ts";
 import { feedForward } from "../kernels/feedforward.ts";
-import { Tensor } from "../../../mod.ts";
+import { gpuZeroes2D, Tensor } from "../../../mod.ts";
 
 /**
  * Regular Dense Layer
@@ -40,9 +40,9 @@ export class DenseGPULayer {
 
   reset(batches: number) {
     if (batches != this.output.y) {
-      this.output = Tensor.zeroes([this.outputSize[0], batches]);
-      this.error = Tensor.zeroes([this.outputSize[0], batches]);
-      this.cost = Tensor.zeroes([this.outputSize[0], batches]);
+      this.output = gpuZeroes2D([this.outputSize[0], batches]);
+      this.error = gpuZeroes2D([this.outputSize[0], batches]);
+      this.cost = gpuZeroes2D([this.outputSize[0], batches]);
     }
   }
 
@@ -53,11 +53,11 @@ export class DenseGPULayer {
     const biases = new Float32Array(this.outputSize[0])
       .map(() => Math.random() * 2 - 1);
     if (!this.weights) {
-      this.weights = Tensor.zeroes([this.outputSize[0], shape[0]]);
-      this.biases = Tensor.zeroes([this.outputSize[0], 1]);
-      this.output = Tensor.zeroes([this.outputSize[0], shape[1]]);
-      this.error = Tensor.zeroes([this.outputSize[0], shape[1]]);
-      this.cost = Tensor.zeroes([this.outputSize[0], shape[1]]);
+      this.weights = gpuZeroes2D([this.outputSize[0], shape[0]]);
+      this.biases = gpuZeroes2D([this.outputSize[0], 1]);
+      this.output = gpuZeroes2D([this.outputSize[0], shape[1]]);
+      this.error = gpuZeroes2D([this.outputSize[0], shape[1]]);
+      this.cost = gpuZeroes2D([this.outputSize[0], shape[1]]);
     }
     this.weights.setData(weights);
     this.biases.setData(biases);

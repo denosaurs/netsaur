@@ -1,6 +1,5 @@
 import {
   Activation,
-  BackendType,
   ConvLayerConfig,
   CPUTensor,
   LayerJSON,
@@ -9,7 +8,7 @@ import {
   Shape2D,
 } from "../../../core/types.ts";
 import { iterate2D, to2D, to3D } from "../../../core/util.ts";
-import { Tensor } from "../../../mod.ts";
+import { cpuZeroes2D, cpuZeroes3D, Tensor } from "../../../mod.ts";
 import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -36,7 +35,7 @@ export class ConvCPULayer {
     if (config.kernel) {
       this.kernel = new Tensor(config.kernel, config.kernelSize);
     } else {
-      this.kernel = Tensor.zeroes(config.kernelSize);
+      this.kernel = cpuZeroes2D(config.kernelSize);
     }
     this.padding = config.padding || 0;
     this.strides = config.strides || [2, 2];
@@ -51,18 +50,19 @@ export class ConvCPULayer {
     const wp = size[1] + 2 * this.padding;
     const hp = size[2] + 2 * this.padding;
     if (this.padding > 0) {
-      this.padded = Tensor.ones([size[0], wp, hp], 255);
+      const data = new Float32Array(size[0] * wp * hp).fill(255)
+      this.padded = new Tensor(data, [size[0], wp, hp]);
     }
     if (!this.config.kernel) {
       this.kernel.data = this.kernel.data.map(() => Math.random() * 2 - 1);
     }
     const wo = 1 + Math.floor((wp - this.kernel.x) / this.strides[0]);
     const ho = 1 + Math.floor((hp - this.kernel.y) / this.strides[1]);
-    this.biases = Tensor.zeroes([size[0], wo, ho]);
+    this.biases = cpuZeroes3D([size[0], wo, ho]);
     if (!this.config.unbiased) {
       this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
     }
-    this.output = Tensor.zeroes([size[0], wo, ho]);
+    this.output = cpuZeroes3D([size[0], wo, ho]);
     this.outputSize = [ho, wo];
   }
 
@@ -70,14 +70,15 @@ export class ConvCPULayer {
     this.activationFn = setActivation(activation);
   }
 
-  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
+  feedForward(inputTensor: CPUTensor<Rank>): CPUTensor<Rank> {
+    this.input = inputTensor.to3D()
     if (this.padding > 0) {
-      iterate2D([input.y, input.z], (i: number, j: number) => {
+      iterate2D([this.input.y, this.input.z], (i: number, j: number) => {
         const idx = this.padded.y * (this.padding + j) + this.padding + i;
-        this.padded.data[idx] = input.data[j * input.y + i];
+        this.padded.data[idx] = this.input.data[j * this.input.y + i];
       });
     } else {
-      this.padded = input.to3D();
+      this.padded = this.input;
     }
     iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
       let sum = 0;
@@ -93,8 +94,9 @@ export class ConvCPULayer {
     return this.output;
   }
 
-  backPropagate(error: CPUTensor<Rank>, rate: number) {
-    const cost = Tensor.zeroes<Rank.R3, BackendType.CPU>(to3D(error.shape));
+  backPropagate(errorTensor: CPUTensor<Rank>, rate: number) {
+    const error = errorTensor.to3D()
+    const cost = cpuZeroes3D(error.shape);
     for (const i in cost.data) {
       const activation = this.activationFn.prime(this.output.data[i]);
       cost.data[i] = error.data[i] * activation;

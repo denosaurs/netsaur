@@ -9,7 +9,19 @@ import {
   TensorLike,
   TypedArray,
 } from "./types.ts";
-import { flatten, inferShape, iterate1D, Random, to1D, to2D, to3D } from "./util.ts";
+import {
+  flatten,
+  inferShape,
+  iterate1D,
+  Random,
+  to1D,
+  to2D,
+  to3D,
+} from "./util.ts";
+
+// NOTE: In development, avoid calling boilerplate-heavy methods such as Tensor.zeroes()
+// Such methods should be reserved as user-facing API
+// Use more specific albeit verbous functions such cpuZeroes2D()
 
 export class Tensor<R extends Rank, B extends BackendType> {
   static type: BackendType;
@@ -56,10 +68,12 @@ export class Tensor<R extends Rank, B extends BackendType> {
     shape: Shape[R],
     mean = 0,
     stdDev = 1,
-    seed?: number
+    seed?: number,
   ): Tensor<R, B> {
     if (seed !== undefined) Random.setSeed(seed);
-    const data = new Float32Array(to1D(shape)[0]).fill(0).map( () => Random.gaussian(mean, stdDev));
+    const data = new Float32Array(to1D(shape)[0]).fill(0).map(() =>
+      Random.gaussian(mean, stdDev)
+    );
     return new Tensor(toData(data), shape);
   }
 
@@ -134,6 +148,7 @@ export class Tensor<R extends Rank, B extends BackendType> {
     return res;
   }
 }
+
 export function toData<B extends BackendType>(
   values: TensorLike,
 ): TensorData[B] {
@@ -193,7 +208,11 @@ export function tensor3D(
   const outputShape = shape || inferShape(values).slice();
   if (outputShape.length > 3) throw new Error("Invalid 3D Tensor");
   // values
-  return new Tensor(toData(values), [outputShape[2], outputShape[1], outputShape[0]]);
+  return new Tensor(toData(values), [
+    outputShape[2],
+    outputShape[1],
+    outputShape[0],
+  ]);
 }
 
 export function zeros3D(shape: Shape[Rank.R3]) {
@@ -211,7 +230,12 @@ export function tensor4D(
   const outputShape = shape || inferShape(values).slice();
   if (outputShape.length > 4) throw new Error("Invalid 4D Tensor");
   // values
-  return new Tensor(toData(values), [outputShape[3], outputShape[2], outputShape[1], outputShape[0]]);
+  return new Tensor(toData(values), [
+    outputShape[3],
+    outputShape[2],
+    outputShape[1],
+    outputShape[0],
+  ]);
 }
 
 export function zeros4D(shape: Shape[Rank.R4]) {
@@ -229,7 +253,13 @@ export function tensor5D(
   const outputShape = shape || inferShape(values).slice();
   if (outputShape.length > 5) throw new Error("Invalid 5D Tensor");
   // values
-  return new Tensor(toData(values), [outputShape[4], outputShape[3], outputShape[2], outputShape[1], outputShape[0]]);
+  return new Tensor(toData(values), [
+    outputShape[4],
+    outputShape[3],
+    outputShape[2],
+    outputShape[1],
+    outputShape[0],
+  ]);
 }
 
 export function zeros5D(shape: Shape[Rank.R5]) {
@@ -237,7 +267,13 @@ export function zeros5D(shape: Shape[Rank.R5]) {
 }
 
 export function randNormal5D(shape: Shape[Rank.R5]) {
-  return Tensor.randomNormal([shape[4], shape[3], shape[2], shape[1], shape[0]]);
+  return Tensor.randomNormal([
+    shape[4],
+    shape[3],
+    shape[2],
+    shape[1],
+    shape[0],
+  ]);
 }
 
 export function tensor6D(
@@ -247,13 +283,57 @@ export function tensor6D(
   const outputShape = shape || inferShape(values).slice();
   if (outputShape.length > 6) throw new Error("Invalid 6D Tensor");
   // values
-  return new Tensor(toData(values), [outputShape[5], outputShape[4], outputShape[3], outputShape[2], outputShape[1], outputShape[0]]);
+  return new Tensor(toData(values), [
+    outputShape[5],
+    outputShape[4],
+    outputShape[3],
+    outputShape[2],
+    outputShape[1],
+    outputShape[0],
+  ]);
 }
 
 export function zeros6D(shape: Shape[Rank.R6]) {
-  return Tensor.zeroes([shape[5], shape[4], shape[3], shape[2], shape[1], shape[0]]);
+  return Tensor.zeroes([
+    shape[5],
+    shape[4],
+    shape[3],
+    shape[2],
+    shape[1],
+    shape[0],
+  ]);
 }
 
 export function randNormal6D(shape: Shape[Rank.R6]) {
-  return Tensor.randomNormal([shape[5], shape[4], shape[3], shape[2], shape[1], shape[0]]);
+  return Tensor.randomNormal([
+    shape[5],
+    shape[4],
+    shape[3],
+    shape[2],
+    shape[1],
+    shape[0],
+  ]);
+}
+
+export function cpuZeroes2D(
+  shape: Shape[Rank.R2],
+): Tensor<Rank.R2, BackendType.CPU> {
+  const data = new Float32Array(shape[0] * shape[1])
+  return new Tensor(data.fill(0), shape);
+}
+
+export function cpuZeroes3D(
+  shape: Shape[Rank.R3],
+): Tensor<Rank.R3, BackendType.CPU> {
+  const data = new Float32Array(shape[0] * shape[1] * shape[2])
+  return new Tensor(data.fill(0), shape);
+}
+
+export function gpuZeroes2D(
+  shape: Shape[Rank.R2],
+): Tensor<Rank.R2, BackendType.GPU> {
+  const data = new Float32Array(shape[0] * shape[1]);
+  const res = new WebGPUData(GPUInstance.backend!, "f32", data.length);
+  GPUInstance.backend!.device.queue.writeBuffer(res.buffer, 0, data);
+  return new Tensor(res, shape);
 }

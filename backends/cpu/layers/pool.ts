@@ -1,5 +1,4 @@
 import {
-  BackendType,
   CPUTensor,
   LayerJSON,
   PoolLayerConfig,
@@ -8,7 +7,7 @@ import {
   Shape2D,
 } from "../../../core/types.ts";
 import { average, iterate2D, maxIdx, to2D, to3D } from "../../../core/util.ts";
-import { Tensor } from "../../../mod.ts";
+import { cpuZeroes3D } from "../../../mod.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
@@ -45,20 +44,21 @@ export class PoolCPULayer {
     }
     const w = size[1] / this.strides[0];
     const h = size[2] / this.strides[1];
-    this.output = Tensor.zeroes([size[0], w, h]);
+    this.output = cpuZeroes3D([size[0], w, h]);
     this.outputSize = [h, w];
   }
 
-  feedForward(input: CPUTensor<Rank>) {
+  feedForward(inputTensor: CPUTensor<Rank>) {
+    this.input = inputTensor.to3D();
     if (this.mode == "max") {
       iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
         const pool: number[] = [];
         const indices: number[] = [];
         iterate2D(this.strides, (x: number, y: number) => {
           //TODO: batches
-          const idx = (j * this.strides[0] + y) * input.y +
+          const idx = (j * this.strides[0] + y) * this.input.y +
             i * this.strides[1] + x;
-          pool.push(input.data[idx]);
+          pool.push(this.input.data[idx]);
           indices.push(idx);
         });
         const max = maxIdx(pool);
@@ -69,14 +69,13 @@ export class PoolCPULayer {
       iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
         const pool: number[] = [];
         iterate2D(this.strides, (x: number, y: number) => {
-          const idx = (j * this.strides[0] + y) * input.y +
+          const idx = (j * this.strides[0] + y) * this.input.y +
             i * this.strides[1] + x;
-          pool.push(input.data[idx]);
+          pool.push(this.input.data[idx]);
         });
         this.output.data[j * this.output.y + i] = average(pool);
       });
     }
-    this.input = input.to3D();
     return this.output;
   }
 
@@ -85,7 +84,7 @@ export class PoolCPULayer {
   }
 
   getError(): CPUTensor<Rank> {
-    const error = Tensor.zeroes<Rank.R3, BackendType.CPU>(this.input.shape);
+    const error = cpuZeroes3D(this.input.shape);
     if (this.mode == "max") {
       for (let i = 0; i < this.error.data.length; i++) {
         error.data[this.indices[i]] = this.error.data[i];

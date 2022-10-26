@@ -1,7 +1,6 @@
-import { Tensor } from "../../../core/tensor.ts";
+import { cpuZeroes2D, Tensor } from "../../../core/tensor.ts";
 import {
   Activation,
-  BackendType,
   CPUTensor,
   DenseLayerConfig,
   LayerJSON,
@@ -37,14 +36,14 @@ export class DenseCPULayer {
   }
 
   reset(batches: number) {
-    this.output = Tensor.zeroes([this.outputSize[0], batches]);
+    this.output = cpuZeroes2D([this.outputSize[0], batches]);
   }
 
   initialize(inputShape: Shape[Rank]) {
     const shape = to2D(inputShape);
-    this.weights = Tensor.zeroes([this.outputSize[0], shape[0]]);
+    this.weights = cpuZeroes2D([this.outputSize[0], shape[0]]);
     this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
-    this.biases = Tensor.zeroes([this.outputSize[0], 1]);
+    this.biases = cpuZeroes2D([this.outputSize[0], 1]);
     this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
     this.reset(shape[1]);
   }
@@ -53,8 +52,8 @@ export class DenseCPULayer {
     this.activationFn = setActivation(activation);
   }
 
-  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
-    this.input = input.to2D();
+  feedForward(inputTensor: CPUTensor<Rank>): CPUTensor<Rank> {
+    this.input = inputTensor.to2D();
     const product = CPUMatrix.dot(this.input, this.weights);
     for (let i = 0, j = 0; i < product.data.length; i++, j++) {
       if (j >= this.biases.x) j = 0;
@@ -65,23 +64,23 @@ export class DenseCPULayer {
   }
 
   backPropagate(
-    error: CPUTensor<Rank>,
+    errorTensor: CPUTensor<Rank>,
     rate: number,
   ) {
-    const cost = Tensor.zeroes<Rank.R2, BackendType.CPU>([error.x, error.y]);
+    this.error = errorTensor.to2D()
+    const cost = cpuZeroes2D([this.error.x, this.error.y]);
     for (let i = 0; i < cost.data.length; i++) {
       const activation = this.activationFn.prime(this.output.data[i]);
-      cost.data[i] = error.data[i] * activation;
+      cost.data[i] = this.error.data[i] * activation;
     }
     const weightsDelta = CPUMatrix.dot(CPUMatrix.transpose(this.input), cost);
     for (const i in weightsDelta.data) {
       this.weights.data[i] += weightsDelta.data[i] * rate;
     }
-    for (let i = 0, j = 0; i < error.data.length; i++, j++) {
+    for (let i = 0, j = 0; i < this.error.data.length; i++, j++) {
       if (j >= this.biases.x) j = 0;
       this.biases.data[j] += cost.data[i] * rate;
     }
-    this.error = error.to2D();
   }
 
   getError(): CPUTensor<Rank> {
