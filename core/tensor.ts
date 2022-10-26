@@ -71,9 +71,7 @@ export class Tensor<R extends Rank, B extends BackendType> {
     seed?: number,
   ): Tensor<R, B> {
     if (seed !== undefined) Random.setSeed(seed);
-    const data = new Float32Array(to1D(shape)[0]).fill(0).map(() =>
-      Random.gaussian(mean, stdDev)
-    );
+    const data = new Float32Array(to1D(shape)[0]).fill(Random.gaussian(mean, stdDev));
     return new Tensor(toData(data), shape);
   }
 
@@ -179,8 +177,8 @@ export function zeros1D(shape: Shape[Rank.R1]) {
   return Tensor.zeroes(shape);
 }
 
-export function randNormal1D(shape: Shape[Rank.R1]) {
-  return Tensor.randomNormal(shape);
+export function randNormal1D(shape: Shape[Rank.R1], mean = 0, stdDev = 1,seed?: number) {
+  return Tensor.randomNormal(shape, mean, stdDev, seed);
 }
 
 export function tensor2D(
@@ -197,8 +195,8 @@ export function zeros2D(shape: Shape[Rank.R2]) {
   return Tensor.zeroes([shape[1], shape[0]]);
 }
 
-export function randNormal2D(shape: Shape[Rank.R2]) {
-  return Tensor.randomNormal([shape[1], shape[0]]);
+export function randNormal2D(shape: Shape[Rank.R2], mean = 0, stdDev = 1,seed?: number) {
+  return Tensor.randomNormal([shape[1], shape[0]], mean, stdDev, seed);
 }
 
 export function tensor3D(
@@ -219,8 +217,8 @@ export function zeros3D(shape: Shape[Rank.R3]) {
   return Tensor.zeroes([shape[2], shape[1], shape[0]]);
 }
 
-export function randNormal3D(shape: Shape[Rank.R3]) {
-  return Tensor.randomNormal([shape[2], shape[1], shape[0]]);
+export function randNormal3D(shape: Shape[Rank.R3], mean = 0, stdDev = 1,seed?: number) {
+  return Tensor.randomNormal([shape[2], shape[1], shape[0]], mean, stdDev, seed);
 }
 
 export function tensor4D(
@@ -242,8 +240,8 @@ export function zeros4D(shape: Shape[Rank.R4]) {
   return Tensor.zeroes([shape[3], shape[2], shape[1], shape[0]]);
 }
 
-export function randNormal4D(shape: Shape[Rank.R4]) {
-  return Tensor.randomNormal([shape[3], shape[2], shape[1], shape[0]]);
+export function randNormal4D(shape: Shape[Rank.R4], mean = 0, stdDev = 1,seed?: number) {
+  return Tensor.randomNormal([shape[3], shape[2], shape[1], shape[0]], mean, stdDev, seed);
 }
 
 export function tensor5D(
@@ -266,14 +264,8 @@ export function zeros5D(shape: Shape[Rank.R5]) {
   return Tensor.zeroes([shape[4], shape[3], shape[2], shape[1], shape[0]]);
 }
 
-export function randNormal5D(shape: Shape[Rank.R5]) {
-  return Tensor.randomNormal([
-    shape[4],
-    shape[3],
-    shape[2],
-    shape[1],
-    shape[0],
-  ]);
+export function randNormal5D(shape: Shape[Rank.R5], mean = 0, stdDev = 1,seed?: number) {
+  return Tensor.randomNormal([shape[4], shape[3], shape[2], shape[1], shape[0]], mean, stdDev, seed);
 }
 
 export function tensor6D(
@@ -304,15 +296,8 @@ export function zeros6D(shape: Shape[Rank.R6]) {
   ]);
 }
 
-export function randNormal6D(shape: Shape[Rank.R6]) {
-  return Tensor.randomNormal([
-    shape[5],
-    shape[4],
-    shape[3],
-    shape[2],
-    shape[1],
-    shape[0],
-  ]);
+export function randNormal6D(shape: Shape[Rank.R6], mean = 0, stdDev = 1,seed?: number) {
+  return Tensor.randomNormal([shape[5], shape[4], shape[3], shape[2], shape[1], shape[0]], mean, stdDev, seed);
 }
 
 export function cpuZeroes2D(
