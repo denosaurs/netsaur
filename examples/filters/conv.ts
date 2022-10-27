@@ -54,12 +54,12 @@ const net = new NeuralNetwork({
   cost: "crossentropy"
 });
 
-const input = new Tensor(buf, [1, dim, dim]);
+const input = new Tensor(buf, [dim, dim, 1]);
 
 const conv = net.getLayer(0) as ConvCPULayer;
 const pool = net.getLayer(1) as PoolCPULayer;
 
-net.initialize([1, dim, dim], 1);
+net.initialize([dim, dim, 1], 1);
 net.feedForward(input);
 
 for (let i = 0; i < dim; i++) {
@@ -70,20 +70,20 @@ for (let i = 0; i < dim; i++) {
   }
 }
 
-for (let i = 0; i < conv.output.y; i++) {
-  for (let j = 0; j < conv.output.z; j++) {
+for (let i = 0; i < conv.output.x; i++) {
+  for (let j = 0; j < conv.output.y; j++) {
     const pixel = Math.round(
-      Math.max(Math.min(conv.output.data[j * conv.output.y + i], 255), 0),
+      Math.max(Math.min(conv.output.data[j * conv.output.x + i], 255), 0),
     );
     ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
     ctx.fillRect(i * 10 + dim * 10, j * 10, 10, 10);
   }
 }
 
-for (let i = 0; i < pool.output.y; i++) {
-  for (let j = 0; j < pool.output.z; j++) {
+for (let i = 0; i < pool.output.x; i++) {
+  for (let j = 0; j < pool.output.y; j++) {
     const pixel = Math.round(
-      Math.max(Math.min(pool.output.data[j * pool.output.y + i], 255), 0),
+      Math.max(Math.min(pool.output.data[j * pool.output.x + i], 255), 0),
     );
     ctx.fillStyle = `rgb(${pixel}, ${pixel}, ${pixel})`;
     ctx.fillRect(i * 20 + dim * 10, j * 20 + dim * 10, 20, 20);

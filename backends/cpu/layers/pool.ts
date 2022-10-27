@@ -6,8 +6,8 @@ import {
   Shape,
   Shape2D,
 } from "../../../core/types.ts";
-import { average, iterate2D, maxIdx, to2D, to3D } from "../../../core/util.ts";
-import { cpuZeroes3D } from "../../../mod.ts";
+import { average, iterate2D, maxIdx } from "../../../core/util.ts";
+import { cpuZeroes3D, reshape3D, toShape3D } from "../../../mod.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
@@ -33,8 +33,8 @@ export class PoolCPULayer {
   }
 
   initialize(inputSize: Shape[Rank]) {
-    const size = to3D(inputSize);
-    if (size[1] % this.strides[0] || size[2] % this.strides[1]) {
+    const size = toShape3D(inputSize);
+    if (size[0] % this.strides[0] || size[1] % this.strides[1]) {
       throw new Error(
         `Cannot pool shape ${size} with stride ${this.strides}`,
       );
@@ -42,45 +42,45 @@ export class PoolCPULayer {
     if (this.strides[0] == 1 || this.strides[1] == 1) {
       throw new Error(`Cannot pool with stride ${this.strides}`);
     }
-    const w = size[1] / this.strides[0];
-    const h = size[2] / this.strides[1];
-    this.output = cpuZeroes3D([size[0], w, h]);
-    this.outputSize = [h, w];
+    const w = size[0] / this.strides[0];
+    const h = size[1] / this.strides[1];
+    this.output = cpuZeroes3D([w, h, size[2]]);
+    this.outputSize = [w, h];
   }
 
   feedForward(inputTensor: CPUTensor<Rank>) {
-    this.input = inputTensor.to3D();
+    this.input = reshape3D(inputTensor);
     if (this.mode == "max") {
-      iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
+      iterate2D([this.output.x, this.output.y], (i: number, j: number) => {
         const pool: number[] = [];
         const indices: number[] = [];
         iterate2D(this.strides, (x: number, y: number) => {
           //TODO: batches
-          const idx = (j * this.strides[0] + y) * this.input.y +
+          const idx = (j * this.strides[0] + y) * this.input.x +
             i * this.strides[1] + x;
           pool.push(this.input.data[idx]);
           indices.push(idx);
         });
         const max = maxIdx(pool);
-        this.indices[j * this.output.y + i] = indices[max];
-        this.output.data[j * this.output.y + i] = pool[max];
+        this.indices[j * this.output.x + i] = indices[max];
+        this.output.data[j * this.output.x + i] = pool[max];
       });
     } else if (this.mode == "avg") {
-      iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
+      iterate2D([this.output.x, this.output.y], (i: number, j: number) => {
         const pool: number[] = [];
         iterate2D(this.strides, (x: number, y: number) => {
-          const idx = (j * this.strides[0] + y) * this.input.y +
+          const idx = (j * this.strides[0] + y) * this.input.x +
             i * this.strides[1] + x;
           pool.push(this.input.data[idx]);
         });
-        this.output.data[j * this.output.y + i] = average(pool);
+        this.output.data[j * this.output.x + i] = average(pool);
       });
     }
     return this.output;
   }
 
   backPropagate(error: CPUTensor<Rank>, _rate: number) {
-    this.error = error.to3D();
+    this.error = reshape3D(error);
   }
 
   getError(): CPUTensor<Rank> {
@@ -90,7 +90,7 @@ export class PoolCPULayer {
         error.data[this.indices[i]] = this.error.data[i];
       }
     } else if (this.mode == "avg") {
-      iterate2D([this.output.y, this.output.z], (i: number, j: number) => {
+      iterate2D([this.output.x, this.output.y], (i: number, j: number) => {
         const meanError = this.error.data[j * this.error.x + i];
         iterate2D(this.strides, (x: number, y: number) => {
           const idx = (j * this.strides[0] + y) * error.x +
@@ -124,8 +124,8 @@ export class PoolCPULayer {
     if (strides === undefined) {
       throw new Error("Layer imported must be initialized");
     }
-    const layer = new PoolCPULayer({ strides: to2D(strides), mode });
-    layer.outputSize = to2D(outputSize);
+    const layer = new PoolCPULayer({ strides: strides as Shape2D, mode });
+    layer.outputSize = outputSize as Shape2D;
     return layer;
   }
 }

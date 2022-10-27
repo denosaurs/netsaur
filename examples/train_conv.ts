@@ -18,17 +18,17 @@ const net = new NeuralNetwork({
       activation: "tanh",
       kernelSize: [3, 3],
       padding: 0,
-      strides: 1,
+      strides: [1, 1],
     }),
-    PoolLayer({ strides: 2 }),
-    DenseLayer({ size: 10, activation: "sigmoid" }),
-    DenseLayer({ size: 1, activation: "sigmoid" }),
+    PoolLayer({ strides: [2, 2] }),
+    DenseLayer({ size: [1], activation: "sigmoid" }),
   ],
   cost: "crossentropy",
   input: [8,8],
 });
 
-const input_1 = await tensor2D([
+const input_1 = tensor2D([
+  [0, 0, 0, 1, 0, 0, 0, 0],
   [0, 0, 0, 1, 0, 0, 0, 0],
   [0, 0, 0, 1, 0, 0, 0, 0],
   [0, 0, 0, 1, 0, 0, 0, 0],
@@ -38,7 +38,7 @@ const input_1 = await tensor2D([
   [0, 0, 0, 1, 0, 0, 0, 0],
 ]);
 
-const input_2 = await tensor2D([
+const input_2 = tensor2D([
   [0, 1, 1, 1, 1, 1, 1, 1],
   [0, 0, 0, 0, 0, 0, 1, 0],
   [0, 0, 0, 0, 0, 1, 0, 0],
@@ -49,7 +49,7 @@ const input_2 = await tensor2D([
   [1, 1, 1, 1, 1, 1, 1, 1],
 ]);
 
-const input_3 = await tensor2D([
+const input_3 = tensor2D([
   [1, 1, 1, 1, 1, 1, 1, 1],
   [0, 0, 0, 0, 0, 0, 0, 1],
   [0, 0, 0, 0, 0, 0, 0, 1],
@@ -62,9 +62,9 @@ const input_3 = await tensor2D([
 
 await net.train(
   [
-    { inputs: input_1, outputs: await tensor1D([1]) },
-    { inputs: input_2, outputs: await tensor2D([2]) },
-    { inputs: input_3, outputs: await tensor2D([3]) },
+    { inputs: input_1, outputs: tensor1D([1]) },
+    { inputs: input_2, outputs: tensor2D([2]) },
+    { inputs: input_3, outputs: tensor2D([3]) },
   ],
   1,
   1,

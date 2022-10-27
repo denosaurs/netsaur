@@ -16,7 +16,7 @@ import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
-import { Tensor } from "../../mod.ts";
+import { cpuZeroes2D, Tensor } from "../../mod.ts";
 
 type OutputLayer = DenseCPULayer;
 
@@ -73,7 +73,7 @@ export class CPUBackend implements Backend {
 
   backpropagate(output: CPUTensor<Rank>, rate: number) {
     const shape = this.output.output.shape;
-    let error = Tensor.zeroes<Rank, BackendType.CPU>(shape);
+    let error = cpuZeroes2D(shape) as CPUTensor<Rank>;
     for (const i in this.output.output.data) {
       error.data[i] = this.costFn.prime(
         output.data[i],

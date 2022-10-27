@@ -322,3 +322,21 @@ export function gpuZeroes2D(
   GPUInstance.backend!.device.queue.writeBuffer(res.buffer, 0, data);
   return new Tensor(res, shape);
 }
+
+export function toShape2D(shape: Shape[Rank]): Shape[Rank.R2] {
+  return shape.length == 2 ? shape: [shape[0] * shape[1]!, shape[2]!]
+}
+
+export function toShape3D(shape: Shape[Rank]): Shape[Rank.R3] {
+  return shape.length == 3 ? shape: [shape[0], 1, shape[1]!]
+}
+
+export function reshape2D<B extends BackendType>(tensor: Tensor<Rank, B>){
+  const res = new Tensor(tensor.data, toShape2D(tensor.shape))
+  return res as Tensor<Rank.R2, B>
+}
+
+export function reshape3D<B extends BackendType>(tensor: Tensor<Rank, B>){
+  const res = new Tensor(tensor.data, toShape3D(tensor.shape))
+  return res as Tensor<Rank.R3, B>
+}

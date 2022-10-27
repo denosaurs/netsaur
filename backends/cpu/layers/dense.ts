@@ -1,4 +1,4 @@
-import { cpuZeroes2D, Tensor } from "../../../core/tensor.ts";
+import { cpuZeroes2D, reshape2D, Tensor, toShape2D } from "../../../core/tensor.ts";
 import {
   Activation,
   CPUTensor,
@@ -8,7 +8,6 @@ import {
   Shape,
   Shape1D,
 } from "../../../core/types.ts";
-import { to1D, to2D } from "../../../core/util.ts";
 import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 import { CPUCostFunction, CrossEntropy } from "../cost.ts";
 import { CPUMatrix } from "../kernels/matrix.ts";
@@ -40,7 +39,7 @@ export class DenseCPULayer {
   }
 
   initialize(inputShape: Shape[Rank]) {
-    const shape = to2D(inputShape);
+    const shape = toShape2D(inputShape);
     this.weights = cpuZeroes2D([this.outputSize[0], shape[0]]);
     this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
     this.biases = cpuZeroes2D([this.outputSize[0], 1]);
@@ -53,7 +52,7 @@ export class DenseCPULayer {
   }
 
   feedForward(inputTensor: CPUTensor<Rank>): CPUTensor<Rank> {
-    this.input = inputTensor.to2D();
+    this.input = reshape2D(inputTensor);
     const product = CPUMatrix.dot(this.input, this.weights);
     for (let i = 0, j = 0; i < product.data.length; i++, j++) {
       if (j >= this.biases.x) j = 0;
@@ -67,7 +66,7 @@ export class DenseCPULayer {
     errorTensor: CPUTensor<Rank>,
     rate: number,
   ) {
-    this.error = errorTensor.to2D()
+    this.error = reshape2D(errorTensor)
     const cost = cpuZeroes2D([this.error.x, this.error.y]);
     for (let i = 0; i < cost.data.length; i++) {
       const activation = this.activationFn.prime(this.output.data[i]);
@@ -113,7 +112,7 @@ export class DenseCPULayer {
       throw new Error("Layer imported must be initialized");
     }
     const layer = new DenseCPULayer({
-      size: to1D(outputSize),
+      size: outputSize as Shape1D,
       activation: (activationFn as Activation) || "sigmoid",
     });
     layer.weights = Tensor.fromJSON(weights);
