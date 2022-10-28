@@ -1,7 +1,5 @@
-import type { DataTypeArray } from "../../deps.ts";
 import type {
   Backend,
-  BackendType,
   Cost,
   CPULayer,
   CPUTensor,
@@ -16,7 +14,7 @@ import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
-import { cpuZeroes2D, Tensor } from "../../mod.ts";
+import { cpuZeroes2D } from "../../mod.ts";
 
 type OutputLayer = DenseCPULayer;
 
@@ -119,8 +117,7 @@ export class CPUBackend implements Backend {
   //   return cost;
   // }
 
-  predict(data: DataTypeArray) {
-    const input = new Tensor<Rank, BackendType.CPU>(data, [data.length, 1]);
+  predict(input: CPUTensor<Rank>) {
     for (const layer of this.layers) {
       layer.reset(1);
     }

@@ -6,7 +6,7 @@ import {
   Shape,
   Shape2D,
 } from "../../../core/types.ts";
-import { average, iterate2D, maxIdx } from "../../../core/util.ts";
+import { average, iterate1D, iterate2D, maxIdx } from "../../../core/util.ts";
 import { cpuZeroes3D, reshape3D, toShape3D } from "../../../mod.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -19,7 +19,7 @@ export class PoolCPULayer {
   outputSize!: Shape2D;
   strides: Shape2D;
   mode: "max" | "avg";
-  indices: number[] = [];
+  indices: number[][] = [];
   input!: CPUTensor<Rank.R3>;
   error!: CPUTensor<Rank.R3>;
   output!: CPUTensor<Rank.R3>;
@@ -51,29 +51,36 @@ export class PoolCPULayer {
   feedForward(inputTensor: CPUTensor<Rank>) {
     this.input = reshape3D(inputTensor);
     if (this.mode == "max") {
-      iterate2D([this.output.x, this.output.y], (i: number, j: number) => {
-        const pool: number[] = [];
-        const indices: number[] = [];
-        iterate2D(this.strides, (x: number, y: number) => {
-          //TODO: batches
-          const idx = (j * this.strides[0] + y) * this.input.x +
-            i * this.strides[1] + x;
-          pool.push(this.input.data[idx]);
-          indices.push(idx);
+      iterate1D(this.input.z, (z: number) => {
+        this.indices[z] = [];
+        iterate2D([this.output.x, this.output.y], (x: number, y: number) => {
+          const pool: number[] = [];
+          const indices: number[] = [];
+          iterate2D(this.strides, (i: number, j: number) => {
+            const w = x * this.strides[0] + i;
+            const h = y * this.strides[1] + j;
+            const idx = this.input.index(w, h, z);
+            pool.push(this.input.data[idx]);
+            indices.push(idx);
+          });
+          const idx = this.output.index(x, y, z);
+          const max = maxIdx(pool);
+          this.indices[z][idx] = indices[max];
+          this.output.data[idx] = pool[max];
         });
-        const max = maxIdx(pool);
-        this.indices[j * this.output.x + i] = indices[max];
-        this.output.data[j * this.output.x + i] = pool[max];
       });
     } else if (this.mode == "avg") {
-      iterate2D([this.output.x, this.output.y], (i: number, j: number) => {
-        const pool: number[] = [];
-        iterate2D(this.strides, (x: number, y: number) => {
-          const idx = (j * this.strides[0] + y) * this.input.x +
-            i * this.strides[1] + x;
-          pool.push(this.input.data[idx]);
+      iterate1D(this.input.z, (z: number) => {
+        iterate2D([this.output.x, this.output.y], (x: number, y: number) => {
+          const pool: number[] = [];
+          iterate2D(this.strides, (i: number, j: number) => {
+            const w = x * this.strides[0] + i;
+            const h = y * this.strides[1] + j;
+            const idx = this.input.index(w, h, z);
+            pool.push(this.input.data[idx]);
+          });
+          this.output.data[this.output.index(x, y, z)] = average(pool);
         });
-        this.output.data[j * this.output.x + i] = average(pool);
       });
     }
     return this.output;
@@ -86,22 +93,27 @@ export class PoolCPULayer {
   getError(): CPUTensor<Rank> {
     const error = cpuZeroes3D(this.input.shape);
     if (this.mode == "max") {
-      for (let i = 0; i < this.error.data.length; i++) {
-        error.data[this.indices[i]] = this.error.data[i];
-      }
+      iterate1D(this.input.z, (z: number) => {
+        for (let i = 0; i < this.error.data.length; i++) {
+          error.data[this.indices[z][i]] = this.error.data[i];
+        }
+      });
     } else if (this.mode == "avg") {
-      iterate2D([this.output.x, this.output.y], (i: number, j: number) => {
-        const meanError = this.error.data[j * this.error.x + i];
-        iterate2D(this.strides, (x: number, y: number) => {
-          const idx = (j * this.strides[0] + y) * error.x +
-            i * this.strides[1] + x;
-          error.data[idx] = meanError / this.strides[1] / this.strides[0];
+      iterate1D(this.input.z, (z: number) => {
+        iterate2D([this.output.x, this.output.y], (x: number, y: number) => {
+          const meanError = this.error.data[this.error.index(x, y, z)];
+          iterate2D(this.strides, (i: number, j: number) => {
+            const w = x * this.strides[0] + i;
+            const h = y * this.strides[1] + j;
+            const idx = this.error.index(w, h, z);
+            error.data[idx] = meanError / this.strides[0] / this.strides[1];
+          });
         });
       });
     }
     return error;
   }
-
+  
   toJSON() {
     return {
       outputSize: this.outputSize,

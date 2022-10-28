@@ -7,8 +7,14 @@ import {
   Shape,
   Shape2D,
 } from "../../../core/types.ts";
-import { iterate2D } from "../../../core/util.ts";
-import { cpuZeroes2D, cpuZeroes3D, reshape3D, Tensor, toShape3D } from "../../../mod.ts";
+import { iterate1D, iterate2D } from "../../../core/util.ts";
+import {
+  cpuZeroes2D,
+  cpuZeroes3D,
+  reshape3D,
+  Tensor,
+  toShape3D,
+} from "../../../mod.ts";
 import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -27,7 +33,8 @@ export class ConvCPULayer {
   input!: CPUTensor<Rank.R3>;
   kernel!: CPUTensor<Rank.R2>;
   padded!: CPUTensor<Rank.R3>;
-  biases!: CPUTensor<Rank.R3>;
+  biases!: CPUTensor<Rank.R2>;
+  error!: CPUTensor<Rank.R3>;
   output!: CPUTensor<Rank.R3>;
 
   constructor(config: ConvLayerConfig) {
@@ -50,7 +57,7 @@ export class ConvCPULayer {
     const wp = size[0] + 2 * this.padding;
     const hp = size[1] + 2 * this.padding;
     if (this.padding > 0) {
-      const data = new Float32Array(wp * hp * size[2]).fill(255)
+      const data = new Float32Array(wp * hp * size[2]).fill(255);
       this.padded = new Tensor(data, [wp, hp, size[2]]);
     }
     if (!this.config.kernel) {
@@ -58,7 +65,7 @@ export class ConvCPULayer {
     }
     const wo = 1 + Math.floor((wp - this.kernel.x) / this.strides[0]);
     const ho = 1 + Math.floor((hp - this.kernel.y) / this.strides[1]);
-    this.biases = cpuZeroes3D([wo, ho, size[2]]);
+    this.biases = cpuZeroes2D([wo, ho]);
     if (!this.config.unbiased) {
       this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
     }
@@ -71,51 +78,59 @@ export class ConvCPULayer {
   }
 
   feedForward(inputTensor: CPUTensor<Rank>): CPUTensor<Rank> {
-    this.input = reshape3D(inputTensor)
+    this.input = reshape3D(inputTensor);
     if (this.padding > 0) {
-      iterate2D([this.input.x, this.input.y], (i: number, j: number) => {
-        const idx = this.padded.x * (this.padding + j) + this.padding + i;
-        this.padded.data[idx] = this.input.data[j * this.input.x + i];
+      iterate1D(this.input.z, (z: number) => {
+        iterate2D([this.input.x, this.input.y], (x: number, y: number) => {
+          const idx = this.padded.index(this.padding + x, this.padding + y, z);
+          this.padded.data[idx] = this.input.data[this.input.index(x, y, z)];
+        });
       });
     } else {
       this.padded = this.input;
     }
-    iterate2D([this.output.x, this.output.y], (i: number, j: number) => {
-      let sum = 0;
-      iterate2D(this.kernel, (x: number, y: number) => {
-        const k = this.padded.x * (j * this.strides[1] + y) +
-          (i * this.strides[0] + x);
-        const l = y * this.kernel.x + x;
-        sum += this.padded.data[k] * this.kernel.data[l];
+    iterate1D(this.input.z, (z: number) => {
+      iterate2D([this.output.x, this.output.y], (x: number, y: number) => {
+        let sum = 0;
+        iterate2D(this.kernel, (i: number, j: number) => {
+          const w = x * this.strides[0] + i
+          const h = y * this.strides[1] + j
+          const k = this.padded.index(w, h, z);
+          const l = j * this.kernel.x + i;
+          sum += this.padded.data[k] * this.kernel.data[l];
+        });
+        const idx = this.output.index(x, y, z);
+        sum += this.biases.data[y * this.output.x + x];
+        this.output.data[idx] = this.activationFn.activate(sum);
       });
-      sum += this.biases.data[j * this.output.x + i];
-      this.output.data[j * this.output.x + i] = this.activationFn.activate(sum);
     });
     return this.output;
   }
 
   backPropagate(errorTensor: CPUTensor<Rank>, rate: number) {
-    const error = reshape3D(errorTensor)
-    const cost = cpuZeroes3D(error.shape);
+    this.error = reshape3D(errorTensor);
+    const cost = cpuZeroes3D(this.error.shape);
     for (const i in cost.data) {
       const activation = this.activationFn.prime(this.output.data[i]);
-      cost.data[i] = error.data[i] * activation;
+      cost.data[i] = this.error.data[i] * activation;
     }
-    iterate2D(this.kernel, (i: number, j: number) => {
-      let sum = 0;
-      iterate2D([cost.x, cost.y], (x: number, y: number) => {
-        const k = this.padded.x * (j * this.strides[1] + y) +
-          (i * this.strides[0] + x);
-        const l = y * cost.x + x;
-        sum += this.padded.data[k] * cost.data[l];
+    iterate1D(this.input.z, (z: number) => {
+      iterate2D(this.kernel, (x: number, y: number) => {
+        let sum = 0;
+        iterate2D([cost.x, cost.y], (i: number, j: number) => {
+          const w = x * this.strides[0] + i;
+          const h = y * this.strides[1] + j;
+          const k = this.padded.index(w, h, z);
+          const l = cost.index(i, j, z);
+          sum += this.padded.data[k] * cost.data[l];
+        });
+        const idx = y * this.kernel.x + x;
+        this.kernel.data[idx] += this.activationFn.activate(sum) * rate;
       });
-      const idx = j * this.kernel.x + i;
-      this.kernel.data[idx] += this.activationFn.activate(sum) * rate;
+      for (let i = 0; i < this.biases.data.length; i++) {
+        this.biases.data[i] += cost.data[i + z * cost.x * cost.y];
+      }
     });
-    //TODO: fix batches
-    for (let i = 0; i < cost.data.length; i++) {
-      this.biases.data[i] += cost.data[i];
-    }
   }
 
   async toJSON() {

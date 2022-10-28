@@ -69,8 +69,8 @@ await setupBackend(CPU);
 const net = new NeuralNetwork({
   silent: true,
   layers: [
-    DenseLayer({ size: 10, activation: "sigmoid" }),
-    DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: [10], activation: "sigmoid" }),
+    DenseLayer({ size: [1], activation: "sigmoid" }),
   ],
   cost: "crossentropy",
 });
@@ -78,12 +78,12 @@ const net = new NeuralNetwork({
 net.train(
   [
     {
-      inputs: await tensor2D([happy]),
-      outputs: await tensor1D(["a".charCodeAt(0) / 255]),
+      inputs: tensor2D([happy]),
+      outputs: tensor1D(["a".charCodeAt(0) / 255]),
     },
     {
-      inputs: await tensor2D([sad]),
-      outputs: await tensor1D(["b".charCodeAt(0) / 255]),
+      inputs: tensor2D([sad]),
+      outputs: tensor1D(["b".charCodeAt(0) / 255]),
     },
   ],
   5000,
