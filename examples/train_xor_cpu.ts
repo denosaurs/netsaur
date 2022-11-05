@@ -36,7 +36,7 @@ await net.train(
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
-console.log(await net.predict(new Float32Array([0, 0])));
-console.log(await net.predict(new Float32Array([1, 0])));
-console.log(await net.predict(new Float32Array([0, 1])));
-console.log(await net.predict(new Float32Array([1, 1])));
+console.log((await net.predict(tensor1D([0, 0]))).data);
+console.log((await net.predict(tensor1D([1, 0]))).data);
+console.log((await net.predict(tensor1D([0, 1]))).data);
+console.log((await net.predict(tensor1D([1, 1]))).data);

@@ -1,5 +1,5 @@
-import type { Dataset } from "../../backends/native/mod.ts";
-import { Matrix } from "../../backends/native/mod.ts";
+import { DataSet } from "../../core/types.ts";
+import { Tensor } from "../../mod.ts";
 
 export function assert(condition: boolean, message?: string) {
   if (!condition) {
@@ -20,9 +20,9 @@ export function loadDataset(imagesFile: string, labelsFile: string) {
   const count = imageView.getUint32(4);
   assert(count === labelView.getUint32(4), "Image and label count mismatch");
 
-  const results: Dataset[] = [];
+  const results: DataSet[] = [];
 
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < 5000; i++) {
     const inputs = new Float32Array(784);
     for (let j = 0; j < 784; j++) {
       inputs[j] = imageView.getUint8(16 + i * 784 + j) / 255;
@@ -32,8 +32,8 @@ export function loadDataset(imagesFile: string, labelsFile: string) {
     outputs[labelView.getUint8(8 + i)] = 1;
 
     results.push({
-      inputs: new Matrix(1, inputs.length, inputs),
-      outputs: new Matrix(1, outputs.length, outputs),
+      inputs: new Tensor(inputs, [28, 28, 1]),
+      outputs: new Tensor(outputs, [10, 1]),
     });
   }
 

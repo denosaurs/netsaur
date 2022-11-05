@@ -1,11 +1,16 @@
-import { DataType, Matrix, NativeBackend } from "../../backends/native/mod.ts";
+import { CPUBackend } from "../../backends/cpu/backend.ts";
+import { CPU } from "../../backends/cpu/mod.ts";
+import { setupBackend } from "../../core/mod.ts";
+import { CPUTensor, Rank } from "../../core/types.ts";
 import { loadDataset } from "./common.ts";
 
-const network = NativeBackend.load("digit_model.bin");
+await setupBackend(CPU)
+
+const network = CPUBackend.load("digit_model.json");
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx");
 
-function argmax<T extends DataType>(mat: Matrix<T>) {
+function argmax(mat: CPUTensor<Rank>) {
   let max = -Infinity;
   let index = -1;
   for (let i = 0; i < mat.data.length; i++) {
@@ -18,8 +23,8 @@ function argmax<T extends DataType>(mat: Matrix<T>) {
 }
 
 const correct = testSet.filter((e) => {
-  const prediction = argmax(network.predict(e.inputs));
-  const expected = argmax(e.outputs);
+  const prediction = argmax(network.predict(e.inputs as CPUTensor<Rank>));
+  const expected = argmax(e.outputs as CPUTensor<Rank>);
   return prediction === expected;
 });
 

@@ -54,7 +54,7 @@ const net = new NeuralNetwork({
   silent: true,
   layers: [
     ConvLayer({
-      activation: "tanh",
+      activation: "relu",
       kernelSize: [3, 3],
       padding: 0,
       strides: [1, 1],
@@ -73,7 +73,7 @@ net.train([
 ], 5000);
 
 console.log(
-  await net.predict(tensor3D([
+  (await net.predict(tensor3D([
     [
       [0, 0, 0, 0, 1, 0, 0, 0],
       [0, 0, 0, 1, 1, 0, 0, 0],
@@ -84,11 +84,11 @@ console.log(
       [0, 0, 0, 0, 1, 0, 0, 0],
       [0, 0, 1, 1, 1, 1, 0, 0],
     ],
-  ])),
+  ]))).data,
 );
 
 console.log(
-  await net.predict(tensor3D([
+  (await net.predict(tensor3D([
     [
       [0, 0, 0, 1, 1, 0, 0, 0],
       [0, 0, 1, 0, 0, 1, 0, 0],
@@ -99,11 +99,11 @@ console.log(
       [0, 0, 1, 0, 0, 0, 0, 0],
       [0, 0, 1, 1, 1, 1, 0, 0],
     ],
-  ])),
+  ]))).data,
 );
 
 console.log(
-  await net.predict(tensor3D([
+  (await net.predict(tensor3D([
     [
       [0, 0, 0, 1, 1, 0, 0, 0],
       [0, 0, 1, 0, 0, 1, 0, 0],
@@ -114,5 +114,5 @@ console.log(
       [0, 0, 1, 0, 0, 1, 0, 0],
       [0, 0, 0, 1, 1, 0, 0, 0],
     ],
-  ])),
+  ]))).data,
 );

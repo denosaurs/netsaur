@@ -389,7 +389,14 @@ export function gpuZeroes2D(
 }
 
 export function toShape2D(shape: Shape[Rank]): Shape[Rank.R2] {
-  return shape.length == 2 ? shape : [shape[0] * shape[1]!, shape[2]!];
+  switch (shape.length) {
+    case 2:
+      return shape
+    case 3:
+      return [shape[0] * shape[1]!, shape[2]!]
+    default:
+      return [shape[0], 1]
+  }
 }
 
 export function toShape3D(shape: Shape[Rank]): Shape[Rank.R3] {
@@ -404,4 +411,11 @@ export function reshape2D<B extends BackendType>(tensor: Tensor<Rank, B>) {
 export function reshape3D<B extends BackendType>(tensor: Tensor<Rank, B>) {
   const res = new Tensor(tensor.data, toShape3D(tensor.shape));
   return res as Tensor<Rank.R3, B>;
+}
+
+export function cpuZeroes1D(
+  shape: Shape[Rank.R1],
+): Tensor<Rank.R1, BackendType.CPU> {
+  const data = new Float32Array(shape[0]);
+  return new Tensor(data.fill(0), shape);
 }

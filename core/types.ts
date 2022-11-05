@@ -12,6 +12,7 @@ export interface LayerJSON {
   costFn?: string;
   type: string;
   weights?: TensorJSON;
+  paddedSize?: Shape[Rank];
   biases?: TensorJSON;
   kernel?: TensorJSON;
   strides?: Shape[Rank];

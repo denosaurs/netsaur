@@ -33,7 +33,9 @@ export class CPUBackend implements Backend {
     this.setCost(config.cost);
   }
 
-  static load() {
+  static load(path: string) {
+    const net = JSON.parse(Deno.readTextFileSync(path))
+    return CPUBackend.fromJSON(net)
   }
 
   setCost(activation: Cost): void {
@@ -78,10 +80,8 @@ export class CPUBackend implements Backend {
         this.output.output.data[i],
       );
     }
-    this.output.backPropagate(error, rate);
-    for (let i = this.layers.length - 2; i >= 0; i--) {
-      error = (this.layers[i + 1] as DenseCPULayer).getError();
-      this.layers[i].backPropagate(error, rate);
+    for (let i = this.layers.length - 1; i >= 0; i--) {
+      error = this.layers[i].backPropagate(error, rate)!;
     }
   }
 
@@ -121,7 +121,7 @@ export class CPUBackend implements Backend {
     for (const layer of this.layers) {
       layer.reset(1);
     }
-    return this.feedForward(input).data;
+    return this.feedForward(input);
   }
 
   async toJSON() {
@@ -162,8 +162,9 @@ export class CPUBackend implements Backend {
     return backend;
   }
 
-  save(_str: string): void {
-    throw new Error("Not implemented");
+  async save(path: string) {
+    const data = await this.toJSON()
+    Deno.writeTextFileSync(path, JSON.stringify(data))
   }
 
   getWeights(): CPUTensor<Rank>[] {

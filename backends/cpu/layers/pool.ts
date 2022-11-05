@@ -29,7 +29,9 @@ export class PoolCPULayer {
     this.mode = config.mode ?? "max";
   }
 
-  reset(_batches: number) {
+  reset(batches: number) {
+    const [w, h] = this.outputSize
+    this.output = cpuZeroes3D([w, h, batches]);
   }
 
   initialize(inputSize: Shape[Rank]) {
@@ -44,8 +46,8 @@ export class PoolCPULayer {
     }
     const w = size[0] / this.strides[0];
     const h = size[1] / this.strides[1];
-    this.output = cpuZeroes3D([w, h, size[2]]);
     this.outputSize = [w, h];
+    this.reset(size[2])
   }
 
   feedForward(inputTensor: CPUTensor<Rank>) {
@@ -86,11 +88,8 @@ export class PoolCPULayer {
     return this.output;
   }
 
-  backPropagate(error: CPUTensor<Rank>, _rate: number) {
-    this.error = reshape3D(error);
-  }
-
-  getError(): CPUTensor<Rank> {
+  backPropagate(errorTensor: CPUTensor<Rank>, _rate: number) {
+    this.error = reshape3D(errorTensor);
     const error = cpuZeroes3D(this.input.shape);
     if (this.mode == "max") {
       iterate1D(this.input.z, (z: number) => {

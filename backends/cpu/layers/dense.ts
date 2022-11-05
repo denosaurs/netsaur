@@ -1,4 +1,9 @@
-import { cpuZeroes2D, reshape2D, Tensor, toShape2D } from "../../../core/tensor.ts";
+import {
+  cpuZeroes2D,
+  reshape2D,
+  Tensor,
+  toShape2D,
+} from "../../../core/tensor.ts";
 import {
   Activation,
   CPUTensor,
@@ -26,6 +31,7 @@ export class DenseCPULayer {
   input!: CPUTensor<Rank.R2>;
   weights!: CPUTensor<Rank.R2>;
   biases!: CPUTensor<Rank.R2>;
+  sum!: CPUTensor<Rank.R2>;
   output!: CPUTensor<Rank.R2>;
   error!: CPUTensor<Rank.R2>;
 
@@ -35,6 +41,7 @@ export class DenseCPULayer {
   }
 
   reset(batches: number) {
+    this.sum = cpuZeroes2D([this.outputSize[0], batches]);
     this.output = cpuZeroes2D([this.outputSize[0], batches]);
   }
 
@@ -56,8 +63,8 @@ export class DenseCPULayer {
     const product = CPUMatrix.dot(this.input, this.weights);
     for (let i = 0, j = 0; i < product.data.length; i++, j++) {
       if (j >= this.biases.x) j = 0;
-      const sum = product.data[i] + this.biases.data[j];
-      this.output.data[i] = this.activationFn.activate(sum);
+      this.sum.data[i] = product.data[i] + this.biases.data[j];
+      this.output.data[i] = this.activationFn.activate(this.sum.data[i]);
     }
     return this.output;
   }
@@ -66,10 +73,10 @@ export class DenseCPULayer {
     errorTensor: CPUTensor<Rank>,
     rate: number,
   ) {
-    this.error = reshape2D(errorTensor)
+    this.error = reshape2D(errorTensor);
     const cost = cpuZeroes2D([this.error.x, this.error.y]);
     for (let i = 0; i < cost.data.length; i++) {
-      const activation = this.activationFn.prime(this.output.data[i]);
+      const activation = this.activationFn.prime(this.sum.data[i]);
       cost.data[i] = this.error.data[i] * activation;
     }
     const weightsDelta = CPUMatrix.dot(CPUMatrix.transpose(this.input), cost);
@@ -80,10 +87,7 @@ export class DenseCPULayer {
       if (j >= this.biases.x) j = 0;
       this.biases.data[j] += cost.data[i] * rate;
     }
-  }
-
-  getError(): CPUTensor<Rank> {
-    return CPUMatrix.dot(this.error, CPUMatrix.transpose(this.weights));
+    return CPUMatrix.dot(this.error, CPUMatrix.transpose(this.weights))
   }
 
   async toJSON() {
@@ -98,8 +102,7 @@ export class DenseCPULayer {
   }
 
   static fromJSON(
-    { outputSize, activationFn, type, weights, biases }:
-      LayerJSON,
+    { outputSize, activationFn, type, weights, biases }: LayerJSON,
   ): DenseCPULayer {
     if (type !== "dense") {
       throw new Error(

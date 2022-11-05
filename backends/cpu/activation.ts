@@ -31,7 +31,7 @@ export class Sigmoid implements CPUActivationFn {
   }
 
   prime(val: number, error = 1): number {
-    return val * (1 - val) * error;
+    return this.activate(val) * (1 - this.activate(val)) * error;
   }
 }
 
@@ -46,7 +46,7 @@ export class Tanh implements CPUActivationFn {
   }
 
   prime(val: number, error = 1): number {
-    return (1 - (val * val)) * error;
+    return (1 - (Math.tanh(val) ** 2)) * error;
   }
 }
 

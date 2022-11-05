@@ -6,6 +6,7 @@ esr.bin
 node_modules/
 output.png
 digit_model.bin
+digit_model.json
 package-lock.json
 test.ts
 experiments
