@@ -30,8 +30,15 @@ export function ConvLayer(config: ConvLayerConfig) {
   return Layer.layers.conv(config);
 }
 export function PoolLayer(config: PoolLayerConfig) {
-  if (Layer.layers.conv === undefined) {
+  if (Layer.layers.pool === undefined) {
     throw new Error("Current backend does not support pooling layers");
   }
   return Layer.layers.pool(config);
+}
+
+export function Softmax() {
+  if (Layer.layers.softmax === undefined) {
+    throw new Error("Current backend does not support softmax layers");
+  }
+  return Layer.layers.softmax();
 }

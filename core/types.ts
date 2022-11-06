@@ -5,6 +5,7 @@ import { DenseGPULayer } from "../backends/gpu/layers/dense.ts";
 import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
 import { Tensor } from "./tensor.ts";
 import { Matrix } from "../backends/native/matrix.ts";
+import { SoftmaxCPULayer } from "../backends/cpu/layers/softmax.ts";
 
 export interface LayerJSON {
   outputSize: Shape[Rank];
@@ -72,7 +73,7 @@ export interface NetworkConfig {
 // deno-lint-ignore no-explicit-any
 export type Layer = any;
 
-export type CPULayer = ConvCPULayer | DenseCPULayer | PoolCPULayer;
+export type CPULayer = ConvCPULayer | DenseCPULayer | PoolCPULayer | SoftmaxCPULayer;
 
 export type GPULayer = DenseGPULayer;
 
@@ -84,7 +85,7 @@ export interface DenseLayerConfig {
 export interface ConvLayerConfig {
   activation?: Activation;
   kernel?: DataTypeArray;
-  kernelSize: Shape2D;
+  kernelSize: Shape4D;
   padding?: number;
   unbiased?: boolean;
   strides?: Shape2D;
@@ -170,6 +171,7 @@ export type TensorLike =
   | number[]
   | number[][]
   | number[][][]
+  | number[][][][]
   | TypedArray
   | TypedArray[]
   | TypedArray[][]

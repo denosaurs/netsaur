@@ -15,6 +15,7 @@ import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
 import { cpuZeroes2D } from "../../mod.ts";
+import { SoftmaxCPULayer } from "./layers/softmax.ts";
 
 type OutputLayer = DenseCPULayer;
 
@@ -88,34 +89,41 @@ export class CPUBackend implements Backend {
   train(
     datasets: DataSet[],
     epochs = 5000,
-    _batches = 1,
+    batches = 1,
     rate = 0.1,
+    initialize = true
   ): void {
-    this.initialize(datasets[0].inputs.shape);
-
-    iterate1D(epochs, (e: number) => {
-      if (!this.silent) console.log(`Epoch ${e + 1}/${epochs}`);
-      for (const dataset of datasets) {
-        this.feedForward(dataset.inputs as CPUTensor<Rank>);
-        this.backpropagate(dataset.outputs as CPUTensor<Rank>, rate);
+    if (initialize) {
+      this.initialize(datasets[0].inputs.shape);
+    } else {
+      for (const layer of this.layers) {
+        layer.reset(1);
       }
+    }
+
+    let batch = 0
+    let loss = 0
+    iterate1D(epochs, (e: number) => {
+      iterate1D(datasets.length, (i: number) => {
+        this.feedForward(datasets[i].inputs as CPUTensor<Rank>);
+        loss += this.getCostLoss(datasets[i].outputs as CPUTensor<Rank>)
+        this.backpropagate(datasets[i].outputs as CPUTensor<Rank>, rate);
+        batch += 1
+        if (batch >= batches) {
+          batch = 0
+          loss /= batches
+          if (!this.silent) console.log(`Batch ${i + 1}/${datasets.length}, Loss ${loss}`);
+          loss = 0
+        }
+      })
+      if (!this.silent) console.log(`Epoch ${e + 1}/${epochs}`);
     });
   }
 
-  // getCostLoss(output: DataTypeArray) {
-  //   const { x, y } = this.output.output;
-  //   const cost = CPUMatrix.with(x, y);
-  //   for (const i in this.output.output.data) {
-  //     const activation = this.output.activationFn.prime(
-  //       this.output.output.data[i],
-  //     );
-  //     cost.data[i] = activation * this.costFn.prime(
-  //       output[i],
-  //       this.output.output.data[i],
-  //     );
-  //   }
-  //   return cost;
-  // }
+  getCostLoss(label: CPUTensor<Rank>) {
+    const output = this.output.output
+    return this.costFn.cost(output.data, label.data);
+  }
 
   predict(input: CPUTensor<Rank>) {
     for (const layer of this.layers) {
@@ -144,6 +152,8 @@ export class CPUBackend implements Backend {
           return ConvCPULayer.fromJSON(layer);
         case "pool":
           return PoolCPULayer.fromJSON(layer);
+        case "softmax":
+          return SoftmaxCPULayer.fromJSON(layer);
         default:
           throw new Error(
             `${

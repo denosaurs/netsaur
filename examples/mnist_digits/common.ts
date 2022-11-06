@@ -7,7 +7,7 @@ export function assert(condition: boolean, message?: string) {
   }
 }
 
-export function loadDataset(imagesFile: string, labelsFile: string) {
+export function loadDataset(imagesFile: string, labelsFile: string, start: number, end: number) {
   const images = Deno.readFileSync(new URL(imagesFile, import.meta.url));
   const labels = Deno.readFileSync(new URL(labelsFile, import.meta.url));
 
@@ -20,20 +20,37 @@ export function loadDataset(imagesFile: string, labelsFile: string) {
   const count = imageView.getUint32(4);
   assert(count === labelView.getUint32(4), "Image and label count mismatch");
 
-  const results: DataSet[] = [];
-
-  for (let i = 0; i < 5000; i++) {
-    const inputs = new Float32Array(784);
+  const inputs: Float32Array[] = [];
+  let mean = 0
+  let sd = 0
+  for (let i = 0; i < count; i++) {
+    const input = new Float32Array(784);
     for (let j = 0; j < 784; j++) {
-      inputs[j] = imageView.getUint8(16 + i * 784 + j) / 255;
+      input[j] = imageView.getUint8(16 + i * 784 + j);
+      mean += input[j]
+      sd += Math.pow(input[j], 2)
+    }
+    inputs.push(input)
+  }
+
+  mean /= count * 784
+  sd /= count * 784
+  sd -= Math.pow(mean, 2)
+  sd = Math.sqrt(sd)
+
+  const results: DataSet[] = [];
+  for (let i = start; i < end; i++) {
+    for (let j = 0; j < 784; j++) {
+      inputs[i][j] -= mean;
+      inputs[i][j] /= sd;
     }
 
     const outputs = new Float32Array(10);
     outputs[labelView.getUint8(8 + i)] = 1;
 
     results.push({
-      inputs: new Tensor(inputs, [28, 28, 1]),
-      outputs: new Tensor(outputs, [10, 1]),
+      inputs: new Tensor(inputs[i], [28, 28, 1, 1]),
+      outputs: new Tensor(outputs, [10]),
     });
   }
 

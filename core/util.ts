@@ -4,6 +4,8 @@ import {
   Rank,
   Shape,
   Shape2D,
+  Shape3D,
+  Shape4D,
   TensorLike,
   TypedArray,
 } from "./types.ts";
@@ -107,15 +109,19 @@ export const mse = (errors: Float32Array): number => {
 export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
   if (rank < shape.length) {
     const res = new Array(rank).fill(1);
-    res.forEach((_, i) => res[i] = shape[i]);
-    res[rank - 1] = 1;
-    for (let i = rank - 1; i < shape.length; i++) {
-      res[rank - 1] *= shape[i];
+    for (let i = 1; i < shape.length + 1; i++) {
+      if (i < rank) {
+        res[rank - i] = shape[shape.length - i]
+      } else {
+        res[0] *= shape[shape.length - i]
+      }
     }
     return res as Shape[R];
   } else if (rank > shape.length) {
     const res = new Array(rank).fill(1);
-    shape.map((val, i) => res[i] = val);
+    for (let i = 1; i < shape.length + 1; i++) {
+      res[rank - i] = shape[shape.length - i]
+    }
     return res as Shape[R];
   } else {
     return shape as Shape[R];
@@ -134,8 +140,38 @@ export function to3D(shape: Shape[Rank]) {
   return toShape(shape, Rank.R3)
 }
 
+export function iterate4D(
+  mat: Tensor<Rank, BackendType> | Shape[Rank],
+  callback: (i: number, j: number, k: number, l: number) => void,
+): void {
+  mat = (Array.isArray(mat) ? mat : mat.shape) as Shape4D;
+  for (let i = 0; i < mat[0]; i++) {
+    for (let j = 0; j < mat[1]; j++) {
+      for (let k = 0; k < mat[2]; k++) {
+        for (let l = 0; l < mat[3]; l++) {
+          callback(i, j, k, l);
+        }
+      }
+    }
+  }
+}
+
+export function iterate3D(
+  mat: Tensor<Rank, BackendType> | Shape[Rank],
+  callback: (i: number, j: number, k: number) => void,
+): void {
+  mat = (Array.isArray(mat) ? mat : mat.shape) as Shape3D;
+  for (let i = 0; i < mat[0]; i++) {
+    for (let j = 0; j < mat[1]; j++) {
+      for (let k = 0; k < mat[2]; k++) {
+        callback(i, j, k);
+      }
+    }
+  }
+}
+
 export function iterate2D(
-  mat: Tensor<Rank.R2, BackendType> | Shape2D,
+  mat: Tensor<Rank, BackendType> | Shape[Rank],
   callback: (i: number, j: number) => void,
 ): void {
   mat = (Array.isArray(mat) ? mat : mat.shape) as Shape2D;
@@ -402,19 +438,19 @@ export class Random {
 
   static gaussian(mean: number, standard_deviation = 1) {
     let y1, x1, x2, w;
-    if (Random.#previous_gaussian) {
-      y1 = Random.#y2;
-    } else {
-      do {
-        x1 = this.random(2) - 1;
-        x2 = this.random(2) - 1;
-        w = x1 * x1 + x2 * x2;
-      } while (w >= 1);
-      w = Math.sqrt(-2 * Math.log(w) / w);
-      y1 = x1 * w;
-      Random.#y2 = x2 * w;
-      Random.#previous_gaussian = true;
-    }
+    // if (Random.#previous_gaussian) {
+    //   y1 = Random.#y2;
+    // } else {
+    do {
+      x1 = this.random(2) - 1;
+      x2 = this.random(2) - 1;
+      w = x1 * x1 + x2 * x2;
+    } while (w >= 1);
+    w = Math.sqrt(-2 * Math.log(w) / w);
+    y1 = x1 * w;
+    //   Random.#y2 = x2 * w;
+    //   Random.#previous_gaussian = true;
+    // }
 
     const m = mean || 0;
     return y1 * standard_deviation + m;

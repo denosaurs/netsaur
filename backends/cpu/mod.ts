@@ -16,6 +16,7 @@ import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
 import * as kernels from "./kernels/mod.ts"
+import { SoftmaxCPULayer } from "./layers/softmax.ts";
 
 const loadBackend = (config: NetworkConfig): Backend => {
   return new CPUBackend(config);
@@ -28,11 +29,13 @@ const model = async (data: NetworkJSON, _silent = false): Promise<Backend> =>
 const dense = (config: DenseLayerConfig) => new DenseCPULayer(config);
 const conv = (config: ConvLayerConfig) => new ConvCPULayer(config);
 const pool = (config: PoolLayerConfig) => new PoolCPULayer(config);
+const softmax = () => new SoftmaxCPULayer();
 
 const layers = {
   dense,
   conv,
   pool,
+  softmax
 };
 
 const setup = (_silent = false) => {

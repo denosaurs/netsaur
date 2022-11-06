@@ -17,6 +17,7 @@ import {
   to1D,
   to2D,
   to3D,
+  toShape,
 } from "./util.ts";
 
 // NOTE: In development, avoid calling boilerplate-heavy methods such as Tensor.zeroes()
@@ -95,11 +96,15 @@ export class Tensor<R extends Rank, B extends BackendType> {
     //   index += indices[i] * this.shape[i - 1];
     // }
     // return index
-    if (indices.length == 2) {
-      return indices[0] + indices[1] * this.x;
-    } else {
-      return indices[0] + indices[1] * this.x + indices[2] * this.x * this.y;
+    switch (indices.length) {
+      case 2:
+        return indices[0] + indices[1] * this.x;
+      case 3:
+        return indices[0] + indices[1] * this.x + indices[2] * this.x * this.y;
+      default:
+        return indices[0] + indices[1] * this.x + indices[2] * this.x * this.y + indices[3] * this.x * this.y * this.z;
     }
+
   }
 
   async get(...indices: number[]) {
@@ -389,18 +394,11 @@ export function gpuZeroes2D(
 }
 
 export function toShape2D(shape: Shape[Rank]): Shape[Rank.R2] {
-  switch (shape.length) {
-    case 2:
-      return shape
-    case 3:
-      return [shape[0] * shape[1]!, shape[2]!]
-    default:
-      return [shape[0], 1]
-  }
+  return toShape(shape, Rank.R2);
 }
 
 export function toShape3D(shape: Shape[Rank]): Shape[Rank.R3] {
-  return shape.length == 3 ? shape : [shape[0], 1, shape[1]!];
+  return toShape(shape, Rank.R3);
 }
 
 export function reshape2D<B extends BackendType>(tensor: Tensor<Rank, B>) {
@@ -413,9 +411,32 @@ export function reshape3D<B extends BackendType>(tensor: Tensor<Rank, B>) {
   return res as Tensor<Rank.R3, B>;
 }
 
+export function cpuCloneZeroes(
+  tensor: Tensor<Rank, BackendType.CPU>,
+): Tensor<Rank, BackendType.CPU> {
+  const data = new Float32Array(tensor.data.length);
+  return new Tensor(data, tensor.shape);
+}
+
 export function cpuZeroes1D(
   shape: Shape[Rank.R1],
 ): Tensor<Rank.R1, BackendType.CPU> {
   const data = new Float32Array(shape[0]);
   return new Tensor(data.fill(0), shape);
+}
+
+export function cpuZeroes4D(
+  shape: Shape[Rank.R4],
+): Tensor<Rank.R4, BackendType.CPU> {
+  const data = new Float32Array(shape[0] * shape[1] * shape[2] * shape[3]);
+  return new Tensor(data.fill(0), shape);
+}
+
+export function toShape4D(shape: Shape[Rank]): Shape[Rank.R4] {
+  return toShape(shape, Rank.R4);
+}
+
+export function reshape4D<B extends BackendType>(tensor: Tensor<Rank, B>) {
+  const res = new Tensor(tensor.data, toShape4D(tensor.shape));
+  return res as Tensor<Rank.R4, B>;
 }

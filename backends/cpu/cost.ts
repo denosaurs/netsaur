@@ -18,14 +18,18 @@ export class CrossEntropy<T extends DataType = DataType>
   name = "crossentropy";
   cost(yHat: DataTypeArray<T>, y: DataTypeArray<T>) {
     let sum = 0;
+    // Binary Classification
+    // iterate1D(yHat.length, (i: number) => {
+    //   sum += -y * Math.log(yHat[i]) - (1 - y[i]) * Math.log(1 - yHat[i]);
+    // });
     iterate1D(yHat.length, (i: number) => {
-      sum += -y * Math.log(yHat[i]) - (1 - y[i]) * Math.log(1 - yHat[i]);
+      sum += yHat[i] * y[i];
     });
-    return sum;
+    return -Math.log(sum);
   }
 
   prime(yHat: number, y: number) {
-    return yHat - y;
+    return y - yHat;
   }
 }
 

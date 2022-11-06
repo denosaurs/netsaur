@@ -1,4 +1,3 @@
-import { CoreBackendOptions } from "https://raw.githubusercontent.com/denosaurs/neo/e7f602cd218fbdb7418e0fca9ac4aba8d6c22d08/backend/core/core.ts";
 import { Engine } from "../../core/engine.ts";
 import { Tensor } from "../../core/tensor.ts";
 import {

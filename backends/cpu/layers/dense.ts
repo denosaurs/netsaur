@@ -13,6 +13,7 @@ import {
   Shape,
   Shape1D,
 } from "../../../core/types.ts";
+import { Random } from "../../../core/util.ts";
 import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 import { CPUCostFunction, CrossEntropy } from "../cost.ts";
 import { CPUMatrix } from "../kernels/matrix.ts";
@@ -48,9 +49,9 @@ export class DenseCPULayer {
   initialize(inputShape: Shape[Rank]) {
     const shape = toShape2D(inputShape);
     this.weights = cpuZeroes2D([this.outputSize[0], shape[0]]);
-    this.weights.data = this.weights.data.map(() => Math.random() * 2 - 1);
+    this.weights.data = this.weights.data.map(() => Random.gaussian(0) * 0.01);
     this.biases = cpuZeroes2D([this.outputSize[0], 1]);
-    this.biases.data = this.biases.data.map(() => Math.random() * 2 - 1);
+    this.biases.data = this.biases.data.map(() => 0);
     this.reset(shape[1]);
   }
 
@@ -79,15 +80,16 @@ export class DenseCPULayer {
       const activation = this.activationFn.prime(this.sum.data[i]);
       cost.data[i] = this.error.data[i] * activation;
     }
+    const dInput = CPUMatrix.dot(this.error, CPUMatrix.transpose(this.weights))
     const weightsDelta = CPUMatrix.dot(CPUMatrix.transpose(this.input), cost);
     for (const i in weightsDelta.data) {
-      this.weights.data[i] += weightsDelta.data[i] * rate;
+      this.weights.data[i] -= weightsDelta.data[i] * rate;
     }
     for (let i = 0, j = 0; i < this.error.data.length; i++, j++) {
       if (j >= this.biases.x) j = 0;
-      this.biases.data[j] += cost.data[i] * rate;
+      this.biases.data[j] -= cost.data[i] * rate;
     }
-    return CPUMatrix.dot(this.error, CPUMatrix.transpose(this.weights))
+    return dInput
   }
 
   async toJSON() {

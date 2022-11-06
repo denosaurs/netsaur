@@ -6,15 +6,22 @@ import {
   Rank,
   Shape,
   Shape2D,
+  Shape3D,
+  Shape4D,
 } from "../../../core/types.ts";
-import { iterate1D, iterate2D } from "../../../core/util.ts";
+import {
+  iterate1D,
+  iterate2D,
+  iterate3D,
+  iterate4D,
+  Random,
+} from "../../../core/util.ts";
 import {
   cpuZeroes1D,
-  cpuZeroes2D,
-  cpuZeroes3D,
-  reshape3D,
+  cpuZeroes4D,
+  reshape4D,
   Tensor,
-  toShape3D,
+  toShape4D,
 } from "../../../mod.ts";
 import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 
@@ -26,59 +33,60 @@ import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
  */
 export class ConvCPULayer {
   config: ConvLayerConfig;
-  outputSize!: Shape2D;
-  paddedSize!: Shape2D;
+  outputSize!: Shape3D;
+  paddedSize!: Shape3D;
   padding: number;
   strides: Shape2D;
   activationFn: CPUActivationFn = new Sigmoid();
 
-  input!: CPUTensor<Rank.R3>;
-  kernel!: CPUTensor<Rank.R2>;
-  padded!: CPUTensor<Rank.R3>;
+  input!: CPUTensor<Rank.R4>;
+  kernel!: CPUTensor<Rank.R4>;
+  padded!: CPUTensor<Rank.R4>;
   biases!: CPUTensor<Rank.R1>;
-  sum!: CPUTensor<Rank.R3>;
-  error!: CPUTensor<Rank.R3>;
-  output!: CPUTensor<Rank.R3>;
+  sum!: CPUTensor<Rank.R4>;
+  error!: CPUTensor<Rank.R4>;
+  output!: CPUTensor<Rank.R4>;
 
   constructor(config: ConvLayerConfig) {
     this.config = config;
     if (config.kernel) {
       this.kernel = new Tensor(config.kernel, config.kernelSize);
     } else {
-      this.kernel = cpuZeroes2D(config.kernelSize);
+      this.kernel = cpuZeroes4D(config.kernelSize);
     }
     this.padding = config.padding || 0;
-    this.strides = config.strides || [2, 2];
+    this.strides = config.strides || [1, 1];
     this.setActivation(config.activation ?? "linear");
   }
 
   reset(batches: number) {
-    const [wp, hp] = this.paddedSize;
-    const [wo, ho] = this.outputSize;
-    this.sum = cpuZeroes3D([wo, ho, batches]);
-    this.output = cpuZeroes3D([wo, ho, batches]);
+    const [wp, hp, c] = this.paddedSize;
+    const [wo, ho, f] = this.outputSize;
+    this.sum = cpuZeroes4D([wo, ho, f, batches]);
+    this.output = cpuZeroes4D([wo, ho, f, batches]);
     if (this.padding > 0) {
       const data = new Float32Array(wp * hp * batches).fill(0);
-      this.padded = new Tensor(data, [wp, hp, batches]);
+      this.padded = new Tensor(data, [wp, hp, c, batches]);
     }
   }
 
   initialize(inputSize: Shape[Rank]) {
-    const size = toShape3D(inputSize);
+    const size = toShape4D(inputSize);
     const wp = size[0] + 2 * this.padding;
     const hp = size[1] + 2 * this.padding;
-    this.paddedSize = [wp, hp];
+    this.paddedSize = [wp, hp, size[2]];
     if (!this.config.kernel) {
-      this.kernel.data = this.kernel.data.map(() => Math.random() * 2 - 1);
+      const sd = Math.sqrt(1 / (size[2] * this.kernel.x * this.kernel.y));
+      this.kernel.data = this.kernel.data.map(() => Random.gaussian(0, sd));
     }
     const wo = 1 + Math.floor((wp - this.kernel.x) / this.strides[0]);
     const ho = 1 + Math.floor((hp - this.kernel.y) / this.strides[1]);
-    this.biases = cpuZeroes1D([1]);
+    this.biases = cpuZeroes1D([this.kernel.shape[3]]);
     if (!this.config.unbiased) {
-      this.biases.data = this.biases.data.map(() => 0.1);
+      this.biases.data = this.biases.data.map(() => 0);
     }
-    this.outputSize = [wo, ho];
-    this.reset(size[2]);
+    this.outputSize = [wo, ho, this.kernel.shape[3]];
+    this.reset(size[3]);
   }
 
   setActivation(activation: Activation) {
@@ -86,59 +94,75 @@ export class ConvCPULayer {
   }
 
   feedForward(inputTensor: CPUTensor<Rank>): CPUTensor<Rank> {
-    this.input = reshape3D(inputTensor);
+    this.input = reshape4D(inputTensor);
     if (this.padding > 0) {
-      iterate1D(this.input.z, (z: number) => {
-        iterate2D([this.input.x, this.input.y], (x: number, y: number) => {
-          const idx = this.padded.index(this.padding + x, this.padding + y, z);
-          this.padded.data[idx] = this.input.data[this.input.index(x, y, z)];
-        });
+      iterate4D(this.input, (x, y, z, w) => {
+        const idx = this.padded.index(this.padding + x, this.padding + y, z, w);
+        this.padded.data[idx] = this.input.data[this.input.index(x, y, z, w)];
       });
     } else {
       this.padded = this.input;
     }
-    iterate1D(this.input.z, (z: number) => {
-      iterate2D([this.output.x, this.output.y], (x: number, y: number) => {
-        let sum = this.biases.data[0];
-        iterate2D(this.kernel, (i: number, j: number) => {
-          const w = x * this.strides[0] + i;
-          const h = y * this.strides[1] + j;
-          const k = this.padded.index(w, h, z);
-          const l = j * this.kernel.x + i;
-          sum += this.padded.data[k] * this.kernel.data[l];
-        });
-        const idx = this.output.index(x, y, z);
-        this.sum.data[idx] = sum;
-        this.output.data[idx] = this.activationFn.activate(sum);
+    iterate4D(this.output, (x, y, z, w) => {
+      let sum = this.biases.data[0];
+      iterate3D(this.kernel, (i, j, k) => {
+        const W = x * this.strides[0] + i;
+        const H = y * this.strides[1] + j;
+        const P = this.padded.index(W, H, k, w);
+        const K = this.kernel.index(i, j, k, z);
+        sum += this.padded.data[P] * this.kernel.data[K];
       });
+      const idx = this.output.index(x, y, z, w);
+      this.sum.data[idx] = sum;
+      this.output.data[idx] = this.activationFn.activate(sum);
     });
     return this.output;
   }
 
   backPropagate(errorTensor: CPUTensor<Rank>, rate: number) {
-    this.error = reshape3D(errorTensor);
-    const cost = cpuZeroes3D(this.error.shape);
+    this.error = reshape4D(errorTensor);
+    const cost = cpuZeroes4D(this.error.shape);
     for (const i in cost.data) {
       const activation = this.activationFn.prime(this.sum.data[i]);
       cost.data[i] = this.error.data[i] * activation;
     }
-    iterate1D(this.input.z, (z: number) => {
-      iterate2D(this.kernel, (x: number, y: number) => {
-        let sum = 0;
-        iterate2D([cost.x, cost.y], (i: number, j: number) => {
-          const w = x * this.strides[0] + i;
-          const h = y * this.strides[1] + j;
-          const k = this.padded.index(w, h, z);
-          const l = cost.index(i, j, z);
-          sum += this.padded.data[k] * cost.data[l];
-        });
-        const idx = y * this.kernel.x + x;
-        this.kernel.data[idx] += sum * rate;
-      });
+    const dInput = cpuZeroes4D(this.padded.shape);
+    iterate4D(dInput, (x, y, z, w) => {
       let sum = 0;
-      iterate1D(cost.x * cost.y, (i) => sum += cost.data[i]);
-      this.biases.data[0] -= sum * rate;
+      iterate3D(cost, (i, j, k) => {
+        const W = x * this.strides[0] + i;
+        const H = y * this.strides[1] + j;
+        if (W >= 0 && H >= 0 && W < this.kernel.x && H < this.kernel.x) {
+          const K = this.kernel.index(H, W, z, k);
+          const C = cost.index(i, j, k, w);
+          sum += this.kernel.data[K] * cost.data[C];
+        }
+      });
+      const idx = dInput.index(x, y, z, w);
+      dInput.data[idx] = sum;
     });
+    iterate1D(cost.w, (b) => {
+      iterate4D(this.kernel, (x, y, z, w) => {
+        let sum = 0;
+        iterate2D([cost.x, cost.y], (i, j) => {
+          const W = x * this.strides[0] + i;
+          const H = y * this.strides[1] + j;
+          const P = this.padded.index(W, H, z, b);
+          const C = cost.index(i, j, w, b);
+          sum += this.padded.data[P] * cost.data[C];
+        });
+        const idx = this.kernel.index(x, y, z, w);
+        this.kernel.data[idx] -= sum * rate;
+      });
+    });
+    iterate1D(cost.z, (z) => {
+      let sum = 0;
+      iterate3D([cost.x, cost.y, cost.w], (x, y, w) => {
+        sum += cost.data[cost.index(x, y, z, w)];
+      });
+      this.biases.data[z] -= sum * rate;
+    });
+    return dInput;
   }
 
   async toJSON() {
@@ -150,11 +174,12 @@ export class ConvCPULayer {
       strides: this.strides,
       paddedSize: this.paddedSize,
       padding: this.padding,
+      activationFn: this.activationFn
     };
   }
 
   static fromJSON(
-    { outputSize, kernel, type, biases, strides, padding, paddedSize }:
+    { outputSize, kernel, type, biases, strides, padding, paddedSize, activationFn }:
       LayerJSON,
   ): ConvCPULayer {
     if (type !== "conv") {
@@ -168,12 +193,13 @@ export class ConvCPULayer {
       throw new Error("Layer imported must be initialized");
     }
     const layer = new ConvCPULayer({
-      kernelSize: kernel.shape as Shape2D,
+      kernelSize: kernel.shape as Shape4D,
       padding,
       strides: strides as Shape2D,
+      activation: activationFn as Activation
     });
-    layer.paddedSize = paddedSize as Shape2D;
-    layer.outputSize = outputSize as Shape2D;
+    layer.paddedSize = paddedSize as Shape3D;
+    layer.outputSize = outputSize as Shape3D;
     layer.kernel = Tensor.fromJSON(kernel);
     layer.biases = Tensor.fromJSON(biases);
     return layer;
