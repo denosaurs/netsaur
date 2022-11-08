@@ -14,14 +14,14 @@ import type {
 } from "../../core/types.ts";
 import { CrossEntropy, GPUCostFunction, Hinge } from "./cost.ts";
 import {
-  DataType,
   DataTypeArray,
   WebGPUBackend,
 } from "../../deps.ts";
 import { GPUInstance } from "./mod.ts";
 import { Tensor, toData } from "../../mod.ts";
+import { flatten } from "../../core/util.ts";
 
-export class GPUBackend<T extends DataType = DataType> implements Backend {
+export class GPUBackend implements Backend {
   input?: Shape[Rank];
   layers: GPULayer[] = [];
   output: GPULayer;
@@ -112,7 +112,7 @@ export class GPUBackend<T extends DataType = DataType> implements Backend {
   // }
 
   async predict(data: DataTypeArray) {
-    const gpuData = toData(data as Float32Array) as TensorData[BackendType.GPU];
+    const gpuData = toData(flatten(data as Float32Array)) as TensorData[BackendType.GPU];
     const input = new Tensor<Rank, BackendType.GPU>(gpuData, [data.length, 1]);
     this.layers.forEach((layer) => layer.reset(1));
 

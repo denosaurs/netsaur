@@ -12,15 +12,15 @@ const network = new NeuralNetwork({
     ConvLayer({ kernelSize: [5, 5, 6, 16], activation: "relu" }),
     PoolLayer({ strides: [2, 2] }),
     ConvLayer({ kernelSize: [5, 5, 16, 120], activation: "relu" }),
-    DenseLayer({ size: [84], activation: "relu" }),
-    DenseLayer({ size: [10], activation: "linear" }),
+    DenseLayer({ size: [84], activation: "relu", init: "kaiming" }),
+    DenseLayer({ size: [10], activation: "linear", init: "kaiming" }),
     Softmax()
   ],
   cost: "crossentropy",
 });
 
 console.log("Loading training dataset...");
-const trainSet = loadDataset("train-images.idx", "train-labels.idx", 0, 10000);
+const trainSet = loadDataset("train-images.idx", "train-labels.idx", 0, 1000);
 
 const epochs = 1;
 console.log("Training (" + epochs + " epochs)...");

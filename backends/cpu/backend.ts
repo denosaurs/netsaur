@@ -126,6 +126,7 @@ export class CPUBackend implements Backend {
   }
 
   predict(input: CPUTensor<Rank>) {
+    input.shape.push(1)
     for (const layer of this.layers) {
       layer.reset(1);
     }

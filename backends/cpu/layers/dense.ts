@@ -1,3 +1,4 @@
+import { setInit, Xavier } from "../../../core/init.ts";
 import {
   cpuZeroes2D,
   reshape2D,
@@ -8,14 +9,14 @@ import {
   Activation,
   CPUTensor,
   DenseLayerConfig,
+  InitFn,
   LayerJSON,
   Rank,
   Shape,
   Shape1D,
+  Shape2D,
 } from "../../../core/types.ts";
-import { Random } from "../../../core/util.ts";
 import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
-import { CPUCostFunction, CrossEntropy } from "../cost.ts";
 import { CPUMatrix } from "../kernels/matrix.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
@@ -27,7 +28,7 @@ import { CPUMatrix } from "../kernels/matrix.ts";
 export class DenseCPULayer {
   outputSize: Shape1D;
   activationFn: CPUActivationFn = new Sigmoid();
-  costFunction: CPUCostFunction = new CrossEntropy();
+  init: InitFn = new Xavier();
 
   input!: CPUTensor<Rank.R2>;
   weights!: CPUTensor<Rank.R2>;
@@ -38,7 +39,8 @@ export class DenseCPULayer {
 
   constructor(config: DenseLayerConfig) {
     this.outputSize = config.size;
-    this.setActivation(config.activation || "linear");
+    this.activationFn = setActivation(config.activation || "linear");
+    this.init = setInit(config.init || "xavier")
   }
 
   reset(batches: number) {
@@ -48,15 +50,10 @@ export class DenseCPULayer {
 
   initialize(inputShape: Shape[Rank]) {
     const shape = toShape2D(inputShape);
-    this.weights = cpuZeroes2D([this.outputSize[0], shape[0]]);
-    this.weights.data = this.weights.data.map(() => Random.gaussian(0) * 0.01);
+    const weights = [this.outputSize[0], shape[0]] as Shape2D
+    this.weights = this.init.init([shape[0]], weights, this.outputSize)
     this.biases = cpuZeroes2D([this.outputSize[0], 1]);
-    this.biases.data = this.biases.data.map(() => 0);
     this.reset(shape[1]);
-  }
-
-  setActivation(activation: Activation) {
-    this.activationFn = setActivation(activation);
   }
 
   feedForward(inputTensor: CPUTensor<Rank>): CPUTensor<Rank> {
@@ -96,7 +93,6 @@ export class DenseCPULayer {
     return {
       outputSize: this.outputSize,
       activationFn: this.activationFn.name,
-      costFn: this.costFunction.name,
       type: "dense",
       weights: await this.weights.toJSON(),
       biases: await this.biases.toJSON(),

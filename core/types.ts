@@ -78,11 +78,13 @@ export type CPULayer = ConvCPULayer | DenseCPULayer | PoolCPULayer | SoftmaxCPUL
 export type GPULayer = DenseGPULayer;
 
 export interface DenseLayerConfig {
+  init?: Init;
   size: Shape1D;
   activation?: Activation;
 }
 
 export interface ConvLayerConfig {
+  init?: Init;
   activation?: Activation;
   kernel?: DataTypeArray;
   kernelSize: Shape4D;
@@ -181,4 +183,14 @@ export interface TensorData {
   cpu: DataTypeArray,
   gpu: WebGPUData,
   native: Matrix<"f32">
+}
+
+export type Init = "xavier" | "xaviern" | "kaiming"
+
+export interface InitFn {
+  init<R extends Rank, B extends BackendType>(
+    input: Shape[Rank],
+    weights: Shape[R],
+    outputs: Shape[Rank],
+  ): Tensor<R, B>
 }

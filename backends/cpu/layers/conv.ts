@@ -1,7 +1,9 @@
+import { setInit, Kaiming } from "../../../core/init.ts";
 import {
   Activation,
   ConvLayerConfig,
   CPUTensor,
+  InitFn,
   LayerJSON,
   Rank,
   Shape,
@@ -14,7 +16,6 @@ import {
   iterate2D,
   iterate3D,
   iterate4D,
-  Random,
 } from "../../../core/util.ts";
 import {
   cpuZeroes1D,
@@ -34,10 +35,12 @@ import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 export class ConvCPULayer {
   config: ConvLayerConfig;
   outputSize!: Shape3D;
+  kernelSize: Shape4D;
   paddedSize!: Shape3D;
   padding: number;
   strides: Shape2D;
   activationFn: CPUActivationFn = new Sigmoid();
+  init: InitFn = new Kaiming();
 
   input!: CPUTensor<Rank.R4>;
   kernel!: CPUTensor<Rank.R4>;
@@ -49,14 +52,11 @@ export class ConvCPULayer {
 
   constructor(config: ConvLayerConfig) {
     this.config = config;
-    if (config.kernel) {
-      this.kernel = new Tensor(config.kernel, config.kernelSize);
-    } else {
-      this.kernel = cpuZeroes4D(config.kernelSize);
-    }
     this.padding = config.padding || 0;
     this.strides = config.strides || [1, 1];
-    this.setActivation(config.activation ?? "linear");
+    this.kernelSize = config.kernelSize;
+    this.activationFn = setActivation(config.activation || "linear");
+    this.init = setInit(config.init || "kaiming")
   }
 
   reset(batches: number) {
@@ -75,22 +75,15 @@ export class ConvCPULayer {
     const wp = size[0] + 2 * this.padding;
     const hp = size[1] + 2 * this.padding;
     this.paddedSize = [wp, hp, size[2]];
-    if (!this.config.kernel) {
-      const sd = Math.sqrt(1 / (size[2] * this.kernel.x * this.kernel.y));
-      this.kernel.data = this.kernel.data.map(() => Random.gaussian(0, sd));
-    }
-    const wo = 1 + Math.floor((wp - this.kernel.x) / this.strides[0]);
-    const ho = 1 + Math.floor((hp - this.kernel.y) / this.strides[1]);
-    this.biases = cpuZeroes1D([this.kernel.shape[3]]);
-    if (!this.config.unbiased) {
-      this.biases.data = this.biases.data.map(() => 0);
-    }
-    this.outputSize = [wo, ho, this.kernel.shape[3]];
+    const wo = 1 + Math.floor((wp - this.kernelSize[0]) / this.strides[0]);
+    const ho = 1 + Math.floor((hp - this.kernelSize[1]) / this.strides[1]);
+    this.outputSize = [wo, ho, this.kernelSize[3]];
+    const inputShape = [size[0], size[1], size[2]] as Shape3D
+    this.kernel = this.config.kernel 
+      ? new Tensor(this.config.kernel, this.kernelSize)
+      : this.init.init(inputShape, this.kernelSize, this.outputSize)
+    this.biases = cpuZeroes1D([this.kernelSize[3]]);
     this.reset(size[3]);
-  }
-
-  setActivation(activation: Activation) {
-    this.activationFn = setActivation(activation);
   }
 
   feedForward(inputTensor: CPUTensor<Rank>): CPUTensor<Rank> {
@@ -174,7 +167,7 @@ export class ConvCPULayer {
       strides: this.strides,
       paddedSize: this.paddedSize,
       padding: this.padding,
-      activationFn: this.activationFn
+      activationFn: this.activationFn.name
     };
   }
 

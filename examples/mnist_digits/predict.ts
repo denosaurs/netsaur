@@ -6,7 +6,7 @@ import { loadDataset } from "./common.ts";
 
 await setupBackend(CPU)
 
-const network = CPUBackend.load("digit_model1.json");
+const network = CPUBackend.load("digit_model.json");
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx", 0, 1000);
 
