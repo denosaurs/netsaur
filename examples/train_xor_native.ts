@@ -2,42 +2,35 @@ import { NeuralNetwork, DenseLayer, tensor2D, tensor1D, setupBackend } from "../
 import { Native } from "../backends/native/mod.ts";
 
 await setupBackend(Native);
-const start = performance.now();
 
-const network = new NeuralNetwork({
-  input: 2,
+const net = new NeuralNetwork({
+  silent: true,
   layers: [
-    DenseLayer({ size: 3, activation: "sigmoid" }),
-    DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: [3], activation: "sigmoid" }),
+    DenseLayer({ size: [1], activation: "sigmoid" }),
   ],
   cost: "crossentropy",
 });
 
-network.train(
+const time = performance.now();
+
+await net.train(
   [
     {
-      inputs: await tensor2D([
+      inputs: tensor2D([
         [0, 0],
-        [0, 1],
         [1, 0],
+        [0, 1],
         [1, 1],
       ]),
-      outputs: await tensor1D([0, 1, 1, 0]),
+      outputs: tensor1D([0, 1, 1, 0]),
     },
   ],
   5000,
-  0.1,
 );
 
-console.log("training time", performance.now() - start, "milliseconds");
-
-console.log(
-  await network.predict(
-    await tensor2D([
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [1, 1],
-    ]),
-  ),
-);
+console.log(`training time: ${performance.now() - time}ms`);
+console.log((await net.predict(tensor1D([0, 0]))).data);
+console.log((await net.predict(tensor1D([1, 0]))).data);
+console.log((await net.predict(tensor1D([0, 1]))).data);
+console.log((await net.predict(tensor1D([1, 1]))).data);
