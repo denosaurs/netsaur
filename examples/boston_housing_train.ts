@@ -20,7 +20,7 @@ const data = await Data.csv(
 const network = new NeuralNetwork({
   input: [data.inputs.cols, 1],
   layers: [
-    DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: [1], activation: "sigmoid" }),
   ],
   cost: "mse",
 });
