@@ -10,13 +10,12 @@ import {
 } from "../../core/types.ts";
 import { Layer } from "../../layers/mod.ts";
 import { Tensor } from "../../mod.ts";
-
 import { CPUBackend } from "./backend.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
 import * as kernels from "./kernels/mod.ts"
-import { SoftmaxCPULayer } from "./layers/softmax.ts";
+import { ReluCPULayer, SigmoidCPULayer, SoftmaxCPULayer, TanhCPULayer } from "./layers/activation.ts";
 
 const loadBackend = (config: NetworkConfig): Backend => {
   return new CPUBackend(config);
@@ -30,12 +29,18 @@ const dense = (config: DenseLayerConfig) => new DenseCPULayer(config);
 const conv = (config: ConvLayerConfig) => new ConvCPULayer(config);
 const pool = (config: PoolLayerConfig) => new PoolCPULayer(config);
 const softmax = () => new SoftmaxCPULayer();
+const sigmoid = () => new SigmoidCPULayer();
+const tanh = () => new TanhCPULayer();
+const relu = () => new ReluCPULayer();
 
 const layers = {
   dense,
   conv,
   pool,
-  softmax
+  softmax,
+  sigmoid,
+  tanh,
+  relu
 };
 
 const setup = (_silent = false) => {

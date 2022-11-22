@@ -1,6 +1,3 @@
-import { ConvCPULayer } from "../backends/cpu/layers/conv.ts";
-import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
-import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
 import {
   ConvLayerConfig,
   DenseLayerConfig,
@@ -9,11 +6,7 @@ import {
 
 export class Layer {
   // deno-lint-ignore no-explicit-any
-  static layers: any = {
-    dense: (config: DenseLayerConfig) => new DenseCPULayer(config),
-    conv: (config: ConvLayerConfig) => new ConvCPULayer(config),
-    pool: (config: PoolLayerConfig) => new PoolCPULayer(config),
-  };
+  static layers: any = {};
 }
 
 export function DenseLayer(config: DenseLayerConfig) {
@@ -36,9 +29,60 @@ export function PoolLayer(config: PoolLayerConfig) {
   return Layer.layers.pool(config);
 }
 
-export function Softmax() {
+export function SoftmaxLayer() {
   if (Layer.layers.softmax === undefined) {
     throw new Error("Current backend does not support softmax layers");
   }
   return Layer.layers.softmax();
 }
+
+export function SigmoidLayer() {
+  if (Layer.layers.sigmoid === undefined) {
+    throw new Error("Current backend does not support softmax layers");
+  }
+  return Layer.layers.sigmoid();
+}
+
+export function LeakyReluLayer() {
+  if (Layer.layers.softmax === undefined) {
+    throw new Error("Current backend does not support softmax layers");
+  }
+  return Layer.layers.softmax();
+}
+
+export function TanhLayer() {
+  if (Layer.layers.softmax === undefined) {
+    throw new Error("Current backend does not support softmax layers");
+  }
+  return Layer.layers.tanh();
+}
+
+export function ReluLayer() {
+  if (Layer.layers.softmax === undefined) {
+    throw new Error("Current backend does not support softmax layers");
+  }
+  return Layer.layers.relu();
+}
+
+export function Relu6Layer() {
+  if (Layer.layers.softmax === undefined) {
+    throw new Error("Current backend does not support softmax layers");
+  }
+  return Layer.layers.softmax();
+}
+
+export function EluLayer() {
+  if (Layer.layers.softmax === undefined) {
+    throw new Error("Current backend does not support softmax layers");
+  }
+  return Layer.layers.softmax();
+}
+
+export function SeluLayer() {
+  if (Layer.layers.softmax === undefined) {
+    throw new Error("Current backend does not support softmax layers");
+  }
+  return Layer.layers.softmax();
+}
+
+

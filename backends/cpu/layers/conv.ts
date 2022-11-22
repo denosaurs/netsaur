@@ -24,7 +24,7 @@ import {
   Tensor,
   toShape4D,
 } from "../../../mod.ts";
-import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
+// import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
@@ -33,20 +33,19 @@ import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
  * Convolutional 2D layer.
  */
 export class ConvCPULayer {
+  type = "conv"
   config: ConvLayerConfig;
   outputSize!: Shape3D;
   kernelSize: Shape4D;
   paddedSize!: Shape3D;
   padding: number;
   strides: Shape2D;
-  activationFn: CPUActivationFn = new Sigmoid();
   init: InitFn = new Kaiming();
 
   input!: CPUTensor<Rank.R4>;
   kernel!: CPUTensor<Rank.R4>;
   padded!: CPUTensor<Rank.R4>;
   biases!: CPUTensor<Rank.R1>;
-  sum!: CPUTensor<Rank.R4>;
   error!: CPUTensor<Rank.R4>;
   output!: CPUTensor<Rank.R4>;
 
@@ -55,14 +54,12 @@ export class ConvCPULayer {
     this.padding = config.padding || 0;
     this.strides = config.strides || [1, 1];
     this.kernelSize = config.kernelSize;
-    this.activationFn = setActivation(config.activation || "linear");
     this.init = setInit(config.init || "kaiming")
   }
 
   reset(batches: number) {
     const [wp, hp, c] = this.paddedSize;
     const [wo, ho, f] = this.outputSize;
-    this.sum = cpuZeroes4D([wo, ho, f, batches]);
     this.output = cpuZeroes4D([wo, ho, f, batches]);
     if (this.padding > 0) {
       const data = new Float32Array(wp * hp * batches).fill(0);
@@ -106,19 +103,13 @@ export class ConvCPULayer {
         sum += this.padded.data[P] * this.kernel.data[K];
       });
       const idx = this.output.index(x, y, z, w);
-      this.sum.data[idx] = sum;
-      this.output.data[idx] = this.activationFn.activate(sum);
+      this.output.data[idx] = sum;
     });
     return this.output;
   }
 
   backPropagate(errorTensor: CPUTensor<Rank>, rate: number) {
-    this.error = reshape4D(errorTensor);
-    const cost = cpuZeroes4D(this.error.shape);
-    for (const i in cost.data) {
-      const activation = this.activationFn.prime(this.sum.data[i]);
-      cost.data[i] = this.error.data[i] * activation;
-    }
+    const cost = reshape4D(errorTensor);
     const dInput = cpuZeroes4D(this.padded.shape);
     iterate4D(dInput, (x, y, z, w) => {
       let sum = 0;
@@ -161,13 +152,12 @@ export class ConvCPULayer {
   async toJSON() {
     return {
       outputSize: this.outputSize,
-      type: "conv",
+      type: this.type,
       kernel: await this.kernel.toJSON(),
       biases: await this.biases.toJSON(),
       strides: this.strides,
       paddedSize: this.paddedSize,
-      padding: this.padding,
-      activationFn: this.activationFn.name
+      padding: this.padding
     };
   }
 

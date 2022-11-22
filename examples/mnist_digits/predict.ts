@@ -9,6 +9,7 @@ await setupBackend(CPU)
 const network = CPUBackend.load("digit_model.json");
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx", 0, 1000);
+testSet.map((_, i) => testSet[i].inputs.shape = [28, 28, 1])
 
 function argmax(mat: CPUTensor<Rank>) {
   let max = -Infinity;

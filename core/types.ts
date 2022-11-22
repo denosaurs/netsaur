@@ -5,10 +5,10 @@ import { DenseGPULayer } from "../backends/gpu/layers/dense.ts";
 import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
 import { Tensor } from "./tensor.ts";
 import { Matrix } from "../backends/native/matrix.ts";
-import { SoftmaxCPULayer } from "../backends/cpu/layers/softmax.ts";
+import { SoftmaxCPULayer } from "../backends/cpu/layers/activation.ts";
 
 export interface LayerJSON {
-  outputSize: Shape[Rank];
+  outputSize?: Shape[Rank];
   activationFn?: string;
   costFn?: string;
   type: string;
@@ -23,7 +23,6 @@ export interface LayerJSON {
 
 export interface NetworkJSON {
   costFn?: string;
-  sizes: Shape[Rank][];
   input: Shape[Rank] | undefined;
   layers: LayerJSON[];
 }
@@ -185,7 +184,7 @@ export interface TensorData {
   native: Matrix<"f32">
 }
 
-export type Init = "xavier" | "xaviern" | "kaiming"
+export type Init = "uniform" | "xavier" | "xaviern" | "kaiming"
 
 export interface InitFn {
   init<R extends Rank, B extends BackendType>(

@@ -6,14 +6,17 @@ import {
   tensor2D,
 } from "../mod.ts";
 import { CPU } from "../backends/cpu/mod.ts";
+import { SigmoidLayer } from "../layers/mod.ts";
 
 await setupBackend(CPU);
 
 const net = new NeuralNetwork({
   silent: true,
   layers: [
-    DenseLayer({ size: [3], activation: "sigmoid" }),
-    DenseLayer({ size: [1], activation: "sigmoid" }),
+    DenseLayer({ size: [3] }),
+    SigmoidLayer(),
+    DenseLayer({ size: [1] }),
+    SigmoidLayer(),
   ],
   cost: "crossentropy",
 });
@@ -32,7 +35,7 @@ await net.train(
       outputs: tensor1D([0, 1, 1, 0]),
     },
   ],
-  5000,
+  10000,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);

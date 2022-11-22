@@ -15,7 +15,7 @@ import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
 import { cpuZeroes2D } from "../../mod.ts";
-import { SoftmaxCPULayer } from "./layers/softmax.ts";
+import { ReluCPULayer, SigmoidCPULayer, SoftmaxCPULayer, TanhCPULayer } from "./layers/activation.ts";
 
 type OutputLayer = DenseCPULayer;
 
@@ -59,9 +59,7 @@ export class CPUBackend implements Backend {
     this.layers[0]?.initialize(shape);
 
     for (let i = 1; i < this.layers.length; i++) {
-      const current = this.layers[i];
-      const previous = this.layers[i - 1];
-      current.initialize(previous.output.shape);
+      this.layers[i].initialize(this.layers[i - 1].output.shape);
     }
   }
 
@@ -136,7 +134,6 @@ export class CPUBackend implements Backend {
   async toJSON() {
     return {
       costFn: this.costFn.name,
-      sizes: this.layers.map((layer) => layer.outputSize),
       input: this.input,
       layers: await Promise.all(
         this.layers.map(async (layer) => await layer.toJSON()),
@@ -155,6 +152,12 @@ export class CPUBackend implements Backend {
           return PoolCPULayer.fromJSON(layer);
         case "softmax":
           return SoftmaxCPULayer.fromJSON(layer);
+        case "sigmoid":
+          return SigmoidCPULayer.fromJSON(layer);
+        case "tanh":
+          return TanhCPULayer.fromJSON(layer);
+        case "relu":
+          return ReluCPULayer.fromJSON(layer);
         default:
           throw new Error(
             `${
@@ -168,7 +171,7 @@ export class CPUBackend implements Backend {
       layers: [],
       cost: data.costFn! as Cost,
     });
-    backend.layers = layers
+    backend.layers = layers as CPULayer[]
     backend.output = layers.at(-1) as DenseCPULayer
     return backend;
   }
