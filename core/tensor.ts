@@ -102,9 +102,9 @@ export class Tensor<R extends Rank, B extends BackendType> {
       case 3:
         return indices[0] + indices[1] * this.x + indices[2] * this.x * this.y;
       default:
-        return indices[0] + indices[1] * this.x + indices[2] * this.x * this.y + indices[3] * this.x * this.y * this.z;
+        return indices[0] + indices[1] * this.x + indices[2] * this.x * this.y +
+          indices[3] * this.x * this.y * this.z;
     }
-
   }
 
   async get(...indices: number[]) {

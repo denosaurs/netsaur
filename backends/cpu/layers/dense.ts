@@ -24,7 +24,7 @@ import { CPUMatrix } from "../kernels/matrix.ts";
  * Regular Dense Layer
  */
 export class DenseCPULayer {
-  type = "dense"
+  type = "dense";
   outputSize: Shape1D;
   init: InitFn = new Xavier();
 

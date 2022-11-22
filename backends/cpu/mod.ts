@@ -14,8 +14,13 @@ import { CPUBackend } from "./backend.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
-import * as kernels from "./kernels/mod.ts"
-import { ReluCPULayer, SigmoidCPULayer, SoftmaxCPULayer, TanhCPULayer } from "./layers/activation.ts";
+import * as kernels from "./kernels/mod.ts";
+import {
+  ReluCPULayer,
+  SigmoidCPULayer,
+  SoftmaxCPULayer,
+  TanhCPULayer,
+} from "./layers/activation.ts";
 
 const loadBackend = (config: NetworkConfig): Backend => {
   return new CPUBackend(config);
@@ -40,7 +45,7 @@ const layers = {
   softmax,
   sigmoid,
   tanh,
-  relu
+  relu,
 };
 
 const setup = (_silent = false) => {
@@ -55,7 +60,7 @@ export const CPU = {
   loadBackend,
   model,
   layers,
-  kernels
+  kernels,
 };
 export { CPUBackend };
 export * from "./kernels/matrix.ts";

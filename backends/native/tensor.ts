@@ -1,8 +1,4 @@
-import {
-  Tensor2DNative,
-  TensorBackend,
-  TensorLike,
-} from "../../core/types.ts";
+import { Tensor2DNative, TensorBackend, TensorLike } from "../../core/types.ts";
 import { Matrix } from "./matrix.ts";
 
 export class TensorNativeBackend implements TensorBackend {

@@ -47,7 +47,7 @@ export class DenseGPULayer {
   }
 
   initialize(inputShape: Shape[Rank]) {
-    const shape = to2D(inputShape)
+    const shape = to2D(inputShape);
     const weights = new Float32Array(this.outputSize[0] * shape[0])
       .map(() => Math.random() * 2 - 1);
     const biases = new Float32Array(this.outputSize[0])

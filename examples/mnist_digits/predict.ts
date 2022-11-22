@@ -4,12 +4,12 @@ import { setupBackend } from "../../core/mod.ts";
 import { CPUTensor, Rank } from "../../core/types.ts";
 import { loadDataset } from "./common.ts";
 
-await setupBackend(CPU)
+await setupBackend(CPU);
 
 const network = CPUBackend.load("digit_model.json");
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx", 0, 1000);
-testSet.map((_, i) => testSet[i].inputs.shape = [28, 28, 1])
+testSet.map((_, i) => testSet[i].inputs.shape = [28, 28, 1]);
 
 function argmax(mat: CPUTensor<Rank>) {
   let max = -Infinity;

@@ -1,6 +1,13 @@
 import { DataTypeArray } from "../deps.ts";
 import { CPUBackend } from "../backends/cpu/backend.ts";
-import { Backend, DataSet, NetworkConfig, NetworkJSON, Rank, Shape } from "./types.ts";
+import {
+  Backend,
+  DataSet,
+  NetworkConfig,
+  NetworkJSON,
+  Rank,
+  Shape,
+} from "./types.ts";
 import { Data } from "../data/mod.ts";
 import { Engine } from "./engine.ts";
 

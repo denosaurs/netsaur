@@ -46,12 +46,12 @@ const net = new NeuralNetwork({
       kernelSize: [3, 3],
       padding: 1,
       strides: [1, 1],
-      unbiased: true
+      unbiased: true,
     }),
     PoolLayer({ strides: [2, 2], mode: "max" }),
     DenseLayer({ size: [1], activation: "sigmoid" }),
   ],
-  cost: "crossentropy"
+  cost: "crossentropy",
 });
 
 const input = new Tensor(buf, [dim, dim, 1]);

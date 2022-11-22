@@ -1,4 +1,10 @@
-import { DenseLayer, NeuralNetwork, tensor2D, tensor1D, setupBackend } from "../mod.ts";
+import {
+  DenseLayer,
+  NeuralNetwork,
+  setupBackend,
+  tensor1D,
+  tensor2D,
+} from "../mod.ts";
 import { GPU } from "../backends/gpu/mod.ts";
 
 await setupBackend(GPU, true);

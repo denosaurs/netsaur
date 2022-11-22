@@ -1,4 +1,10 @@
-import { ConvLayer, DenseLayer, NeuralNetwork, PoolLayer, setupBackend } from "../../mod.ts";
+import {
+  ConvLayer,
+  DenseLayer,
+  NeuralNetwork,
+  PoolLayer,
+  setupBackend,
+} from "../../mod.ts";
 import { loadDataset } from "./common.ts";
 import { CPU } from "../../backends/cpu/mod.ts";
 import { ReluLayer, SoftmaxLayer } from "../../layers/mod.ts";
@@ -7,18 +13,18 @@ await setupBackend(CPU);
 
 const network = new NeuralNetwork({
   layers: [
-    ConvLayer({ kernelSize: [5, 5, 1, 6], padding: 2}),
+    ConvLayer({ kernelSize: [5, 5, 1, 6], padding: 2 }),
     ReluLayer(),
     PoolLayer({ strides: [2, 2] }),
-    ConvLayer({ kernelSize: [5, 5, 6, 16]}),
+    ConvLayer({ kernelSize: [5, 5, 6, 16] }),
     ReluLayer(),
     PoolLayer({ strides: [2, 2] }),
-    ConvLayer({ kernelSize: [5, 5, 16, 120]}),
+    ConvLayer({ kernelSize: [5, 5, 16, 120] }),
     ReluLayer(),
     DenseLayer({ size: [84], init: "kaiming" }),
     ReluLayer(),
     DenseLayer({ size: [10], init: "kaiming" }),
-    SoftmaxLayer()
+    SoftmaxLayer(),
   ],
   cost: "crossentropy",
 });

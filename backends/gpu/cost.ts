@@ -14,7 +14,7 @@ export interface GPUCostFunction {
  * Cross entropy cost function is the standard cost function for binary classification.
  */
 export class CrossEntropy implements GPUCostFunction {
-  name = "crossentropy"
+  name = "crossentropy";
   cost() {
     return `var sum: f32 = f32(0);
     for (var i = f32(0); i < yHat.length; i++) {
@@ -32,7 +32,7 @@ export class CrossEntropy implements GPUCostFunction {
  * Hinge cost function is the standard cost function for multiclass classification.
  */
 export class Hinge implements GPUCostFunction {
-  name = "hinge"
+  name = "hinge";
   cost() {
     return `var max: f32 = f32(0);
     for (var i = f32(0); i < yHat.length; i++) {

@@ -23,8 +23,8 @@ export function getType(type: DataTypeArray<DataType>) {
     type instanceof Uint32Array
       ? "u32"
       : type instanceof Int32Array
-        ? "i32"
-        : "f32"
+      ? "i32"
+      : "f32"
   );
 }
 export function fromType<T extends DataType>(type: string) {
@@ -32,10 +32,10 @@ export function fromType<T extends DataType>(type: string) {
     type === "u32"
       ? Uint32Array
       : type === "i32"
-        ? Int32Array
-        : type === "f32"
-          ? Float32Array
-          : Uint32Array
+      ? Int32Array
+      : type === "f32"
+      ? Float32Array
+      : Uint32Array
   ) as DataTypeArrayConstructor<T>;
 }
 export function toType<T extends DataType>(type: string) {
@@ -43,10 +43,10 @@ export function toType<T extends DataType>(type: string) {
     type === "u32"
       ? Uint32Array
       : type === "i32"
-        ? Int32Array
-        : type === "f32"
-          ? Float32Array
-          : Uint32Array
+      ? Int32Array
+      : type === "f32"
+      ? Float32Array
+      : Uint32Array
   ) as DataTypeArrayConstructor<T>;
 }
 
@@ -111,16 +111,16 @@ export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
     const res = new Array(rank).fill(1);
     for (let i = 1; i < shape.length + 1; i++) {
       if (i < rank) {
-        res[rank - i] = shape[shape.length - i]
+        res[rank - i] = shape[shape.length - i];
       } else {
-        res[0] *= shape[shape.length - i]
+        res[0] *= shape[shape.length - i];
       }
     }
     return res as Shape[R];
   } else if (rank > shape.length) {
     const res = new Array(rank).fill(1);
     for (let i = 1; i < shape.length + 1; i++) {
-      res[rank - i] = shape[shape.length - i]
+      res[rank - i] = shape[shape.length - i];
     }
     return res as Shape[R];
   } else {
@@ -129,15 +129,15 @@ export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
 }
 
 export function to1D(shape: Shape[Rank]) {
-  return toShape(shape, Rank.R1)
+  return toShape(shape, Rank.R1);
 }
 
 export function to2D(shape: Shape[Rank]) {
-  return toShape(shape, Rank.R2)
+  return toShape(shape, Rank.R2);
 }
 
 export function to3D(shape: Shape[Rank]) {
-  return toShape(shape, Rank.R3)
+  return toShape(shape, Rank.R3);
 }
 
 export function iterate4D(
@@ -220,8 +220,8 @@ export function shuffleCombo(
   if (array.length !== array2.length) {
     throw new Error(
       `Array sizes must match to be shuffled together ` +
-      `First array length was ${array.length}` +
-      `Second array length was ${array2.length}`,
+        `First array length was ${array.length}` +
+        `Second array length was ${array2.length}`,
     );
   }
   let counter = array.length;
@@ -344,7 +344,8 @@ export function toNestedArray(
   }
   if (size !== a.length) {
     throw new Error(
-      `[${shape}] does not match the input size ${a.length}${isComplex ? " for a complex tensor" : ""
+      `[${shape}] does not match the input size ${a.length}${
+        isComplex ? " for a complex tensor" : ""
       }.`,
     );
   }
@@ -388,14 +389,16 @@ export function inferShape(val: TensorLike): number[] {
 export class Random {
   static #y2 = 0;
   static #previous_gaussian = false;
-  static #randomStateProp = '_lcg_random_state';
+  static #randomStateProp = "_lcg_random_state";
   static #m = 4294967296;
   static #a = 1664525;
   static #c = 1013904223;
 
   static lcg(stateProperty: string) {
     // deno-lint-ignore no-explicit-any
-    (Random as any)[stateProperty] = (Random.#a * (Random as any)[stateProperty] + Random.#c) % Random.#m;
+    (Random as any)[stateProperty] =
+      // deno-lint-ignore no-explicit-any
+      (Random.#a * (Random as any)[stateProperty] + Random.#c) % Random.#m;
     // deno-lint-ignore no-explicit-any
     return (Random as any)[stateProperty] / Random.#m;
   }
@@ -418,9 +421,9 @@ export class Random {
     } else {
       rand = Math.random();
     }
-    if (typeof min === 'undefined') {
+    if (typeof min === "undefined") {
       return rand;
-    } else if (typeof max === 'undefined') {
+    } else if (typeof max === "undefined") {
       if (min instanceof Array) {
         return min[Math.floor(rand * min.length)];
       } else {
@@ -437,6 +440,7 @@ export class Random {
   }
 
   static gaussian(mean: number, standard_deviation = 1) {
+    // deno-lint-ignore prefer-const
     let y1, x1, x2, w;
     // if (Random.#previous_gaussian) {
     //   y1 = Random.#y2;

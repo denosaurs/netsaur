@@ -4,20 +4,42 @@ import { PoolLayer } from "../layers/mod.ts";
 
 const pool = PoolLayer({ strides: 1 }) as PoolCPULayer;
 
-const input = new CPUMatrix(new Float32Array([
-    1, 2, 3, 1,
-    4, 5, 2, 4,
-    2, 3, 3, 2,
-    1, 4, 5, 1,
-]), 4, 4)
-pool.initialize({x: 4, y: 4}, 1)
-const output = pool.feedForward(input)!
-console.log(input.fmt())
-console.log(output.fmt())
-const prevError = new CPUMatrix(new Float32Array([
-    1, 2,
-    3, 4,
-]), 2, 2)
-pool.backPropagate(prevError, 1)
-const error = pool.getError()
-console.log(error.fmt())
+const input = new CPUMatrix(
+  new Float32Array([
+    1,
+    2,
+    3,
+    1,
+    4,
+    5,
+    2,
+    4,
+    2,
+    3,
+    3,
+    2,
+    1,
+    4,
+    5,
+    1,
+  ]),
+  4,
+  4,
+);
+pool.initialize({ x: 4, y: 4 }, 1);
+const output = pool.feedForward(input)!;
+console.log(input.fmt());
+console.log(output.fmt());
+const prevError = new CPUMatrix(
+  new Float32Array([
+    1,
+    2,
+    3,
+    4,
+  ]),
+  2,
+  2,
+);
+pool.backPropagate(prevError, 1);
+const error = pool.getError();
+console.log(error.fmt());

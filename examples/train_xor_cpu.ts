@@ -2,11 +2,11 @@ import {
   DenseLayer,
   NeuralNetwork,
   setupBackend,
+  SigmoidLayer,
   tensor1D,
   tensor2D,
 } from "../mod.ts";
 import { CPU } from "../backends/cpu/mod.ts";
-import { SigmoidLayer } from "../layers/mod.ts";
 
 await setupBackend(CPU);
 

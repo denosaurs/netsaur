@@ -1,5 +1,9 @@
 import { Engine } from "../../core/engine.ts";
-import { BackendType, DenseLayerConfig, NetworkConfig } from "../../core/types.ts";
+import {
+  BackendType,
+  DenseLayerConfig,
+  NetworkConfig,
+} from "../../core/types.ts";
 import { Layer } from "../../layers/mod.ts";
 import { Tensor } from "../../mod.ts";
 

@@ -29,7 +29,7 @@ export interface NetworkJSON {
 
 export interface TensorJSON {
   data: number[];
-  shape: Shape[Rank]
+  shape: Shape[Rank];
 }
 
 export interface Backend<T extends DataType = DataType> {
@@ -72,7 +72,11 @@ export interface NetworkConfig {
 // deno-lint-ignore no-explicit-any
 export type Layer = any;
 
-export type CPULayer = ConvCPULayer | DenseCPULayer | PoolCPULayer | SoftmaxCPULayer;
+export type CPULayer =
+  | ConvCPULayer
+  | DenseCPULayer
+  | PoolCPULayer
+  | SoftmaxCPULayer;
 
 export type GPULayer = DenseGPULayer;
 
@@ -106,9 +110,9 @@ export type Shape6D = [number, number, number, number, number, number];
 
 export enum Rank {
   R1 = 1, // Scalar   (magnitude only)
-  R2 = 2,	// Vector   (magnitude and direction)
+  R2 = 2, // Vector   (magnitude and direction)
   R3 = 3, // Matrix   (table of numbers)
-  R4 = 4,	// 3-Tensor (cube of numbers)
+  R4 = 4, // 3-Tensor (cube of numbers)
   R5 = 5,
   R6 = 6,
 }
@@ -148,9 +152,8 @@ export type ArrayMap =
 
 export type TypedArray = Float32Array | Int32Array | Uint8Array;
 
-export type CPUTensor<R extends Rank> = Tensor<R, BackendType.CPU>
-export type GPUTensor<R extends Rank> = Tensor<R, BackendType.GPU>
-
+export type CPUTensor<R extends Rank> = Tensor<R, BackendType.CPU>;
+export type GPUTensor<R extends Rank> = Tensor<R, BackendType.GPU>;
 
 /**
  * DataSet is a container for training data.
@@ -163,7 +166,7 @@ export type DataSet = {
 export enum BackendType {
   CPU = "cpu",
   GPU = "gpu",
-  Native = "native"
+  Native = "native",
 }
 
 /** @docalias TypedArray|Array */
@@ -176,20 +179,20 @@ export type TensorLike =
   | TypedArray
   | TypedArray[]
   | TypedArray[][]
-  | TypedArray[][][]
+  | TypedArray[][][];
 
 export interface TensorData {
-  cpu: DataTypeArray,
-  gpu: WebGPUData,
-  native: Matrix<"f32">
+  cpu: DataTypeArray;
+  gpu: WebGPUData;
+  native: Matrix<"f32">;
 }
 
-export type Init = "uniform" | "xavier" | "xaviern" | "kaiming"
+export type Init = "uniform" | "xavier" | "xaviern" | "kaiming";
 
 export interface InitFn {
   init<R extends Rank, B extends BackendType>(
     input: Shape[Rank],
     weights: Shape[R],
     outputs: Shape[Rank],
-  ): Tensor<R, B>
+  ): Tensor<R, B>;
 }

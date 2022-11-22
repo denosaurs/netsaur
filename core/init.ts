@@ -9,7 +9,7 @@ export class Uniform {
     _?: Shape[Rank],
   ): Tensor<R, B> {
     const res = new Array(length(weights));
-    iterate1D(res.length, (i) => res[i] = Random.random(-1, 1))
+    iterate1D(res.length, (i) => res[i] = Random.random(-1, 1));
     return new Tensor(toData(res), weights);
   }
 }
@@ -22,7 +22,7 @@ export class Xavier {
   ): Tensor<R, B> {
     const bounds = 1 / Math.sqrt(length(input));
     const res = new Array(length(weights));
-    iterate1D(res.length, (i) => res[i] = Random.random(-bounds, bounds))
+    iterate1D(res.length, (i) => res[i] = Random.random(-bounds, bounds));
     return new Tensor(toData(res), weights);
   }
 }
@@ -35,7 +35,7 @@ export class XavierNorm {
   ): Tensor<R, B> {
     const bounds = Math.sqrt(6) / Math.sqrt(length(input) + length(output));
     const res = new Array(length(weights));
-    iterate1D(res.length, (i) => res[i] = Random.random(-bounds, bounds))
+    iterate1D(res.length, (i) => res[i] = Random.random(-bounds, bounds));
     return new Tensor(toData(res), weights);
   }
 }
@@ -48,7 +48,7 @@ export class Kaiming {
   ): Tensor<R, B> {
     const std = Math.sqrt(2 / length(input));
     const res = new Array(length(weights));
-    iterate1D(res.length, (i) => res[i] = Random.gaussian(0, std))
+    iterate1D(res.length, (i) => res[i] = Random.gaussian(0, std));
     return new Tensor(toData(res), weights);
   }
 }

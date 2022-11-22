@@ -19,4 +19,3 @@ export function Hinge(yHat: any, y: any, prime = false) {
     ? Engine.kernels.hinge_prime(yHat, y)
     : Engine.kernels.hinge(yHat, y);
 }
-

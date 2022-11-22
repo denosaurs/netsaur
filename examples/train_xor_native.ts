@@ -1,4 +1,10 @@
-import { NeuralNetwork, DenseLayer, tensor2D, tensor1D, setupBackend } from "../mod.ts";
+import {
+  DenseLayer,
+  NeuralNetwork,
+  setupBackend,
+  tensor1D,
+  tensor2D,
+} from "../mod.ts";
 import { Native } from "../backends/native/mod.ts";
 
 await setupBackend(Native);

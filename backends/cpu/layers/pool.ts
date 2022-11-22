@@ -23,7 +23,7 @@ import { cpuZeroes4D, reshape4D, toShape4D } from "../../../mod.ts";
  * Pooling layer.
  */
 export class PoolCPULayer {
-  type = "pool"
+  type = "pool";
   outputSize!: Shape3D;
   strides: Shape2D;
   mode: "max" | "avg";

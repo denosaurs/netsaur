@@ -55,20 +55,23 @@ const dense = (config: DenseLayerConfig) => {
 };
 
 const layers = {
-  dense
-}
+  dense,
+};
+
 const setup = async (silent = false) => {
   await GPUInstance.init(silent);
   Tensor.type = BackendType.GPU;
   Engine.backendLoader = loadBackend;
   Layer.layers = layers;
+  // Engine.kernels = kernels;
 };
 
 export const GPU = {
+  setup,
   loadBackend,
   model,
-  setup,
   layers,
+  // kernels,
 };
 
 export { GPUBackend };

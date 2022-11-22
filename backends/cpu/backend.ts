@@ -15,7 +15,12 @@ import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
 import { cpuZeroes2D } from "../../mod.ts";
-import { ReluCPULayer, SigmoidCPULayer, SoftmaxCPULayer, TanhCPULayer } from "./layers/activation.ts";
+import {
+  ReluCPULayer,
+  SigmoidCPULayer,
+  SoftmaxCPULayer,
+  TanhCPULayer,
+} from "./layers/activation.ts";
 
 type OutputLayer = DenseCPULayer;
 
@@ -35,8 +40,8 @@ export class CPUBackend implements Backend {
   }
 
   static load(path: string) {
-    const net = JSON.parse(Deno.readTextFileSync(path))
-    return CPUBackend.fromJSON(net)
+    const net = JSON.parse(Deno.readTextFileSync(path));
+    return CPUBackend.fromJSON(net);
   }
 
   setCost(activation: Cost): void {
@@ -89,7 +94,7 @@ export class CPUBackend implements Backend {
     epochs = 5000,
     batches = 1,
     rate = 0.1,
-    initialize = true
+    initialize = true,
   ): void {
     if (initialize) {
       this.initialize(datasets[0].inputs.shape);
@@ -99,32 +104,34 @@ export class CPUBackend implements Backend {
       }
     }
 
-    let batch = 0
-    let loss = 0
+    let batch = 0;
+    let loss = 0;
     iterate1D(epochs, (e: number) => {
       iterate1D(datasets.length, (i: number) => {
         this.feedForward(datasets[i].inputs as CPUTensor<Rank>);
-        loss += this.getCostLoss(datasets[i].outputs as CPUTensor<Rank>)
+        loss += this.getCostLoss(datasets[i].outputs as CPUTensor<Rank>);
         this.backpropagate(datasets[i].outputs as CPUTensor<Rank>, rate);
-        batch += 1
+        batch += 1;
         if (batch >= batches) {
-          batch = 0
-          loss /= batches
-          if (!this.silent) console.log(`Batch ${i + 1}/${datasets.length}, Loss ${loss}`);
-          loss = 0
+          batch = 0;
+          loss /= batches;
+          if (!this.silent) {
+            console.log(`Batch ${i + 1}/${datasets.length}, Loss ${loss}`);
+          }
+          loss = 0;
         }
-      })
+      });
       if (!this.silent) console.log(`Epoch ${e + 1}/${epochs}`);
     });
   }
 
   getCostLoss(label: CPUTensor<Rank>) {
-    const output = this.output.output
+    const output = this.output.output;
     return this.costFn.cost(output.data, label.data);
   }
 
   predict(input: CPUTensor<Rank>) {
-    input.shape.push(1)
+    input.shape.push(1);
     for (const layer of this.layers) {
       layer.reset(1);
     }
@@ -171,14 +178,14 @@ export class CPUBackend implements Backend {
       layers: [],
       cost: data.costFn! as Cost,
     });
-    backend.layers = layers as CPULayer[]
-    backend.output = layers.at(-1) as DenseCPULayer
+    backend.layers = layers as CPULayer[];
+    backend.output = layers.at(-1) as DenseCPULayer;
     return backend;
   }
 
   async save(path: string) {
-    const data = await this.toJSON()
-    Deno.writeTextFileSync(path, JSON.stringify(data))
+    const data = await this.toJSON();
+    Deno.writeTextFileSync(path, JSON.stringify(data));
   }
 
   getWeights(): CPUTensor<Rank>[] {

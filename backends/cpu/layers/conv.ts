@@ -1,4 +1,4 @@
-import { setInit, Kaiming } from "../../../core/init.ts";
+import { Kaiming, setInit } from "../../../core/init.ts";
 import {
   Activation,
   ConvLayerConfig,
@@ -33,7 +33,7 @@ import {
  * Convolutional 2D layer.
  */
 export class ConvCPULayer {
-  type = "conv"
+  type = "conv";
   config: ConvLayerConfig;
   outputSize!: Shape3D;
   kernelSize: Shape4D;
@@ -54,7 +54,7 @@ export class ConvCPULayer {
     this.padding = config.padding || 0;
     this.strides = config.strides || [1, 1];
     this.kernelSize = config.kernelSize;
-    this.init = setInit(config.init || "kaiming")
+    this.init = setInit(config.init || "kaiming");
   }
 
   reset(batches: number) {
@@ -75,10 +75,10 @@ export class ConvCPULayer {
     const wo = 1 + Math.floor((wp - this.kernelSize[0]) / this.strides[0]);
     const ho = 1 + Math.floor((hp - this.kernelSize[1]) / this.strides[1]);
     this.outputSize = [wo, ho, this.kernelSize[3]];
-    const inputShape = [size[0], size[1], size[2]] as Shape3D
-    this.kernel = this.config.kernel 
+    const inputShape = [size[0], size[1], size[2]] as Shape3D;
+    this.kernel = this.config.kernel
       ? new Tensor(this.config.kernel, this.kernelSize)
-      : this.init.init(inputShape, this.kernelSize, this.outputSize)
+      : this.init.init(inputShape, this.kernelSize, this.outputSize);
     this.biases = cpuZeroes1D([this.kernelSize[3]]);
     this.reset(size[3]);
   }
@@ -157,13 +157,21 @@ export class ConvCPULayer {
       biases: await this.biases.toJSON(),
       strides: this.strides,
       paddedSize: this.paddedSize,
-      padding: this.padding
+      padding: this.padding,
     };
   }
 
   static fromJSON(
-    { outputSize, kernel, type, biases, strides, padding, paddedSize, activationFn }:
-      LayerJSON,
+    {
+      outputSize,
+      kernel,
+      type,
+      biases,
+      strides,
+      padding,
+      paddedSize,
+      activationFn,
+    }: LayerJSON,
   ): ConvCPULayer {
     if (type !== "conv") {
       throw new Error(
@@ -179,7 +187,7 @@ export class ConvCPULayer {
       kernelSize: kernel.shape as Shape4D,
       padding,
       strides: strides as Shape2D,
-      activation: activationFn as Activation
+      activation: activationFn as Activation,
     });
     layer.paddedSize = paddedSize as Shape3D;
     layer.outputSize = outputSize as Shape3D;

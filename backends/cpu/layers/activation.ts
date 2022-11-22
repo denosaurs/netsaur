@@ -1,17 +1,23 @@
 import { Tensor } from "../../../core/tensor.ts";
 import { CPUTensor, LayerJSON, Rank, Shape } from "../../../core/types.ts";
 import { iterate1D } from "../../../core/util.ts";
-import { relu, sigmoid_prime, sigmoid, tanh_prime, relu_prime } from "../kernels/mod.ts";
+import {
+  relu,
+  relu_prime,
+  sigmoid,
+  sigmoid_prime,
+  tanh_prime,
+} from "../kernels/mod.ts";
 
 export class ActivationCPULayer {
-  type!: string
+  type!: string;
   output!: CPUTensor<Rank>;
   reset() {}
   initialize(shape: Shape[Rank]) {
     this.output = new Tensor(new Float32Array(), shape);
   }
   feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
-    return input
+    return input;
   }
   backPropagate(_: CPUTensor<Rank>) {}
   // deno-lint-ignore require-await
@@ -27,7 +33,7 @@ export class ActivationCPULayer {
  * Softmax Layer
  */
 export class SoftmaxCPULayer extends ActivationCPULayer {
-  type = "softmax"
+  type = "softmax";
 
   feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
     const output = new Float32Array(input.data.length);
@@ -52,7 +58,7 @@ export class SoftmaxCPULayer extends ActivationCPULayer {
  * Sigmoid Layer
  */
 export class SigmoidCPULayer extends ActivationCPULayer {
-  type = "sigmoid"
+  type = "sigmoid";
   input!: CPUTensor<Rank>;
 
   feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
@@ -73,8 +79,8 @@ export class SigmoidCPULayer extends ActivationCPULayer {
 /**
  * Tanh Layer
  */
- export class TanhCPULayer extends ActivationCPULayer {
-  type = "tanh"
+export class TanhCPULayer extends ActivationCPULayer {
+  type = "tanh";
   input!: CPUTensor<Rank>;
 
   feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
@@ -95,8 +101,8 @@ export class SigmoidCPULayer extends ActivationCPULayer {
 /**
  * Relu Layer
  */
- export class ReluCPULayer extends ActivationCPULayer {
-  type = "relu"
+export class ReluCPULayer extends ActivationCPULayer {
+  type = "relu";
   input!: CPUTensor<Rank>;
 
   feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {

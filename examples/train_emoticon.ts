@@ -2,6 +2,7 @@ import { CPU } from "../backends/cpu/mod.ts";
 import { DataType, DataTypeArray } from "../deps.ts";
 import {
   DenseLayer,
+  SigmoidLayer,
   NeuralNetwork,
   setupBackend,
   tensor1D,
@@ -69,13 +70,15 @@ await setupBackend(CPU);
 const net = new NeuralNetwork({
   silent: true,
   layers: [
-    DenseLayer({ size: [10], activation: "sigmoid" }),
-    DenseLayer({ size: [1], activation: "sigmoid" }),
+    DenseLayer({ size: [10] }),
+    SigmoidLayer(),
+    DenseLayer({ size: [1] }),
+    SigmoidLayer(),
   ],
   cost: "crossentropy",
 });
 
-net.train(
+await net.train(
   [
     {
       inputs: tensor2D([happy]),
@@ -86,13 +89,11 @@ net.train(
       outputs: tensor1D(["b".charCodeAt(0) / 255]),
     },
   ],
-  5000,
-  1,
-  0.1,
+  10000,
 );
 
-console.log(toChar(await net.predict(happy))); // 😀
-console.log(toChar(await net.predict(sad))); // 😔
+console.log(toChar((await net.predict(tensor1D(happy))).data)); // 😀
+console.log(toChar((await net.predict(tensor1D(sad))).data)); // 😔
 
 function toChar<T extends DataType>(x: DataTypeArray<T>) {
   const str = String.fromCharCode(Math.round(x[0] * 255));

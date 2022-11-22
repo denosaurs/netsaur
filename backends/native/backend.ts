@@ -3,8 +3,8 @@ import {
   DenseLayerConfig,
   Layer,
   NetworkConfig,
+  Rank,
   Shape,
-  Rank
 } from "../../core/types.ts";
 import { to1D } from "../../core/util.ts";
 import ffi, { cstr } from "./ffi.ts";
