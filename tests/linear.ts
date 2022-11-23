@@ -6,9 +6,8 @@ const start = performance.now();
 await setupBackend(Native);
 
 const network = new NeuralNetwork({
-  input: 1,
   layers: [
-    DenseLayer({ size: 1, activation: "linear" }),
+    DenseLayer({ size: [1], activation: "linear" }),
   ],
   cost: "mse",
 });

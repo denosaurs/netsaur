@@ -125,7 +125,6 @@ export class GPUBackend implements Backend {
     );
     return {
       costFn: this.costFn.name,
-      sizes: this.layers.map((layer) => layer.outputSize),
       input: this.input,
       layers,
     };

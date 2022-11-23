@@ -16,7 +16,11 @@ import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
 import * as kernels from "./kernels/mod.ts";
 import {
+  EluCPULayer,
+  LeakyReluCPULayer,
+  Relu6CPULayer,
   ReluCPULayer,
+  SeluCPULayer,
   SigmoidCPULayer,
   SoftmaxCPULayer,
   TanhCPULayer,
@@ -36,7 +40,11 @@ const pool = (config: PoolLayerConfig) => new PoolCPULayer(config);
 const softmax = () => new SoftmaxCPULayer();
 const sigmoid = () => new SigmoidCPULayer();
 const tanh = () => new TanhCPULayer();
+const elu = () => new EluCPULayer();
+const selu = () => new SeluCPULayer();
 const relu = () => new ReluCPULayer();
+const relu6 = () => new Relu6CPULayer();
+const leakyrelu = () => new LeakyReluCPULayer();
 
 const layers = {
   dense,
@@ -46,6 +54,10 @@ const layers = {
   sigmoid,
   tanh,
   relu,
+  relu6,
+  leakyrelu,
+  elu,
+  selu,
 };
 
 const setup = (_silent = false) => {
@@ -62,6 +74,7 @@ export const CPU = {
   layers,
   kernels,
 };
+
 export { CPUBackend };
 export * from "./kernels/matrix.ts";
 export type { DataSet } from "../../core/types.ts";

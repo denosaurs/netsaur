@@ -10,8 +10,7 @@ import { Tensor } from "../../mod.ts";
 import { NativeBackend } from "./backend.ts";
 import { DenseNativeLayer } from "./layers/dense.ts";
 
-// deno-lint-ignore no-explicit-any
-const loadBackend = (config: NetworkConfig) => new NativeBackend(config as any);
+const loadBackend = (config: NetworkConfig) => new NativeBackend(config);
 
 const dense = (config: DenseLayerConfig) => new DenseNativeLayer(config);
 const layers = {

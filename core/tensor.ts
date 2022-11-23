@@ -122,7 +122,7 @@ export class Tensor<R extends Rank, B extends BackendType> {
         return Array.from(this.data as TypedArray);
       case BackendType.GPU: {
         const data = await (this.data as WebGPUData).get();
-        return Array.from(data);
+        return Array.from(data as TypedArray);
       }
     }
   }

@@ -131,7 +131,7 @@ export class DenseGPULayer {
       throw new Error("Layer imported must be initialized");
     }
     const layer = new DenseGPULayer({
-      size: to1D(outputSize),
+      size: to1D(outputSize!),
       activation: (activationFn as Activation) || "sigmoid",
     }, backend);
     layer.weights = Tensor.fromJSON(weights);

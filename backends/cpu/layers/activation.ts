@@ -2,8 +2,16 @@ import { Tensor } from "../../../core/tensor.ts";
 import { CPUTensor, LayerJSON, Rank, Shape } from "../../../core/types.ts";
 import { iterate1D } from "../../../core/util.ts";
 import {
+  elu,
+  elu_prime,
+  leakyrelu,
+  leakyrelu_prime,
   relu,
+  relu6,
+  relu6_prime,
   relu_prime,
+  selu,
+  selu_prime,
   sigmoid,
   sigmoid_prime,
   tanh_prime,
@@ -26,6 +34,50 @@ export class ActivationCPULayer {
   }
   static fromJSON(_: LayerJSON): ActivationCPULayer {
     return new this();
+  }
+}
+
+/**
+ * Elu Layer
+ */
+export class EluCPULayer extends ActivationCPULayer {
+  type = "elu";
+  input!: CPUTensor<Rank>;
+
+  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
+    this.input = input;
+    this.output = new Tensor(input.data.map(elu), input.shape);
+    return this.output;
+  }
+
+  backPropagate(dError: CPUTensor<Rank>) {
+    const dInput = new Float32Array(this.input.data.length);
+    for (let i = 0; i < dInput.length; i++) {
+      dInput[i] = dError.data[i] * elu_prime(this.input.data[i]);
+    }
+    return new Tensor(dInput, this.output.shape);
+  }
+}
+
+/**
+ * LeakyRelu Layer
+ */
+export class LeakyReluCPULayer extends ActivationCPULayer {
+  type = "leakyrelu";
+  input!: CPUTensor<Rank>;
+
+  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
+    this.input = input;
+    this.output = new Tensor(input.data.map(leakyrelu), input.shape);
+    return this.output;
+  }
+
+  backPropagate(dError: CPUTensor<Rank>) {
+    const dInput = new Float32Array(this.input.data.length);
+    for (let i = 0; i < dInput.length; i++) {
+      dInput[i] = dError.data[i] * leakyrelu_prime(this.input.data[i]);
+    }
+    return new Tensor(dInput, this.output.shape);
   }
 }
 
@@ -115,6 +167,50 @@ export class ReluCPULayer extends ActivationCPULayer {
     const dInput = new Float32Array(this.input.data.length);
     for (let i = 0; i < dInput.length; i++) {
       dInput[i] = dError.data[i] * relu_prime(this.input.data[i]);
+    }
+    return new Tensor(dInput, this.output.shape);
+  }
+}
+
+/**
+ * Relu6 Layer
+ */
+export class Relu6CPULayer extends ActivationCPULayer {
+  type = "relu6";
+  input!: CPUTensor<Rank>;
+
+  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
+    this.input = input;
+    this.output = new Tensor(input.data.map(relu6), input.shape);
+    return this.output;
+  }
+
+  backPropagate(dError: CPUTensor<Rank>) {
+    const dInput = new Float32Array(this.input.data.length);
+    for (let i = 0; i < dInput.length; i++) {
+      dInput[i] = dError.data[i] * relu6_prime(this.input.data[i]);
+    }
+    return new Tensor(dInput, this.output.shape);
+  }
+}
+
+/**
+ * Selu Layer
+ */
+export class SeluCPULayer extends ActivationCPULayer {
+  type = "selu";
+  input!: CPUTensor<Rank>;
+
+  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
+    this.input = input;
+    this.output = new Tensor(input.data.map(selu), input.shape);
+    return this.output;
+  }
+
+  backPropagate(dError: CPUTensor<Rank>) {
+    const dInput = new Float32Array(this.input.data.length);
+    for (let i = 0; i < dInput.length; i++) {
+      dInput[i] = dError.data[i] * selu_prime(this.input.data[i]);
     }
     return new Tensor(dInput, this.output.shape);
   }
