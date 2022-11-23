@@ -30,15 +30,22 @@
 import {
   DenseLayer,
   NeuralNetwork,
+  setupBackend,
+  SigmoidLayer,
   tensor1D,
   tensor2D,
 } from "https://deno.land/x/netsaur/mod.ts";
+import { CPU } from "https://deno.land/x/netsaur/backends/cpu/mod.ts";
+
+await setupBackend(CPU);
 
 const net = new NeuralNetwork({
   silent: true,
   layers: [
-    DenseLayer({ size: 3, activation: "sigmoid" }),
-    DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: [3] }),
+    SigmoidLayer(),
+    DenseLayer({ size: [1] }),
+    SigmoidLayer(),
   ],
   cost: "crossentropy",
 });
@@ -46,28 +53,34 @@ const net = new NeuralNetwork({
 await net.train(
   [
     {
-      inputs: await tensor2D([
+      inputs: tensor2D([
         [0, 0],
         [1, 0],
         [0, 1],
         [1, 1],
       ]),
-      outputs: await tensor1D([0, 1, 1, 0]),
+      outputs: tensor1D([0, 1, 1, 0]),
     },
   ],
-  5000,
+  10000,
 );
 
-console.log(await net.predict(new Float32Array([0, 0])));
-console.log(await net.predict(new Float32Array([1, 0])));
-console.log(await net.predict(new Float32Array([0, 1])));
-console.log(await net.predict(new Float32Array([1, 1])));
+console.log(`training time: ${performance.now() - time}ms`);
+console.log((await net.predict(tensor1D([0, 0]))).data);
+console.log((await net.predict(tensor1D([1, 0]))).data);
+console.log((await net.predict(tensor1D([0, 1]))).data);
+console.log((await net.predict(tensor1D([1, 1]))).data);
 ```
 
 #### Use the Native Backend
 
 ```typescript
-import { DenseLayer, NeuralNetwork, setupBackend } from "https://deno.land/x/netsaur/mod.ts";
+import {
+  DenseLayer,
+  NeuralNetwork,
+  setupBackend,
+  SigmoidLayer,
+} from "https://deno.land/x/netsaur/mod.ts";
 import {
   Matrix,
   Native,
@@ -75,14 +88,16 @@ import {
 
 await setupBackend(Native);
 
-const network = await new NeuralNetwork({
-  input: 2,
+const net = new NeuralNetwork({
+  silent: true,
   layers: [
-    DenseLayer({ size: 3, activation: "sigmoid" }),
-    DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: [3] }),
+    SigmoidLayer(),
+    DenseLayer({ size: [1] }),
+    SigmoidLayer(),
   ],
   cost: "crossentropy",
-}).;
+});
 
 network.train(
   [
@@ -118,6 +133,7 @@ console.log(
 import {
   DenseLayer,
   NeuralNetwork,
+  SigmoidLayer,
   tensor1D,
   tensor2D,
 } from "https://deno.land/x/netsaur/mod.ts";
@@ -126,8 +142,10 @@ import { Model } from "https://deno.land/x/netsaur/model/mod.ts";
 const net = new NeuralNetwork({
   silent: true,
   layers: [
-    DenseLayer({ size: 3, activation: "sigmoid" }),
-    DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: [3] }),
+    SigmoidLayer(),
+    DenseLayer({ size: [1] }),
+    SigmoidLayer(),
   ],
   cost: "crossentropy",
 });
@@ -153,12 +171,13 @@ await Model.save("./network.json", net);
 ### Loading & Running Models
 
 ```typescript
+import { tensor1D } from "https://deno.land/x/netsaur/mod.ts";
 import { Model } from "https://deno.land/x/netsaur/model/mod.ts";
 
 const net = await Model.load("./network.json");
 
-console.log(await net.predict(new Float32Array([0, 0])));
-console.log(await net.predict(new Float32Array([1, 0])));
-console.log(await net.predict(new Float32Array([0, 1])));
-console.log(await net.predict(new Float32Array([1, 1])));
+console.log((await net.predict(tensor1D([0, 0]))).data);
+console.log((await net.predict(tensor1D([1, 0]))).data);
+console.log((await net.predict(tensor1D([0, 1]))).data);
+console.log((await net.predict(tensor1D([1, 1]))).data);
 ```
