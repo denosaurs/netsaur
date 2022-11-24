@@ -10,7 +10,7 @@ import type {
   Shape,
 } from "../../core/types.ts";
 import { iterate1D } from "../../core/util.ts";
-import { CPUCostFunction, CrossEntropy, Hinge } from "./cost.ts";
+import { CPUCostFunction, CrossEntropy, Hinge, MSE } from "./cost.ts";
 import { ConvCPULayer } from "./layers/conv.ts";
 import { DenseCPULayer } from "./layers/dense.ts";
 import { PoolCPULayer } from "./layers/pool.ts";
@@ -51,6 +51,9 @@ export class CPUBackend implements Backend {
         break;
       case "hinge":
         this.costFn = new Hinge();
+        break;
+      case "mse":
+        this.costFn = new MSE();
         break;
     }
   }

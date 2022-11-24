@@ -1,6 +1,6 @@
 import { Tensor } from "../../../core/tensor.ts";
 import { CPUTensor, LayerJSON, Rank, Shape } from "../../../core/types.ts";
-import { iterate1D } from "../../../core/util.ts";
+import { iterate1D, iterate3D } from "../../../core/util.ts";
 import {
   elu,
   elu_prime,
@@ -101,8 +101,17 @@ export class SoftmaxCPULayer extends ActivationCPULayer {
     return this.output;
   }
 
-  backPropagate(error: CPUTensor<Rank>) {
-    return error;
+  backPropagate(dError: CPUTensor<Rank>): CPUTensor<Rank> {
+    const dInput = new Float32Array(this.output.data.length);
+    const batches = this.output.shape.at(-1)!;
+    const length = this.output.data.length / batches;
+    iterate3D([batches, length, length], (z, x, y) => {
+      const out1 = this.output.data[z * batches + x];
+      const out2 = this.output.data[z * batches + y];
+      const dActivation = x == y ? out1 * (1 - out1) : -out1 * out2;
+      dInput[z * batches + x] += dActivation * dError.data[z * batches + y];
+    });
+    return new Tensor(dInput, this.output.shape);
   }
 }
 

@@ -18,7 +18,7 @@ const net = new NeuralNetwork({
     DenseLayer({ size: [1] }),
     SigmoidLayer(),
   ],
-  cost: "crossentropy",
+  cost: "mse",
 });
 
 const time = performance.now();

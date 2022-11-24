@@ -1,23 +1,38 @@
-import { DataType, DataTypeArray } from "../../deps.ts";
+import { DataTypeArray } from "../../deps.ts";
 import { iterate1D } from "../../core/util.ts";
 
-export interface CPUCostFunction<T extends DataType = DataType> {
+export interface CPUCostFunction {
   name: string;
   /** Return the cost associated with an output `a` and desired output `y`. */
-  cost(yHat: DataTypeArray<T>, y: DataTypeArray<T>): number;
+  cost(yHat: DataTypeArray, y: DataTypeArray): number;
 
   /** Return the error delta from the output layer. */
   prime(yHat: number, y: number): number;
 }
 
+export class MSE implements CPUCostFunction {
+  name = "mse";
+  cost(yHat: DataTypeArray, y: DataTypeArray) {
+    let sum = 0;
+    iterate1D(yHat.length, (i: number) => {
+      sum += (y[i] - yHat[i]) ** 2;
+    });
+    return sum / yHat.length;
+  }
+
+  prime(yHat: number, y: number) {
+    return y - yHat;
+  }
+}
+
 /**
  * Cross entropy cost function is the standard cost function for binary classification.
  */
-export class CrossEntropy<T extends DataType = DataType>
-  implements CPUCostFunction {
+export class CrossEntropy implements CPUCostFunction {
   name = "crossentropy";
-  cost(yHat: DataTypeArray<T>, y: DataTypeArray<T>) {
+  cost(yHat: DataTypeArray, y: DataTypeArray) {
     let sum = 0;
+    //TODO:
     // Binary Classification
     // iterate1D(yHat.length, (i: number) => {
     //   sum += -y * Math.log(yHat[i]) - (1 - y[i]) * Math.log(1 - yHat[i]);
@@ -29,16 +44,16 @@ export class CrossEntropy<T extends DataType = DataType>
   }
 
   prime(yHat: number, y: number) {
-    return y - yHat;
+    return -yHat / y;
   }
 }
 
 /**
  * Hinge cost function is the standard cost function for multiclass classification.
  */
-export class Hinge<T extends DataType = DataType> implements CPUCostFunction {
+export class Hinge implements CPUCostFunction {
   name = "hinge";
-  cost(yHat: DataTypeArray<T>, y: DataTypeArray<T>) {
+  cost(yHat: DataTypeArray, y: DataTypeArray) {
     let max = -Infinity;
     iterate1D(yHat.length, (i: number) => {
       const value = y[i] - (1 - 2 * y[i]) * yHat[i];
