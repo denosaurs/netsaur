@@ -1,5 +1,6 @@
 import { GPUInstance } from "../backends/gpu/mod.ts";
 import { WebGPUData } from "../deps.ts";
+import { MismatchedRankError } from "./error.ts";
 import {
   BackendType,
   Rank,
@@ -17,7 +18,6 @@ import {
   to1D,
   to2D,
   to3D,
-  toShape,
 } from "./util.ts";
 
 // NOTE: In development, avoid calling boilerplate-heavy methods such as Tensor.zeroes()
@@ -393,24 +393,6 @@ export function gpuZeroes2D(
   return new Tensor(res, shape);
 }
 
-export function toShape2D(shape: Shape[Rank]): Shape[Rank.R2] {
-  return toShape(shape, Rank.R2);
-}
-
-export function toShape3D(shape: Shape[Rank]): Shape[Rank.R3] {
-  return toShape(shape, Rank.R3);
-}
-
-export function reshape2D<B extends BackendType>(tensor: Tensor<Rank, B>) {
-  const res = new Tensor(tensor.data, toShape2D(tensor.shape));
-  return res as Tensor<Rank.R2, B>;
-}
-
-export function reshape3D<B extends BackendType>(tensor: Tensor<Rank, B>) {
-  const res = new Tensor(tensor.data, toShape3D(tensor.shape));
-  return res as Tensor<Rank.R3, B>;
-}
-
 export function cpuCloneZeroes(
   tensor: Tensor<Rank, BackendType.CPU>,
 ): Tensor<Rank, BackendType.CPU> {
@@ -432,11 +414,22 @@ export function cpuZeroes4D(
   return new Tensor(data.fill(0), shape);
 }
 
-export function toShape4D(shape: Shape[Rank]): Shape[Rank.R4] {
-  return toShape(shape, Rank.R4);
+export function checkTensor<R extends Rank, B extends BackendType>(
+  tensor: Tensor<Rank, B>,
+  rank: R,
+): Tensor<R, B> {
+  if (tensor.shape.length != rank) {
+    throw new MismatchedRankError(tensor.shape.length, rank)
+  }
+  return tensor as Tensor<R, B>
 }
 
-export function reshape4D<B extends BackendType>(tensor: Tensor<Rank, B>) {
-  const res = new Tensor(tensor.data, toShape4D(tensor.shape));
-  return res as Tensor<Rank.R4, B>;
+export function checkShape<R extends Rank>(
+  shape: Shape[Rank],
+  rank: R,
+): Shape[R] {
+  if (shape.length != rank) {
+    throw new MismatchedRankError(shape.length, rank)
+  }
+  return shape as Shape[R]
 }

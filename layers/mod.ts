@@ -1,6 +1,7 @@
 import {
   ConvLayerConfig,
   DenseLayerConfig,
+  FlattenLayerConfig,
   PoolLayerConfig,
 } from "../core/types.ts";
 
@@ -83,4 +84,11 @@ export function SeluLayer() {
     throw new Error("Current backend does not support selu layers");
   }
   return Layer.layers.selu();
+}
+
+export function FlattenLayer(config: FlattenLayerConfig) {
+  if (Layer.layers.flatten === undefined) {
+    throw new Error("Current backend does not support flatten layers");
+  }
+  return Layer.layers.flatten(config);
 }

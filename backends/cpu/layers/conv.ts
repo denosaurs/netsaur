@@ -18,11 +18,11 @@ import {
   iterate4D,
 } from "../../../core/util.ts";
 import {
+  checkShape,
+  checkTensor,
   cpuZeroes1D,
   cpuZeroes4D,
-  reshape4D,
   Tensor,
-  toShape4D,
 } from "../../../mod.ts";
 // import { CPUActivationFn, setActivation, Sigmoid } from "../activation.ts";
 
@@ -68,7 +68,7 @@ export class ConvCPULayer {
   }
 
   initialize(inputSize: Shape[Rank]) {
-    const size = toShape4D(inputSize);
+    const size = checkShape(inputSize, Rank.R4);
     const wp = size[0] + 2 * this.padding;
     const hp = size[1] + 2 * this.padding;
     this.paddedSize = [wp, hp, size[2]];
@@ -83,8 +83,8 @@ export class ConvCPULayer {
     this.reset(size[3]);
   }
 
-  feedForward(inputTensor: CPUTensor<Rank>): CPUTensor<Rank> {
-    this.input = reshape4D(inputTensor);
+  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
+    this.input = checkTensor(input, Rank.R4);
     if (this.padding > 0) {
       iterate4D(this.input, (x, y, z, w) => {
         const idx = this.padded.index(this.padding + x, this.padding + y, z, w);
@@ -109,7 +109,7 @@ export class ConvCPULayer {
   }
 
   backPropagate(errorTensor: CPUTensor<Rank>, rate: number) {
-    const cost = reshape4D(errorTensor);
+    const cost = checkTensor(errorTensor, Rank.R4);
     const dInput = cpuZeroes4D(this.padded.shape);
     iterate4D(dInput, (x, y, z, w) => {
       let sum = 0;
@@ -165,7 +165,6 @@ export class ConvCPULayer {
     {
       outputSize,
       kernel,
-      type,
       biases,
       strides,
       padding,
@@ -173,13 +172,6 @@ export class ConvCPULayer {
       activationFn,
     }: LayerJSON,
   ): ConvCPULayer {
-    if (type !== "conv") {
-      throw new Error(
-        "Cannot cannot create a Convolutional layer from a" +
-          type.charAt(0).toUpperCase() + type.slice(1) +
-          "Layer",
-      );
-    }
     if (biases === undefined || kernel === undefined) {
       throw new Error("Layer imported must be initialized");
     }

@@ -9,6 +9,7 @@ import { SoftmaxCPULayer } from "../backends/cpu/layers/activation.ts";
 
 export interface LayerJSON {
   outputSize?: Shape[Rank];
+  inputSize?: Shape[Rank];
   activationFn?: string;
   costFn?: string;
   type: string;
@@ -99,6 +100,10 @@ export interface ConvLayerConfig {
 export interface PoolLayerConfig {
   strides?: Shape2D;
   mode?: "max" | "avg";
+}
+
+export interface FlattenLayerConfig {
+  size: Shape[Rank];
 }
 
 export type Shape1D = [number];

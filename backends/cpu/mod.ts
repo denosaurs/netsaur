@@ -4,6 +4,7 @@ import {
   BackendType,
   ConvLayerConfig,
   DenseLayerConfig,
+  FlattenLayerConfig,
   NetworkConfig,
   NetworkJSON,
   PoolLayerConfig,
@@ -25,6 +26,7 @@ import {
   SoftmaxCPULayer,
   TanhCPULayer,
 } from "./layers/activation.ts";
+import { FlattenCPULayer } from "./layers/flatten.ts";
 
 const loadBackend = (config: NetworkConfig): Backend => {
   return new CPUBackend(config);
@@ -45,6 +47,7 @@ const selu = () => new SeluCPULayer();
 const relu = () => new ReluCPULayer();
 const relu6 = () => new Relu6CPULayer();
 const leakyrelu = () => new LeakyReluCPULayer();
+const flatten = (config: FlattenLayerConfig) => new FlattenCPULayer(config);
 
 const layers = {
   dense,
@@ -58,6 +61,7 @@ const layers = {
   leakyrelu,
   elu,
   selu,
+  flatten,
 };
 
 const setup = (_silent = false) => {

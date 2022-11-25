@@ -7,7 +7,7 @@ import {
 } from "../../mod.ts";
 import { loadDataset } from "./common.ts";
 import { CPU } from "../../backends/cpu/mod.ts";
-import { ReluLayer, SoftmaxLayer } from "../../layers/mod.ts";
+import { FlattenLayer, ReluLayer, SoftmaxLayer } from "../../layers/mod.ts";
 
 await setupBackend(CPU);
 
@@ -21,6 +21,7 @@ const network = new NeuralNetwork({
     PoolLayer({ strides: [2, 2] }),
     ConvLayer({ kernelSize: [5, 5, 16, 120] }),
     ReluLayer(),
+    FlattenLayer({size: [120]}), 
     DenseLayer({ size: [84], init: "kaiming" }),
     ReluLayer(),
     DenseLayer({ size: [10], init: "kaiming" }),

@@ -1,9 +1,9 @@
 import { setInit, Xavier } from "../../../core/init.ts";
 import {
+  checkShape,
+  checkTensor,
   cpuZeroes2D,
-  reshape2D,
   Tensor,
-  toShape2D,
 } from "../../../core/tensor.ts";
 import {
   CPUTensor,
@@ -43,7 +43,7 @@ export class DenseCPULayer {
   }
 
   initialize(inputShape: Shape[Rank]) {
-    const shape = toShape2D(inputShape);
+    const shape = checkShape(inputShape, Rank.R2);
     const weights = [this.outputSize[0], shape[0]] as Shape2D;
     this.weights = this.init.init([shape[0]], weights, this.outputSize);
     this.biases = cpuZeroes2D([this.outputSize[0], 1]);
@@ -51,7 +51,7 @@ export class DenseCPULayer {
   }
 
   feedForward(inputTensor: CPUTensor<Rank>): CPUTensor<Rank> {
-    this.input = reshape2D(inputTensor);
+    this.input = checkTensor(inputTensor, Rank.R2);
     const product = CPUMatrix.dot(this.input, this.weights);
     for (let i = 0, j = 0; i < product.data.length; i++, j++) {
       if (j >= this.biases.x) j = 0;
@@ -60,11 +60,8 @@ export class DenseCPULayer {
     return this.output;
   }
 
-  backPropagate(
-    errorTensor: CPUTensor<Rank>,
-    rate: number,
-  ) {
-    const dError = reshape2D(errorTensor);
+  backPropagate(errorTensor: CPUTensor<Rank>, rate: number) {
+    const dError = checkTensor(errorTensor, Rank.R2);
     const dInput = CPUMatrix.dot(dError, CPUMatrix.transpose(this.weights));
     const dWeights = CPUMatrix.dot(CPUMatrix.transpose(this.input), dError);
     for (const i in dWeights.data) {

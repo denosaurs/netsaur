@@ -14,7 +14,7 @@ import {
   iterate4D,
   maxIdx,
 } from "../../../core/util.ts";
-import { cpuZeroes4D, reshape4D, toShape4D } from "../../../mod.ts";
+import { checkShape, checkTensor, cpuZeroes4D } from "../../../mod.ts";
 
 // https://github.com/mnielsen/neural-networks-and-deep-learning
 // https://ml-cheatsheet.readthedocs.io/en/latest/backpropagation.html#applying-the-chain-rule
@@ -44,7 +44,7 @@ export class PoolCPULayer {
   }
 
   initialize(inputSize: Shape[Rank]) {
-    const size = toShape4D(inputSize);
+    const size = checkShape(inputSize, Rank.R4);
     if (size[0] % this.strides[0] || size[1] % this.strides[1]) {
       throw new Error(
         `Cannot pool shape ${size} with stride ${this.strides}`,
@@ -60,7 +60,7 @@ export class PoolCPULayer {
   }
 
   feedForward(inputTensor: CPUTensor<Rank>) {
-    this.input = reshape4D(inputTensor);
+    this.input = checkTensor(inputTensor, Rank.R4);
     if (this.mode == "max") {
       iterate4D(this.output, (x, y, z, w) => {
         const pool: number[] = [];
@@ -93,7 +93,7 @@ export class PoolCPULayer {
   }
 
   backPropagate(errorTensor: CPUTensor<Rank>, _rate: number) {
-    this.error = reshape4D(errorTensor);
+    this.error = checkTensor(errorTensor, Rank.R4);
     const error = cpuZeroes4D(this.input.shape);
     if (this.mode == "max") {
       iterate1D(this.error.data.length, (i) => {
