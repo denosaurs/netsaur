@@ -438,3 +438,29 @@ export function gpuZeroes(shape: Shape[Rank]): Tensor<Rank, BackendType.GPU> {
   const res = new WebGPUData(GPUInstance.backend!, "f32", length);
   return new Tensor(res, shape);
 }
+
+export function gpuZeroes1D(
+  shape: Shape[Rank.R1],
+): Tensor<Rank.R1, BackendType.GPU> {
+  const res = new WebGPUData(GPUInstance.backend!, "f32", shape[0]);
+  return new Tensor(res, shape);
+}
+
+export function gpuZeroes4D(
+  shape: Shape[Rank.R4],
+): Tensor<Rank.R4, BackendType.GPU> {
+  const length = shape[0] * shape[1] * shape[2] * shape[3]
+  const res = new WebGPUData(GPUInstance.backend!, "f32", length);
+  return new Tensor(res, shape);
+}
+
+export function gpuTensor(
+  buffer: Float32Array, 
+  shape: Shape[Rank.R4],
+): Tensor<Rank.R4, BackendType.GPU> {
+  const length = shape[0] * shape[1] * shape[2] * shape[3]
+  const res = new WebGPUData(GPUInstance.backend!, "f32", length);
+  GPUInstance.backend!.device.queue.writeBuffer(res.buffer, 0, buffer);
+  return new Tensor(res, shape);
+}
+

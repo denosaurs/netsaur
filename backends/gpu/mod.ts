@@ -4,6 +4,7 @@ import { Tensor } from "../../core/tensor.ts";
 import {
   Backend,
   BackendType,
+  ConvLayerConfig,
   DenseLayerConfig,
   NetworkConfig,
   NetworkJSON,
@@ -13,6 +14,7 @@ import { Core, WebGPUBackend } from "../../deps.ts";
 import { Layer } from "../../layers/mod.ts";
 import { GPUBackend } from "./backend.ts";
 import { SigmoidGPULayer } from "./layers/activation.ts";
+import { ConvGPULayer } from "./layers/conv.ts";
 import { DenseGPULayer } from "./layers/dense.ts";
 
 export class GPUInstance {
@@ -59,10 +61,15 @@ const sigmoid = () => {
   if (!GPUInstance.backend) throw new NoWebGPUBackendError();
   return new SigmoidGPULayer(GPUInstance.backend);
 };
+const conv = (config: ConvLayerConfig) => {
+  if (!GPUInstance.backend) throw new NoWebGPUBackendError();
+  return new ConvGPULayer(config, GPUInstance.backend);
+};
 
 const layers = {
   dense,
   sigmoid,
+  conv,
 };
 
 const setup = async (silent = false) => {

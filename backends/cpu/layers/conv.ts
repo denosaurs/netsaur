@@ -172,19 +172,16 @@ export class ConvCPULayer {
       activationFn,
     }: LayerJSON,
   ): ConvCPULayer {
-    if (biases === undefined || kernel === undefined) {
-      throw new Error("Layer imported must be initialized");
-    }
     const layer = new ConvCPULayer({
-      kernelSize: kernel.shape as Shape4D,
+      kernelSize: kernel!.shape as Shape4D,
       padding,
       strides: strides as Shape2D,
       activation: activationFn as Activation,
     });
     layer.paddedSize = paddedSize as Shape3D;
     layer.outputSize = outputSize as Shape3D;
-    layer.kernel = Tensor.fromJSON(kernel);
-    layer.biases = Tensor.fromJSON(biases);
+    layer.kernel = Tensor.fromJSON(kernel!);
+    layer.biases = Tensor.fromJSON(biases!);
     return layer;
   }
 }

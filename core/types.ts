@@ -90,7 +90,7 @@ export interface DenseLayerConfig {
 export interface ConvLayerConfig {
   init?: Init;
   activation?: Activation;
-  kernel?: DataTypeArray;
+  kernel?: Float32Array;
   kernelSize: Shape4D;
   padding?: number;
   unbiased?: boolean;
