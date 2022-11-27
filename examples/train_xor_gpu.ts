@@ -2,6 +2,7 @@ import {
   DenseLayer,
   NeuralNetwork,
   setupBackend,
+  SigmoidLayer,
   tensor1D,
   tensor2D,
 } from "../mod.ts";
@@ -12,10 +13,12 @@ await setupBackend(GPU, true);
 const net = new NeuralNetwork({
   silent: true,
   layers: [
-    DenseLayer({ size: [3], activation: "sigmoid" }),
-    DenseLayer({ size: [1], activation: "sigmoid" }),
+    DenseLayer({ size: [3]}),
+    SigmoidLayer(),
+    DenseLayer({ size: [1]}),
+    SigmoidLayer(),
   ],
-  cost: "crossentropy",
+  cost: "mse",
 });
 
 const time = performance.now();
@@ -36,7 +39,7 @@ await net.train(
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
-console.log(await net.predict(new Float32Array([0, 0])));
-console.log(await net.predict(new Float32Array([1, 0])));
-console.log(await net.predict(new Float32Array([0, 1])));
-console.log(await net.predict(new Float32Array([1, 1])));
+console.log(await ((await net.predict(tensor1D([0, 0]))).data).get());
+console.log(await ((await net.predict(tensor1D([1, 0]))).data).get());
+console.log(await ((await net.predict(tensor1D([0, 1]))).data).get());
+console.log(await ((await net.predict(tensor1D([1, 1]))).data).get());

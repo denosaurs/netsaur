@@ -1,4 +1,4 @@
-import { setInit, Xavier } from "../../../core/init.ts";
+import { setInit, Uniform } from "../../../core/init.ts";
 import {
   checkShape,
   checkTensor,
@@ -26,7 +26,7 @@ import { CPUMatrix } from "../kernels/matrix.ts";
 export class DenseCPULayer {
   type = "dense";
   outputSize: Shape1D;
-  init: InitFn = new Xavier();
+  init: InitFn = new Uniform();
 
   input!: CPUTensor<Rank.R2>;
   weights!: CPUTensor<Rank.R2>;

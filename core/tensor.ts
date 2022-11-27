@@ -1,6 +1,6 @@
 import { GPUInstance } from "../backends/gpu/mod.ts";
 import { WebGPUData } from "../deps.ts";
-import { MismatchedRankError } from "./error.ts";
+import { IncompatibleRankError } from "./error.ts";
 import {
   BackendType,
   Rank,
@@ -387,9 +387,8 @@ export function cpuZeroes3D(
 export function gpuZeroes2D(
   shape: Shape[Rank.R2],
 ): Tensor<Rank.R2, BackendType.GPU> {
-  const data = new Float32Array(shape[0] * shape[1]);
-  const res = new WebGPUData(GPUInstance.backend!, "f32", data.length);
-  GPUInstance.backend!.device.queue.writeBuffer(res.buffer, 0, data);
+  const length = shape[0] * shape[1]
+  const res = new WebGPUData(GPUInstance.backend!, "f32", length);
   return new Tensor(res, shape);
 }
 
@@ -419,9 +418,9 @@ export function checkTensor<R extends Rank, B extends BackendType>(
   rank: R,
 ): Tensor<R, B> {
   if (tensor.shape.length != rank) {
-    throw new MismatchedRankError(tensor.shape.length, rank)
+    throw new IncompatibleRankError(tensor.shape.length, rank);
   }
-  return tensor as Tensor<R, B>
+  return tensor as Tensor<R, B>;
 }
 
 export function checkShape<R extends Rank>(
@@ -429,7 +428,13 @@ export function checkShape<R extends Rank>(
   rank: R,
 ): Shape[R] {
   if (shape.length != rank) {
-    throw new MismatchedRankError(shape.length, rank)
+    throw new IncompatibleRankError(shape.length, rank);
   }
-  return shape as Shape[R]
+  return shape as Shape[R];
+}
+
+export function gpuZeroes(shape: Shape[Rank]): Tensor<Rank, BackendType.GPU> {
+  const length = shape.reduce((i, j) => i * j, 1);
+  const res = new WebGPUData(GPUInstance.backend!, "f32", length);
+  return new Tensor(res, shape);
 }

@@ -1,4 +1,5 @@
 import { Engine } from "../../core/engine.ts";
+import { NoWebGPUBackendError } from "../../core/error.ts";
 import { Tensor } from "../../core/tensor.ts";
 import {
   Backend,
@@ -11,6 +12,7 @@ import {
 import { Core, WebGPUBackend } from "../../deps.ts";
 import { Layer } from "../../layers/mod.ts";
 import { GPUBackend } from "./backend.ts";
+import { SigmoidGPULayer } from "./layers/activation.ts";
 import { DenseGPULayer } from "./layers/dense.ts";
 
 export class GPUInstance {
@@ -28,34 +30,39 @@ export class GPUInstance {
     if (!GPUInstance.backend.adapter) {
       throw new Error("No backend adapter found!");
     }
-    if (!silent) console.log(`Using adapter: ${GPUInstance.backend.adapter}`);
+    if (!silent) {
+      console.log(
+        `Using adapter: ${JSON.stringify(GPUInstance.backend.adapter)}`,
+      );
+    }
     const features = [...GPUInstance.backend.adapter.features.values()];
     if (!silent) console.log(`Supported features: ${features.join(", ")}`);
   }
 }
 
 const loadBackend = (config: NetworkConfig): Backend => {
-  if (!GPUInstance.backend) {
-    throw new Error("WebGPU backend not initialized, use loadBackend function");
-  }
+  if (!GPUInstance.backend) throw new NoWebGPUBackendError();
   return new GPUBackend(config, GPUInstance.backend!);
 };
 
 const model = async (data: NetworkJSON, silent = false): Promise<Backend> => {
   await GPUInstance.init(silent);
-  const gpubackend = await GPUBackend.fromJSON(data, GPUInstance.backend!);
+  const gpubackend = GPUBackend.fromJSON(data, GPUInstance.backend!);
   return gpubackend;
 };
 
 const dense = (config: DenseLayerConfig) => {
-  if (!GPUInstance.backend) {
-    throw new Error("WebGPU backend not initialized, use loadBackend function");
-  }
+  if (!GPUInstance.backend) throw new NoWebGPUBackendError();
   return new DenseGPULayer(config, GPUInstance.backend);
+};
+const sigmoid = () => {
+  if (!GPUInstance.backend) throw new NoWebGPUBackendError();
+  return new SigmoidGPULayer(GPUInstance.backend);
 };
 
 const layers = {
   dense,
+  sigmoid,
 };
 
 const setup = async (silent = false) => {

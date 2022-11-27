@@ -24,10 +24,6 @@ export class ActivationCPULayer {
   initialize(shape: Shape[Rank]) {
     this.output = new Tensor(new Float32Array(), shape);
   }
-  feedForward(input: CPUTensor<Rank>): CPUTensor<Rank> {
-    return input;
-  }
-  backPropagate(_: CPUTensor<Rank>) {}
   // deno-lint-ignore require-await
   async toJSON() {
     return { type: this.type };

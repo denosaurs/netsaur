@@ -1,7 +1,6 @@
 import { DenseGPULayer } from "./layers/dense.ts";
 import type {
   Backend,
-  BackendType,
   Cost,
   DataSet,
   GPULayer,
@@ -10,20 +9,17 @@ import type {
   NetworkJSON,
   Rank,
   Shape,
-  TensorData,
 } from "../../core/types.ts";
-import { CrossEntropy, GPUCostFunction, Hinge } from "./cost.ts";
-import { DataTypeArray, WebGPUBackend } from "../../deps.ts";
+import { GPUCostFunction, MSE } from "./cost.ts";
+import { WebGPUBackend } from "../../deps.ts";
 import { GPUInstance } from "./mod.ts";
-import { Tensor, toData } from "../../mod.ts";
-import { flatten } from "../../core/util.ts";
 
 export class GPUBackend implements Backend {
   input?: Shape[Rank];
   layers: GPULayer[] = [];
   output: GPULayer;
   silent: boolean;
-  costFn: GPUCostFunction = new CrossEntropy();
+  costFn!: GPUCostFunction;
   backend: WebGPUBackend;
   imported = false;
 
@@ -38,11 +34,8 @@ export class GPUBackend implements Backend {
 
   setCost(activation: Cost): void {
     switch (activation) {
-      case "crossentropy":
-        this.costFn = new CrossEntropy();
-        break;
-      case "hinge":
-        this.costFn = new Hinge();
+      case "mse":
+        this.costFn = new MSE(this.backend);
         break;
     }
   }
@@ -52,13 +45,18 @@ export class GPUBackend implements Backend {
     this.layers.push(layer);
   }
 
-  initialize(inputSize: Shape[Rank]) {
-    this.layers[0].initialize(inputSize);
-    for (let i = 1; i < this.layers.length; i++) {
-      const current = this.layers[i];
-      const previous = this.layers[i - 1];
-      current.initialize(previous.output.shape);
+  reset(size: Shape[Rank]) {
+    for (const layer of this.layers) {
+      size = layer.reset(size);
     }
+    this.costFn.reset(size);
+  }
+
+  initialize(size: Shape[Rank]) {
+    for (const layer of this.layers) {
+      size = layer.initialize(size);
+    }
+    this.costFn.initialize(size);
   }
 
   async feedForward(input: GPUTensor<Rank>) {
@@ -69,21 +67,10 @@ export class GPUBackend implements Backend {
   }
 
   async backpropagate(output: GPUTensor<Rank>, rate: number) {
-    await this.output.backPropagate(
-      output,
-      output,
-      rate,
-      0,
-      this.costFn,
-    );
-    // todo: update for convolutional layer
-    for (let i = this.layers.length - 2, last = 1; i >= 0; i--, last++) {
-      await this.layers[i].backPropagate(
-        this.output.error,
-        this.layers[i + 1].weights,
-        rate,
-        last,
-      );
+    await this.costFn.prime(this.output.output, output)
+    let error = this.costFn.dInput
+    for (let i = this.layers.length - 1; i >= 0; i--) {
+      error = await this.layers[i].backPropagate(error, rate)!;
     }
   }
 
@@ -100,23 +87,22 @@ export class GPUBackend implements Backend {
       for (const dataset of datasets) {
         await this.feedForward(dataset.inputs as GPUTensor<Rank>);
         await this.backpropagate(dataset.outputs as GPUTensor<Rank>, rate);
+        if (!this.silent) {
+          await this.getCostLoss(dataset.outputs as GPUTensor<Rank>);
+          this.costFn.getOutput().then((loss) => console.log(`Loss ${loss}`));
+        }
       }
     }
   }
 
-  // async getCostLoss(_output: DataTypeArray<T>) {
-  //   throw new Error("Not implemented");
-  // }
+  async getCostLoss(label: GPUTensor<Rank>) {
+    await this.costFn.cost(this.output.output, label);
+  }
 
-  async predict(data: DataTypeArray) {
-    const gpuData = toData(
-      flatten(data as Float32Array),
-    ) as TensorData[BackendType.GPU];
-    const input = new Tensor<Rank, BackendType.GPU>(gpuData, [data.length, 1]);
-    this.layers.forEach((layer) => layer.reset(1));
-
-    this.output.reset(1);
-    return await (await this.feedForward(input)).data.get();
+  async predict(data: GPUTensor<Rank>) {
+    data.shape.push(1);
+    this.reset(data.shape);
+    return await this.feedForward(data);
   }
 
   async toJSON(): Promise<NetworkJSON> {
