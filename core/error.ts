@@ -1,4 +1,4 @@
-import { Rank, Shape } from "./types.ts"
+import { Rank, Shape, Shape2D } from "./types.ts"
 
 export class IncompatibleRankError extends Error {
     constructor(shape: number, expected: number) {
@@ -15,5 +15,11 @@ export class InvalidFlattenError extends Error {
 export class NoWebGPUBackendError extends Error {
     constructor() {
         super(`WebGPU backend not initialized. Help: Did you forget to call setupBackend()?`)
+    }
+}
+
+export class InvalidPoolError extends Error {
+    constructor(size: Shape[Rank], stride: Shape2D) {
+        super(`Cannot pool shape ${size} with stride ${stride}`)
     }
 }

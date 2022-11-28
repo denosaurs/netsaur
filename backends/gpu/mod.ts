@@ -8,6 +8,7 @@ import {
   DenseLayerConfig,
   NetworkConfig,
   NetworkJSON,
+  PoolLayerConfig,
 } from "../../core/types.ts";
 
 import { Core, WebGPUBackend } from "../../deps.ts";
@@ -16,6 +17,7 @@ import { GPUBackend } from "./backend.ts";
 import { SigmoidGPULayer } from "./layers/activation.ts";
 import { ConvGPULayer } from "./layers/conv.ts";
 import { DenseGPULayer } from "./layers/dense.ts";
+import { PoolGPULayer } from "./layers/pool.ts";
 
 export class GPUInstance {
   static core = new Core();
@@ -65,11 +67,16 @@ const conv = (config: ConvLayerConfig) => {
   if (!GPUInstance.backend) throw new NoWebGPUBackendError();
   return new ConvGPULayer(config, GPUInstance.backend);
 };
+const pool = (config: PoolLayerConfig) => {
+  if (!GPUInstance.backend) throw new NoWebGPUBackendError();
+  return new PoolGPULayer(config, GPUInstance.backend);
+};
 
 const layers = {
   dense,
   sigmoid,
   conv,
+  pool,
 };
 
 const setup = async (silent = false) => {

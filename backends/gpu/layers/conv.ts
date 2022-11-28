@@ -27,7 +27,7 @@ import { GPUInstance } from "../mod.ts";
  * Conv Layer
  */
 export class ConvGPULayer {
-  type = "dense";
+  type = "conv";
   config: ConvLayerConfig;
   outputSize!: Shape3D;
   kernelSize: Shape4D;
@@ -70,7 +70,7 @@ export class ConvGPULayer {
       : this.init.init(inputShape, this.kernelSize, this.outputSize);
     this.biases = gpuZeroes1D([this.kernelSize[3]]);
     this.output = gpuZeroes4D([wo, ho, this.kernelSize[3], size[3]]);
-    return this.outputSize
+    return this.output.shape;
   }
 
   async feedForward(inputTensor: GPUTensor<Rank>) {

@@ -1,3 +1,4 @@
+import { InvalidPoolError } from "../../../core/error.ts";
 import {
   CPUTensor,
   LayerJSON,
@@ -45,13 +46,11 @@ export class PoolCPULayer {
 
   initialize(inputSize: Shape[Rank]) {
     const size = checkShape(inputSize, Rank.R4);
-    if (size[0] % this.strides[0] || size[1] % this.strides[1]) {
-      throw new Error(
-        `Cannot pool shape ${size} with stride ${this.strides}`,
-      );
-    }
-    if (this.strides[0] == 1 || this.strides[1] == 1) {
-      throw new Error(`Cannot pool with stride ${this.strides}`);
+    if (
+      size[0] % this.strides[0] || size[1] % this.strides[1] ||
+      this.strides[0] == 1 || this.strides[1] == 1
+    ) {
+      throw new InvalidPoolError(size, this.strides);
     }
     const w = size[0] / this.strides[0];
     const h = size[1] / this.strides[1];
@@ -123,18 +122,8 @@ export class PoolCPULayer {
   }
 
   static fromJSON(
-    { outputSize, type, strides, mode }: LayerJSON,
+    { outputSize, strides, mode }: LayerJSON,
   ): PoolCPULayer {
-    if (type !== "pool") {
-      throw new Error(
-        "Cannot cannot create a MaxPooling layer from a" +
-          type.charAt(0).toUpperCase() + type.slice(1) +
-          "Layer",
-      );
-    }
-    if (strides === undefined) {
-      throw new Error("Layer imported must be initialized");
-    }
     const layer = new PoolCPULayer({ strides: strides as Shape2D, mode });
     layer.outputSize = outputSize as Shape3D;
     return layer;
