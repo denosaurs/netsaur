@@ -53,15 +53,17 @@ const {
   op_ffi_read_u8,
   op_ffi_get_buf,
   // deno-lint-ignore no-explicit-any
-} = (Deno as any).core.ops;
+} = (Deno as any)[(Deno as any).internal]
+  .core
+  .ops;
 
 const MatrixFinalizer = new FinalizationRegistry((id: Deno.PointerValue) => {
   matrix_free(id);
 });
 
 export class Matrix<T extends DataType> {
-  #ptr: Deno.PointerValue = 0;
-  #token = { ptr: 0 as Deno.PointerValue };
+  #ptr: Deno.PointerValue = null;
+  #token = { ptr: null as Deno.PointerValue };
 
   get unsafePointer() {
     return this.#ptr;
@@ -77,7 +79,7 @@ export class Matrix<T extends DataType> {
   constructor(rows: number, cols: number, data: DataTypeArray<T>);
   constructor(rows: number, cols: number, type: T, fill: number);
   constructor(
-    rows: number,
+    rows: number | Deno.PointerValue,
     cols?: number,
     type?: T | DataTypeArray<T>,
     fill?: number | Deno.PointerValue,
@@ -88,17 +90,17 @@ export class Matrix<T extends DataType> {
       if (typeof fill === "number") {
         switch (type) {
           case "u32":
-            this.#ptr = matrix_new_fill_u32(rows, cols!, fill);
+            this.#ptr = matrix_new_fill_u32(rows as number, cols!, fill);
             break;
           case "i32":
-            this.#ptr = matrix_new_fill_i32(rows, cols!, fill);
+            this.#ptr = matrix_new_fill_i32(rows as number, cols!, fill);
             break;
           case "f32":
-            this.#ptr = matrix_new_fill_f32(rows, cols!, fill);
+            this.#ptr = matrix_new_fill_f32(rows as number, cols!, fill);
             break;
         }
       } else {
-        this.#ptr = matrix_new(rows, cols!, C_DATA_TYPE[type]);
+        this.#ptr = matrix_new(rows as number, cols!, C_DATA_TYPE[type]);
       }
       Object.defineProperty(this, "type", { value: type, writable: false });
     } else if (typeof type === "object" && type !== null) {
@@ -107,10 +109,10 @@ export class Matrix<T extends DataType> {
         value: C_DATA_TYPE[ty],
         writable: false,
       });
-      this.#ptr = matrix_new_from_array(rows, cols!, ty, type);
+      this.#ptr = matrix_new_from_array(rows as number, cols!, ty, type);
     } else throw new Error("Invalid arguments");
 
-    const c = Number(this.#ptr);
+    const c = Number(Deno.UnsafePointer.value(this.#ptr));
 
     const ptr = op_ffi_read_u64(c);
     rows = op_ffi_read_u32(c + 8);
@@ -124,10 +126,10 @@ export class Matrix<T extends DataType> {
       });
     }
 
-    const buf = op_ffi_get_buf(ptr, rows * cols! * 4);
+    const buf = op_ffi_get_buf(ptr, rows as number * cols! * 4);
 
     Object.defineProperties(this, {
-      rows: { value: rows, writable: false },
+      rows: { value: rows as number, writable: false },
       cols: { value: cols, writable: false },
       data: {
         value: this.type === "f32"
@@ -163,7 +165,7 @@ export class Matrix<T extends DataType> {
 
   dot(b: Matrix<T>): Matrix<T> {
     const c = matrix_dot(this.#ptr, b.unsafePointer);
-    if (c === 0) throw new Error("Invalid matrix dimensions");
+    if (c === null) throw new Error("Invalid matrix dimensions");
     return new Matrix(c);
   }
 
@@ -181,7 +183,7 @@ export class Matrix<T extends DataType> {
       }
     } else {
       const c = matrix_add(this.#ptr, b.unsafePointer);
-      if (c === 0) throw new Error("Invalid matrix dimensions");
+      if (c === null) throw new Error("Invalid matrix dimensions");
       return new Matrix(c);
     }
   }
@@ -200,7 +202,7 @@ export class Matrix<T extends DataType> {
       }
     } else {
       const c = matrix_sub(this.#ptr, b.unsafePointer);
-      if (c === 0) throw new Error("Invalid matrix dimensions");
+      if (c === null) throw new Error("Invalid matrix dimensions");
       return new Matrix(c);
     }
   }
@@ -247,7 +249,7 @@ export class Matrix<T extends DataType> {
     if (this.#ptr) {
       matrix_free(this.#ptr);
       MatrixFinalizer.unregister(this.#token);
-      this.#ptr = 0;
+      this.#ptr = null;
     }
   }
 

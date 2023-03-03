@@ -40,7 +40,7 @@ export interface Dataset {
 
 export class NativeBackend implements Backend {
   #ptr: Deno.PointerValue;
-  #token: { ptr: Deno.PointerValue } = { ptr: 0 };
+  #token: { ptr: Deno.PointerValue } = { ptr: null };
 
   get unsafePointer() {
     return this.#ptr;
@@ -50,13 +50,15 @@ export class NativeBackend implements Backend {
     return [];
   }
   constructor(config: NetworkConfig | Deno.PointerValue) {
-    this.#ptr = typeof config === "object"
+    this.#ptr = "cost" in config!
       ? network_create(
         to1D(config.input!)[0],
         config.cost === "crossentropy" ? 1 : 0,
         config.layers.length,
         new BigUint64Array(
-          config.layers.map((e) => BigInt(e.unsafePointer)),
+          config.layers.map((e) =>
+            BigInt(Deno.UnsafePointer.value(e.unsafePointer))
+          ),
         ),
       )
       : config;
@@ -90,11 +92,15 @@ export class NativeBackend implements Backend {
   train(datasets: Dataset[], epochs = 5000, _batches = 1, rate = 0.1) {
     const datasetBuffers = datasets.map((e) =>
       new BigUint64Array(
-        [e.inputs.unsafePointer, e.outputs.unsafePointer].map(BigInt),
+        [e.inputs.unsafePointer!, e.outputs.unsafePointer!].map((ptr) =>
+          BigInt(Deno.UnsafePointer.value(ptr))
+        ),
       )
     );
     const datasetBufferPointers = new BigUint64Array(
-      datasetBuffers.map((e) => BigInt(Deno.UnsafePointer.of(e))),
+      datasetBuffers.map((e) =>
+        BigInt(Deno.UnsafePointer.value(Deno.UnsafePointer.of(e)))
+      ),
     );
     network_train(
       this.unsafePointer,
@@ -120,7 +126,7 @@ export class NativeBackend implements Backend {
   free(): void {
     if (this.#ptr) {
       network_free(this.#ptr);
-      this.#ptr = 0;
+      this.#ptr = null;
       NetworkFinalizer.unregister(this.#token);
     }
   }
