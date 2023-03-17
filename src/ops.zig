@@ -11,115 +11,115 @@ pub const op_tensor_new = *const fn (
 
 pub const op_tensor_free = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) void;
 
 pub const op_tensor_sum = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
     dtype: tensor.TensorType,
 ) *tensor.Tensor;
 
 pub const op_tensor_matmul = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
-    tensor_other: *tensor.Tensor,
+    input: *tensor.Tensor,
+    other: *tensor.Tensor,
     dtype: tensor.TensorType,
 ) *tensor.Tensor;
 
 pub const op_tensor_transpose = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
     dim0: u8,
     dim1: u8,
 ) *tensor.Tensor;
 
 pub const op_tensor_sigmoid = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_softmax = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
     dim: u8,
     dtype: tensor.TensorType,
 ) *tensor.Tensor;
 
 pub const op_tensor_abs = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_acos = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_asin = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_atan = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_cos = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_sin = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_tan = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_cosh = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_sinh = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_tanh = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_ceil = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_sqrt = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_lgamma = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_reshape = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
     shape: [4]usize,
 ) *tensor.Tensor;
 
 pub const op_tensor_flatten = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
     first_dim: u8,
     end_dim: u8,
 ) *tensor.Tensor;
@@ -127,80 +127,90 @@ pub const op_tensor_flatten = *const fn (
 // Both tensors must be 1D
 pub const op_tensor_dot = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
-    other_tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
+    other: *tensor.Tensor,
 ) *tensor.Tensor;
 
 // Same as previous but if a tensor has more than one dimension finds the dot product between their last dimensions
 pub const op_tensor_inner = *const fn (
     ctx: *const Context,
-    tensor: *tensor.Tensor,
-    other_tensor: *tensor.Tensor,
+    input: *tensor.Tensor,
+    other: *tensor.Tensor,
+) *tensor.Tensor;
+
+pub const op_tensor_max = *const fn (
+    ctx: *const Context,
+    input: *tensor.Tensor,
+) *tensor.Tensor;
+
+pub const op_tensor_min = *const fn (
+    ctx: *const Context,
+    input: *tensor.Tensor,
 ) *tensor.Tensor;
 
 pub const op_tensor_foreach_abs = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_acos = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_asin = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_atan = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_cos = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_sin = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_tan = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_cosh = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_sinh = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_tanh = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_ceil = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_sqrt = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const op_tensor_foreach_lgamma = *const fn (
     ctx: *const Context,
-    tensors: []*tensor.Tensor,
+    inputs: []*tensor.Tensor,
 ) []*tensor.Tensor;
 
 pub const Ops = struct {
@@ -215,6 +225,8 @@ pub const Ops = struct {
     // tensor_flatten: op_tensor_flatten,
     // tensor_dot: op_tensor_dot,
     // tensor_inner: op_tensor_inner,
+    // tensor_min: op_tensor_min,
+    // tensor_max: op_tensor_max,
     // tensor_abs: op_tensor_abs,
     // tensor_acos: op_tensor_acos,
     // tensor_asin: op_tensor_asin,
