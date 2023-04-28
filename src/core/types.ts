@@ -4,8 +4,8 @@ import { DenseCPULayer } from "../backends/cpu/layers/dense.ts";
 import { DenseGPULayer } from "../backends/gpu/layers/dense.ts";
 import { PoolCPULayer } from "../backends/cpu/layers/pool.ts";
 import { Tensor } from "./tensor.ts";
-import { Matrix } from "../backends/native/matrix.ts";
 import { SoftmaxCPULayer } from "../backends/cpu/layers/activation.ts";
+import { Shape,Rank,Shape1D,Shape4D,Shape2D } from "./api/shape.ts";
 
 export interface LayerJSON {
   outputSize?: Shape[Rank];
@@ -106,31 +106,6 @@ export interface FlattenLayerConfig {
   size: Shape[Rank];
 }
 
-export type Shape1D = [number];
-export type Shape2D = [number, number];
-export type Shape3D = [number, number, number];
-export type Shape4D = [number, number, number, number];
-export type Shape5D = [number, number, number, number, number];
-export type Shape6D = [number, number, number, number, number, number];
-
-export enum Rank {
-  R1 = 1, // Scalar   (magnitude only)
-  R2 = 2, // Vector   (magnitude and direction)
-  R3 = 3, // Matrix   (table of numbers)
-  R4 = 4, // 3-Tensor (cube of numbers)
-  R5 = 5,
-  R6 = 6,
-}
-
-export interface Shape {
-  1: Shape1D;
-  2: Shape2D;
-  3: Shape3D;
-  4: Shape4D;
-  5: Shape5D;
-  6: Shape6D;
-}
-
 /**
  * Activation functions are used to transform the output of a layer into a new output.
  */
@@ -146,19 +121,7 @@ export type Activation =
 
 export type Cost = "crossentropy" | "hinge" | "mse";
 
-export type ArrayMap =
-  | number
-  | number[]
-  | number[][]
-  | number[][][]
-  | number[][][][]
-  | number[][][][][]
-  | number[][][][][][];
-
 export type TypedArray = Float32Array | Int32Array | Uint8Array;
-
-export type CPUTensor<R extends Rank> = Tensor<R, BackendType.CPU>;
-export type GPUTensor<R extends Rank> = Tensor<R, BackendType.GPU>;
 
 /**
  * DataSet is a container for training data.
@@ -171,25 +134,11 @@ export type DataSet = {
 export enum BackendType {
   CPU = "cpu",
   GPU = "gpu",
-  Native = "native",
 }
 
-/** @docalias TypedArray|Array */
-export type TensorLike =
-  | number
-  | number[]
-  | number[][]
-  | number[][][]
-  | number[][][][]
-  | TypedArray
-  | TypedArray[]
-  | TypedArray[][]
-  | TypedArray[][][];
-
 export interface TensorData {
-  cpu: DataTypeArray;
-  gpu: WebGPUData;
-  native: Matrix<"f32">;
+  [BackendType.CPU]: Float32Array;
+  [BackendType.GPU]: WebGPUData;
 }
 
 export type Init = "uniform" | "xavier" | "xaviern" | "kaiming";

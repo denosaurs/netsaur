@@ -1,53 +1,22 @@
-import { DataTypeArray } from "../deps.ts";
+import { DataTypeArray } from "../../deps.ts";
 import { CPUBackend } from "../backends/cpu/backend.ts";
-import {
-  Backend,
-  DataSet,
-  NetworkConfig,
-  NetworkJSON,
-  Rank,
-  Shape,
-} from "./types.ts";
-import { Data } from "../data/mod.ts";
+import { Backend, DataSet, NetworkConfig, NetworkJSON } from "./types.ts";
+import { Data } from "../model/data/mod.ts";
 import { Engine } from "./engine.ts";
+import { Rank, Shape } from "./api/shape.ts";
 
 /**
  * base class for neural network
  */
 export class NeuralNetwork {
   backend!: Backend;
-  // input?: Size;
-  // layers: Layer[] = [];
-  // output: any;
-  // silent: boolean;
-  // costFn: any;
+
   /**
    * create a neural network
    */
   constructor(public config: NetworkConfig) {
     this.backend = Engine.backendLoader(this.config);
-    // this.silent = config.silent ?? false;
-    // config.layers.map(this.addLayer.bind(this));
-    // this.output = config.layers[config.layers.length - 1];
-    // this.setCost(config.cost);
   }
-
-  // setCost(activation: Cost) {
-  //   switch (activation) {
-  //     case "crossentropy":
-  //       this.costFn = {
-  //         cost: Engine.ops.crossentropy,
-  //         prime: Engine.ops.crossentropy_prime,
-  //       };
-  //       break;
-  //     case "hinge":
-  //       this.costFn = {
-  //         cost: Engine.ops.hinge,
-  //         prime: Engine.ops.hinge_prime,
-  //       };
-  //       break;
-  //   }
-  // }
 
   /**
    * initialize the backend
@@ -72,6 +41,7 @@ export class NeuralNetwork {
   async feedForward(input: any): Promise<any> {
     return await this.backend.feedForward(input);
   }
+
   /**
    * train network
    */
@@ -83,6 +53,7 @@ export class NeuralNetwork {
   ) {
     await this.backend.train(datasets, epochs, batches, learningRate);
   }
+
   /**
    * use network to predict data
    */
@@ -97,6 +68,7 @@ export class NeuralNetwork {
   async toJSON() {
     return await this.backend.toJSON();
   }
+
   /**
    * Import the network in a JSON format
    */
@@ -107,17 +79,20 @@ export class NeuralNetwork {
   ) {
     return helper ? await helper(data, silent) : CPUBackend.fromJSON(data);
   }
+
   /**
    * Load model from binary file
    */
   static load(_str: string) {
   }
+
   /**
    * save model to binary file
    */
   save(str: string) {
     this.backend.save(str);
   }
+
   /**
    * get the weights of the network
    */
@@ -131,6 +106,7 @@ export class NeuralNetwork {
   getBiases() {
     return this.backend.getBiases();
   }
+
   /**
    * get layers from the backend
    */

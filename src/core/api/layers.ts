@@ -3,7 +3,7 @@ import {
   DenseLayerConfig,
   FlattenLayerConfig,
   PoolLayerConfig,
-} from "../core/types.ts";
+} from "../types.ts";
 
 export class Layer {
   // deno-lint-ignore no-explicit-any
