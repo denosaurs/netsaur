@@ -1,9 +1,11 @@
-import { DataTypeArray } from "../../deps.ts";
 import { CPUBackend } from "../backends/cpu/backend.ts";
-import { Backend, DataSet, NetworkConfig, NetworkJSON } from "./types.ts";
+import { Backend, BackendType, DataSet, NetworkConfig } from "./types.ts";
 import { Data } from "../model/data/mod.ts";
 import { Engine } from "./engine.ts";
 import { Rank, Shape } from "./api/shape.ts";
+import { Layer } from "./api/layer.ts";
+import { Tensor } from "./tensor/tensor.ts";
+import { NetworkJSON } from "../model/types.ts";
 
 /**
  * base class for neural network
@@ -28,18 +30,9 @@ export class NeuralNetwork {
   /**
    * add layer to network
    */
-  // deno-lint-ignore no-explicit-any
-  addLayer(layer: any) {
+  addLayer(layer: Layer) {
     this.backend.addLayer(layer);
     // this.layers.push(layer);
-  }
-
-  /**
-   * feed an input through the layers
-   */
-  // deno-lint-ignore no-explicit-any
-  async feedForward(input: any): Promise<any> {
-    return await this.backend.feedForward(input);
   }
 
   /**
@@ -57,8 +50,7 @@ export class NeuralNetwork {
   /**
    * use network to predict data
    */
-  // deno-lint-ignore no-explicit-any
-  async predict(data: DataTypeArray | any) {
+  async predict(data: Tensor<Rank, BackendType>) {
     return await this.backend.predict(data);
   }
 
@@ -91,27 +83,6 @@ export class NeuralNetwork {
    */
   save(str: string) {
     this.backend.save(str);
-  }
-
-  /**
-   * get the weights of the network
-   */
-  getWeights() {
-    return this.backend.getWeights();
-  }
-
-  /**
-   * get the biases of the network
-   */
-  getBiases() {
-    return this.backend.getBiases();
-  }
-
-  /**
-   * get layers from the backend
-   */
-  getLayer(index: number) {
-    return this.backend.layers[index];
   }
 }
 

@@ -17,8 +17,14 @@ import {
 import { GPUInstance } from "../../backend_gpu/mod.ts";
 import { WebGPUData } from "../../../deps.ts";
 import { Engine } from "../engine.ts";
-import { BackendType, TensorData, TensorJSON, TypedArray } from "../types.ts";
+import { BackendType } from "../types.ts";
 import { inferShape, length } from "./util.ts";
+import { TensorJSON } from "../../model/types.ts";
+
+export interface TensorData {
+  [BackendType.CPU]: Float32Array;
+  [BackendType.GPU]: WebGPUData;
+}
 
 export type CPUTensor<R extends Rank> = Tensor<R, BackendType.CPU>;
 
@@ -37,8 +43,10 @@ export class Tensor<R extends Rank, B extends BackendType> {
     shape: Shape[R],
   ): Tensor<R, B> {
     switch (Engine.type) {
-      case BackendType.CPU:
-        return new Tensor(new Float32Array(length(shape)), shape);
+      case BackendType.CPU: {
+        const data = new Float32Array(length(shape))
+        return new Tensor(data, shape) as Tensor<R, B>;
+      }
       case BackendType.GPU: {
         const data = new WebGPUData(GPUInstance.backend!, "f32", length(shape));
         return new Tensor(data, shape);
@@ -64,10 +72,10 @@ export class Tensor<R extends Rank, B extends BackendType> {
   async getData() {
     switch (Engine.type) {
       case BackendType.CPU:
-        return Array.from(this.data as TypedArray);
+        return Array.from(this.data as Float32Array);
       case BackendType.GPU: {
         const data = await (this.data as WebGPUData).get();
-        return Array.from(data as TypedArray);
+        return Array.from(data as Float32Array);
       }
     }
   }

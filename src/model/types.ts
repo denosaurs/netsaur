@@ -1,5 +1,5 @@
-import { NetworkJSON } from "../core/types.ts";
-import { NeuralNetwork } from "../mod.ts";
+import { Rank, Shape } from "../core/api/shape.ts";
+import { NeuralNetwork } from "../../mod.ts";
 
 export interface ModelFormat {
   load: (path: string) => Promise<NetworkJSON>;
@@ -46,4 +46,30 @@ export interface KerasLayer {
   config: KerasLayerConfig;
   // deno-lint-ignore no-explicit-any
   inbound_nodes: any[];
+}
+
+export interface LayerJSON {
+  outputSize?: Shape[Rank];
+  inputSize?: Shape[Rank];
+  activationFn?: string;
+  costFn?: string;
+  type: string;
+  weights?: TensorJSON;
+  paddedSize?: Shape[Rank];
+  biases?: TensorJSON;
+  kernel?: TensorJSON;
+  strides?: Shape[Rank];
+  padding?: number;
+  mode?: "max" | "avg";
+}
+
+export interface NetworkJSON {
+  costFn?: string;
+  input: Shape[Rank] | undefined;
+  layers: LayerJSON[];
+}
+
+export interface TensorJSON {
+  data: number[];
+  shape: Shape[Rank];
 }
