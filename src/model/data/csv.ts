@@ -1,6 +1,6 @@
-import { tensor2D } from "../core/tensor.ts";
+import { tensor2D } from "./core/tensor.ts";
 import type { DataLike } from "./data.ts";
-import { CsvStream } from "./deps.ts";
+import { CsvStream } from "../../../deps.ts";
 
 export interface CsvColumnConfig {
   label?: boolean;
