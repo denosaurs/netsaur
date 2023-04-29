@@ -11,3 +11,4 @@ package-lock.json
 test.ts
 experiments
 deno.lock
+target/

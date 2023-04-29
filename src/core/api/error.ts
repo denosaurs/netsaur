@@ -14,6 +14,14 @@ export class InvalidFlattenError extends Error {
   }
 }
 
+export class NoDynamicLibraryError extends Error {
+  constructor() {
+    super(
+      `CPU backend not initialized. Help: Did you forget to call setupBackend()?`,
+    );
+  }
+}
+
 export class NoWebGPUBackendError extends Error {
   constructor() {
     super(

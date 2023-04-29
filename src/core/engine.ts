@@ -1,10 +1,44 @@
-import { CPUBackend } from "../backends/cpu/backend.ts";
+import { CPU } from "../backend_cpu/mod.ts";
+import { NetworkJSON } from "../model/types.ts";
+import { Rank, Shape } from "./api/shape.ts";
+import { Tensor } from "./tensor/tensor.ts";
 import { Backend, BackendType, NetworkConfig } from "./types.ts";
 
-export class Engine {
-  static backendLoader: (config: NetworkConfig) => Backend = (
-    config: NetworkConfig,
-  ) => new CPUBackend(config);
+export interface BackendInstance {
+  init(): Promise<void>;
+}
 
-  static type: BackendType
+export interface TensorBackend {
+  zeroes<R extends Rank, B extends BackendType>(shape: Shape[R]): Tensor<R, B>;
+
+  from<R extends Rank, B extends BackendType>(
+    values: Float32Array,
+    shape: Shape[R],
+  ): Tensor<R, B>;
+
+  get(): Promise<Float32Array>;
+
+  set(values: Float32Array): void;
+}
+
+export interface BackendLoader {
+  setup(silent: boolean): Promise<boolean>;
+
+  loadBackend(config: NetworkConfig): Backend;
+
+  fromJSON(json: NetworkJSON): Backend;
+}
+
+export async function setupBackend(loader: BackendLoader, silent = false) {
+  const success = await loader.setup(silent);
+  if (!success) {
+    if (!silent) console.log("Defaulting to CPU Backend");
+    await CPU.setup(silent);
+  }
+}
+
+export class Engine {
+  static backendLoader: BackendLoader;
+
+  static type: BackendType;
 }

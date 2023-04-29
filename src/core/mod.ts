@@ -1,4 +1,3 @@
-import { CPUBackend } from "../backends/cpu/backend.ts";
 import { Backend, BackendType, DataSet, NetworkConfig } from "./types.ts";
 import { Data } from "../model/data/mod.ts";
 import { Engine } from "./engine.ts";
@@ -17,7 +16,7 @@ export class NeuralNetwork {
    * create a neural network
    */
   constructor(public config: NetworkConfig) {
-    this.backend = Engine.backendLoader(this.config);
+    this.backend = Engine.backendLoader.loadBackend(this.config);
   }
 
   /**
@@ -64,12 +63,8 @@ export class NeuralNetwork {
   /**
    * Import the network in a JSON format
    */
-  static async fromJSON(
-    data: NetworkJSON,
-    helper?: (data: NetworkJSON, silent: boolean) => Promise<Backend>,
-    silent = false,
-  ) {
-    return helper ? await helper(data, silent) : CPUBackend.fromJSON(data);
+  static fromJSON(data: NetworkJSON) {
+    return Engine.backendLoader.fromJSON(data);
   }
 
   /**
@@ -84,11 +79,4 @@ export class NeuralNetwork {
   save(str: string) {
     this.backend.save(str);
   }
-}
-
-export async function setupBackend(
-  { setup }: { setup: (silent: boolean) => Promise<void> | void },
-  silent = false,
-) {
-  await setup(silent);
 }

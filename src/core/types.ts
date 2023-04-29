@@ -1,4 +1,3 @@
-import { DataType } from "../../deps.ts";
 import { Tensor } from "./tensor/tensor.ts";
 import { Rank, Shape } from "./api/shape.ts";
 import { Layer } from "./api/layer.ts";
@@ -6,11 +5,7 @@ import { NetworkJSON } from "../model/types.ts";
 import { Data } from "../model/data/data.ts";
 
 export interface Backend {
-  initialize(
-    inputSize: Shape[Rank],
-    batches: number,
-    type?: DataType,
-  ): void | Promise<void>;
+  initialize(inputSize: Shape[Rank], batches: number): Promise<void>;
 
   addLayer(layer: Layer): void;
 
@@ -67,12 +62,12 @@ export type DataSet = {
 };
 
 export enum LayerType {
-  Dense,
-  Activation,
-  Conv,
-  Pool,
-  Flatten,
-  Softmax,
+  Dense = "dense",
+  Activation  = "activation",
+  Conv = "conv",
+  Pool = "pool",
+  Flatten = "flatten",
+  Softmax = "softmax",
 }
 
 export enum BackendType {
