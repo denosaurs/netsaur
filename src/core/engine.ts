@@ -16,9 +16,9 @@ export interface TensorBackend {
     shape: Shape[R],
   ): Tensor<R, B>;
 
-  get(): Promise<Float32Array>;
+  get(tensor: Tensor<Rank, BackendType>): Promise<Float32Array>;
 
-  set(values: Float32Array): void;
+  set(tensor: Tensor<Rank, BackendType>, values: Float32Array): void;
 }
 
 export interface BackendLoader {
@@ -35,6 +35,7 @@ export async function setupBackend(loader: BackendLoader, silent = false) {
     if (!silent) console.log("Defaulting to CPU Backend");
     await CPU.setup(silent);
   }
+  Engine.backendLoader = loader
 }
 
 export class Engine {

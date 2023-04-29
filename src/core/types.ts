@@ -2,24 +2,14 @@ import { Tensor } from "./tensor/tensor.ts";
 import { Rank, Shape } from "./api/shape.ts";
 import { Layer } from "./api/layer.ts";
 import { NetworkJSON } from "../model/types.ts";
-import { Data } from "../model/data/data.ts";
 
 export interface Backend {
-  initialize(inputSize: Shape[Rank], batches: number): Promise<void>;
+  train(datasets: DataSet[], epochs: number, rate: number): void;
 
-  addLayer(layer: Layer): void;
-
-  train(
-    datasets: DataSet[] | Data,
-    epochs: number,
-    batches: number,
-    learningRate: number,
-  ): void;
-
-  predict(input: Tensor<Rank, BackendType>): Tensor<Rank, BackendType>;
+  predict(input: Tensor<Rank, BackendType>): Promise<Tensor<Rank, BackendType>>;
 
   save(input: string): void;
-  
+
   toJSON(): Promise<NetworkJSON>;
 }
 
@@ -27,7 +17,7 @@ export interface Backend {
  * NetworkConfig represents the configuration of a neural network.
  */
 export type NetworkConfig = {
-  input?: Shape[Rank];
+  size: Shape[Rank];
   layers: Layer[];
   cost: Cost;
   silent?: boolean;
@@ -63,7 +53,7 @@ export type DataSet = {
 
 export enum LayerType {
   Dense = "dense",
-  Activation  = "activation",
+  Activation = "activation",
   Conv = "conv",
   Pool = "pool",
   Flatten = "flatten",

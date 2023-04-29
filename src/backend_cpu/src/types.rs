@@ -8,6 +8,7 @@ pub struct BackendConfig {
     pub cost: Cost,
 }
 
+#[derive(Debug)]
 pub struct Dataset {
     pub inputs: ArrayD<f32>,
     pub outputs: ArrayD<f32>,
@@ -22,6 +23,7 @@ pub enum Layer {
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "lowercase")] 
 pub enum Activation {
     Sigmoid,
     Tanh,
@@ -37,4 +39,21 @@ pub struct Dense {
 #[serde(rename_all = "lowercase")] 
 pub enum Cost {
     MSE,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")] 
+pub struct TrainOptions {
+    pub datasets: usize,
+    pub input_shape: Vec<usize>,
+    pub output_shape: Vec<usize>,
+    pub epochs: usize,
+    pub rate: f32
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")] 
+pub struct PredictOptions {
+    pub input_shape: Vec<usize>,
+    pub output_shape: Vec<usize>,
 }

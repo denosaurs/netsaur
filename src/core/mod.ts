@@ -1,8 +1,6 @@
 import { Backend, BackendType, DataSet, NetworkConfig } from "./types.ts";
-import { Data } from "../model/data/mod.ts";
 import { Engine } from "./engine.ts";
-import { Rank, Shape } from "./api/shape.ts";
-import { Layer } from "./api/layer.ts";
+import { Rank } from "./api/shape.ts";
 import { Tensor } from "./tensor/tensor.ts";
 import { NetworkJSON } from "../model/types.ts";
 
@@ -20,30 +18,10 @@ export class NeuralNetwork {
   }
 
   /**
-   * initialize the backend
-   */
-  initialize(inputSize: Shape[Rank], batches = 1) {
-    this.backend.initialize(inputSize, batches);
-  }
-
-  /**
-   * add layer to network
-   */
-  addLayer(layer: Layer) {
-    this.backend.addLayer(layer);
-    // this.layers.push(layer);
-  }
-
-  /**
    * train network
    */
-  async train(
-    datasets: (DataSet | Data)[],
-    epochs = 1000,
-    batches = 1,
-    learningRate = 0.1,
-  ) {
-    await this.backend.train(datasets, epochs, batches, learningRate);
+  train(datasets: DataSet[], epochs = 1000, rate = 0.1) {
+    this.backend.train(datasets, epochs, rate);
   }
 
   /**

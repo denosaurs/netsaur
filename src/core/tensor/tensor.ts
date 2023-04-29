@@ -65,14 +65,14 @@ export class Tensor<R extends Rank, B extends BackendType> {
    * Get tensor data as an array of values.
    */
   async get() {
-    return await Tensor.backend.get();
+    return await Tensor.backend.get(this);
   }
 
   /**
    * Set tensor data from an array of values.
    */
   set(values: Float32Array) {
-    Tensor.backend.set(values);
+    Tensor.backend.set(this, values);
   }
 
   /**
