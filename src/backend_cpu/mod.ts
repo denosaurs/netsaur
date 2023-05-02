@@ -9,9 +9,12 @@ import { NetworkJSON } from "../model/types.ts";
 
 const options: FetchOptions = {
   name: "netsaur",
-  // url: `${import.meta.url}/../../release/`,
-  // url: "./target/debug/",
-  url: "./target/release/",
+  url: new URL(import.meta.url).protocol !== "file:"
+    ? new URL(
+      "https://github.com/denosaurs/netsaur/releases/download/1.5.0/",
+      import.meta.url,
+    )
+    : "./target/release/",
   cache: "reloadAll",
 };
 
@@ -55,7 +58,7 @@ export class CPUBackendLoader {
 
   loadBackend(config: NetworkConfig): Backend {
     if (!CPUInstance.initialized) {
-      throw new NoBackendError(BackendType.CPU)
+      throw new NoBackendError(BackendType.CPU);
     }
     return new CPUBackend(config, CPUInstance.library!);
   }
@@ -65,4 +68,4 @@ export class CPUBackendLoader {
   }
 }
 
-export const CPU = new CPUBackendLoader()
+export const CPU = new CPUBackendLoader();
