@@ -1,29 +1,29 @@
 # Contributing
 
-### Building `backend_cpu`
+## Building `backend_cpu`
 
-Unoptimized: 
+Unoptimized:
 
-```
+```sh
 cargo build
 ```
 
-Optimized: 
+Optimized:
 
-```
+```sh
 cargo build --release
 ```
 
-### Building `backend_wasm`
+## Building `backend_wasm`
 
-Unoptimized: 
+Unoptimized:
 
-```
+```sh
 deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backend_wasm/lib --debug
 ```
 
-Optimized: 
+Optimized:
 
-```
+```sh
 deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backend_wasm/lib
 ```
