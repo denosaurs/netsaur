@@ -17,7 +17,13 @@
  </p>
 <hr/>
 
-## neural network deno module using [neo](https://github.com/denosaurs/neo)
+## Blazing fast Machine Learning library for Deno
+
+### Backends
+
+- [CPU](/src/backend_cpu/)
+- [WASM](/src/backend_wasm/)
+- [GPU](/src/backend_gpu/)
 
 ### Maintainers
 
@@ -28,135 +34,96 @@
 
 ```typescript
 import {
+  Activation,
+  Cost,
+  CPU,
   DenseLayer,
   NeuralNetwork,
-  tensor1D,
+  setupBackend,
   tensor2D,
 } from "https://deno.land/x/netsaur/mod.ts";
 
+await setupBackend(CPU);
+
 const net = new NeuralNetwork({
+  size: [4, 2],
   silent: true,
   layers: [
-    new DenseLayer({ size: 3, activation: "sigmoid" }),
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: [3], activation: Activation.Sigmoid }),
+    DenseLayer({ size: [1], activation: Activation.Sigmoid }),
   ],
-  cost: "crossentropy",
+  cost: Cost.MSE,
 });
 
-await net.train(
+const time = performance.now();
+
+net.train(
   [
     {
-      inputs: await tensor2D([
+      inputs: tensor2D([
         [0, 0],
         [1, 0],
         [0, 1],
         [1, 1],
       ]),
-      outputs: await tensor1D([0, 1, 1, 0]),
+      outputs: tensor2D([[0], [1], [1], [0]]),
     },
   ],
-  5000,
-);
+  10000,
+)
 
-console.log(await net.predict(new Float32Array([0, 0])));
-console.log(await net.predict(new Float32Array([1, 0])));
-console.log(await net.predict(new Float32Array([0, 1])));
-console.log(await net.predict(new Float32Array([1, 1])));
+console.log(`training time: ${performance.now() - time}ms`);
+console.log((await net.predict(tensor2D([[0, 0]]))).data);
+console.log((await net.predict(tensor2D([[1, 0]]))).data);
+console.log((await net.predict(tensor2D([[0, 1]]))).data);
+console.log((await net.predict(tensor2D([[1, 1]]))).data);
 ```
 
-#### Use the Native Backend
-
-```typescript
-import { DenseLayer, NeuralNetwork } from "https://deno.land/x/netsaur/mod.ts";
-import {
-  Matrix,
-  Native,
-} from "https://deno.land/x/netsaur/backends/native/mod.ts";
-
-const network = await new NeuralNetwork({
-  input: 2,
-  layers: [
-    new DenseLayer({ size: 3, activation: "sigmoid" }),
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
-  ],
-  cost: "crossentropy",
-}).setupBackend(Native);
-
-network.train(
-  [
-    {
-      inputs: Matrix.of([
-        [0, 0],
-        [0, 1],
-        [1, 0],
-        [1, 1],
-      ]),
-      outputs: Matrix.column([0, 1, 1, 0]),
-    },
-  ],
-  5000,
-  0.1,
-);
-
-console.log(
-  await network.predict(
-    Matrix.of([
-      [0, 0],
-      [0, 1],
-      [1, 0],
-      [1, 1],
-    ]),
-  ),
-);
-```
-
-### Saving Models
+#### Use the WASM Backend
 
 ```typescript
 import {
+  Activation,
+  Cost,
+  WASM,
   DenseLayer,
   NeuralNetwork,
-  tensor1D,
+  setupBackend,
   tensor2D,
 } from "https://deno.land/x/netsaur/mod.ts";
-import { Model } from "https://deno.land/x/netsaur/model/mod.ts";
+
+await setupBackend(WASM);
 
 const net = new NeuralNetwork({
+  size: [4, 2],
   silent: true,
   layers: [
-    new DenseLayer({ size: 3, activation: "sigmoid" }),
-    new DenseLayer({ size: 1, activation: "sigmoid" }),
+    DenseLayer({ size: [3], activation: Activation.Sigmoid }),
+    DenseLayer({ size: [1], activation: Activation.Sigmoid }),
   ],
-  cost: "crossentropy",
+  cost: Cost.MSE,
 });
 
-await net.train(
+const time = performance.now();
+
+net.train(
   [
     {
-      inputs: await tensor2D([
+      inputs: tensor2D([
         [0, 0],
         [1, 0],
         [0, 1],
         [1, 1],
       ]),
-      outputs: await tensor1D([0, 1, 1, 0]),
+      outputs: tensor2D([[0], [1], [1], [0]]),
     },
   ],
-  5000,
-);
+  10000,
+)
 
-await Model.save("./network.json", net);
-```
-
-### Loading & Running Models
-
-```typescript
-import { Model } from "https://deno.land/x/netsaur/model/mod.ts";
-
-const net = await Model.load("./network.json");
-
-console.log(await net.predict(new Float32Array([0, 0])));
-console.log(await net.predict(new Float32Array([1, 0])));
-console.log(await net.predict(new Float32Array([0, 1])));
-console.log(await net.predict(new Float32Array([1, 1])));
+console.log(`training time: ${performance.now() - time}ms`);
+console.log((await net.predict(tensor2D([[0, 0]]))).data);
+console.log((await net.predict(tensor2D([[1, 0]]))).data);
+console.log((await net.predict(tensor2D([[0, 1]]))).data);
+console.log((await net.predict(tensor2D([[1, 1]]))).data);
 ```

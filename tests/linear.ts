@@ -1,15 +1,16 @@
-import { NeuralNetwork, DenseLayer } from "../mod.ts";
-import { Native, Matrix } from "../backends/native/mod.ts";
+import { DenseLayer, NeuralNetwork, setupBackend } from "../mod.ts";
+import { Matrix, Native } from "../backends/native/mod.ts";
 
 const start = performance.now();
 
-const network = await new NeuralNetwork({
-  input: 1,
+await setupBackend(Native);
+
+const network = new NeuralNetwork({
   layers: [
-    new DenseLayer({ size: 1, activation: "linear" }),
+    DenseLayer({ size: [1], activation: "linear" }),
   ],
   cost: "mse",
-}).setupBackend(Native);
+});
 
 network.train(
   [

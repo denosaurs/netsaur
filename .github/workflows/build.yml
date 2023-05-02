@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [v1, main]
   pull_request:
 
 jobs:
@@ -12,38 +12,27 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        compiler: [clang]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.12
+      - name: Install rust
+        uses: hecrj/setup-rust-action@v1
         with:
-          cmake-version: '3.24.2'
+          rust-version: nightly
 
-      - name: Build on Windows
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: canary
+
+      - name: Build
         shell: bash
-        if: startsWith(matrix.os, 'windows')
         run: |
           set -xeuo pipefail
-          cd native
-          mkdir build
-          cd build
-          cmake .. -G "Unix Makefiles"
-          make
-          cd ../..
-      - name: Build on Mac & Linux
-        shell: bash
-        if: runner.os != 'Windows'
-        run: |
-          set -xeuo pipefail
-          cd native
-          mkdir build
-          cd build
-          cmake ..
-          make
-          cd ../..
+          rustc --version
+          cargo --version
+          cargo build --release
+          deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backend_wasm/lib
       - name: Release
         uses: softprops/action-gh-release@master
         env:
@@ -52,6 +41,8 @@ jobs:
           tag_name: "release draft"
           draft: true
           files: |
-            native/build/libnetsaur.so
-            native/build/libnetsaur.dylib
-            native/build/libnetsaur.dll
+            target/release/libnetsaur.so
+            target/release/libnetsaur.dylib
+            target/release/netsaur.dll
+            src/backend_wasm/lib/netsaur.generated.js
+            src/backend_wasm/lib/netsaur_bg.wasm
