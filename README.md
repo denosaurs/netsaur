@@ -17,13 +17,18 @@
  </p>
 <hr/>
 
-## Blazing fast Machine Learning library for Deno
+## Powerful Machine Learning library for Deno
 
 ### Backends
 
-- [CPU](/src/backend_cpu/)
-- [WASM](/src/backend_wasm/)
-- [GPU](/src/backend_gpu/)
+- [CPU](./src/backend_cpu/)
+- [WASM](./src/backend_wasm/)
+- [GPU](./src/backend_gpu/)
+
+### Examples
+
+- XOR ([CPU](./examples/xor_cpu.ts), [WASM](./examples/xor_wasm.ts))
+- Linear Regression ([CPU](./examples/linear_cpu.ts), [WASM](./examples/linear_wasm.ts))
 
 ### Maintainers
 
@@ -70,7 +75,7 @@ net.train(
     },
   ],
   10000,
-)
+);
 
 console.log(`training time: ${performance.now() - time}ms`);
 console.log((await net.predict(tensor2D([[0, 0]]))).data);
@@ -85,11 +90,11 @@ console.log((await net.predict(tensor2D([[1, 1]]))).data);
 import {
   Activation,
   Cost,
-  WASM,
   DenseLayer,
   NeuralNetwork,
   setupBackend,
   tensor2D,
+  WASM,
 } from "https://deno.land/x/netsaur/mod.ts";
 
 await setupBackend(WASM);
@@ -119,7 +124,7 @@ net.train(
     },
   ],
   10000,
-)
+);
 
 console.log(`training time: ${performance.now() - time}ms`);
 console.log((await net.predict(tensor2D([[0, 0]]))).data);
@@ -127,3 +132,11 @@ console.log((await net.predict(tensor2D([[1, 0]]))).data);
 console.log((await net.predict(tensor2D([[0, 1]]))).data);
 console.log((await net.predict(tensor2D([[1, 1]]))).data);
 ```
+
+### Documentation
+
+The full documentation for Netsaur can be found [here](https://deno.land/x/netsaur@0.2.0/mod.ts).
+
+### License
+
+Netsaur is licensed under the MIT License.
