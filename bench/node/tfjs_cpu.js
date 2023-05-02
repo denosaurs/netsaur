@@ -1,6 +1,7 @@
 const tf = require("@tensorflow/tfjs-node");
 
 async function predictOutput() {
+  const time = performance.now();
   const model = tf.sequential();
   model.add(tf.layers.dense({ units: 8, inputShape: 2, activation: "tanh" }));
   model.add(tf.layers.dense({ units: 1, activation: "sigmoid" }));
@@ -9,7 +10,6 @@ async function predictOutput() {
   // Creating dataset
   const xs = tf.tensor2d([[0, 0], [0, 1], [1, 0], [1, 1]]);
   const ys = tf.tensor2d([[0], [1], [1], [0]]);
-  const time = performance.now();
 
   // Train the model
   await model.fit(xs, ys, {

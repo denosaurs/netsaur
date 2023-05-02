@@ -1,11 +1,11 @@
 import {
   Activation,
   Cost,
-  WASM,
   DenseLayer,
   NeuralNetwork,
   setupBackend,
   tensor2D,
+  WASM,
 } from "../mod.ts";
 
 await setupBackend(WASM);
