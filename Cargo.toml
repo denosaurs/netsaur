@@ -1,5 +1,5 @@
 [workspace]
 
 members = [
-    "src/backend_cpu"
+    "src/rust"
 ]

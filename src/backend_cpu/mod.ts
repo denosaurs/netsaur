@@ -1,6 +1,6 @@
 import { dlopen, FetchOptions } from "../../deps.ts";
 import { CPUBackend } from "./backend.ts";
-import { NoDynamicLibraryError } from "../core/api/error.ts";
+import { NoBackendError } from "../core/api/error.ts";
 import { Engine } from "../core/engine.ts";
 import { Tensor } from "../core/tensor/tensor.ts";
 import { Backend, BackendType, NetworkConfig } from "../core/types.ts";
@@ -16,15 +16,15 @@ const options: FetchOptions = {
 };
 
 const symbols = {
-  ops_backend_create: {
+  ffi_backend_create: {
     parameters: ["buffer", "usize"],
     result: "void",
   } as const,
-  ops_backend_train: {
+  ffi_backend_train: {
     parameters: ["buffer", "usize", "buffer", "usize"],
     result: "void",
   } as const,
-  ops_backend_predict: {
+  ffi_backend_predict: {
     parameters: ["buffer", "buffer", "usize", "buffer"],
     result: "buffer",
   } as const,
@@ -54,7 +54,9 @@ export class CPUBackendLoader {
   }
 
   loadBackend(config: NetworkConfig): Backend {
-    if (!CPUInstance.initialized) throw new NoDynamicLibraryError();
+    if (!CPUInstance.initialized) {
+      throw new NoBackendError(BackendType.CPU)
+    }
     return new CPUBackend(config, CPUInstance.library!);
   }
 

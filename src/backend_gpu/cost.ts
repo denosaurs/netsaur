@@ -36,9 +36,6 @@ export class GPUCostFunction {
   async prime(_y: GPUTensor<Rank>, _yHat: GPUTensor<Rank>) {}
 }
 
-/**
- * Cross entropy cost function is the standard cost function for binary classification.
- */
 export class MSE extends GPUCostFunction {
   name = "mse";
   async cost(y: GPUTensor<Rank>, yHat: GPUTensor<Rank>) {

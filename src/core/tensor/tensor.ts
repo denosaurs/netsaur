@@ -23,6 +23,7 @@ import { TensorJSON } from "../../model/types.ts";
 export interface TensorData {
   [BackendType.CPU]: Float32Array;
   [BackendType.GPU]: WebGPUData;
+  [BackendType.WASM]: Float32Array;
 }
 
 export type CPUTensor<R extends Rank> = Tensor<R, BackendType.CPU>;

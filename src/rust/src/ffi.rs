@@ -1,34 +1,9 @@
-mod backend;
-mod layers;
-mod types;
-mod util;
-
-pub use backend::*;
-pub use layers::*;
-pub use types::*;
-pub use util::*;
-
-use std::cell::RefCell;
 use std::slice::{from_raw_parts, from_raw_parts_mut};
 
-pub struct Resources {
-    backend: RefCell<Option<CPUBackend>>,
-}
-
-impl Resources {
-    pub fn new() -> Self {
-        Self {
-            backend: RefCell::new(None),
-        }
-    }
-}
-
-thread_local! {
-    pub static RESOURCES: Resources = Resources::new();
-}
+use crate::{CPUBackend, decode_json, RESOURCES, TrainOptions, decode_array, Dataset, PredictOptions, length};
 
 #[no_mangle]
-pub extern "C" fn ops_backend_create(ptr: *const u8, len: usize) {
+pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize) {
     let config = decode_json(ptr, len);
     RESOURCES.with(|cell| {
         let mut backend = cell.backend.borrow_mut();
@@ -37,7 +12,7 @@ pub extern "C" fn ops_backend_create(ptr: *const u8, len: usize) {
 }
 
 #[no_mangle]
-pub extern "C" fn ops_backend_train(
+pub extern "C" fn ffi_backend_train(
     buffer_ptr: *const u64,
     buffer_len: usize,
     options_ptr: *const u8,
@@ -66,7 +41,7 @@ pub extern "C" fn ops_backend_train(
 }
 
 #[no_mangle]
-pub extern "C" fn ops_backend_predict(
+pub extern "C" fn ffi_backend_predict(
     buffer_ptr: *const f32,
     options_ptr: *const u8,
     options_len: usize,

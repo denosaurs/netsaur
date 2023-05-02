@@ -40,11 +40,6 @@ export class GPUBackend implements Backend {
     }
   }
 
-  // deno-lint-ignore no-explicit-any
-  addLayer(layer: any): void {
-    this.layers.push(layer);
-  }
-
   reset(size: Shape[Rank]) {
     for (const layer of this.layers) {
       size = layer.reset(size);

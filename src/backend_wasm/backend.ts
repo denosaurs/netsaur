@@ -1,32 +1,31 @@
 import { Rank, Shape, Tensor } from "../../mod.ts";
-import { length } from "../core/tensor/util.ts";
 import { BackendType, DataSet, NetworkConfig } from "../core/types.ts";
 import { NetworkJSON } from "../model/types.ts";
-import { Library } from "./mod.ts";
 import {
-  encodeDatasets,
-  encodeJSON,
-  PredictOptions,
-  TrainOptions,
-} from "./util.ts";
+  wasm_backend_create,
+  wasm_backend_predict,
+  wasm_backend_train,
+} from "./lib/netsaur.generated.js";
+import { PredictOptions, TrainOptions } from "./utils.ts";
 
-export class CPUBackend {
+export class WASMBackend {
   config: NetworkConfig;
-  library: Library;
   outputShape?: Shape[Rank];
 
-  constructor(config: NetworkConfig, library: Library) {
+  constructor(config: NetworkConfig) {
     this.config = config;
-    this.library = library;
 
-    const buffer = encodeJSON(config);
-    this.library.symbols.ffi_backend_create(buffer, buffer.length);
+    wasm_backend_create(JSON.stringify(config));
   }
 
   train(datasets: DataSet[], epochs: number, rate: number) {
     this.outputShape = datasets[0].outputs.shape.slice(1) as Shape[Rank];
-    const buffer = encodeDatasets(datasets);
-    const options = encodeJSON({
+    const buffer = [];
+    for (const dataset of datasets) {
+      buffer.push(dataset.inputs.data as Float32Array);
+      buffer.push(dataset.outputs.data as Float32Array);
+    }
+    const options = JSON.stringify({
       datasets: datasets.length,
       inputShape: datasets[0].inputs.shape,
       outputShape: datasets[0].outputs.shape,
@@ -34,29 +33,18 @@ export class CPUBackend {
       rate,
     } as TrainOptions);
 
-    this.library.symbols.ffi_backend_train(
-      buffer,
-      buffer.byteLength,
-      options,
-      options.byteLength,
-    );
+    wasm_backend_train(buffer, options);
   }
 
   //deno-lint-ignore require-await
   async predict(
     input: Tensor<Rank, BackendType>,
   ): Promise<Tensor<Rank, BackendType>> {
-    const options = encodeJSON({
+    const options = JSON.stringify({
       inputShape: input.shape,
       outputShape: this.outputShape,
     } as PredictOptions);
-    const output = new Float32Array(length(this.outputShape!));
-    this.library.symbols.ffi_backend_predict(
-      input.data as Float32Array,
-      options,
-      options.length,
-      output,
-    );
+    const output = wasm_backend_predict(input.data as Float32Array, options);
     return new Tensor(output, this.outputShape!);
   }
 
@@ -67,7 +55,7 @@ export class CPUBackend {
     return null as unknown as NetworkJSON;
   }
 
-  static fromJSON(_json: NetworkJSON): CPUBackend {
-    return null as unknown as CPUBackend;
+  static fromJSON(_json: NetworkJSON): WASMBackend {
+    return null as unknown as WASMBackend;
   }
 }

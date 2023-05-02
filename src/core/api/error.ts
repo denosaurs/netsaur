@@ -1,3 +1,4 @@
+import { BackendType } from "../types.ts";
 import { Rank, Shape, Shape2D } from "./shape.ts";
 
 export class IncompatibleRankError extends Error {
@@ -14,18 +15,10 @@ export class InvalidFlattenError extends Error {
   }
 }
 
-export class NoDynamicLibraryError extends Error {
-  constructor() {
+export class NoBackendError extends Error {
+  constructor(type: BackendType) {
     super(
-      `CPU backend not initialized. Help: Did you forget to call setupBackend()?`,
-    );
-  }
-}
-
-export class NoWebGPUBackendError extends Error {
-  constructor() {
-    super(
-      `WebGPU backend not initialized. Help: Did you forget to call setupBackend()?`,
+      `${type} backend not initialized. Help: Did you forget to call setupBackend()?`,
     );
   }
 }
