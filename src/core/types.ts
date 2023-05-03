@@ -105,7 +105,12 @@ export enum BackendType {
   WASM = "wasm",
 }
 
-export type Init = "uniform" | "xavier" | "xaviern" | "kaiming";
+export enum Init {
+  Uniform = "uniform",
+  Xavier = "xavier",
+  XavierN = "xaviern",
+  Kaiming = "kaiming",
+}
 
 export interface InitFn {
   init<R extends Rank, B extends BackendType>(

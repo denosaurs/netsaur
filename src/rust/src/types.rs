@@ -39,12 +39,22 @@ pub enum Activation {
 pub struct Dense {
     pub size: Vec<usize>,
     pub activation: Option<Activation>,
+    pub init: Option<Init>
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "lowercase")] 
 pub enum Cost {
     MSE,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "lowercase")] 
+pub enum Init {
+    Uniform,
+    Xavier,
+    XavierN,
+    Kaiming,
 }
 
 #[derive(Deserialize, Debug)]

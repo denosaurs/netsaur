@@ -1,9 +1,7 @@
-use ndarray::{Array1, Array2, ArrayD, Ix2, IxDyn, Axis};
-use ndarray_rand::RandomExt;
-use ndarray_rand::rand_distr::Uniform;
-use std::ops::{Add, Mul, AddAssign};
+use ndarray::{Array1, Array2, ArrayD, Axis, Ix2, IxDyn};
+use std::ops::{Add, AddAssign, Mul};
 
-use crate::{CPUActivation, Dense};
+use crate::{CPUActivation, CPUInit, Dense, Init};
 
 pub struct DenseCPULayer {
     pub inputs: Array2<f32>,
@@ -15,11 +13,17 @@ pub struct DenseCPULayer {
 
 impl DenseCPULayer {
     pub fn new(dense: Dense, size: IxDyn) -> Self {
+        let init = CPUInit::from_default(dense.init, Init::Uniform);
+        let input_size = [size[0], size[1]];
+        let weights_size = [size[1], dense.size[0]];
+        let output_size = [size[0], dense.size[0]];
         Self {
-            inputs: Array2::zeros((size[0], size[1])),
-            weights: Array2::random((size[1], dense.size[0]), Uniform::new(-1.0, 1.0)),
+            inputs: Array2::zeros(input_size),
+            weights: (init.init)(&weights_size, &input_size, &output_size)
+                .into_dimensionality::<Ix2>()
+                .unwrap(),
             biases: Array1::zeros(dense.size[0]),
-            outputs: Array2::zeros((size[0], dense.size[0])),
+            outputs: Array2::zeros(output_size),
             activation: CPUActivation::from_option(dense.activation),
         }
     }
@@ -52,7 +56,8 @@ impl DenseCPULayer {
         inputs_t.swap_axes(0, 1);
         let d_weights = inputs_t.dot(&d_outputs);
         self.weights.add_assign(&d_weights.mul(rate));
-        self.biases.add_assign(&d_outputs.mul(rate).sum_axis(Axis(0)));
+        self.biases
+            .add_assign(&d_outputs.mul(rate).sum_axis(Axis(0)));
         d_inputs.into_dyn()
     }
 }
