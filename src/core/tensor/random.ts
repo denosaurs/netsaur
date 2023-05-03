@@ -1,3 +1,6 @@
+/**
+ * Random class
+ */
 export class Random {
   static #y2 = 0;
   static #previous_gaussian = false;
@@ -6,6 +9,9 @@ export class Random {
   static #a = 1664525;
   static #c = 1013904223;
 
+  /**
+   * Linear congruential generator
+   */
   static lcg(stateProperty: string) {
     // deno-lint-ignore no-explicit-any
     (Random as any)[stateProperty] =
@@ -20,27 +26,28 @@ export class Random {
     (Random as any)[stateProperty] = val >>> 0;
   }
 
+  /**
+   * sets the seed for the random number generator
+   */
   static setSeed(seed: number) {
     Random.#lcgSeed(Random.#randomStateProp, seed);
     Random.#previous_gaussian = false;
   }
 
+  /**
+   * returns a random number
+   */
   static random(min?: number | number[], max?: number | number[]): number {
-    let rand;
     // deno-lint-ignore no-explicit-any
-    if ((Random as any)[Random.#randomStateProp] != null) {
-      rand = Random.lcg(Random.#randomStateProp);
-    } else {
-      rand = Math.random();
-    }
+    const rand = (Random as any)[Random.#randomStateProp] != null
+      ? Random.lcg(Random.#randomStateProp)
+      : Math.random();
     if (typeof min === "undefined") {
       return rand;
     } else if (typeof max === "undefined") {
-      if (min instanceof Array) {
-        return min[Math.floor(rand * min.length)];
-      } else {
-        return rand * min;
-      }
+      return min instanceof Array
+        ? min[Math.floor(rand * min.length)]
+        : rand * min;
     } else {
       if (min > max) {
         const tmp = min;
@@ -51,6 +58,9 @@ export class Random {
     }
   }
 
+  /**
+   * returns a random gaussian number
+   */
   static gaussian(mean: number, standard_deviation = 1) {
     // deno-lint-ignore prefer-const
     let y1, x1, x2, w;
@@ -73,6 +83,9 @@ export class Random {
   }
 }
 
+/**
+ * swap two elements in an array
+ */
 export function swap<T>(
   object: { [index: number]: T },
   left: number,
@@ -83,6 +96,9 @@ export function swap<T>(
   object[right] = temp;
 }
 
+/**
+ * shuffle an array
+ */
 export function shuffle(
   // deno-lint-ignore no-explicit-any
   array: any[] | Uint32Array | Int32Array | Float32Array,
@@ -96,6 +112,9 @@ export function shuffle(
   }
 }
 
+/**
+ * shuffle two arrays together
+ */
 export function shuffleCombo(
   // deno-lint-ignore no-explicit-any
   array: any[] | Uint32Array | Int32Array | Float32Array,
@@ -119,6 +138,9 @@ export function shuffleCombo(
   }
 }
 
+/**
+ * create an array of shuffled indices into another array
+ */
 export function createShuffledIndices(n: number): Uint32Array {
   const shuffledIndices = new Uint32Array(n);
   for (let i = 0; i < n; ++i) {
@@ -128,16 +150,28 @@ export function createShuffledIndices(n: number): Uint32Array {
   return shuffledIndices;
 }
 
+/**
+ * random Uniform distribution between two numbers
+ */
 export function randUniform(a: number, b: number) {
   const r = Math.random();
   return (b * r) + (1 - r) * a;
 }
 
+/**
+ * random weight initialization
+ */
 export const randomWeight = (): number => Math.random() * 0.4 - 0.2;
 
+/**
+ * random float between two numbers
+ */
 export const randomFloat = (min: number, max: number): number =>
   Math.random() * (max - min) + min;
 
+/**
+ * random gaussian
+ */
 export const gaussRandom = (): number => {
   if (gaussRandom.returnV) {
     gaussRandom.returnV = false;
@@ -157,11 +191,21 @@ export const gaussRandom = (): number => {
 gaussRandom.returnV = false;
 gaussRandom.vVal = 0;
 
+/**
+ * random integer between two numbers
+ */
 export const randomInteger = (min: number, max: number): number =>
   Math.floor(Math.random() * (max - min) + min);
 
+/**
+ * random number from a gaussian distribution
+ */
 export const randomN = (mu: number, std: number): number =>
   mu + gaussRandom() * std;
+
+/**
+ * max value in an array or object
+ */
 export const max = (
   values:
     | Float32Array

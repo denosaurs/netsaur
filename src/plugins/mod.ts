@@ -1,6 +1,9 @@
 import { Plugin } from "./types.ts";
-import { NeuralNetwork } from "../mod.ts";
+import { NeuralNetwork } from "../../mod.ts";
 
+/**
+ * Load a plugin into a NeuralNetwork instance.
+ */
 export const loadPlugin = (
   instance: NeuralNetwork,
   loader: (instance: NeuralNetwork) => Plugin,

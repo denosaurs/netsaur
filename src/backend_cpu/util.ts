@@ -1,5 +1,8 @@
 import { DataSet, Rank, Shape } from "../../mod.ts";
 
+/**
+ * Train Options Interface.
+ */
 export type TrainOptions = {
   datasets: number;
   inputShape: Shape[Rank];
@@ -8,19 +11,31 @@ export type TrainOptions = {
   rate: number;
 };
 
+/**
+ * Predict Options Interface.
+ */
 export type PredictOptions = {
   inputShape: Shape[Rank];
   outputShape: Shape[Rank];
 };
 
+/**
+ * Encode JSON data.
+ */
 export function encodeJSON(json: unknown) {
   return new TextEncoder().encode(JSON.stringify(json));
 }
 
+/**
+ * Returns the BigInt value of a pointer.
+ */
 export function pointer(arr: BufferSource) {
   return BigInt(Deno.UnsafePointer.value(Deno.UnsafePointer.of(arr)));
 }
 
+/**
+ * Encode datasets.
+ */
 export function encodeDatasets(datasets: DataSet[]) {
   const pointers: bigint[] = [];
   for (const dataset of datasets) {

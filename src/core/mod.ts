@@ -5,27 +5,27 @@ import { Tensor } from "./tensor/tensor.ts";
 import { NetworkJSON } from "../model/types.ts";
 
 /**
- * base class for neural network
+ * Sequential Neural Network
  */
 export class NeuralNetwork {
   backend!: Backend;
 
   /**
-   * create a neural network
+   * Create a Sequential Neural Network.
    */
   constructor(public config: NetworkConfig) {
     this.backend = Engine.backendLoader.loadBackend(this.config);
   }
 
   /**
-   * train network
+   * Train the Neural Network.
    */
   train(datasets: DataSet[], epochs = 1000, rate = 0.1) {
     this.backend.train(datasets, epochs, rate);
   }
 
   /**
-   * use network to predict data
+   * Use the network to make predictions.
    */
   async predict(data: Tensor<Rank, BackendType>) {
     return await this.backend.predict(data);
@@ -52,7 +52,7 @@ export class NeuralNetwork {
   }
 
   /**
-   * save model to binary file
+   * Save model to binary file
    */
   save(str: string) {
     this.backend.save(str);

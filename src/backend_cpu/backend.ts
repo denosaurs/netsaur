@@ -10,6 +10,9 @@ import {
   TrainOptions,
 } from "./util.ts";
 
+/**
+ * CPU Backend.
+ */
 export class CPUBackend {
   config: NetworkConfig;
   library: Library;

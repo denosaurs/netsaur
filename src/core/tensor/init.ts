@@ -4,6 +4,9 @@ import { Random } from "./random.ts";
 import { iterate1D, length } from "./util.ts";
 import { Rank, Shape } from "../api/shape.ts";
 
+/**
+ * setInit sets the initialization function.
+ */
 export function setInit(init: Init) {
   switch (init) {
     case "uniform":
@@ -17,6 +20,9 @@ export function setInit(init: Init) {
   }
 }
 
+/**
+ * Uniform initializer
+ */
 export class Uniform {
   init<R extends Rank, B extends BackendType>(
     _input: Shape[Rank],
@@ -29,6 +35,9 @@ export class Uniform {
   }
 }
 
+/**
+ * Xavier initializer
+ */
 export class Xavier {
   init<R extends Rank, B extends BackendType>(
     input: Shape[Rank],
@@ -42,6 +51,9 @@ export class Xavier {
   }
 }
 
+/**
+ * XavierNorm initializer
+ */
 export class XavierNorm {
   init<R extends Rank, B extends BackendType>(
     input: Shape[Rank],
@@ -55,6 +67,9 @@ export class XavierNorm {
   }
 }
 
+/**
+ * Kaiming initializer
+ */
 export class Kaiming {
   init<R extends Rank, B extends BackendType>(
     input: Shape[Rank],

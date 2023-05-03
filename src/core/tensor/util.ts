@@ -9,6 +9,9 @@ import {
 import { BackendType } from "../types.ts";
 import { Tensor } from "./tensor.ts";
 
+/**
+ * Infer the shape of an array.
+ */
 export function inferShape(arr: ArrayMap): number[] {
   const shape = [];
   let elem: ArrayMap | number = arr;
@@ -19,12 +22,18 @@ export function inferShape(arr: ArrayMap): number[] {
   return shape;
 }
 
+/**
+ * return the length of a shape.
+ */
 export function length(shape: Shape[Rank]) {
   let length = 1;
   shape.forEach((i) => length *= i);
   return length;
 }
 
+/**
+ * convert a shape to a given rank.
+ */
 export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
   if (rank < shape.length) {
     const res = new Array(rank).fill(1);
@@ -47,28 +56,46 @@ export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
   }
 }
 
+/**
+ * convert a shape to a 1D shape.
+ */
 export function to1D(shape: Shape[Rank]) {
   return toShape(shape, Rank.R1);
 }
 
+/**
+ * convert a shape to a 2D shape.
+ */
 export function to2D(shape: Shape[Rank]) {
   return toShape(shape, Rank.R2);
 }
 
+/**
+ * convert a shape to a 3D shape.
+ */
 export function to3D(shape: Shape[Rank]) {
   return toShape(shape, Rank.R3);
 }
 
+/**
+ * convert a shape to a 4D shape.
+ */
 export function to4D(shape: Shape[Rank]) {
   return toShape(shape, Rank.R3);
 }
 
+/**
+ * iterate over a 1D array.
+ */
 export function iterate1D(length: number, callback: (i: number) => void): void {
   for (let i = 0; i < length; i++) {
     callback(i);
   }
 }
 
+/**
+ * iterate over a 2D array.
+ */
 export function iterate2D(
   mat: Tensor<Rank, BackendType> | Shape[Rank],
   callback: (i: number, j: number) => void,
@@ -81,6 +108,9 @@ export function iterate2D(
   }
 }
 
+/**
+ * iterate over a 3D array.
+ */
 export function iterate3D(
   mat: Tensor<Rank, BackendType> | Shape[Rank],
   callback: (i: number, j: number, k: number) => void,
@@ -95,6 +125,9 @@ export function iterate3D(
   }
 }
 
+/**
+ * iterate over a 4D array.
+ */
 export function iterate4D(
   mat: Tensor<Rank, BackendType> | Shape[Rank],
   callback: (i: number, j: number, k: number, l: number) => void,

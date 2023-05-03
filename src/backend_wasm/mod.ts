@@ -7,6 +7,9 @@ import { WASMTensorBackend } from "./tensor.ts";
 import { NetworkJSON } from "../model/types.ts";
 import { instantiate } from "./lib/netsaur.generated.js";
 
+/**
+ * Web Assembly backend instance.
+ */
 export class WASMInstance {
   static initialized = false;
 
@@ -19,6 +22,9 @@ export class WASMInstance {
   }
 }
 
+/**
+ * Web Assembly Backend Loader.
+ */
 export class WASMBackendLoader {
   async setup(silent = false) {
     Tensor.backend = new WASMTensorBackend();
@@ -38,4 +44,7 @@ export class WASMBackendLoader {
   }
 }
 
+/**
+ * Web Assembly Backend Type.
+ */
 export const WASM = new WASMBackendLoader();

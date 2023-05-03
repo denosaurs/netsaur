@@ -3,6 +3,9 @@ import { Rank, Shape } from "./api/shape.ts";
 import { Layer } from "./api/layer.ts";
 import { NetworkJSON } from "../model/types.ts";
 
+/**
+ * The Backend is responsible for eveything related to the neural network.
+ */
 export interface Backend {
   train(datasets: DataSet[], epochs: number, rate: number): void;
 
@@ -78,7 +81,15 @@ export enum Cost {
    * Cross entropy cost function is the standard cost function for binary classification.
    */
   CrossEntropy = "crossentropy",
+
+  /**
+   * Hinge cost function is the standard cost function for multi-class classification.
+   */
   Hinge = "hinge",
+
+  /**
+   * Mean squared error cost function is the standard cost function for regression.
+   */
   MSE = "mse",
 }
 
@@ -99,19 +110,54 @@ export enum LayerType {
   Softmax = "softmax",
 }
 
+/**
+ * BackendType represents the type of backend to use.
+ */
 export enum BackendType {
+  /**
+   * CPU backend
+   */
   CPU = "cpu",
+
+  /**
+   * GPU backend
+   */
   GPU = "gpu",
+
+  /**
+   * Web Assembly backend
+   */
   WASM = "wasm",
 }
 
+/**
+ * Init represents the type of initialization to use.
+ */
 export enum Init {
+  /**
+   * Uniform initialization
+   */
   Uniform = "uniform",
+
+  /**
+   * Xavier initialization
+   */
   Xavier = "xavier",
+
+  /**
+   * XavierN initialization
+   */
   XavierN = "xaviern",
+
+  /**
+   * Kaiming initialization
+   */
   Kaiming = "kaiming",
 }
 
+/**
+ * InitFn is a function that initializes a tensor.
+ */
 export interface InitFn {
   init<R extends Rank, B extends BackendType>(
     input: Shape[Rank],
