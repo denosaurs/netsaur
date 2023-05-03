@@ -1,5 +1,6 @@
 use crate::Activation;
 pub struct CPUActivation {
+    pub activation: Activation,
     pub activate: fn(x: &f32) -> f32,
     pub prime: fn(x: &f32) -> f32,
 }
@@ -8,34 +9,42 @@ impl CPUActivation {
     pub fn from(activation: Activation) -> CPUActivation {
         match activation {
             Activation::Sigmoid => CPUActivation {
+                activation: Activation::Sigmoid,
                 activate: sigmoid,
                 prime: sigmoid_prime,
             },
             Activation::Tanh => CPUActivation {
+                activation: Activation::Tanh,
                 activate: tanh,
                 prime: tanh_prime,
             },
             Activation::Linear => CPUActivation {
+                activation: Activation::Linear,
                 activate: linear,
                 prime: linear_prime,
             },
             Activation::Relu => CPUActivation {
+                activation: Activation::Relu,
                 activate: relu,
                 prime: relu_prime,
             },
             Activation::Relu6 => CPUActivation {
+                activation: Activation::Relu6,
                 activate: relu6,
                 prime: relu6_prime,
             },
             Activation::LeakyRelu => CPUActivation {
+                activation: Activation::LeakyRelu,
                 activate: leaky_relu,
                 prime: leaky_relu_prime,
             },
             Activation::Elu => CPUActivation {
+                activation: Activation::Elu,
                 activate: elu,
                 prime: elu_prime,
             },
             Activation::Selu => CPUActivation {
+                activation: Activation::Selu,
                 activate: selu,
                 prime: selu_prime,
             },
@@ -47,6 +56,13 @@ impl CPUActivation {
             Some(CPUActivation::from(activation))
         } else {
             None
+        }
+    }
+
+    pub fn memoize_output(activation: &CPUActivation) -> bool {
+        match activation.activation {
+            Activation::Sigmoid | Activation::Tanh => true,
+            _ => true
         }
     }
 }

@@ -1,10 +1,10 @@
 import {
-  Activation,
   Cost,
   CPU,
   DenseLayer,
   NeuralNetwork,
   setupBackend,
+  SigmoidLayer,
   tensor2D,
 } from "../mod.ts";
 
@@ -14,8 +14,10 @@ const net = new NeuralNetwork({
   size: [4, 2],
   silent: true,
   layers: [
-    DenseLayer({ size: [3], activation: Activation.Sigmoid }),
-    DenseLayer({ size: [1], activation: Activation.Sigmoid }),
+    DenseLayer({ size: [3] }),
+    SigmoidLayer(),
+    DenseLayer({ size: [1] }),
+    SigmoidLayer(),
   ],
   cost: Cost.MSE,
 });
@@ -35,7 +37,7 @@ net.train(
     },
   ],
   10000,
-)
+);
 
 console.log(`training time: ${performance.now() - time}ms`);
 console.log((await net.predict(tensor2D([[0, 0]]))).data);

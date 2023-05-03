@@ -16,14 +16,14 @@ pub struct Dataset {
 
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type", content = "config")]
-#[serde(rename_all = "lowercase")] 
+#[serde(rename_all = "lowercase")]
 pub enum Layer {
-    Activation(Activation),
-    Dense(Dense),
+    Activation(ActivationLayer),
+    Dense(DenseLayer),
 }
 
 #[derive(Deserialize, Debug)]
-#[serde(rename_all = "lowercase")] 
+#[serde(rename_all = "lowercase")]
 pub enum Activation {
     Sigmoid,
     Tanh,
@@ -36,20 +36,25 @@ pub enum Activation {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Dense {
+pub struct DenseLayer {
     pub size: Vec<usize>,
     pub activation: Option<Activation>,
-    pub init: Option<Init>
+    pub init: Option<Init>,
 }
 
 #[derive(Deserialize, Debug)]
-#[serde(rename_all = "lowercase")] 
+pub struct ActivationLayer {
+    pub activation: Activation,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
 pub enum Cost {
     MSE,
 }
 
 #[derive(Deserialize, Debug)]
-#[serde(rename_all = "lowercase")] 
+#[serde(rename_all = "lowercase")]
 pub enum Init {
     Uniform,
     Xavier,
@@ -58,17 +63,17 @@ pub enum Init {
 }
 
 #[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase")] 
+#[serde(rename_all = "camelCase")]
 pub struct TrainOptions {
     pub datasets: usize,
     pub input_shape: Vec<usize>,
     pub output_shape: Vec<usize>,
     pub epochs: usize,
-    pub rate: f32
+    pub rate: f32,
 }
 
 #[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase")] 
+#[serde(rename_all = "camelCase")]
 pub struct PredictOptions {
     pub input_shape: Vec<usize>,
     pub output_shape: Vec<usize>,
