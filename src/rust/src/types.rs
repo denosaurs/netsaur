@@ -27,6 +27,12 @@ pub enum Layer {
 pub enum Activation {
     Sigmoid,
     Tanh,
+    Linear,
+    Relu,
+    Relu6,
+    LeakyRelu,
+    Elu,
+    Selu,
 }
 
 #[derive(Deserialize, Debug)]
