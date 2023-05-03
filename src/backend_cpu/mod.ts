@@ -68,4 +68,7 @@ export class CPUBackendLoader {
   }
 }
 
+/**
+ * CPU Backend Type.
+ */
 export const CPU = new CPUBackendLoader();

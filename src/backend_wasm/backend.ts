@@ -8,6 +8,9 @@ import {
 } from "./lib/netsaur.generated.js";
 import { PredictOptions, TrainOptions } from "./utils.ts";
 
+/**
+ * Web Assembly Backend.
+ */
 export class WASMBackend {
   config: NetworkConfig;
   outputShape?: Shape[Rank];

@@ -20,14 +20,23 @@ import { BackendType } from "../types.ts";
 import { inferShape } from "./util.ts";
 import { TensorJSON } from "../../model/types.ts";
 
+/**
+ * TensorData is the data type for the Tensor based on the backend.
+ */
 export interface TensorData {
   [BackendType.CPU]: Float32Array;
   [BackendType.GPU]: WebGPUData;
   [BackendType.WASM]: Float32Array;
 }
 
+/**
+ * Tensor for the CPU backend.
+ */
 export type CPUTensor<R extends Rank> = Tensor<R, BackendType.CPU>;
 
+/**
+ * Tensor for the GPU backend.
+ */
 export type GPUTensor<R extends Rank> = Tensor<R, BackendType.GPU>;
 
 /**
@@ -91,35 +100,56 @@ export class Tensor<R extends Rank, B extends BackendType> {
   }
 }
 
+/**
+ * Create an nth rank tensor from the given nthD array and shape. 
+ */
 export function tensor<R extends Rank>(values: Float32Array, shape: Shape[R]) {
   return Tensor.from(values, shape);
 }
 
+/**
+ * Create a 1D tensor from the given 1D array.
+ */
 export function tensor1D(values: Array1D) {
   const shape = inferShape(values) as Shape1D;
   return Tensor.from(new Float32Array(values), shape);
 }
 
+/**
+ * Create a 2D tensor from the given 2D array.
+ */
 export function tensor2D(values: Array2D) {
   const shape = inferShape(values) as Shape2D;
   return Tensor.from(new Float32Array(values.flat(1)), shape);
 }
 
+/**
+ * Create a 3D tensor from the given 3D array.
+ */
 export function tensor3D(values: Array3D) {
   const shape = inferShape(values) as Shape3D;
   return Tensor.from(new Float32Array(values.flat(2)), shape);
 }
 
+/**
+ * Create a 4D tensor from the given 4D array.
+ */
 export function tensor4D(values: Array4D) {
   const shape = inferShape(values) as Shape4D;
   return Tensor.from(new Float32Array(values.flat(3)), shape);
 }
 
+/**
+ * Create a 5D tensor from the given 5D array.
+ */
 export function tensor5D(values: Array5D) {
   const shape = inferShape(values) as Shape5D;
   return Tensor.from(new Float32Array(values.flat(4)), shape);
 }
 
+/**
+ * Create a 6D tensor from the given 6D array.
+ */
 export function tensor6D(values: Array6D) {
   const shape = inferShape(values) as Shape6D;
   return Tensor.from(new Float32Array(values.flat(5)), shape);

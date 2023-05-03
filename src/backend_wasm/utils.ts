@@ -1,5 +1,8 @@
 import { Rank, Shape } from "../../mod.ts";
 
+/**
+ * Train Options Interface.
+ */
 export type TrainOptions = {
   datasets: number;
   inputShape: Shape[Rank];
@@ -8,6 +11,9 @@ export type TrainOptions = {
   rate: number;
 };
 
+/**
+ * Predict Options Interface.
+ */
 export type PredictOptions = {
   inputShape: Shape[Rank];
   outputShape: Shape[Rank];
