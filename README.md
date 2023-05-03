@@ -43,14 +43,14 @@ import {
   Cost,
   CPU,
   DenseLayer,
-  NeuralNetwork,
+  Sequential,
   setupBackend,
   tensor2D,
 } from "https://deno.land/x/netsaur/mod.ts";
 
 await setupBackend(CPU);
 
-const net = new NeuralNetwork({
+const net = new Sequential({
   size: [4, 2],
   silent: true,
   layers: [
@@ -91,7 +91,7 @@ import {
   Activation,
   Cost,
   DenseLayer,
-  NeuralNetwork,
+  Sequential,
   setupBackend,
   tensor2D,
   WASM,
@@ -99,7 +99,7 @@ import {
 
 await setupBackend(WASM);
 
-const net = new NeuralNetwork({
+const net = new Sequential({
   size: [4, 2],
   silent: true,
   layers: [
@@ -135,7 +135,7 @@ console.log((await net.predict(tensor2D([[1, 1]]))).data);
 
 ### Documentation
 
-The full documentation for Netsaur can be found [here](https://deno.land/x/netsaur@0.2.0/mod.ts).
+The full documentation for Netsaur can be found [here](https://deno.land/x/netsaur@0.2.2/mod.ts).
 
 ### License
 
