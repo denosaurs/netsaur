@@ -11,7 +11,7 @@ const options: FetchOptions = {
   name: "netsaur",
   url: new URL(import.meta.url).protocol !== "file:"
     ? new URL(
-      "https://github.com/denosaurs/netsaur/releases/download/0.2.0/",
+      "https://github.com/denosaurs/netsaur/releases/download/0.2.2/",
       import.meta.url,
     )
     : "./target/release/",
