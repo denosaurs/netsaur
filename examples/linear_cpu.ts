@@ -3,7 +3,7 @@ import {
   Cost,
   CPU,
   DenseLayer,
-  Sequential,
+  NeuralNetwork,
   setupBackend,
   tensor2D,
 } from "../mod.ts";
@@ -15,7 +15,7 @@ function fmt(input: any) {
 }
 await setupBackend(CPU);
 
-const network = new Sequential({
+const network = new NeuralNetwork({
   size: [4, 1],
   silent: true,
   layers: [

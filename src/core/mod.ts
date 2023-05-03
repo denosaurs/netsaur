@@ -7,7 +7,7 @@ import { NetworkJSON } from "../model/types.ts";
 /**
  * Sequential Neural Network
  */
-export class Sequential {
+export class NeuralNetwork {
   backend!: Backend;
 
   /**

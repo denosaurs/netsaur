@@ -3,14 +3,14 @@ import {
     Cost,
     WASM,
     DenseLayer,
-    Sequential,
+    NeuralNetwork,
     setupBackend,
     tensor2D,
   } from "../mod.ts";
   
   await setupBackend(WASM);
   
-  const net = new Sequential({
+  const net = new NeuralNetwork({
     size: [4, 2],
     silent: true,
     layers: [

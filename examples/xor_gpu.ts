@@ -1,6 +1,6 @@
 import {
   DenseLayer,
-  Sequential,
+  NeuralNetwork,
   setupBackend,
   SigmoidLayer,
   tensor1D,
@@ -10,7 +10,7 @@ import { GPU } from "../backends/gpu/mod.ts";
 
 await setupBackend(GPU, true);
 
-const net = new Sequential({
+const net = new NeuralNetwork({
   silent: true,
   layers: [
     DenseLayer({ size: [3]}),

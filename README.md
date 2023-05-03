@@ -43,14 +43,14 @@ import {
   Cost,
   CPU,
   DenseLayer,
-  Sequential,
+  NeuralNetwork,
   setupBackend,
   tensor2D,
 } from "https://deno.land/x/netsaur/mod.ts";
 
 await setupBackend(CPU);
 
-const net = new Sequential({
+const net = new NeuralNetwork({
   size: [4, 2],
   silent: true,
   layers: [
@@ -91,7 +91,7 @@ import {
   Activation,
   Cost,
   DenseLayer,
-  Sequential,
+  NeuralNetwork,
   setupBackend,
   tensor2D,
   WASM,
@@ -99,7 +99,7 @@ import {
 
 await setupBackend(WASM);
 
-const net = new Sequential({
+const net = new NeuralNetwork({
   size: [4, 2],
   silent: true,
   layers: [

@@ -3,14 +3,14 @@ import {
   Cost,
   CPU,
   DenseLayer,
-  Sequential,
+  NeuralNetwork,
   setupBackend,
   tensor2D,
 } from "../mod.ts";
 
 await setupBackend(CPU);
 
-const net = new Sequential({
+const net = new NeuralNetwork({
   size: [4, 2],
   silent: true,
   layers: [
