@@ -1,6 +1,6 @@
 use ndarray::{ArrayD, ArrayViewD, IxDyn};
 
-use crate::{CPUCost, CPULayer, Dataset, DenseCPULayer, Layer, BackendConfig};
+use crate::{ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Dataset, DenseCPULayer, Layer};
 
 pub struct CPUBackend {
     pub layers: Vec<CPULayer>,
@@ -19,7 +19,12 @@ impl CPUBackend {
                     layers.push(CPULayer::Dense(DenseCPULayer::new(layer, size.clone())));
                     size = IxDyn(&[batches, layer_size[0]]);
                 }
-                _ => unimplemented!(),
+                Layer::Activation(layer) => {
+                    layers.push(CPULayer::Activation(ActivationCPULayer::new(
+                        layer,
+                        size.clone(),
+                    )));
+                }
             }
         }
         let cost = CPUCost::from(config.cost);
