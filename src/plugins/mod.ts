@@ -1,10 +1,10 @@
 import { Plugin } from "./types.ts";
-import { Sequential } from "../../mod.ts";
+import { NeuralNetwork } from "../../mod.ts";
 
 /**
- * Load a plugin into a Sequential instance.
+ * Load a plugin into a NeuralNetwork instance.
  */
 export const loadPlugin = (
-  instance: Sequential,
-  loader: (instance: Sequential) => Plugin,
+  instance: NeuralNetwork,
+  loader: (instance: NeuralNetwork) => Plugin,
 ): Plugin => loader(instance);

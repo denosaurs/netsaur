@@ -3,7 +3,7 @@ import {
   Cost,
   CPU,
   DenseLayer,
-  NeuralNetwork,
+  Sequential,
   setupBackend,
   tensor2D,
 } from "../mod.ts";
@@ -13,7 +13,7 @@ await setupBackend(CPU);
 Deno.bench(
   { name: "xor 10000 epochs", permissions: "inherit" },
   async () => {
-    const net = new NeuralNetwork({
+    const net = new Sequential({
       size: [4, 2],
       silent: true,
       layers: [
