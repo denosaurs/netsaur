@@ -1,7 +1,7 @@
 import {
   Cost,
   DenseLayer,
-  NeuralNetwork,
+  Sequential,
   setupBackend,
   SigmoidLayer,
   tensor2D,
@@ -10,7 +10,7 @@ import {
 
 await setupBackend(WASM);
 
-const net = new NeuralNetwork({
+const net = new Sequential({
   size: [4, 2],
   silent: true,
   layers: [

@@ -2,7 +2,7 @@ import {
   Cost,
   CPU,
   DenseLayer,
-  NeuralNetwork,
+  Sequential,
   setupBackend,
   SigmoidLayer,
   tensor2D,
@@ -10,7 +10,7 @@ import {
 
 await setupBackend(CPU);
 
-const net = new NeuralNetwork({
+const net = new Sequential({
   size: [4, 2],
   silent: true,
   layers: [
