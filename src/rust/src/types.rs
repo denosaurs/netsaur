@@ -20,6 +20,9 @@ pub struct Dataset {
 pub enum Layer {
     Activation(ActivationLayer),
     Dense(DenseLayer),
+    Conv2D(Conv2DLayer),
+    Pool2D(Pool2DLayer),
+    Flatten(FlattenLayer),
 }
 
 #[derive(Deserialize, Debug)]
@@ -40,6 +43,27 @@ pub struct DenseLayer {
     pub size: Vec<usize>,
     pub activation: Option<Activation>,
     pub init: Option<Init>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Conv2DLayer {
+    pub init: Option<Init>,
+    pub activation: Option<Activation>,
+    pub kernel: Option<Vec<f32>>,
+    pub kernel_size: Vec<usize>,
+    pub padding: u32,
+    pub strides: Option<Vec<u32>>
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Pool2DLayer {
+    pub mode: bool, // true for max, false for average
+    pub strides: Option<Vec<u32>>
+}
+
+#[derive(Deserialize, Debug)]
+pub struct FlattenLayer {
+    pub size: Vec<usize>,
 }
 
 #[derive(Deserialize, Debug)]

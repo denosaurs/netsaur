@@ -19,6 +19,15 @@ impl CPUBackend {
                     layers.push(CPULayer::Dense(DenseCPULayer::new(layer, size.clone())));
                     size = IxDyn(&[batches, layer_size[0]]);
                 }
+                Layer::Conv2D(_layer) => {
+                    unimplemented!("Conv2D is not implemented yet")
+                }
+                Layer::Pool2D(_layer) => {
+                    unimplemented!("Pool2D is not implemented yet")
+                }
+                Layer::Flatten(_layer) => {
+                    unimplemented!("Flatten is not implemented yet")
+                }
                 Layer::Activation(layer) => {
                     layers.push(CPULayer::Activation(ActivationCPULayer::new(
                         layer,
