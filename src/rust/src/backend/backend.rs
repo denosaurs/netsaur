@@ -14,26 +14,33 @@ impl CPUBackend {
         let batches = size[0];
         for layer in config.layers {
             match layer {
-                Layer::Dense(layer) => {
-                    let layer_size = layer.size.clone();
-                    layers.push(CPULayer::Dense(DenseCPULayer::new(layer, size.clone())));
-                    size = IxDyn(&[batches, layer_size[0]]);
-                }
-                Layer::Conv2D(_layer) => {
-                    unimplemented!("Conv2D is not implemented yet")
-                }
-                Layer::Pool2D(_layer) => {
-                    unimplemented!("Pool2D is not implemented yet")
-                }
-                Layer::Flatten(_layer) => {
-                    unimplemented!("Flatten is not implemented yet")
-                }
                 Layer::Activation(layer) => {
                     layers.push(CPULayer::Activation(ActivationCPULayer::new(
                         layer,
                         size.clone(),
                     )));
                 }
+                Layer::Conv2D(_layer) => {
+                    unimplemented!("Conv2D is not implemented yet")
+                }
+                Layer::Dropout1D(_layer) => {
+                    unimplemented!("Dropout1D is not implemented yet")
+                }
+                Layer::Dropout2D(_layer) => {
+                    unimplemented!("Dropout2D is not implemented yet")
+                }
+                Layer::Dense(layer) => {
+                    let layer_size = layer.size.clone();
+                    layers.push(CPULayer::Dense(DenseCPULayer::new(layer, size.clone())));
+                    size = IxDyn(&[batches, layer_size[0]]);
+                }
+                Layer::Flatten(_layer) => {
+                    unimplemented!("Flatten is not implemented yet")
+                }
+                Layer::Pool2D(_layer) => {
+                    unimplemented!("Pool2D is not implemented yet")
+                }
+
             }
         }
         let cost = CPUCost::from(config.cost);

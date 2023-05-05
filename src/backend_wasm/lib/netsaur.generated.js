@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: 33d8d5913b813798d4825e5e89ab83f07dfe3142
+// source-hash: 92f70feee70d4c5bf90971eeae0d40490486749d
 let wasm;
 let cachedInt32Memory0;
 

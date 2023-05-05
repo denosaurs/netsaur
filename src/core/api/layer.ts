@@ -82,6 +82,11 @@ export type ConvLayerConfig = {
   strides?: Shape2D;
 };
 
+export enum PoolMode {
+  Avg,
+  Max,
+}
+
 /**
  * The configuration for a pooling layer.
  */
@@ -94,7 +99,7 @@ export type PoolLayerConfig = {
   /**
    * The mode to use for the pool layer.
    */
-  mode?: "max" | "avg";
+  mode?: PoolMode;
 };
 
 /**

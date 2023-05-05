@@ -23,6 +23,8 @@ pub enum Layer {
     Conv2D(Conv2DLayer),
     Pool2D(Pool2DLayer),
     Flatten(FlattenLayer),
+    Dropout1D(Dropout1DLayer),
+    Dropout2D(Dropout2DLayer),
 }
 
 #[derive(Deserialize, Debug)]
@@ -57,13 +59,25 @@ pub struct Conv2DLayer {
 
 #[derive(Deserialize, Debug)]
 pub struct Pool2DLayer {
-    pub mode: bool, // true for max, false for average
+    pub mode: usize, // 0 = avg, 1 = max
     pub strides: Option<Vec<u32>>
 }
 
 #[derive(Deserialize, Debug)]
 pub struct FlattenLayer {
     pub size: Vec<usize>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Dropout1DLayer {
+    pub probability: f32,
+    pub inplace: bool,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Dropout2DLayer {
+    pub probability: f32,
+    pub inplace: bool,
 }
 
 #[derive(Deserialize, Debug)]
