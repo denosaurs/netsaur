@@ -5,11 +5,12 @@ import { Rank, Shape, Shape1D, Shape2D, Shape4D } from "./shape.ts";
  * Layer is the base type for all layers.
  */
 export type Layer =
-  | { type: LayerType.Dense; config: DenseLayerConfig }
   | { type: LayerType.Activation; config: ActivationLayerConfig }
   | { type: LayerType.Conv; config: ConvLayerConfig }
-  | { type: LayerType.Pool; config: PoolLayerConfig }
+  | { type: LayerType.Dense; config: DenseLayerConfig }
+  | { type: LayerType.Dropout; config: DropoutLayerConfig }
   | { type: LayerType.Flatten; config: FlattenLayerConfig }
+  | { type: LayerType.Pool; config: PoolLayerConfig }
   | { type: LayerType.Softmax };
 
 /**
@@ -31,6 +32,22 @@ export type DenseLayerConfig = {
    */
   activation?: Activation;
 };
+
+/**
+ * The configuration for a dropout layer.
+ */
+export type DropoutLayerConfig = {
+  /**
+   * probability of dropping out a value.
+   */
+  probability: number;
+
+  /**
+   * whether or not to do the operation in place.
+   */
+  inplace?: boolean;
+}
+
 
 /**
  * The configuration for an activation layer.

@@ -53,14 +53,14 @@ pub struct Conv2DLayer {
     pub activation: Option<Activation>,
     pub kernel: Option<Vec<f32>>,
     pub kernel_size: Vec<usize>,
-    pub padding: u32,
-    pub strides: Option<Vec<u32>>
+    pub padding: usize,
+    pub strides: Option<Vec<usize>>
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Pool2DLayer {
     pub mode: usize, // 0 = avg, 1 = max
-    pub strides: Option<Vec<u32>>
+    pub strides: Option<Vec<usize>>
 }
 
 #[derive(Deserialize, Debug)]

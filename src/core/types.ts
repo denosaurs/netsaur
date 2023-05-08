@@ -105,6 +105,7 @@ export enum LayerType {
   Dense = "dense",
   Activation = "activation",
   Conv = "conv",
+  Dropout = "dropout",
   Pool = "pool",
   Flatten = "flatten",
   Softmax = "softmax",
