@@ -1,5 +1,4 @@
-mod backend;
-mod layers;
+mod cpu;
 mod types;
 mod util;
 #[cfg(not(target_arch = "wasm32"))]
@@ -7,8 +6,7 @@ mod ffi;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 
-pub use backend::*;
-pub use layers::*;
+pub use cpu::*;
 pub use types::*;
 pub use util::*;
 #[cfg(not(target_arch = "wasm32"))]

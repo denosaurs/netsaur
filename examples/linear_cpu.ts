@@ -35,7 +35,7 @@ network.train(
       outputs: tensor2D([[3], [5], [7], [9]]),
     },
   ],
-  500,
+  400,
   0.01,
 );
 

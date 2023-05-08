@@ -2,7 +2,7 @@ import {
   Activation,
   Cost,
   DenseLayer,
-  NeuralNetwork,
+  Sequential,
   setupBackend,
   tensor2D,
   WASM,
@@ -13,7 +13,7 @@ await setupBackend(WASM);
 Deno.bench(
   { name: "xor 10000 epochs", permissions: "inherit" },
   async () => {
-    const net = new NeuralNetwork({
+    const net = new Sequential({
       size: [4, 2],
       silent: true,
       layers: [

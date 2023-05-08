@@ -3,11 +3,12 @@ import { Engine } from "./engine.ts";
 import { Rank } from "./api/shape.ts";
 import { Tensor } from "./tensor/tensor.ts";
 import { NetworkJSON } from "../model/types.ts";
+import { NeuralNetwork } from "./api/network.ts";
 
 /**
  * Sequential Neural Network
  */
-export class Sequential {
+export class Sequential implements NeuralNetwork {
   backend!: Backend;
 
   /**
