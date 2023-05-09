@@ -1,4 +1,4 @@
-import { Backend, BackendType, DataSet, NetworkConfig } from "../types.ts";
+import { Backend, DataSet, NetworkConfig } from "../types.ts";
 import { Tensor } from "../tensor/tensor.ts";
 import { Rank } from "./shape.ts";
 
@@ -19,7 +19,7 @@ export interface NeuralNetwork {
   /**
    * Use the network to make predictions on the given data.
    */
-  predict(data: Tensor<Rank, BackendType>): Promise<Tensor<Rank, BackendType>>;
+  predict(data: Tensor<Rank>): Promise<Tensor<Rank>>;
 
   /**
    * Save model to binary file

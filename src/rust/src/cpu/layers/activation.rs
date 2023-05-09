@@ -15,6 +15,10 @@ impl ActivationCPULayer {
             activation: CPUActivation::from(config.activation),
         }
     }
+    
+    pub fn output_size(&self) -> Vec<usize> {
+        self.outputs.shape().to_vec()
+    }
 
     pub fn reset(&mut self, batches: usize) {
         let mut output_size = self.outputs.shape().to_vec();

@@ -2,9 +2,7 @@ import { dlopen, FetchOptions } from "../../deps.ts";
 import { CPUBackend } from "./backend.ts";
 import { NoBackendError } from "../core/api/error.ts";
 import { Engine } from "../core/engine.ts";
-import { Tensor } from "../core/tensor/tensor.ts";
 import { Backend, BackendType, NetworkConfig } from "../core/types.ts";
-import { CPUTensorBackend } from "./tensor.ts";
 import { NetworkJSON } from "../model/types.ts";
 
 const options: FetchOptions = {
@@ -20,8 +18,8 @@ const options: FetchOptions = {
 
 const symbols = {
   ffi_backend_create: {
-    parameters: ["buffer", "usize"],
-    result: "void",
+    parameters: ["buffer", "usize", "buffer"],
+    result: "u32",
   } as const,
   ffi_backend_train: {
     parameters: ["buffer", "usize", "buffer", "usize"],
@@ -51,7 +49,6 @@ export class CPUInstance {
 
 export class CPUBackendLoader {
   async setup(silent = false) {
-    Tensor.backend = new CPUTensorBackend();
     Engine.type = BackendType.CPU;
     return await CPUInstance.init(silent);
   }

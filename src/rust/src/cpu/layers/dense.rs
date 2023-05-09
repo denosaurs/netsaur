@@ -1,4 +1,4 @@
-use ndarray::{Array1, Array2, ArrayD, Axis, Ix2, IxDyn};
+use ndarray::{Array1, Array2, ArrayD, Axis, Dimension, Ix2, IxDyn};
 use std::ops::{Add, AddAssign, Mul};
 
 use crate::{CPUActivation, CPUInit, DenseLayer, Init};
@@ -14,18 +14,23 @@ pub struct DenseCPULayer {
 impl DenseCPULayer {
     pub fn new(config: DenseLayer, size: IxDyn) -> Self {
         let init = CPUInit::from_default(config.init, Init::Uniform);
-        let input_size = [size[0], size[1]];
-        let weights_size = [size[1], config.size[0]];
-        let output_size = [size[0], config.size[0]];
+        let input_size = Ix2(size[0], size[1]);
+        let weights_size = Ix2(size[1], config.size[0]);
+        let output_size = Ix2(size[0], config.size[0]);
         Self {
             inputs: Array2::zeros(input_size),
-            weights: (init.init)(&weights_size, &input_size, &output_size)
+            weights: init
+                .init(weights_size.into_dyn(), size.size(), output_size.size())
                 .into_dimensionality::<Ix2>()
                 .unwrap(),
             biases: Array1::zeros(config.size[0]),
             outputs: Array2::zeros(output_size),
             activation: CPUActivation::from_option(config.activation),
         }
+    }
+    
+    pub fn output_size(&self) -> Vec<usize> {
+        self.outputs.shape().to_vec()
     }
 
     pub fn reset(&mut self, batches: usize) {

@@ -1,3 +1,4 @@
+import { Tensor } from "../tensor/tensor.ts";
 import { Activation, Init, LayerType } from "../types.ts";
 import { Rank, Shape, Shape1D, Shape2D, Shape4D } from "./shape.ts";
 
@@ -5,11 +6,12 @@ import { Rank, Shape, Shape1D, Shape2D, Shape4D } from "./shape.ts";
  * Layer is the base type for all layers.
  */
 export type Layer =
-  | { type: LayerType.Dense; config: DenseLayerConfig }
   | { type: LayerType.Activation; config: ActivationLayerConfig }
-  | { type: LayerType.Conv; config: ConvLayerConfig }
-  | { type: LayerType.Pool; config: PoolLayerConfig }
+  | { type: LayerType.Conv2D; config: Conv2DLayerConfig }
+  | { type: LayerType.Dense; config: DenseLayerConfig }
+  | { type: LayerType.Dropout; config: DropoutLayerConfig }
   | { type: LayerType.Flatten; config: FlattenLayerConfig }
+  | { type: LayerType.Pool2D; config: Pool2DLayerConfig }
   | { type: LayerType.Softmax };
 
 /**
@@ -33,6 +35,22 @@ export type DenseLayerConfig = {
 };
 
 /**
+ * The configuration for a dropout layer.
+ */
+export type DropoutLayerConfig = {
+  /**
+   * probability of dropping out a value.
+   */
+  probability: number;
+
+  /**
+   * whether or not to do the operation in place.
+   */
+  inplace?: boolean;
+}
+
+
+/**
  * The configuration for an activation layer.
  */
 export type ActivationLayerConfig = {
@@ -45,7 +63,7 @@ export type ActivationLayerConfig = {
 /**
  * The configuration for a convolutional layer.
  */
-export type ConvLayerConfig = {
+export type Conv2DLayerConfig = {
   /**
    * The type of initialization to use.
    */
@@ -59,7 +77,7 @@ export type ConvLayerConfig = {
   /**
    * The kernel to use.
    */
-  kernel?: Float32Array;
+  kernel?: Tensor<Rank>;
 
   /**
    * The size of the kernel.
@@ -90,7 +108,7 @@ export enum PoolMode {
 /**
  * The configuration for a pooling layer.
  */
-export type PoolLayerConfig = {
+export type Pool2DLayerConfig = {
   /**
    * The optional strides to use.
    */

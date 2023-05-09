@@ -12,16 +12,16 @@ export interface BackendInstance {
  * The Tensor Backend is responsible for creating and managing Tensors.
  */
 export interface TensorBackend {
-  zeroes<R extends Rank, B extends BackendType>(shape: Shape[R]): Tensor<R, B>;
+  zeroes<R extends Rank, B extends BackendType>(shape: Shape[R]): Tensor<R>;
 
   from<R extends Rank, B extends BackendType>(
     values: Float32Array,
     shape: Shape[R],
-  ): Tensor<R, B>;
+  ): Tensor<R>;
 
-  get(tensor: Tensor<Rank, BackendType>): Promise<Float32Array>;
+  get(tensor: Tensor<Rank>): Promise<Float32Array>;
 
-  set(tensor: Tensor<Rank, BackendType>, values: Float32Array): void;
+  set(tensor: Tensor<Rank>, values: Float32Array): void;
 }
 
 /**

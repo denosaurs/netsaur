@@ -1,5 +1,5 @@
 import { Rank, Shape, Tensor } from "../../mod.ts";
-import { BackendType, DataSet, NetworkConfig } from "../core/types.ts";
+import { DataSet, NetworkConfig } from "../core/types.ts";
 import { NetworkJSON } from "../model/types.ts";
 import {
   wasm_backend_create,
@@ -41,8 +41,8 @@ export class WASMBackend {
 
   //deno-lint-ignore require-await
   async predict(
-    input: Tensor<Rank, BackendType>,
-  ): Promise<Tensor<Rank, BackendType>> {
+    input: Tensor<Rank>,
+  ): Promise<Tensor<Rank>> {
     const options = JSON.stringify({
       inputShape: input.shape,
       outputShape: this.outputShape,

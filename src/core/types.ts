@@ -9,7 +9,7 @@ import { NetworkJSON } from "../model/types.ts";
 export interface Backend {
   train(datasets: DataSet[], epochs: number, rate: number): void;
 
-  predict(input: Tensor<Rank, BackendType>): Promise<Tensor<Rank, BackendType>>;
+  predict(input: Tensor<Rank>): Promise<Tensor<Rank>>;
 
   save(input: string): void;
 
@@ -97,15 +97,16 @@ export enum Cost {
  * DataSet is a container for training data.
  */
 export type DataSet = {
-  inputs: Tensor<Rank, BackendType>;
-  outputs: Tensor<Rank, BackendType>;
+  inputs: Tensor<Rank>;
+  outputs: Tensor<Rank>;
 };
 
 export enum LayerType {
   Dense = "dense",
   Activation = "activation",
-  Conv = "conv",
-  Pool = "pool",
+  Conv2D = "conv2d",
+  Dropout = "dropout",
+  Pool2D = "pool2d",
   Flatten = "flatten",
   Softmax = "softmax",
 }
@@ -153,15 +154,4 @@ export enum Init {
    * Kaiming initialization
    */
   Kaiming = "kaiming",
-}
-
-/**
- * InitFn is a function that initializes a tensor.
- */
-export interface InitFn {
-  init<R extends Rank, B extends BackendType>(
-    input: Shape[Rank],
-    weights: Shape[R],
-    outputs: Shape[Rank],
-  ): Tensor<R, B>;
 }

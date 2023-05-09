@@ -11,6 +11,10 @@ impl Dropout1DCPULayer {
 
         Self {}
     }
+    
+    pub fn output_size(&self) -> Vec<usize> {
+        vec![]
+    }
 
     pub fn reset(&mut self, _batches: usize) {}
 
