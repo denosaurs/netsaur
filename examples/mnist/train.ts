@@ -48,8 +48,6 @@ const start = performance.now();
 network.train(trainSet, epochs, 0.01);
 console.log("Training complete!", performance.now() - start);
 
-
-
 // predicting
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx", 0, 1000);

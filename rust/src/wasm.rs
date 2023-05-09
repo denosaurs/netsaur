@@ -1,5 +1,8 @@
 use js_sys::Float32Array;
 use ndarray::ArrayD;
+use safetensors::{serialize, SafeTensors};
+
+
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::{CPUBackend, Dataset, PredictOptions, TrainOptions, RESOURCES};
@@ -49,4 +52,13 @@ pub fn wasm_backend_predict(buffer: Float32Array, options: String) -> Float32Arr
     });
 
     Float32Array::from(res.as_slice().unwrap())
+}
+
+#[wasm_bindgen]
+pub fn wasm_backend_save() -> Vec<u8> {
+    // temporary data
+    let serialized = b"8\x00\x00\x00\x00\x00\x00\x00{\"test\":{\"dtype\":\"I32\",\"shape\":[],\"data_offsets\":[0,4]}}\x00\x00\x00\x00";
+    let loaded = SafeTensors::deserialize(serialized).unwrap();
+
+    serialize(loaded.tensors().iter().map(|(name, view)| (name.to_string(), view)), &None).unwrap()
 }

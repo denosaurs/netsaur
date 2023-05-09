@@ -4,6 +4,7 @@ import { NetworkJSON } from "../model/types.ts";
 import {
   wasm_backend_create,
   wasm_backend_predict,
+  wasm_backend_save,
   wasm_backend_train,
 } from "./lib/netsaur.generated.js";
 import { PredictOptions, TrainOptions } from "./utils.ts";
@@ -51,7 +52,9 @@ export class WASMBackend {
     return new Tensor(output, this.outputShape!);
   }
 
-  save(_input: string): void {}
+  save(input: string): void {
+    Deno.writeFileSync(input, wasm_backend_save());
+  }
 
   //deno-lint-ignore require-await
   async toJSON() {

@@ -29,6 +29,10 @@ const symbols = {
     parameters: ["buffer", "buffer", "usize", "buffer"],
     result: "buffer",
   } as const,
+  ffi_backend_save: {
+    parameters: [],
+    result: "buffer",
+  } as const,
 };
 
 export type Library = Deno.DynamicLibrary<typeof symbols>;

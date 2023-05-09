@@ -1,9 +1,8 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: 67b96ad665d4c0874d8eae875407ddd21ad3a515
+// source-hash: 976722d0437a8267a69554636189ab244fb86708
 let wasm;
-let cachedInt32Memory0;
 
 const heap = new Array(128).fill(undefined);
 
@@ -161,6 +160,35 @@ export function wasm_backend_predict(buffer, options) {
   const len0 = WASM_VECTOR_LEN;
   const ret = wasm.wasm_backend_predict(addHeapObject(buffer), ptr0, len0);
   return takeObject(ret);
+}
+
+let cachedInt32Memory0 = null;
+
+function getInt32Memory0() {
+  if (cachedInt32Memory0 === null || cachedInt32Memory0.byteLength === 0) {
+    cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
+  }
+  return cachedInt32Memory0;
+}
+
+function getArrayU8FromWasm0(ptr, len) {
+  return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
+}
+/**
+ * @returns {Uint8Array}
+ */
+export function wasm_backend_save() {
+  try {
+    const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+    wasm.wasm_backend_save(retptr);
+    var r0 = getInt32Memory0()[retptr / 4 + 0];
+    var r1 = getInt32Memory0()[retptr / 4 + 1];
+    var v0 = getArrayU8FromWasm0(r0, r1).slice();
+    wasm.__wbindgen_free(r0, r1 * 1);
+    return v0;
+  } finally {
+    wasm.__wbindgen_add_to_stack_pointer(16);
+  }
 }
 
 function handleError(f, args) {
@@ -367,7 +395,7 @@ let lastLoadPromise;
  * @param {InstantiateOptions=} opts
  * @returns {Promise<{
  *   instance: WebAssembly.Instance;
- *   exports: { wasm_backend_create: typeof wasm_backend_create; wasm_backend_train: typeof wasm_backend_train; wasm_backend_predict: typeof wasm_backend_predict }
+ *   exports: { wasm_backend_create: typeof wasm_backend_create; wasm_backend_train: typeof wasm_backend_train; wasm_backend_predict: typeof wasm_backend_predict; wasm_backend_save: typeof wasm_backend_save }
  * }>}
  */
 export function instantiateWithInstance(opts) {
@@ -395,7 +423,12 @@ export function instantiateWithInstance(opts) {
 }
 
 function getWasmInstanceExports() {
-  return { wasm_backend_create, wasm_backend_train, wasm_backend_predict };
+  return {
+    wasm_backend_create,
+    wasm_backend_train,
+    wasm_backend_predict,
+    wasm_backend_save,
+  };
 }
 
 /** Gets if the Wasm module has been instantiated. */

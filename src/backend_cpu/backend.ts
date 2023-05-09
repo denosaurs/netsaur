@@ -68,7 +68,9 @@ export class CPUBackend {
     return new Tensor(output, this.outputShape);
   }
 
-  save(_input: string): void {}
+  save(input: string): void {
+    Deno.writeFileSync(input, this.library.symbols.ffi_backend_save() as unknown as Uint8Array);
+  }
 
   //deno-lint-ignore require-await
   async toJSON() {
