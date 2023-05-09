@@ -6,7 +6,6 @@ import {
   Shape3D,
   Shape4D,
 } from "../api/shape.ts";
-import { BackendType } from "../types.ts";
 import { Tensor } from "./tensor.ts";
 
 /**
@@ -97,7 +96,7 @@ export function iterate1D(length: number, callback: (i: number) => void): void {
  * iterate over a 2D array.
  */
 export function iterate2D(
-  mat: Tensor<Rank, BackendType> | Shape[Rank],
+  mat: Tensor<Rank> | Shape[Rank],
   callback: (i: number, j: number) => void,
 ): void {
   mat = (Array.isArray(mat) ? mat : mat.shape) as Shape2D;
@@ -112,7 +111,7 @@ export function iterate2D(
  * iterate over a 3D array.
  */
 export function iterate3D(
-  mat: Tensor<Rank, BackendType> | Shape[Rank],
+  mat: Tensor<Rank> | Shape[Rank],
   callback: (i: number, j: number, k: number) => void,
 ): void {
   mat = (Array.isArray(mat) ? mat : mat.shape) as Shape3D;
@@ -129,7 +128,7 @@ export function iterate3D(
  * iterate over a 4D array.
  */
 export function iterate4D(
-  mat: Tensor<Rank, BackendType> | Shape[Rank],
+  mat: Tensor<Rank> | Shape[Rank],
   callback: (i: number, j: number, k: number, l: number) => void,
 ): void {
   mat = (Array.isArray(mat) ? mat : mat.shape) as Shape4D;

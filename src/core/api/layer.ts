@@ -1,3 +1,4 @@
+import { Tensor } from "../tensor/tensor.ts";
 import { Activation, Init, LayerType } from "../types.ts";
 import { Rank, Shape, Shape1D, Shape2D, Shape4D } from "./shape.ts";
 
@@ -6,7 +7,7 @@ import { Rank, Shape, Shape1D, Shape2D, Shape4D } from "./shape.ts";
  */
 export type Layer =
   | { type: LayerType.Activation; config: ActivationLayerConfig }
-  | { type: LayerType.Conv; config: ConvLayerConfig }
+  | { type: LayerType.Conv2D; config: Conv2DLayerConfig }
   | { type: LayerType.Dense; config: DenseLayerConfig }
   | { type: LayerType.Dropout; config: DropoutLayerConfig }
   | { type: LayerType.Flatten; config: FlattenLayerConfig }
@@ -62,7 +63,7 @@ export type ActivationLayerConfig = {
 /**
  * The configuration for a convolutional layer.
  */
-export type ConvLayerConfig = {
+export type Conv2DLayerConfig = {
   /**
    * The type of initialization to use.
    */
@@ -76,7 +77,7 @@ export type ConvLayerConfig = {
   /**
    * The kernel to use.
    */
-  kernel?: Float32Array;
+  kernel?: Tensor<Rank>;
 
   /**
    * The size of the kernel.

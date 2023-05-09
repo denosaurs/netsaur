@@ -1,9 +1,7 @@
 import { WASMBackend } from "./backend.ts";
 import { NoBackendError } from "../core/api/error.ts";
 import { Engine } from "../core/engine.ts";
-import { Tensor } from "../core/tensor/tensor.ts";
 import { Backend, BackendType, NetworkConfig } from "../core/types.ts";
-import { WASMTensorBackend } from "./tensor.ts";
 import { NetworkJSON } from "../model/types.ts";
 import { instantiate } from "./lib/netsaur.generated.js";
 
@@ -27,7 +25,6 @@ export class WASMInstance {
  */
 export class WASMBackendLoader {
   async setup(silent = false) {
-    Tensor.backend = new WASMTensorBackend();
     Engine.type = BackendType.WASM;
     return await WASMInstance.init(silent);
   }

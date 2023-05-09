@@ -1,6 +1,6 @@
 import { Activation, LayerType } from "../types.ts";
 import {
-  ConvLayerConfig,
+  Conv2DLayerConfig,
   DenseLayerConfig,
   DropoutLayerConfig,
   FlattenLayerConfig,
@@ -32,8 +32,8 @@ export function DropoutLayer(config: DropoutLayerConfig): Layer {
  * They are commonly used in image processing.
  * See https://en.wikipedia.org/wiki/Convolutional_neural_network
  */
-export function ConvLayer(config: ConvLayerConfig): Layer {
-  return { type: LayerType.Conv, config };
+export function Conv2DLayer(config: Conv2DLayerConfig): Layer {
+  return { type: LayerType.Conv2D, config };
 }
 
 /**

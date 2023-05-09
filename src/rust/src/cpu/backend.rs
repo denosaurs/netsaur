@@ -1,50 +1,49 @@
 use ndarray::{ArrayD, ArrayViewD, IxDyn};
 
-use crate::{ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Dataset, DenseCPULayer, Layer};
+use crate::{ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Dataset, DenseCPULayer, Layer, Conv2DCPULayer};
 
 pub struct CPUBackend {
     pub layers: Vec<CPULayer>,
+    pub size: Vec<usize>,
     pub cost: CPUCost,
 }
 
 impl CPUBackend {
     pub fn new(config: BackendConfig) -> Self {
         let mut layers = Vec::new();
-        let mut size = IxDyn(&config.size);
-        let batches = size[0];
+        let mut size = config.size.clone();
         for layer in config.layers {
             match layer {
-                Layer::Activation(layer) => {
-                    layers.push(CPULayer::Activation(ActivationCPULayer::new(
-                        layer,
-                        size.clone(),
-                    )));
+                Layer::Activation(config) => {
+                    let layer = ActivationCPULayer::new(config, IxDyn(&size));
+                    layers.push(CPULayer::Activation(layer));
                 }
-                Layer::Conv2D(_layer) => {
-                    unimplemented!("Conv2D is not implemented yet")
+                Layer::Conv2D(config) => {
+                    let layer = Conv2DCPULayer::new(config, IxDyn(&size));
+                    size = layer.output_size().to_vec();
+                    layers.push(CPULayer::Conv2D(layer));
                 }
-                Layer::Dropout1D(_layer) => {
+                Layer::Dropout1D(_config) => {
                     unimplemented!("Dropout1D is not implemented yet")
                 }
-                Layer::Dropout2D(_layer) => {
+                Layer::Dropout2D(_config) => {
                     unimplemented!("Dropout2D is not implemented yet")
                 }
-                Layer::Dense(layer) => {
-                    let layer_size = layer.size.clone();
-                    layers.push(CPULayer::Dense(DenseCPULayer::new(layer, size.clone())));
-                    size = IxDyn(&[batches, layer_size[0]]);
+                Layer::Dense(config) => {
+                    let layer = DenseCPULayer::new(config, IxDyn(&size));
+                    size = layer.output_size().to_vec();
+                    layers.push(CPULayer::Dense(layer));
                 }
-                Layer::Flatten(_layer) => {
+                Layer::Flatten(_config) => {
                     unimplemented!("Flatten is not implemented yet")
                 }
-                Layer::Pool2D(_layer) => {
+                Layer::Pool2D(_config) => {
                     unimplemented!("Pool2D is not implemented yet")
                 }
-
             }
         }
         let cost = CPUCost::from(config.cost);
-        Self { layers, cost }
+        Self { layers, cost, size }
     }
 
     pub fn forward_propagate(&mut self, mut inputs: ArrayD<f32>) -> ArrayD<f32> {

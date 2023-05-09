@@ -13,6 +13,18 @@ pub enum CPULayer {
 }
 
 impl CPULayer {
+    pub fn output_size(&mut self) -> Vec<usize> {
+        match self {
+            CPULayer::Activation(layer) => layer.output_size(),
+            CPULayer::Conv2D(layer) => layer.output_size(),
+            CPULayer::Dense(layer) => layer.output_size(),
+            CPULayer::Dropout1D(layer) => layer.output_size(),
+            CPULayer::Dropout2D(layer) => layer.output_size(),
+            CPULayer::Flatten(layer) => layer.output_size(),
+            CPULayer::Pool2D(layer) => layer.output_size(),
+        }
+    }
+
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
         match self {
             CPULayer::Activation(layer) => layer.forward_propagate(inputs),
