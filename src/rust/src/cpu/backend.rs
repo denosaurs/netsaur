@@ -1,6 +1,6 @@
 use ndarray::{ArrayD, ArrayViewD, IxDyn};
 
-use crate::{ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Dataset, DenseCPULayer, Layer, Conv2DCPULayer};
+use crate::{ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Dataset, DenseCPULayer, Layer, Conv2DCPULayer, Pool2DCPULayer};
 
 pub struct CPUBackend {
     pub layers: Vec<CPULayer>,
@@ -37,8 +37,10 @@ impl CPUBackend {
                 Layer::Flatten(_config) => {
                     unimplemented!("Flatten is not implemented yet")
                 }
-                Layer::Pool2D(_config) => {
-                    unimplemented!("Pool2D is not implemented yet")
+                Layer::Pool2D(config) => {
+                    let layer = Pool2DCPULayer::new(config, IxDyn(&size));
+                    size = layer.output_size().to_vec();
+                    layers.push(CPULayer::Pool2D(layer));
                 }
             }
         }

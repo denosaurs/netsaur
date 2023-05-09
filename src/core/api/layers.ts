@@ -6,7 +6,7 @@ import {
   FlattenLayerConfig,
   Layer,
   Pool2DLayerConfig,
-PoolMode,
+  PoolMode,
 } from "./layer.ts";
 
 /**
