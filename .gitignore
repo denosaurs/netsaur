@@ -12,3 +12,4 @@ test.ts
 experiments
 deno.lock
 target/
+Cargo.lock
