@@ -6,6 +6,7 @@ import {
   FlattenLayerConfig,
   Layer,
   PoolLayerConfig,
+PoolMode,
 } from "./layer.ts";
 
 /**
@@ -42,6 +43,26 @@ export function Conv2DLayer(config: Conv2DLayerConfig): Layer {
  * See https://en.wikipedia.org/wiki/Convolutional_neural_network#Pooling_layer
  */
 export function PoolLayer(config: PoolLayerConfig): Layer {
+  return { type: LayerType.Pool, config };
+}
+
+/**
+ * Creates a max pooling layer.
+ * Pooling layers are used for downsampling.
+ * See https://en.wikipedia.org/wiki/Convolutional_neural_network#Pooling_layer
+ */
+export function MaxPoolLayer(config: PoolLayerConfig): Layer {
+  config.mode = PoolMode.Max;
+  return { type: LayerType.Pool, config };
+}
+
+/**
+ * Creates an average pooling layer.
+ * Pooling layers are used for downsampling.
+ * See https://en.wikipedia.org/wiki/Convolutional_neural_network#Pooling_layer
+ */
+export function AveragePoolLayer(config: PoolLayerConfig): Layer {
+  config.mode = PoolMode.Avg;
   return { type: LayerType.Pool, config };
 }
 
