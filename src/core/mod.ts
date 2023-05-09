@@ -1,4 +1,4 @@
-import { Backend, BackendType, DataSet, NetworkConfig } from "./types.ts";
+import { Backend, DataSet, NetworkConfig } from "./types.ts";
 import { Engine } from "./engine.ts";
 import { Rank } from "./api/shape.ts";
 import { Tensor } from "./tensor/tensor.ts";
@@ -28,7 +28,7 @@ export class Sequential implements NeuralNetwork {
   /**
    * Use the network to make predictions.
    */
-  async predict(data: Tensor<Rank, BackendType>) {
+  async predict(data: Tensor<Rank>) {
     return await this.backend.predict(data);
   }
 

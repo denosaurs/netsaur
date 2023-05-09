@@ -11,7 +11,7 @@ export type Layer =
   | { type: LayerType.Dense; config: DenseLayerConfig }
   | { type: LayerType.Dropout; config: DropoutLayerConfig }
   | { type: LayerType.Flatten; config: FlattenLayerConfig }
-  | { type: LayerType.Pool; config: PoolLayerConfig }
+  | { type: LayerType.Pool2D; config: Pool2DLayerConfig }
   | { type: LayerType.Softmax };
 
 /**
@@ -108,7 +108,7 @@ export enum PoolMode {
 /**
  * The configuration for a pooling layer.
  */
-export type PoolLayerConfig = {
+export type Pool2DLayerConfig = {
   /**
    * The optional strides to use.
    */
