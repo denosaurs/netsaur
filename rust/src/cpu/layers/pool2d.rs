@@ -6,6 +6,7 @@ pub struct Pool2DCPULayer {
     pub strides: Vec<usize>,
     pub inputs: Array4<f32>,
     pub outputs: Array4<f32>,
+    pub max: bool,
 }
 
 impl Pool2DCPULayer {
@@ -15,11 +16,12 @@ impl Pool2DCPULayer {
         let output_y = size[2] / strides[0];
         let output_x = size[3] / strides[1];
         let output_size = Ix4(size[0], size[1], output_y, output_x);
-
+        let max = config.mode == 1;
         Self {
             strides,
             inputs: Array4::zeros(input_size),
             outputs: Array4::zeros(output_size),
+            max,
         }
     }
 
@@ -47,15 +49,24 @@ impl Pool2DCPULayer {
                         let input_x = x * self.strides[1];
                         let stride_y = (y + 1) * self.strides[0];
                         let stride_x = (x + 1) * self.strides[1];
-                        self.outputs[[b, c, y, x]] = self
-                            .inputs
-                            .slice(s![b, c, input_y..stride_y, input_x..stride_x])
-                            .fold(0.0, |max_value, value| {
-                                if value > &max_value {
-                                    return value.clone();
-                                }
-                                max_value
-                            })
+                        if self.max {
+                            self.outputs[[b, c, y, x]] = self
+                                .inputs
+                                .slice(s![b, c, input_y..stride_y, input_x..stride_x])
+                                .fold(0.0, |max_value, value| {
+                                    if value > &max_value {
+                                        return value.clone();
+                                    }
+                                    max_value
+                                });
+                        } else {
+                            //average
+                            self.outputs[[b, c, y, x]] = self
+                                .inputs
+                                .slice(s![b, c, input_y..stride_y, input_x..stride_x])
+                                .mean()
+                                .unwrap();
+                        }
                     }
                 }
             }

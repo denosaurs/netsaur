@@ -1,4 +1,5 @@
 import {
+AveragePool2DLayer,
   Conv2DLayer,
   Cost,
   CPU,
@@ -58,8 +59,18 @@ const pool = await feedForward([
   }),
   MaxPool2DLayer({ strides: [2, 2] }),
 ]);
-
 drawPixels(pool.data, pool.shape[2], 0, 280, 2);
+
+const pool2 = await feedForward([
+  Conv2DLayer({
+    kernel: tensor4D(kernel),
+    kernelSize: [1, 1, 3, 3],
+    padding: [1, 1],
+  }),
+  AveragePool2DLayer({ strides: [2, 2] }),
+]);
+drawPixels(pool2.data, pool2.shape[2], 280, 280, 2);
+
 
 async function feedForward(layers: Layer[]) {
   const net = new Sequential({
