@@ -2,9 +2,9 @@ const brain = require("brain.js");
 
 const config = {
   binaryThresh: 0.5,
-  hiddenLayers: [4], 
+  hiddenLayers: [4],
   activation: "sigmoid",
-  leakyReluAlpha: 0.01, 
+  leakyReluAlpha: 0.01,
 };
 
 const net = new brain.NeuralNetworkGPU(config);

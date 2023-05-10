@@ -73,5 +73,5 @@ const correct = testSet.filter(async (e) => {
 
 console.log(`${correct.length} / ${testSet.length} correct`);
 console.log(
-  `accuracy: ${((correct.length / testSet.length) * 100).toFixed(2)}%`
+  `accuracy: ${((correct.length / testSet.length) * 100).toFixed(2)}%`,
 );

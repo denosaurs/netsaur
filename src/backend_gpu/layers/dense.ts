@@ -18,7 +18,7 @@ import { Uniform } from "../../../core/init.ts";
  * Regular Dense Layer
  */
 export class DenseGPULayer {
-  type = "dense"
+  type = "dense";
   outputSize: Shape1D;
   init: InitFn = new Uniform();
 
@@ -41,7 +41,7 @@ export class DenseGPULayer {
       this.output = gpuZeroes2D([this.outputSize[0], shape[1]]);
       this.dInputs = gpuZeroes2D([this.weights.y, shape[1]]);
     }
-    return [this.outputSize[0], shape[1]] as Shape2D
+    return [this.outputSize[0], shape[1]] as Shape2D;
   }
 
   initialize(inputShape: Shape[Rank]) {
@@ -51,7 +51,7 @@ export class DenseGPULayer {
     this.biases = gpuZeroes2D([this.outputSize[0], 1]);
     this.output = gpuZeroes2D([this.outputSize[0], shape[1]]);
     this.dInputs = gpuZeroes2D(shape);
-    return [this.outputSize[0], shape[1]] as Shape2D
+    return [this.outputSize[0], shape[1]] as Shape2D;
   }
 
   async feedForward(inputTensor: GPUTensor<Rank>) {

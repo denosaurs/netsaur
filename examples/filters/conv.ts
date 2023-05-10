@@ -78,7 +78,7 @@ function drawPixels(
   dim: number,
   offsetX = 0,
   offsetY = 0,
-  scale = 1
+  scale = 1,
 ) {
   for (let i = 0; i < dim; i++) {
     for (let j = 0; j < dim; j++) {
@@ -88,7 +88,7 @@ function drawPixels(
         i * 10 * scale + offsetX,
         j * 10 * scale + offsetY,
         10 * scale,
-        10 * scale
+        10 * scale,
       );
     }
   }

@@ -57,8 +57,8 @@ export async function backpropagate(
 ) {
   const code = shader_bp(rate, inputs.x, dError.x, inputs.y);
   const pipeline = await backend.register(code);
-  const x = Math.max(inputs.x, dError.x)
-  const y = Math.max(dError.x, dError.y)
+  const x = Math.max(inputs.x, dError.x);
+  const y = Math.max(dError.x, dError.y);
   backend.execute(
     pipeline,
     [Math.ceil(x / 8), Math.ceil(y / 8), 1],
@@ -77,7 +77,7 @@ const shader_bp = (
   input: number,
   output: number,
   batches: number,
-) => 
+) =>
   `struct Matrix {
   values: array<f32>,
 };

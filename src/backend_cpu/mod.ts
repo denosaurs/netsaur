@@ -1,9 +1,8 @@
 import { dlopen, FetchOptions } from "../../deps.ts";
 import { CPUBackend } from "./backend.ts";
 import { NoBackendError } from "../core/api/error.ts";
-import { Engine } from "../core/engine.ts";
+import { BackendLoader, Engine } from "../core/engine.ts";
 import { Backend, BackendType, NetworkConfig } from "../core/types.ts";
-import { NetworkJSON } from "../model/types.ts";
 
 const options: FetchOptions = {
   name: "netsaur",
@@ -12,7 +11,7 @@ const options: FetchOptions = {
       "https://github.com/denosaurs/netsaur/releases/download/0.2.5/",
       import.meta.url,
     )
-    : "./target/debug/",
+    : "./target/release/",
   cache: "reloadAll",
 };
 
@@ -51,7 +50,7 @@ export class CPUInstance {
   }
 }
 
-export class CPUBackendLoader {
+export class CPUBackendLoader implements BackendLoader {
   async setup(silent = false) {
     Engine.type = BackendType.CPU;
     return await CPUInstance.init(silent);
@@ -64,11 +63,9 @@ export class CPUBackendLoader {
     return new CPUBackend(config, CPUInstance.library!);
   }
 
-  fromJSON(json: NetworkJSON): Backend {
-    return CPUBackend.fromJSON(json);
-  }
-
-  loadModel(path: string): Backend {
+  loadModel(path: string): Backend;
+  loadModel(path: Uint8Array): Backend;
+  loadModel(path: string | Uint8Array): Backend {
     return CPUBackend.loadModel(path);
   }
 }

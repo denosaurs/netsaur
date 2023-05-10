@@ -62,8 +62,8 @@ export class GPUBackend implements Backend {
   }
 
   async backpropagate(output: GPUTensor<Rank>, rate: number) {
-    await this.costFn.prime(this.output.output, output)
-    let error = this.costFn.dInput
+    await this.costFn.prime(this.output.output, output);
+    let error = this.costFn.dInput;
     for (let i = this.layers.length - 1; i >= 0; i--) {
       error = await this.layers[i].backPropagate(error, rate)!;
     }

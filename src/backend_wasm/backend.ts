@@ -1,6 +1,5 @@
 import { Rank, Shape, Tensor } from "../../mod.ts";
 import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
-import { NetworkJSON } from "../model/types.ts";
 import {
   wasm_backend_create,
   wasm_backend_predict,
@@ -54,11 +53,7 @@ export class WASMBackend implements Backend {
     Deno.writeFileSync(input, wasm_backend_save());
   }
 
-  static loadModel(_input: string): WASMBackend {
-    return null as unknown as WASMBackend;
-  }
-
-  static fromJSON(_json: NetworkJSON): WASMBackend {
+  static loadModel(_input: string | Uint8Array): WASMBackend {
     return null as unknown as WASMBackend;
   }
 }

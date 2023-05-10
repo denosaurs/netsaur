@@ -1,7 +1,6 @@
 import { Rank, Shape, Tensor } from "../../mod.ts";
 import { length } from "../core/tensor/util.ts";
 import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
-import { NetworkJSON } from "../model/types.ts";
 import { Library } from "./mod.ts";
 import {
   encodeDatasets,
@@ -78,11 +77,7 @@ export class CPUBackend implements Backend {
     Deno.writeFileSync(input, buf);
   }
 
-  static loadModel(_input: string): CPUBackend {
-    return null as unknown as CPUBackend;
-  }
-
-  static fromJSON(_json: NetworkJSON): CPUBackend {
+  static loadModel(_input: string | Uint8Array): CPUBackend {
     return null as unknown as CPUBackend;
   }
 }

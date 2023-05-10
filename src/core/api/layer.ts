@@ -42,8 +42,7 @@ export type DropoutLayerConfig = {
    * whether or not to do the operation in place.
    */
   inplace?: boolean;
-}
-
+};
 
 /**
  * The configuration for an activation layer.

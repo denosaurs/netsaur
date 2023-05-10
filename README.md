@@ -92,12 +92,12 @@ console.log((await net.predict(tensor2D([[1, 1]]))).data);
 ```typescript
 import {
   Cost,
-  WASM,
   DenseLayer,
   Sequential,
   setupBackend,
   SigmoidLayer,
   tensor2D,
+  WASM,
 } from "https://deno.land/x/netsaur/mod.ts";
 
 await setupBackend(WASM);

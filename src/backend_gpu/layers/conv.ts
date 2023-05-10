@@ -82,7 +82,7 @@ export class ConvGPULayer {
       this.biases,
       this.output,
       this.strides,
-      this.padding
+      this.padding,
     );
     return this.output;
   }

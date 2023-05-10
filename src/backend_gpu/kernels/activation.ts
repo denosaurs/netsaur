@@ -7,18 +7,18 @@ export async function feedforward(
   outputs: GPUTensor<Rank>,
   activation: string,
 ) {
-  const shape = to3D(inputs.shape)
+  const shape = to3D(inputs.shape);
   const code = shader_ff(activation, shape);
   const pipeline = await backend.register(code);
   backend.execute(
     pipeline,
-    [Math.ceil(shape[0] / 64), shape[1], shape[2]], 
-    [inputs.data, outputs.data]
+    [Math.ceil(shape[0] / 64), shape[1], shape[2]],
+    [inputs.data, outputs.data],
   );
 }
 
-const shader_ff = (activation: string, shape: Shape3D) => 
-`struct Matrix {
+const shader_ff = (activation: string, shape: Shape3D) =>
+  `struct Matrix {
   values: array<f32>
 };
 
@@ -34,7 +34,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     global_id.y < ${shape[1]}u && 
     global_id.z < ${shape[2]}u
   ) {
-    var idx = global_id.x + global_id.y * ${shape[0]}u + global_id.z * ${shape[1]}u;
+    var idx = global_id.x + global_id.y * ${shape[0]}u + global_id.z * ${
+    shape[1]
+  }u;
     ${activation};
   }
 }`;
@@ -46,18 +48,18 @@ export async function backpropagate(
   dInputs: GPUTensor<Rank>,
   prime: string,
 ) {
-  const shape = to3D(inputs.shape)
+  const shape = to3D(inputs.shape);
   const code = shader_bp(prime, shape);
   const pipeline = await backend.register(code);
   backend.execute(
     pipeline,
-    [Math.ceil(shape[0] / 64), shape[1], shape[2]], 
+    [Math.ceil(shape[0] / 64), shape[1], shape[2]],
     [inputs.data, dError.data, dInputs.data],
   );
 }
 
-const shader_bp = (prime: string, shape: Shape3D) => 
-`struct Matrix {
+const shader_bp = (prime: string, shape: Shape3D) =>
+  `struct Matrix {
   values: array<f32>
 };
 
@@ -75,7 +77,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     global_id.y < ${shape[1]}u && 
     global_id.z < ${shape[2]}u
   ) {
-    var idx = global_id.x + global_id.y * ${shape[0]}u + global_id.z * ${shape[1]}u;
+    var idx = global_id.x + global_id.y * ${shape[0]}u + global_id.z * ${
+    shape[1]
+  }u;
     ${prime};
   }
 }`;
@@ -88,11 +92,11 @@ export const sigmoid_prime =
 dInputs.values[idx] = activation * dError.values[idx];`;
 
 function to3D(shape: Shape[Rank]): Shape3D {
-  let res = shape as Shape3D
+  let res = shape as Shape3D;
   switch (shape.length) {
     case 2:
       res = [shape[0] * shape[1], 1, 1];
-      break
+      break;
     case 4:
       res = [shape[0] * shape[1], shape[2], shape[3]];
   }

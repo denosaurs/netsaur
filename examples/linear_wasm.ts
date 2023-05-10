@@ -32,7 +32,7 @@ network.train(
     },
   ],
   400,
-  0.01
+  0.01,
 );
 
 console.log("training time", performance.now() - start, " milliseconds");
@@ -42,6 +42,6 @@ for (const test of testData) {
   console.log(
     `
   input: ${test}
-  output: ${fmt(await network.predict(tensor2D([[test]])))}`
+  output: ${fmt(await network.predict(tensor2D([[test]])))}`,
   );
 }
