@@ -4,6 +4,9 @@ import { Tensor } from "./tensor/tensor.ts";
 import { Backend, BackendType, NetworkConfig } from "./types.ts";
 
 export interface BackendInstance {
+  /**
+   * Initialize the backend.
+   */
   init(): Promise<void>;
 }
 
@@ -40,17 +43,17 @@ export interface TensorBackend {
  */
 export interface BackendLoader {
   /**
-   * Setup the backend.
+   * Setup the backend. Returns true if the backend was successfully setup.
    */
   setup(silent: boolean): Promise<boolean>;
 
   /**
-   * Load the backend.
+   * Load the backend from a config.
    */
   loadBackend(config: NetworkConfig): Backend;
 
   /**
-   * Load a model from a file.
+   * Load a model from a safe tensors file path.
    */
   loadModel(path: string): Backend;
   

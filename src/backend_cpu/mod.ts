@@ -71,6 +71,6 @@ export class CPUBackendLoader implements BackendLoader {
 }
 
 /**
- * CPU Backend Type.
+ * CPU Backend written in Rust.
  */
 export const CPU = new CPUBackendLoader();

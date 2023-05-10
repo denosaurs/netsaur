@@ -85,7 +85,14 @@ export type Conv2DLayerConfig = {
 };
 
 export enum PoolMode {
+  /**
+   * The average pooling mode.
+   */
   Avg,
+
+  /**
+   * The max pooling mode.
+   */
   Max,
 }
 

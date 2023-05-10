@@ -43,6 +43,6 @@ export class WASMBackendLoader implements BackendLoader {
 }
 
 /**
- * Web Assembly Backend Type.
+ * Web Assembly Backend written in Rust & compiled to Web Assembly.
  */
 export const WASM = new WASMBackendLoader();

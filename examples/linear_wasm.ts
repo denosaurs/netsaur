@@ -1,3 +1,7 @@
+/**
+ * This example trains a neural network to predict the output of the function y = 2x + 1
+ */
+
 import {
   Cost,
   DenseLayer,
@@ -7,22 +11,50 @@ import {
   WASM,
 } from "../mod.ts";
 
+/**
+ * The test data used for predicting the output of the function y = 2x + 1
+ */
 const testData = [20, 40, 43, 87, 43];
 // deno-lint-ignore no-explicit-any
 function fmt(input: any) {
   return (input.data as Float32Array).map((e: number) => Math.round(e))[0];
 }
+
+/**
+ * Setup the WASM backend. This backend is slower than the CPU backend but works on the Edge.
+ */
 await setupBackend(WASM);
 
+/**
+ * Creates a sequential neural network.
+ */
 const network = new Sequential({
+  /**
+   * The input size is set to 4 and the output size is set to 1.
+   */
   size: [4, 1],
+
+  /**
+   * The silent option is set to true, which means that the network will not output any logs during trainin
+   */
   silent: true,
+
+  /**
+   * Creates two dense layers, with the first layer having 3 neurons and the second layer having 1 neuron.
+   */
   layers: [DenseLayer({ size: [3] }), DenseLayer({ size: [1] })],
+
+  /**
+   * The cost function used for training the network is the mean squared error (MSE).
+   */
   cost: Cost.MSE,
 });
 
 const start = performance.now();
 
+/**
+ * Train the network on the given data.
+ */
 network.train(
   [
     {
@@ -31,7 +63,13 @@ network.train(
       outputs: tensor2D([[3], [5], [7], [9]]),
     },
   ],
+  /**
+   * The number of iterations is set to 400.
+   */
   400,
+  /**
+   * The learning rate is set to 0.01.
+   */
   0.01,
 );
 
@@ -39,9 +77,11 @@ console.log("training time", performance.now() - start, " milliseconds");
 console.log("y = 2x + 1");
 
 for (const test of testData) {
+  /**
+   * Make a prediction on the test data.
+   */
+  const predicted = await network.predict(tensor2D([[test]]));
   console.log(
-    `
-  input: ${test}
-  output: ${fmt(await network.predict(tensor2D([[test]])))}`,
+    `input: ${test}\noutput: ${fmt(predicted)}\nexpected: ${2 * test + 1}\n`,
   );
 }
