@@ -31,13 +31,17 @@ export class WASMBackendLoader {
 
   loadBackend(config: NetworkConfig): Backend {
     if (!WASMInstance.initialized) {
-      throw new NoBackendError(BackendType.WASM)
+      throw new NoBackendError(BackendType.WASM);
     }
     return new WASMBackend(config);
   }
 
   fromJSON(json: NetworkJSON): Backend {
-    return WASMBackend.fromJSON(json) as Backend;
+    return WASMBackend.fromJSON(json);
+  }
+
+  loadModel(path: string): Backend {
+    return WASMBackend.loadModel(path);
   }
 }
 

@@ -27,11 +27,6 @@ export type DenseLayerConfig = {
    * The size of the layer.
    */
   size: Shape1D;
-
-  /**
-   * The activation function to use.
-   */
-  activation?: Activation;
 };
 
 /**
@@ -70,11 +65,6 @@ export type Conv2DLayerConfig = {
   init?: Init;
 
   /**
-   * The activation function to use.
-   */
-  activation?: Activation;
-
-  /**
    * The kernel to use.
    */
   kernel?: Tensor<Rank>;
@@ -87,12 +77,7 @@ export type Conv2DLayerConfig = {
   /**
    * The optional padding to use.
    */
-  padding?: number;
-
-  /**
-   * Whether or not to not use bias.
-   */
-  unbiased?: boolean;
+  padding?: Shape2D;
 
   /**
    * The optional strides to use.

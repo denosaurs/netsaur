@@ -1,7 +1,6 @@
 import { Tensor } from "./tensor/tensor.ts";
 import { Rank, Shape } from "./api/shape.ts";
 import { Layer } from "./api/layer.ts";
-import { NetworkJSON } from "../model/types.ts";
 
 /**
  * The Backend is responsible for eveything related to the neural network.
@@ -12,8 +11,6 @@ export interface Backend {
   predict(input: Tensor<Rank>): Promise<Tensor<Rank>>;
 
   save(input: string): void;
-
-  toJSON(): Promise<NetworkJSON>;
 }
 
 /**
@@ -69,11 +66,6 @@ export enum Activation {
    * This is a scaled version of the Elu function, which is a smoother approximation to the ReLU function.
    */
   Selu = "selu",
-
-  /**
-   * Linear activation function f(x) = x
-   */
-  Linear = "linear",
 }
 
 export enum Cost {

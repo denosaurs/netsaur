@@ -1,53 +1,29 @@
 use crate::Activation;
 pub struct CPUActivation {
     pub activation: Activation,
-    pub activate: fn(x: &f32) -> f32,
-    pub prime: fn(x: &f32) -> f32,
+    pub activate: ActivationFn,
+    pub prime: ActivationFn,
 }
 
+type ActivationFn = fn(x: &f32) -> f32;
+
 impl CPUActivation {
-    pub fn from(activation: Activation) -> CPUActivation {
-        match activation {
-            Activation::Sigmoid => CPUActivation {
-                activation: Activation::Sigmoid,
-                activate: sigmoid,
-                prime: sigmoid_prime,
-            },
-            Activation::Tanh => CPUActivation {
-                activation: Activation::Tanh,
-                activate: tanh,
-                prime: tanh_prime,
-            },
-            Activation::Linear => CPUActivation {
-                activation: Activation::Linear,
-                activate: linear,
-                prime: linear_prime,
-            },
-            Activation::Relu => CPUActivation {
-                activation: Activation::Relu,
-                activate: relu,
-                prime: relu_prime,
-            },
-            Activation::Relu6 => CPUActivation {
-                activation: Activation::Relu6,
-                activate: relu6,
-                prime: relu6_prime,
-            },
-            Activation::LeakyRelu => CPUActivation {
-                activation: Activation::LeakyRelu,
-                activate: leaky_relu,
-                prime: leaky_relu_prime,
-            },
-            Activation::Elu => CPUActivation {
-                activation: Activation::Elu,
-                activate: elu,
-                prime: elu_prime,
-            },
-            Activation::Selu => CPUActivation {
-                activation: Activation::Selu,
-                activate: selu,
-                prime: selu_prime,
-            },
+    pub fn from(activation: Activation) -> Self {
+        let (activate, prime): (ActivationFn, ActivationFn) = match activation {
+            Activation::Sigmoid => (sigmoid, sigmoid_prime),
+            Activation::Tanh => (tanh, tanh_prime),
+            Activation::Linear => (linear, linear_prime),
+            Activation::Relu => (relu, relu_prime),
+            Activation::Relu6 => (relu6, relu6_prime),
+            Activation::LeakyRelu => (leaky_relu, leaky_relu_prime),
+            Activation::Elu => (elu, elu_prime),
+            Activation::Selu => (selu, selu_prime),
+        };
+
+        Self {
+            activation,
+            activate,
+            prime,
         }
     }
 
@@ -62,7 +38,7 @@ impl CPUActivation {
     pub fn memoize_output(activation: &CPUActivation) -> bool {
         match activation.activation {
             Activation::Sigmoid | Activation::Tanh => true,
-            _ => true
+            _ => true,
         }
     }
 }
@@ -124,7 +100,11 @@ fn elu_prime(x: &f32) -> f32 {
 }
 
 fn selu(x: &f32) -> f32 {
-    return if *x >= 0.0 { *x } else { 1.0507 * (x.exp() - 1.0) };
+    return if *x >= 0.0 {
+        *x
+    } else {
+        1.0507 * (x.exp() - 1.0)
+    };
 }
 
 fn selu_prime(x: &f32) -> f32 {

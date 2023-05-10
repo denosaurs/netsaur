@@ -1,5 +1,4 @@
 import {
-  Activation,
   Cost,
   DenseLayer,
   Sequential,
@@ -18,10 +17,7 @@ await setupBackend(WASM);
 const network = new Sequential({
   size: [4, 1],
   silent: true,
-  layers: [
-    DenseLayer({ size: [3], activation: Activation.Linear }),
-    DenseLayer({ size: [1], activation: Activation.Linear }),
-  ],
+  layers: [DenseLayer({ size: [3] }), DenseLayer({ size: [1] })],
   cost: Cost.MSE,
 });
 
@@ -36,7 +32,7 @@ network.train(
     },
   ],
   400,
-  0.01,
+  0.01
 );
 
 console.log("training time", performance.now() - start, " milliseconds");
@@ -46,6 +42,6 @@ for (const test of testData) {
   console.log(
     `
   input: ${test}
-  output: ${fmt(await network.predict(tensor2D([[test]])))}`,
+  output: ${fmt(await network.predict(tensor2D([[test]])))}`
   );
 }

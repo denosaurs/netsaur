@@ -11,7 +11,7 @@ export function loadDataset(
   imagesFile: string,
   labelsFile: string,
   start: number,
-  end: number,
+  end: number
 ) {
   const images = Deno.readFileSync(new URL(imagesFile, import.meta.url));
   const labels = Deno.readFileSync(new URL(labelsFile, import.meta.url));

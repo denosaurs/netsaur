@@ -28,7 +28,8 @@
 ### Examples
 
 - XOR ([CPU](./examples/xor_cpu.ts), [WASM](./examples/xor_wasm.ts))
-- Linear Regression ([CPU](./examples/linear_cpu.ts), [WASM](./examples/linear_wasm.ts))
+- Linear Regression ([CPU](./examples/linear_cpu.ts),
+  [WASM](./examples/linear_wasm.ts))
 
 ### Maintainers
 
@@ -39,12 +40,12 @@
 
 ```typescript
 import {
-  Activation,
   Cost,
   CPU,
   DenseLayer,
   Sequential,
   setupBackend,
+  SigmoidLayer,
   tensor2D,
 } from "https://deno.land/x/netsaur/mod.ts";
 
@@ -54,8 +55,10 @@ const net = new Sequential({
   size: [4, 2],
   silent: true,
   layers: [
-    DenseLayer({ size: [3], activation: Activation.Sigmoid }),
-    DenseLayer({ size: [1], activation: Activation.Sigmoid }),
+    DenseLayer({ size: [3] }),
+    SigmoidLayer(),
+    DenseLayer({ size: [1] }),
+    SigmoidLayer(),
   ],
   cost: Cost.MSE,
 });
@@ -88,13 +91,13 @@ console.log((await net.predict(tensor2D([[1, 1]]))).data);
 
 ```typescript
 import {
-  Activation,
   Cost,
+  WASM,
   DenseLayer,
   Sequential,
   setupBackend,
+  SigmoidLayer,
   tensor2D,
-  WASM,
 } from "https://deno.land/x/netsaur/mod.ts";
 
 await setupBackend(WASM);
@@ -103,8 +106,10 @@ const net = new Sequential({
   size: [4, 2],
   silent: true,
   layers: [
-    DenseLayer({ size: [3], activation: Activation.Sigmoid }),
-    DenseLayer({ size: [1], activation: Activation.Sigmoid }),
+    DenseLayer({ size: [3] }),
+    SigmoidLayer(),
+    DenseLayer({ size: [1] }),
+    SigmoidLayer(),
   ],
   cost: Cost.MSE,
 });
@@ -135,7 +140,8 @@ console.log((await net.predict(tensor2D([[1, 1]]))).data);
 
 ### Documentation
 
-The full documentation for Netsaur can be found [here](https://deno.land/x/netsaur@0.2.2/mod.ts).
+The full documentation for Netsaur can be found
+[here](https://deno.land/x/netsaur@0.2.2/mod.ts).
 
 ### License
 

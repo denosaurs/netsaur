@@ -1,5 +1,4 @@
 import {
-  Activation,
   Conv2DLayer,
   Cost,
   CPU,
@@ -20,11 +19,15 @@ ctx.fillStyle = "white";
 ctx.fillRect(0, 0, 600, 600);
 
 const dim = 28;
-const kernel = [[[
-  [-1, 1, 0],
-  [-1, 1, 0],
-  [-1, 1, 0],
-]]];
+const kernel = [
+  [
+    [
+      [0, -1, 1],
+      [0, -1, 1],
+      [0, -1, 1],
+    ],
+  ],
+];
 
 //Credit: Hashrock (https://github.com/hashrock)
 const img = decode(Deno.readFileSync("./examples/filters/deno.png")).image;
@@ -39,12 +42,9 @@ drawPixels(buffer, dim);
 
 const conv = await feedForward([
   Conv2DLayer({
-    activation: Activation.Linear,
     kernel: tensor4D(kernel),
     kernelSize: [1, 1, 3, 3],
-    padding: 1,
-    strides: [1, 1],
-    unbiased: true,
+    padding: [1, 1],
   }),
 ]);
 
@@ -52,12 +52,9 @@ drawPixels(conv.data, conv.shape[2], 280);
 
 const pool = await feedForward([
   Conv2DLayer({
-    activation: Activation.Linear,
     kernel: tensor4D(kernel),
     kernelSize: [1, 1, 3, 3],
-    padding: 1,
-    strides: [1, 1],
-    unbiased: true,
+    padding: [1, 1],
   }),
   MaxPool2DLayer({ strides: [2, 2] }),
 ]);
@@ -73,7 +70,7 @@ async function feedForward(layers: Layer[]) {
   });
 
   const data = new Tensor(buffer, [1, 1, dim, dim]);
-  return await net.predict(data) as Tensor<Rank.R4>;
+  return (await net.predict(data)) as Tensor<Rank.R4>;
 }
 
 function drawPixels(
@@ -81,7 +78,7 @@ function drawPixels(
   dim: number,
   offsetX = 0,
   offsetY = 0,
-  scale = 1,
+  scale = 1
 ) {
   for (let i = 0; i < dim; i++) {
     for (let j = 0; j < dim; j++) {
@@ -91,7 +88,7 @@ function drawPixels(
         i * 10 * scale + offsetX,
         j * 10 * scale + offsetY,
         10 * scale,
-        10 * scale,
+        10 * scale
       );
     }
   }

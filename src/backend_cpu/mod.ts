@@ -12,7 +12,7 @@ const options: FetchOptions = {
       "https://github.com/denosaurs/netsaur/releases/download/0.2.5/",
       import.meta.url,
     )
-    : "./target/release/",
+    : "./target/debug/",
   cache: "reloadAll",
 };
 
@@ -65,7 +65,11 @@ export class CPUBackendLoader {
   }
 
   fromJSON(json: NetworkJSON): Backend {
-    return CPUBackend.fromJSON(json) as Backend;
+    return CPUBackend.fromJSON(json);
+  }
+
+  loadModel(path: string): Backend {
+    return CPUBackend.loadModel(path);
   }
 }
 
