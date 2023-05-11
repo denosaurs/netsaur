@@ -56,7 +56,7 @@ export interface BackendLoader {
    * Load a model from a safe tensors file path.
    */
   loadModel(path: string): Backend;
-  
+
   /**
    * Load a model from Uint8Array data.
    */

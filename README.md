@@ -17,13 +17,25 @@
  </p>
 <hr/>
 
-## Powerful Machine Learning library for Deno
+## Powerful Machine Learning library for Deno.
+
+## Features
+
+- Lightweight and easy-to-use neural network library for [Deno](https://deno.land).
+- Blazingly fast and efficient.
+- Provides a simple API for creating and training neural networks.
+- Can run on both the CPU and the GPU (WIP).
+- Allows you to simply run the code without downloading any prior dependencies.
+- Perfect for serverless environments.
+- Allows you to quickly build and deploy machine learning models for a variety of applications with just a few lines of code.
+- Suitable for both beginners and experienced machine learning practitioners.
+
 
 ### Backends
 
-- [CPU](./src/backend_cpu/)
-- [WASM](./src/backend_wasm/)
-- [GPU](./src/backend_gpu/)
+- [CPU](./src/backend_cpu/) - Native backend written in Rust.
+- [WASM](./src/backend_wasm/) - WebAssembly backend written in Rust.
+- [GPU](./src/backend_gpu/) (TODO)
 
 ### Examples
 
@@ -33,10 +45,12 @@
 
 ### Maintainers
 
-- Loading ([@load1n9](https://github.com/load1n9))
+- Dean Srebnik ([@load1n9](https://github.com/load1n9))
 - CarrotzRule ([@carrotzrule123](https://github.com/CarrotzRule123))
 
-### Usage
+### QuickStart
+
+This example shows how to train a neural network to predict the output of the XOR function our speedy CPU backend written in rust.
 
 ```typescript
 import {
@@ -49,22 +63,52 @@ import {
   tensor2D,
 } from "https://deno.land/x/netsaur/mod.ts";
 
+/**
+ * Setup the CPU backend. This backend is fast but doesn't work on the Edge.
+ */
 await setupBackend(CPU);
 
+/**
+ * Creates a sequential neural network.
+ */
 const net = new Sequential({
+  /**
+   * The input size is set to 4 and the output size is set to 2.
+   */
   size: [4, 2],
+
+  /**
+   * The silent option is set to true, which means that the network will not output any logs during trainin
+   */
   silent: true,
+
+  /**
+   * Defines the layers of a neural network in the XOR function example.
+   * The neural network has two input neurons and one output neuron.
+   * The layers are defined as follows:
+   * - A dense layer with 3 neurons.
+   * - sigmoid activation layer.
+   * - A dense layer with 1 neuron.
+   * -A sigmoid activation layer.
+   */
   layers: [
     DenseLayer({ size: [3] }),
     SigmoidLayer(),
     DenseLayer({ size: [1] }),
     SigmoidLayer(),
   ],
+
+  /**
+   * The cost function used for training the network is the mean squared error (MSE).
+   */
   cost: Cost.MSE,
 });
 
 const time = performance.now();
 
+/**
+ * Train the network on the given data.
+ */
 net.train(
   [
     {
@@ -77,45 +121,91 @@ net.train(
       outputs: tensor2D([[0], [1], [1], [0]]),
     },
   ],
+  /**
+   * The number of iterations is set to 10000.
+   */
   10000,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
-console.log((await net.predict(tensor2D([[0, 0]]))).data);
-console.log((await net.predict(tensor2D([[1, 0]]))).data);
-console.log((await net.predict(tensor2D([[0, 1]]))).data);
-console.log((await net.predict(tensor2D([[1, 1]]))).data);
+
+/**
+ * Predict the output of the XOR function for the given inputs.
+ */
+const out1 = (await net.predict(tensor2D([[0, 0]]))).data;
+console.log(`0 xor 0 = ${out1[0]} (should be close to 0)`);
+
+const out2 = (await net.predict(tensor2D([[1, 0]]))).data;
+console.log(`1 xor 0 = ${out2[0]} (should be close to 1)`);
+
+const out3 = (await net.predict(tensor2D([[0, 1]]))).data;
+console.log(`0 xor 1 = ${out3[0]} (should be close to 1)`);
+
+const out4 = (await net.predict(tensor2D([[1, 1]]))).data;
+console.log(`1 xor 1 = ${out4[0]} (should be close to 0)`);
 ```
 
 #### Use the WASM Backend
 
+By changing the CPU backend to the WASM backend we sacrifice some speed but this allows us to run on the edge.
+
 ```typescript
 import {
   Cost,
+  WASM,
   DenseLayer,
   Sequential,
   setupBackend,
   SigmoidLayer,
   tensor2D,
-  WASM,
 } from "https://deno.land/x/netsaur/mod.ts";
 
+/**
+ * Setup the WASM backend. This backend is slower than the CPU backend but works on the Edge.
+ */
 await setupBackend(WASM);
 
+/**
+ * Creates a sequential neural network.
+ */
 const net = new Sequential({
+  /**
+   * The input size is set to 4 and the output size is set to 2.
+   */
   size: [4, 2],
+
+  /**
+   * The silent option is set to true, which means that the network will not output any logs during trainin
+   */
   silent: true,
+
+  /**
+   * Defines the layers of a neural network in the XOR function example.
+   * The neural network has two input neurons and one output neuron.
+   * The layers are defined as follows:
+   * - A dense layer with 3 neurons.
+   * - sigmoid activation layer.
+   * - A dense layer with 1 neuron.
+   * -A sigmoid activation layer.
+   */
   layers: [
     DenseLayer({ size: [3] }),
     SigmoidLayer(),
     DenseLayer({ size: [1] }),
     SigmoidLayer(),
   ],
+
+  /**
+   * The cost function used for training the network is the mean squared error (MSE).
+   */
   cost: Cost.MSE,
 });
 
 const time = performance.now();
 
+/**
+ * Train the network on the given data.
+ */
 net.train(
   [
     {
@@ -128,20 +218,35 @@ net.train(
       outputs: tensor2D([[0], [1], [1], [0]]),
     },
   ],
+  /**
+   * The number of iterations is set to 10000.
+   */
   10000,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
-console.log((await net.predict(tensor2D([[0, 0]]))).data);
-console.log((await net.predict(tensor2D([[1, 0]]))).data);
-console.log((await net.predict(tensor2D([[0, 1]]))).data);
-console.log((await net.predict(tensor2D([[1, 1]]))).data);
+
+/**
+ * Predict the output of the XOR function for the given inputs.
+ */
+const out1 = (await net.predict(tensor2D([[0, 0]]))).data;
+console.log(`0 xor 0 = ${out1[0]} (should be close to 0)`);
+
+const out2 = (await net.predict(tensor2D([[1, 0]]))).data;
+console.log(`1 xor 0 = ${out2[0]} (should be close to 1)`);
+
+const out3 = (await net.predict(tensor2D([[0, 1]]))).data;
+console.log(`0 xor 1 = ${out3[0]} (should be close to 1)`);
+
+const out4 = (await net.predict(tensor2D([[1, 1]]))).data;
+console.log(`1 xor 1 = ${out4[0]} (should be close to 0)`);
 ```
+
 
 ### Documentation
 
 The full documentation for Netsaur can be found
-[here](https://deno.land/x/netsaur@0.2.2/mod.ts).
+[here](https://deno.land/x/netsaur@0.2.5/mod.ts).
 
 ### License
 

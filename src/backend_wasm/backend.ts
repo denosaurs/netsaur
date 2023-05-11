@@ -46,7 +46,11 @@ export class WASMBackend implements Backend {
       inputShape: input.shape,
       outputShape: this.outputShape,
     } as PredictOptions);
-    const output = wasm_backend_predict(this.#id, input.data as Float32Array, options);
+    const output = wasm_backend_predict(
+      this.#id,
+      input.data as Float32Array,
+      options,
+    );
     return new Tensor(output, this.outputShape!);
   }
 

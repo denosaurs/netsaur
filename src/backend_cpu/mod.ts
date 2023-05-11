@@ -11,7 +11,7 @@ const options: FetchOptions = {
       "https://github.com/denosaurs/netsaur/releases/download/0.2.5/",
       import.meta.url,
     )
-    : "./target/debug/",
+    : "./target/release/",
   cache: "reloadAll",
 };
 
