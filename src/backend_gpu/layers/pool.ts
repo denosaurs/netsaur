@@ -64,9 +64,9 @@ export class PoolGPULayer {
     await feedforward_max(
       this.#backend,
       this.input,
-			this.indices,
+      this.indices,
       this.output,
-			this.strides
+      this.strides,
     );
     return this.output;
   }

@@ -12,3 +12,7 @@ test.ts
 experiments
 deno.lock
 target/
+Cargo.lock
+/target
+
+*.test.bin

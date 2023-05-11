@@ -41,7 +41,7 @@ export class Tensor<R extends Rank> {
    */
   toJSON() {
     const data = new Array(this.data.length).fill(1);
-    this.data.forEach((value, i) => data[i] = value)
+    this.data.forEach((value, i) => data[i] = value);
     return { data, shape: this.shape };
   }
 

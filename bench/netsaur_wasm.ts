@@ -1,9 +1,9 @@
 import {
-  Activation,
   Cost,
   DenseLayer,
   Sequential,
   setupBackend,
+  SigmoidLayer,
   tensor2D,
   WASM,
 } from "../mod.ts";
@@ -17,8 +17,10 @@ Deno.bench(
       size: [4, 2],
       silent: true,
       layers: [
-        DenseLayer({ size: [3], activation: Activation.Sigmoid }),
-        DenseLayer({ size: [1], activation: Activation.Sigmoid }),
+        DenseLayer({ size: [3] }),
+        SigmoidLayer(),
+        DenseLayer({ size: [1] }),
+        SigmoidLayer(),
       ],
       cost: Cost.MSE,
     });

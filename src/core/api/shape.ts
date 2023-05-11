@@ -86,7 +86,6 @@ export type ArrayMap =
   | Array5D
   | Array6D;
 
-
 /**
  * 1D Array.
  */

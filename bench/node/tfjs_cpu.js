@@ -15,7 +15,7 @@ async function predictOutput() {
   await model.fit(xs, ys, {
     batchSize: 1,
     epochs: 10000,
-    verbose: false
+    verbose: false,
   });
   console.log(`training time: ${performance.now() - time}ms`);
 }

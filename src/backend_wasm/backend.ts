@@ -1,9 +1,9 @@
 import { Rank, Shape, Tensor } from "../../mod.ts";
-import { DataSet, NetworkConfig } from "../core/types.ts";
-import { NetworkJSON } from "../model/types.ts";
+import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
 import {
   wasm_backend_create,
   wasm_backend_predict,
+  wasm_backend_save,
   wasm_backend_train,
 } from "./lib/netsaur.generated.js";
 import { PredictOptions, TrainOptions } from "./utils.ts";
@@ -11,7 +11,7 @@ import { PredictOptions, TrainOptions } from "./utils.ts";
 /**
  * Web Assembly Backend.
  */
-export class WASMBackend {
+export class WASMBackend implements Backend {
   config: NetworkConfig;
   outputShape?: Shape[Rank];
 
@@ -40,9 +40,7 @@ export class WASMBackend {
   }
 
   //deno-lint-ignore require-await
-  async predict(
-    input: Tensor<Rank>,
-  ): Promise<Tensor<Rank>> {
+  async predict(input: Tensor<Rank>): Promise<Tensor<Rank>> {
     const options = JSON.stringify({
       inputShape: input.shape,
       outputShape: this.outputShape,
@@ -51,14 +49,11 @@ export class WASMBackend {
     return new Tensor(output, this.outputShape!);
   }
 
-  save(_input: string): void {}
-
-  //deno-lint-ignore require-await
-  async toJSON() {
-    return null as unknown as NetworkJSON;
+  save(input: string): void {
+    Deno.writeFileSync(input, wasm_backend_save());
   }
 
-  static fromJSON(_json: NetworkJSON): WASMBackend {
+  static loadModel(_input: string | Uint8Array): WASMBackend {
     return null as unknown as WASMBackend;
   }
 }

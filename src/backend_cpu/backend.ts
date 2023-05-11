@@ -1,7 +1,6 @@
 import { Rank, Shape, Tensor } from "../../mod.ts";
 import { length } from "../core/tensor/util.ts";
-import { DataSet, NetworkConfig } from "../core/types.ts";
-import { NetworkJSON } from "../model/types.ts";
+import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
 import { Library } from "./mod.ts";
 import {
   encodeDatasets,
@@ -13,7 +12,7 @@ import {
 /**
  * CPU Backend.
  */
-export class CPUBackend {
+export class CPUBackend implements Backend {
   config: NetworkConfig;
   library: Library;
   outputShape: Shape[Rank];
@@ -51,9 +50,7 @@ export class CPUBackend {
   }
 
   //deno-lint-ignore require-await
-  async predict(
-    input: Tensor<Rank>,
-  ): Promise<Tensor<Rank>> {
+  async predict(input: Tensor<Rank>): Promise<Tensor<Rank>> {
     const options = encodeJSON({
       inputShape: input.shape,
       outputShape: this.outputShape,
@@ -68,14 +65,19 @@ export class CPUBackend {
     return new Tensor(output, this.outputShape);
   }
 
-  save(_input: string): void {}
-
-  //deno-lint-ignore require-await
-  async toJSON() {
-    return null as unknown as NetworkJSON;
+  save(input: string): void {
+    const ptr = new Deno.UnsafePointerView(
+      this.library.symbols.ffi_backend_save()!,
+    );
+    const lengthBe = new Uint8Array(4);
+    const view = new DataView(lengthBe.buffer);
+    ptr.copyInto(lengthBe, 0);
+    const buf = new Uint8Array(view.getUint32(0));
+    ptr.copyInto(buf, 4);
+    Deno.writeFileSync(input, buf);
   }
 
-  static fromJSON(_json: NetworkJSON): CPUBackend {
+  static loadModel(_input: string | Uint8Array): CPUBackend {
     return null as unknown as CPUBackend;
   }
 }

@@ -22,7 +22,7 @@ const network = new Sequential({
   size: [1, 1, 28, 28],
   silent: true,
   layers: [
-    Conv2DLayer({ kernelSize: [5, 5, 1, 6], padding: 2 }),
+    Conv2DLayer({ kernelSize: [5, 5, 1, 6], padding: [2, 2] }),
     ReluLayer(),
     MaxPool2DLayer({ strides: [2, 2] }),
     Conv2DLayer({ kernelSize: [5, 5, 6, 16] }),
@@ -48,12 +48,10 @@ const start = performance.now();
 network.train(trainSet, epochs, 0.01);
 console.log("Training complete!", performance.now() - start);
 
-
-
 // predicting
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx", 0, 1000);
-testSet.map((_, i) => testSet[i].inputs.shape = [28, 28, 1]);
+testSet.map((_, i) => (testSet[i].inputs.shape = [28, 28, 1]));
 
 function argmax(mat: Tensor<Rank>) {
   let max = -Infinity;

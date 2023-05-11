@@ -49,7 +49,6 @@ pub struct Tensor {
 #[derive(Deserialize, Debug, Clone)]
 pub struct DenseLayer {
     pub size: Vec<usize>,
-    pub activation: Option<Activation>,
     pub init: Option<Init>,
 }
 
@@ -57,10 +56,9 @@ pub struct DenseLayer {
 #[serde(rename_all = "camelCase")]
 pub struct Conv2DLayer {
     pub init: Option<Init>,
-    pub activation: Option<Activation>,
     pub kernel: Option<Tensor>,
     pub kernel_size: Vec<usize>,
-    pub padding: usize,
+    pub padding: Option<Vec<usize>>,
     pub strides: Option<Vec<usize>>
 }
 

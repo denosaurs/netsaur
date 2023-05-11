@@ -2,7 +2,6 @@ import { Backend, DataSet, NetworkConfig } from "./types.ts";
 import { Engine } from "./engine.ts";
 import { Rank } from "./api/shape.ts";
 import { Tensor } from "./tensor/tensor.ts";
-import { NetworkJSON } from "../model/types.ts";
 import { NeuralNetwork } from "./api/network.ts";
 
 /**
@@ -33,23 +32,12 @@ export class Sequential implements NeuralNetwork {
   }
 
   /**
-   * Export the network in a JSON format
-   */
-  async toJSON() {
-    return await this.backend.toJSON();
-  }
-
-  /**
-   * Import the network in a JSON format
-   */
-  static fromJSON(data: NetworkJSON) {
-    return Engine.backendLoader.fromJSON(data);
-  }
-
-  /**
    * Load model from binary file
    */
-  static load(_str: string) {
+  static loadModel(path: string): Sequential;
+  static loadModel(data: Uint8Array): Sequential;
+  static loadModel(_data: string | Uint8Array) {
+    return null as unknown as Sequential;
   }
 
   /**

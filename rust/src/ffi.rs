@@ -1,4 +1,5 @@
-use std::slice::{from_raw_parts, from_raw_parts_mut};
+use std::{slice::{from_raw_parts, from_raw_parts_mut}};
+use safetensors::{serialize, SafeTensors};
 
 use crate::{
     decode_array, decode_json, length, CPUBackend, Dataset, PredictOptions, TrainOptions, RESOURCES,
@@ -65,4 +66,15 @@ pub extern "C" fn ffi_backend_predict(
         let res = backend.as_mut().unwrap().predict(inputs);
         outputs.copy_from_slice(res.as_slice().unwrap());
     });
+}
+
+#[no_mangle]
+// TODO: change this
+#[allow(improper_ctypes_definitions)]
+pub extern "C" fn ffi_backend_save() -> Vec<u8> {
+    // temporary data
+    let serialized = b"8\x00\x00\x00\x00\x00\x00\x00{\"test\":{\"dtype\":\"I32\",\"shape\":[],\"data_offsets\":[0,4]}}\x00\x00\x00\x00";
+    let loaded = SafeTensors::deserialize(serialized).unwrap();
+
+    serialize(loaded.tensors().iter().map(|(name, view)| (name.to_string(), view)), &None).unwrap()
 }

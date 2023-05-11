@@ -1,19 +1,32 @@
 import { Tensor } from "./tensor/tensor.ts";
 import { Rank, Shape } from "./api/shape.ts";
 import { Layer } from "./api/layer.ts";
-import { NetworkJSON } from "../model/types.ts";
 
 /**
  * The Backend is responsible for eveything related to the neural network.
  */
 export interface Backend {
+  /**
+   * The train method is a function that trains a neural network using a set of training data.
+   * It takes in an array of DataSet objects, the number of epochs to train for, and the learning rate.
+   * The method modifies the weights and biases of the network to minimize the cost function and improve its accuracy on the training data.
+   */
   train(datasets: DataSet[], epochs: number, rate: number): void;
 
+  /**
+   * The predict method is a function that takes in a Tensor object
+   * representing the input to the neural network and returns a Promise that resolves to a Tensor object representing the output of the network.
+   * This method is used to make predictions on new data after the network has been trained.
+   * The Tensor objects passed to and returned from this method have a rank,
+   * which represents the number of dimensions of the tensor.
+   */
   predict(input: Tensor<Rank>): Promise<Tensor<Rank>>;
 
+  /**
+   * The save method is a function that takes in a string representing the path to a file and saves the network to that file.
+   * This method is used to save the network after it has been trained.
+   */
   save(input: string): void;
-
-  toJSON(): Promise<NetworkJSON>;
 }
 
 /**
@@ -69,11 +82,6 @@ export enum Activation {
    * This is a scaled version of the Elu function, which is a smoother approximation to the ReLU function.
    */
   Selu = "selu",
-
-  /**
-   * Linear activation function f(x) = x
-   */
-  Linear = "linear",
 }
 
 export enum Cost {

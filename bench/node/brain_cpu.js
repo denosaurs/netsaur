@@ -4,9 +4,9 @@ const time = performance.now();
 
 const config = {
   binaryThresh: 0.5,
-  hiddenLayers: [4], 
+  hiddenLayers: [4],
   activation: "sigmoid",
-  leakyReluAlpha: 0.01, 
+  leakyReluAlpha: 0.01,
 };
 
 const net = new brain.NeuralNetwork(config);
@@ -25,4 +25,3 @@ console.log(net.run([1, 0]));
 console.log(net.run([0, 1]));
 console.log(net.run([1, 1]));
 console.log(`time: ${performance.now() - time}ms`);
-

@@ -27,11 +27,6 @@ export type DenseLayerConfig = {
    * The size of the layer.
    */
   size: Shape1D;
-
-  /**
-   * The activation function to use.
-   */
-  activation?: Activation;
 };
 
 /**
@@ -47,8 +42,7 @@ export type DropoutLayerConfig = {
    * whether or not to do the operation in place.
    */
   inplace?: boolean;
-}
-
+};
 
 /**
  * The configuration for an activation layer.
@@ -70,11 +64,6 @@ export type Conv2DLayerConfig = {
   init?: Init;
 
   /**
-   * The activation function to use.
-   */
-  activation?: Activation;
-
-  /**
    * The kernel to use.
    */
   kernel?: Tensor<Rank>;
@@ -87,12 +76,7 @@ export type Conv2DLayerConfig = {
   /**
    * The optional padding to use.
    */
-  padding?: number;
-
-  /**
-   * Whether or not to not use bias.
-   */
-  unbiased?: boolean;
+  padding?: Shape2D;
 
   /**
    * The optional strides to use.
@@ -101,7 +85,14 @@ export type Conv2DLayerConfig = {
 };
 
 export enum PoolMode {
+  /**
+   * The average pooling mode.
+   */
   Avg,
+
+  /**
+   * The max pooling mode.
+   */
   Max,
 }
 

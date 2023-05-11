@@ -71,7 +71,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     global_id.y < ${shape[1]}u && 
     global_id.z < ${shape[2]}u
   ) {
-    var idx = global_id.x + global_id.y * ${shape[0]}u + global_id.z * ${shape[1]}u;
+    var idx = global_id.x + global_id.y * ${shape[0]}u + global_id.z * ${
+    shape[1]
+  }u;
     ${prime};
   }
 }`;
@@ -82,8 +84,8 @@ for (var i = 0u; i < length; i++) {
 }
 output.values[0] = sum / f32(length);`;
 
-export const mse_prime = 
-`error.values[idx] = y.values[idx] - yHat.values[idx];`;
+export const mse_prime =
+  `error.values[idx] = y.values[idx] - yHat.values[idx];`;
 
 function to3D(shape: Shape[Rank]): Shape3D {
   let res = shape as Shape3D;

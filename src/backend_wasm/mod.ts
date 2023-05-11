@@ -1,8 +1,7 @@
 import { WASMBackend } from "./backend.ts";
 import { NoBackendError } from "../core/api/error.ts";
-import { Engine } from "../core/engine.ts";
+import { BackendLoader, Engine } from "../core/engine.ts";
 import { Backend, BackendType, NetworkConfig } from "../core/types.ts";
-import { NetworkJSON } from "../model/types.ts";
 import { instantiate } from "./lib/netsaur.generated.js";
 
 /**
@@ -23,7 +22,7 @@ export class WASMInstance {
 /**
  * Web Assembly Backend Loader.
  */
-export class WASMBackendLoader {
+export class WASMBackendLoader implements BackendLoader {
   async setup(silent = false) {
     Engine.type = BackendType.WASM;
     return await WASMInstance.init(silent);
@@ -31,17 +30,19 @@ export class WASMBackendLoader {
 
   loadBackend(config: NetworkConfig): Backend {
     if (!WASMInstance.initialized) {
-      throw new NoBackendError(BackendType.WASM)
+      throw new NoBackendError(BackendType.WASM);
     }
     return new WASMBackend(config);
   }
 
-  fromJSON(json: NetworkJSON): Backend {
-    return WASMBackend.fromJSON(json) as Backend;
+  loadModel(path: string): Backend;
+  loadModel(path: Uint8Array): Backend;
+  loadModel(path: string | Uint8Array): Backend {
+    return WASMBackend.loadModel(path);
   }
 }
 
 /**
- * Web Assembly Backend Type.
+ * Web Assembly Backend written in Rust & compiled to Web Assembly.
  */
 export const WASM = new WASMBackendLoader();

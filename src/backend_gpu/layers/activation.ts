@@ -22,12 +22,12 @@ export class ActivationGPULayer {
       this.output = gpuZeroes(shape);
       this.dInputs = gpuZeroes(shape);
     }
-    return shape
+    return shape;
   }
   initialize(shape: Shape[Rank]) {
     this.output = gpuZeroes(shape);
     this.dInputs = gpuZeroes(shape);
-    return shape
+    return shape;
   }
   // deno-lint-ignore require-await
   async toJSON(): Promise<LayerJSON> {
