@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: f9e6c153a34a2ca040c6287d5a6ee922e66683b3
+// source-hash: de42fe1f0a8733258320d239e0c9e425606451cd
 let wasm;
 
 const heap = new Array(128).fill(undefined);
@@ -101,6 +101,7 @@ function passStringToWasm0(arg, malloc, realloc) {
 }
 /**
  * @param {string} config
+ * @returns {number}
  */
 export function wasm_backend_create(config) {
   const ptr0 = passStringToWasm0(
@@ -109,7 +110,8 @@ export function wasm_backend_create(config) {
     wasm.__wbindgen_realloc,
   );
   const len0 = WASM_VECTOR_LEN;
-  wasm.wasm_backend_create(ptr0, len0);
+  const ret = wasm.wasm_backend_create(ptr0, len0);
+  return ret >>> 0;
 }
 
 let cachedUint32Memory0 = null;
@@ -131,10 +133,11 @@ function passArrayJsValueToWasm0(array, malloc) {
   return ptr;
 }
 /**
+ * @param {number} id
  * @param {(Float32Array)[]} buffers
  * @param {string} options
  */
-export function wasm_backend_train(buffers, options) {
+export function wasm_backend_train(id, buffers, options) {
   const ptr0 = passArrayJsValueToWasm0(buffers, wasm.__wbindgen_malloc);
   const len0 = WASM_VECTOR_LEN;
   const ptr1 = passStringToWasm0(
@@ -143,22 +146,23 @@ export function wasm_backend_train(buffers, options) {
     wasm.__wbindgen_realloc,
   );
   const len1 = WASM_VECTOR_LEN;
-  wasm.wasm_backend_train(ptr0, len0, ptr1, len1);
+  wasm.wasm_backend_train(id, ptr0, len0, ptr1, len1);
 }
 
 /**
+ * @param {number} id
  * @param {Float32Array} buffer
  * @param {string} options
  * @returns {Float32Array}
  */
-export function wasm_backend_predict(buffer, options) {
+export function wasm_backend_predict(id, buffer, options) {
   const ptr0 = passStringToWasm0(
     options,
     wasm.__wbindgen_malloc,
     wasm.__wbindgen_realloc,
   );
   const len0 = WASM_VECTOR_LEN;
-  const ret = wasm.wasm_backend_predict(addHeapObject(buffer), ptr0, len0);
+  const ret = wasm.wasm_backend_predict(id, addHeapObject(buffer), ptr0, len0);
   return takeObject(ret);
 }
 
@@ -175,12 +179,13 @@ function getArrayU8FromWasm0(ptr, len) {
   return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
 }
 /**
+ * @param {number} _id
  * @returns {Uint8Array}
  */
-export function wasm_backend_save() {
+export function wasm_backend_save(_id) {
   try {
     const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-    wasm.wasm_backend_save(retptr);
+    wasm.wasm_backend_save(retptr, _id);
     var r0 = getInt32Memory0()[retptr / 4 + 0];
     var r1 = getInt32Memory0()[retptr / 4 + 1];
     var v0 = getArrayU8FromWasm0(r0, r1).slice();

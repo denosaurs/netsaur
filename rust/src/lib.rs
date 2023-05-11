@@ -17,13 +17,13 @@ pub use wasm::*;
 use std::cell::RefCell;
 
 pub struct Resources {
-    pub backend: RefCell<Option<CPUBackend>>,
+    pub backend: RefCell<Vec<CPUBackend>>,
 }
 
 impl Resources {
     pub fn new() -> Self {
         Self {
-            backend: RefCell::new(None),
+            backend: RefCell::new(Vec::new()),
         }
     }
 }

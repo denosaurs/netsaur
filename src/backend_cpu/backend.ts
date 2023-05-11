@@ -16,19 +16,20 @@ export class CPUBackend implements Backend {
   config: NetworkConfig;
   library: Library;
   outputShape: Shape[Rank];
+  #id: bigint;
 
   constructor(config: NetworkConfig, library: Library) {
     this.config = config;
     this.library = library;
 
     const buffer = encodeJSON(config);
-    const shape = new Uint8Array(6);
-    const length = this.library.symbols.ffi_backend_create(
+    const shape = new Uint8Array(7);
+    this.#id = this.library.symbols.ffi_backend_create(
       buffer,
       buffer.length,
       shape,
-    );
-    this.outputShape = Array.from(shape.slice(1, length)) as Shape[Rank];
+    ) as bigint;
+    this.outputShape = Array.from(shape.slice(2, shape[0] + 1)) as Shape[Rank];
   }
 
   train(datasets: DataSet[], epochs: number, rate: number) {
@@ -42,6 +43,7 @@ export class CPUBackend implements Backend {
     } as TrainOptions);
 
     this.library.symbols.ffi_backend_train(
+      this.#id,
       buffer,
       buffer.byteLength,
       options,
@@ -57,6 +59,7 @@ export class CPUBackend implements Backend {
     } as PredictOptions);
     const output = new Float32Array(length(this.outputShape));
     this.library.symbols.ffi_backend_predict(
+      this.#id,
       input.data as Float32Array,
       options,
       options.length,
@@ -67,7 +70,7 @@ export class CPUBackend implements Backend {
 
   save(input: string): void {
     const ptr = new Deno.UnsafePointerView(
-      this.library.symbols.ffi_backend_save()!,
+      this.library.symbols.ffi_backend_save(this.#id)!,
     );
     const lengthBe = new Uint8Array(4);
     const view = new DataView(lengthBe.buffer);

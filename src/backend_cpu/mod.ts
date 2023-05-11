@@ -11,25 +11,25 @@ const options: FetchOptions = {
       "https://github.com/denosaurs/netsaur/releases/download/0.2.5/",
       import.meta.url,
     )
-    : "./target/release/",
+    : "./target/debug/",
   cache: "reloadAll",
 };
 
 const symbols = {
   ffi_backend_create: {
     parameters: ["buffer", "usize", "buffer"],
-    result: "u32",
+    result: "usize",
   } as const,
   ffi_backend_train: {
-    parameters: ["buffer", "usize", "buffer", "usize"],
+    parameters: ["usize", "buffer", "usize", "buffer", "usize"],
     result: "void",
   } as const,
   ffi_backend_predict: {
-    parameters: ["buffer", "buffer", "usize", "buffer"],
-    result: "buffer",
+    parameters: ["usize", "buffer", "buffer", "usize", "buffer"],
+    result: "void",
   } as const,
   ffi_backend_save: {
-    parameters: [],
+    parameters: ["usize"],
     result: "buffer",
   } as const,
 };

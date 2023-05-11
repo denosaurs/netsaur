@@ -14,11 +14,12 @@ import { PredictOptions, TrainOptions } from "./utils.ts";
 export class WASMBackend implements Backend {
   config: NetworkConfig;
   outputShape?: Shape[Rank];
+  #id: number;
 
   constructor(config: NetworkConfig) {
     this.config = config;
 
-    wasm_backend_create(JSON.stringify(config));
+    this.#id = wasm_backend_create(JSON.stringify(config));
   }
 
   train(datasets: DataSet[], epochs: number, rate: number) {
@@ -36,7 +37,7 @@ export class WASMBackend implements Backend {
       rate,
     } as TrainOptions);
 
-    wasm_backend_train(buffer, options);
+    wasm_backend_train(this.#id, buffer, options);
   }
 
   //deno-lint-ignore require-await
@@ -45,12 +46,12 @@ export class WASMBackend implements Backend {
       inputShape: input.shape,
       outputShape: this.outputShape,
     } as PredictOptions);
-    const output = wasm_backend_predict(input.data as Float32Array, options);
+    const output = wasm_backend_predict(this.#id, input.data as Float32Array, options);
     return new Tensor(output, this.outputShape!);
   }
 
   save(input: string): void {
-    Deno.writeFileSync(input, wasm_backend_save());
+    Deno.writeFileSync(input, wasm_backend_save(this.#id));
   }
 
   static loadModel(_input: string | Uint8Array): WASMBackend {
