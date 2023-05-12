@@ -54,8 +54,12 @@ export class WASMBackend implements Backend {
     return new Tensor(output, this.outputShape!);
   }
 
-  save(input: string): void {
-    Deno.writeFileSync(input, wasm_backend_save(this.#id));
+  save(): Uint8Array {
+    return wasm_backend_save(this.#id);
+  }
+
+  saveFile(input: string): void {
+    Deno.writeFileSync(input, this.save());
   }
 
   static loadModel(_input: string | Uint8Array): WASMBackend {

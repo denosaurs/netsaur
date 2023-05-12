@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BackendConfig {
+    pub silent: Option<bool>,
     pub size: Vec<usize>,
     pub layers: Vec<Layer>,
     pub cost: Cost,
@@ -25,6 +26,7 @@ pub enum Layer {
     Flatten(FlattenLayer),
     Dropout1D(Dropout1DLayer),
     Dropout2D(Dropout2DLayer),
+    Softmax,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -93,6 +95,7 @@ pub struct ActivationLayer {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Cost {
+    CrossEntropy,
     MSE,
 }
 

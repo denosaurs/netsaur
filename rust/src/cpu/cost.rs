@@ -1,6 +1,6 @@
-use std::ops::{Sub, Mul};
+use std::ops::{Mul, Sub};
 
-use ndarray::{ArrayViewD, ArrayD};
+use ndarray::{ArrayD, ArrayViewD};
 
 use crate::Cost;
 
@@ -16,6 +16,10 @@ impl CPUCost {
                 cost: mse,
                 prime: mse_prime,
             },
+            Cost::CrossEntropy => CPUCost {
+                cost: cross_entropy,
+                prime: cross_entropy_prime,
+            },
         }
     }
 }
@@ -26,5 +30,13 @@ fn mse<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
 }
 
 fn mse_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
+    return y.sub(&y_hat);
+}
+
+fn cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
+    return -y_hat.mul(&y).sum().ln();
+}
+
+fn cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
     return y.sub(&y_hat);
 }

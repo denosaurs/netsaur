@@ -9,7 +9,9 @@ pub struct FlattenCPULayer {
 
 impl FlattenCPULayer {
     pub fn new(config: FlattenLayer, size: IxDyn) -> Self {
-        let output_size = IxDyn(&config.size);
+        let mut new_size = config.size.clone();
+        new_size.insert(0, size[0]);
+        let output_size = IxDyn(&new_size);
         if output_size.size() != size.size() {
             panic!(
                 "Shape {:#?} is incompatible with shape {:#?}",
@@ -18,7 +20,7 @@ impl FlattenCPULayer {
         }
         Self {
             input_size: size,
-            output_size: config.size,
+            output_size: new_size,
         }
     }
 

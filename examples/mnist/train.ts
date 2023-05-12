@@ -20,15 +20,14 @@ await setupBackend(CPU);
 // training
 const network = new Sequential({
   size: [1, 1, 28, 28],
-  silent: true,
   layers: [
-    Conv2DLayer({ kernelSize: [5, 5, 1, 6], padding: [2, 2] }),
+    Conv2DLayer({ kernelSize: [6, 1, 5, 5], padding: [2, 2] }),
     ReluLayer(),
     MaxPool2DLayer({ strides: [2, 2] }),
-    Conv2DLayer({ kernelSize: [5, 5, 6, 16] }),
+    Conv2DLayer({ kernelSize: [16, 6, 5, 5] }),
     ReluLayer(),
     MaxPool2DLayer({ strides: [2, 2] }),
-    Conv2DLayer({ kernelSize: [5, 5, 16, 120] }),
+    Conv2DLayer({ kernelSize: [120, 16, 5, 5] }),
     ReluLayer(),
     FlattenLayer({ size: [120] }),
     DenseLayer({ size: [84], init: Init.Kaiming }),

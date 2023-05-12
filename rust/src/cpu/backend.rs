@@ -4,11 +4,12 @@ use ndarray::{ArrayD, ArrayViewD, IxDyn};
 use safetensors::{serialize, SafeTensors};
 
 use crate::{
-    to_arr, ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Conv2DCPULayer,
-    Dataset, DenseCPULayer, Layer, Pool2DCPULayer, Tensor,
+    to_arr, ActivationCPULayer, FlattenCPULayer, BackendConfig, CPUCost, CPULayer, Conv2DCPULayer,
+    Dataset, DenseCPULayer, Layer, Pool2DCPULayer, Tensor, SoftmaxCPULayer,
 };
 
 pub struct CPUBackend {
+    pub silent: bool,
     pub config: BackendConfig,
     pub layers: Vec<CPULayer>,
     pub size: Vec<usize>,
@@ -53,18 +54,26 @@ impl CPUBackend {
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Dense(layer));
                 }
-                Layer::Flatten(_config) => {
-                    unimplemented!("Flatten is not implemented yet")
+                Layer::Flatten(config) => {
+                    let layer = FlattenCPULayer::new(config, IxDyn(&size));
+                    size = layer.output_size().to_vec();
+                    layers.push(CPULayer::Flatten(layer));
                 }
                 Layer::Pool2D(config) => {
                     let layer = Pool2DCPULayer::new(config, IxDyn(&size));
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Pool2D(layer));
+                },
+                Layer::Softmax => {
+                    let layer = SoftmaxCPULayer::new(IxDyn(&size));
+                    layers.push(CPULayer::Softmax(layer));
                 }
             }
         }
         let cost = CPUCost::from(config.cost.clone());
+        let silent = config.silent.is_some();
         Self {
+            silent,
             config,
             layers,
             cost,
@@ -95,8 +104,12 @@ impl CPUBackend {
     pub fn train(&mut self, datasets: Vec<Dataset>, epochs: usize, rate: f32) {
         let mut epoch = 0;
         while epoch < epochs {
-            for dataset in &datasets {
+            for (i, dataset) in datasets.iter().enumerate() {
                 let outputs = self.forward_propagate(dataset.inputs.clone());
+                if !self.silent {
+                    let cost = (self.cost.cost)(outputs.view(), dataset.outputs.view());
+                    println!("Epoch={}, Dataset={}, Cost={}", epoch, i, cost);
+                }
                 self.backward_propagate(outputs.view(), dataset.outputs.view(), rate);
             }
 

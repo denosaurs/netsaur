@@ -1,4 +1,4 @@
-use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix4, IxDyn, Ix1};
+use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix1, Ix4, IxDyn};
 use std::ops::{Add, AddAssign, Mul};
 
 use crate::{CPUInit, Conv2DLayer, Init};
@@ -38,7 +38,7 @@ impl Conv2DCPULayer {
                 output_size.size(),
             )
         });
-        let biases = biases.unwrap_or(ArrayD::zeros(vec![size[1]]));
+        let biases = biases.unwrap_or(ArrayD::zeros(vec![config.kernel_size[0]]));
 
         Self {
             strides,
@@ -99,7 +99,7 @@ impl Conv2DCPULayer {
         let d_outputs = d_outputs.into_dimensionality::<Ix4>().unwrap();
 
         let (filters, _, weight_y, weight_x) = self.weights.dim();
-        let (batches, _, output_y, output_x) = self.inputs.dim();
+        let (batches, _, output_y, output_x) = self.outputs.dim();
 
         let mut d_inputs = Array4::zeros(self.inputs.dim());
         let mut d_weights = Array4::zeros(self.weights.dim());
