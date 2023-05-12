@@ -5,7 +5,7 @@ import { CPU, Sequential, setupBackend, tensor2D } from "../../mod.ts";
  */
 await setupBackend(CPU);
 
-const model = Sequential.loadFile("examples/model/xor.test.bin");
+const model = Sequential.loadFile("examples/model/xor.test.st");
 
 /**
  * Predict the output of the XOR function for the given inputs.

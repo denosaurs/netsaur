@@ -67,11 +67,11 @@ net.train(
     },
   ],
   /**
-   * The number of iterations is set to 10000.
+   * The number of iterations is set to 1,000,000.
    */
-  10000,
+  1000000,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
 
-net.saveFile("examples/model/xor.test.bin");
+net.saveFile("examples/model/xor.test.st");
