@@ -1,4 +1,5 @@
 mod cpu;
+mod tensor;
 mod types;
 mod util;
 #[cfg(not(target_arch = "wasm32"))]
@@ -7,6 +8,7 @@ mod ffi;
 mod wasm;
 
 pub use cpu::*;
+pub use tensor::*;
 pub use types::*;
 pub use util::*;
 #[cfg(not(target_arch = "wasm32"))]

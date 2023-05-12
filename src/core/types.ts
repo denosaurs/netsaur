@@ -26,7 +26,9 @@ export interface Backend {
    * The save method is a function that takes in a string representing the path to a file and saves the network to that file.
    * This method is used to save the network after it has been trained.
    */
-  save(input: string): void;
+  save(): Uint8Array;
+
+  saveFile(path: string): void;
 }
 
 /**

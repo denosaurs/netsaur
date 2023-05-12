@@ -1,5 +1,16 @@
 import { DataSet, Rank, Shape } from "../../mod.ts";
 
+export class Buffer {
+  buffer = new Uint8Array();
+  allocBuffer = new Deno.UnsafeCallback({
+    parameters: ["usize"],
+    result: "buffer",
+  }, (length) => {
+    this.buffer = new Uint8Array(Number(length));
+    return this.buffer
+  }).pointer;
+}
+
 /**
  * Train Options Interface.
  */

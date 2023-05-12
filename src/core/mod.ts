@@ -32,18 +32,30 @@ export class Sequential implements NeuralNetwork {
   }
 
   /**
+   * Load model from buffer
+   */
+  static load(data: Uint8Array) {
+    return Engine.backendLoader.load(data);
+  }
+
+  /**
    * Load model from binary file
    */
-  static loadModel(path: string): Sequential;
-  static loadModel(data: Uint8Array): Sequential;
-  static loadModel(_data: string | Uint8Array) {
-    return null as unknown as Sequential;
+  static loadFile(data: string) {
+    return Engine.backendLoader.loadFile(data);
   }
 
   /**
    * Save model to binary file
    */
-  save(str: string) {
-    this.backend.save(str);
+  save(): Uint8Array {
+    return this.backend.save();
+  }
+
+  /**
+   * Save model to a buffer
+   */
+  saveFile(path: string) {
+    this.backend.saveFile(path);
   }
 }

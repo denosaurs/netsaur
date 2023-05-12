@@ -1,16 +1,17 @@
-use safetensors::{serialize, SafeTensors};
 use std::slice::{from_raw_parts, from_raw_parts_mut};
 
 use crate::{
     decode_array, decode_json, length, CPUBackend, Dataset, PredictOptions, TrainOptions, RESOURCES,
 };
 
+type AllocBufferFn = extern "C" fn(usize) -> *mut u8;
+
 #[no_mangle]
-pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize, size_ptr: *mut u8) -> usize {
+pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize, alloc: AllocBufferFn) -> usize {
     let config = decode_json(ptr, len);
-    let net_backend = CPUBackend::new(config);
-    let mut buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
-    buf.insert(0, buf.len() as u8);
+    let net_backend = CPUBackend::new(config, None);
+    let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
+    let size_ptr = alloc(buf.len());
     let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };
     output_shape.copy_from_slice(buf.as_slice());
 
@@ -70,19 +71,30 @@ pub extern "C" fn ffi_backend_predict(
 }
 
 #[no_mangle]
-// TODO: change this
-#[allow(improper_ctypes_definitions)]
-pub extern "C" fn ffi_backend_save(_id: usize) -> Vec<u8> {
-    // temporary data
-    let serialized = b"8\x00\x00\x00\x00\x00\x00\x00{\"test\":{\"dtype\":\"I32\",\"shape\":[],\"data_offsets\":[0,4]}}\x00\x00\x00\x00";
-    let loaded = SafeTensors::deserialize(serialized).unwrap();
+pub extern "C" fn ffi_backend_save(id: usize, alloc: AllocBufferFn) {
+    RESOURCES.with(|cell| {
+        let backend = cell.backend.borrow_mut();
+        let data = backend[id].save();
+        let file_ptr = alloc(data.len());
+        let file = unsafe { from_raw_parts_mut(file_ptr, data.len()) };
+        file.copy_from_slice(data.as_slice());
+    });
+}
 
-    serialize(
-        loaded
-            .tensors()
-            .iter()
-            .map(|(name, view)| (name.to_string(), view)),
-        &None,
-    )
-    .unwrap()
+#[no_mangle]
+pub extern "C" fn ffi_backend_load(file_ptr: *const u8, file_len: usize, alloc: AllocBufferFn) -> usize {
+    let buffer = unsafe { from_raw_parts(file_ptr, file_len) };
+    let net_backend = CPUBackend::load(buffer);
+    let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
+    let size_ptr = alloc(buf.len());
+    let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };
+    output_shape.copy_from_slice(buf.as_slice());
+
+    let mut len = 0;
+    RESOURCES.with(|cell| {
+        let mut backend = cell.backend.borrow_mut();
+        len = backend.len();
+        backend.push(net_backend);
+    });
+    len
 }

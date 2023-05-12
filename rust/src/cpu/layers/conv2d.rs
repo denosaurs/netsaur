@@ -1,4 +1,4 @@
-use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix4, IxDyn};
+use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix4, IxDyn, Ix1};
 use std::ops::{Add, AddAssign, Mul};
 
 use crate::{CPUInit, Conv2DLayer, Init};
@@ -13,7 +13,12 @@ pub struct Conv2DCPULayer {
 }
 
 impl Conv2DCPULayer {
-    pub fn new(config: Conv2DLayer, size: IxDyn) -> Self {
+    pub fn new(
+        config: Conv2DLayer,
+        size: IxDyn,
+        weights: Option<ArrayD<f32>>,
+        biases: Option<ArrayD<f32>>,
+    ) -> Self {
         let strides = config.strides.unwrap_or(vec![1, 1]);
         let padding = config.padding.unwrap_or(vec![0, 0]);
         let input_y = size[2] + 2 * padding[0];
@@ -23,22 +28,24 @@ impl Conv2DCPULayer {
         let input_size = Ix4(size[0], size[1], input_y, input_x);
         let weight_size = IxDyn(config.kernel_size.as_slice());
         let output_size = Ix4(size[0], weight_size[0], output_y, output_x);
-        let weights = if let Some(tensor) = config.kernel {
-            let shape: [usize; 4] = tensor.shape.try_into().unwrap();
-            Array4::from_shape_vec(shape, tensor.data).unwrap()
+
+        let weights = weights.unwrap_or(if let Some(tensor) = config.kernel {
+            ArrayD::from_shape_vec(tensor.shape, tensor.data).unwrap()
         } else {
-            CPUInit::from_default(config.init, Init::Kaiming)
-                .init(weight_size, input_size.size(), output_size.size())
-                .into_dimensionality::<Ix4>()
-                .unwrap()
-        };
+            CPUInit::from_default(config.init, Init::Kaiming).init(
+                weight_size,
+                input_size.size(),
+                output_size.size(),
+            )
+        });
+        let biases = biases.unwrap_or(ArrayD::zeros(vec![size[1]]));
 
         Self {
             strides,
             padding,
             inputs: Array4::zeros(input_size),
-            weights,
-            biases: Array1::zeros(size[0]),
+            weights: weights.into_dimensionality::<Ix4>().unwrap(),
+            biases: biases.into_dimensionality::<Ix1>().unwrap(),
             outputs: Array4::zeros(output_size),
         }
     }

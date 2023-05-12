@@ -3,6 +3,7 @@ import { length } from "../core/tensor/util.ts";
 import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
 import { Library } from "./mod.ts";
 import {
+  Buffer,
   encodeDatasets,
   encodeJSON,
   PredictOptions,
@@ -13,23 +14,31 @@ import {
  * CPU Backend.
  */
 export class CPUBackend implements Backend {
-  config: NetworkConfig;
   library: Library;
   outputShape: Shape[Rank];
   #id: bigint;
 
-  constructor(config: NetworkConfig, library: Library) {
-    this.config = config;
+  constructor(
+    library: Library,
+    outputShape: Shape[Rank],
+    id: bigint,
+  ) {
     this.library = library;
+    this.outputShape = outputShape;
+    this.#id = id;
+  }
 
+  static create(config: NetworkConfig, library: Library) {
     const buffer = encodeJSON(config);
-    const shape = new Uint8Array(7);
-    this.#id = this.library.symbols.ffi_backend_create(
+    const shape = new Buffer();
+    const id = library.symbols.ffi_backend_create(
       buffer,
       buffer.length,
-      shape,
+      shape.allocBuffer,
     ) as bigint;
-    this.outputShape = Array.from(shape.slice(2, shape[0] + 1)) as Shape[Rank];
+    const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
+
+    return new CPUBackend(library, outputShape, id);
   }
 
   train(datasets: DataSet[], epochs: number, rate: number) {
@@ -68,19 +77,29 @@ export class CPUBackend implements Backend {
     return new Tensor(output, this.outputShape);
   }
 
-  save(input: string): void {
-    const ptr = new Deno.UnsafePointerView(
-      this.library.symbols.ffi_backend_save(this.#id)!,
-    );
-    const lengthBe = new Uint8Array(4);
-    const view = new DataView(lengthBe.buffer);
-    ptr.copyInto(lengthBe, 0);
-    const buf = new Uint8Array(view.getUint32(0));
-    ptr.copyInto(buf, 4);
-    Deno.writeFileSync(input, buf);
+  save(): Uint8Array {
+    const shape = new Buffer();
+    this.library.symbols.ffi_backend_save(this.#id, shape.allocBuffer);
+    return shape.buffer;
   }
 
-  static loadModel(_input: string | Uint8Array): CPUBackend {
-    return null as unknown as CPUBackend;
+  saveFile(path: string): void {
+    Deno.writeFileSync(path, this.save())
+  }
+
+  static load(buffer: Uint8Array, library: Library): CPUBackend {
+    const shape = new Buffer();
+    const id = library.symbols.ffi_backend_load(
+      buffer,
+      buffer.length,
+      shape.allocBuffer,
+    ) as bigint;
+    const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
+
+    return new CPUBackend(library, outputShape, id);
+  }
+
+  static loadFile(path: string, library: Library): CPUBackend {
+    return this.load(Deno.readFileSync(path), library)
   }
 }

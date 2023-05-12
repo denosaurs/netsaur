@@ -1,6 +1,4 @@
 import { CPU } from "../backend_cpu/mod.ts";
-import { Rank, Shape } from "./api/shape.ts";
-import { Tensor } from "./tensor/tensor.ts";
 import { Backend, BackendType, NetworkConfig } from "./types.ts";
 
 export interface BackendInstance {
@@ -8,34 +6,6 @@ export interface BackendInstance {
    * Initialize the backend.
    */
   init(): Promise<void>;
-}
-
-/**
- * The Tensor Backend is responsible for creating and managing Tensors.
- */
-export interface TensorBackend {
-  /**
-   * Create a Tensor with all values set to zero.
-   */
-  zeroes<R extends Rank, B extends BackendType>(shape: Shape[R]): Tensor<R>;
-
-  /**
-   * Creates a tensor from a Float32Array and a shape.
-   */
-  from<R extends Rank, B extends BackendType>(
-    values: Float32Array,
-    shape: Shape[R],
-  ): Tensor<R>;
-
-  /**
-   * Get the values of a tensor.
-   */
-  get(tensor: Tensor<Rank>): Promise<Float32Array>;
-
-  /**
-   * Set the values of a tensor.
-   */
-  set(tensor: Tensor<Rank>, values: Float32Array): void;
 }
 
 /**
@@ -55,12 +25,12 @@ export interface BackendLoader {
   /**
    * Load a model from a safe tensors file path.
    */
-  loadModel(path: string): Backend;
+  loadFile(path: string): Backend;
 
   /**
    * Load a model from Uint8Array data.
    */
-  loadModel(data: Uint8Array): Backend;
+  load(data: Uint8Array): Backend;
 }
 
 /**
