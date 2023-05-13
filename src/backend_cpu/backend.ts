@@ -41,13 +41,14 @@ export class CPUBackend implements Backend {
     return new CPUBackend(library, outputShape, id);
   }
 
-  train(datasets: DataSet[], epochs: number, rate: number) {
+  train(datasets: DataSet[], epochs: number, batches: number, rate: number) {
     const buffer = encodeDatasets(datasets);
     const options = encodeJSON({
       datasets: datasets.length,
       inputShape: datasets[0].inputs.shape,
       outputShape: datasets[0].outputs.shape,
       epochs,
+      batches,
       rate,
     } as TrainOptions);
 

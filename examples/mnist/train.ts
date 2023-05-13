@@ -44,7 +44,7 @@ const trainSet = loadDataset("train-images.idx", "train-labels.idx", 0, 5000);
 const epochs = 1;
 console.log("Training (" + epochs + " epochs)...");
 const start = performance.now();
-network.train(trainSet, epochs, 0.01);
+network.train(trainSet, epochs, 32, 0.01);
 console.log("Training complete!", performance.now() - start);
 
 // predicting
@@ -64,15 +64,18 @@ function argmax(mat: Tensor<Rank>) {
   return index;
 }
 
-const correct = testSet.filter(async (e) => {
-  const prediction = argmax(await network.predict(e.inputs as Tensor<Rank>));
-  const expected = argmax(e.outputs as Tensor<Rank>);
-  return prediction === expected;
-});
+let correct = 0;
+for (const test of testSet) {
+  const prediction = argmax(await network.predict(test.inputs as Tensor<Rank>));
+  const expected = argmax(test.outputs as Tensor<Rank>);
+  if (expected === prediction) {
+    correct += 1
+  }
+}
 
-console.log(`${correct.length} / ${testSet.length} correct`);
+console.log(`${correct} / ${testSet.length} correct`);
 console.log(
-  `accuracy: ${((correct.length / testSet.length) * 100).toFixed(2)}%`,
+  `accuracy: ${((correct / testSet.length) * 100).toFixed(2)}%`,
 );
 
-network.saveFile("examples/mnist/mnist.test.bin")
+network.saveFile("examples/mnist/mnist.test.bin");

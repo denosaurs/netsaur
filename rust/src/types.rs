@@ -115,6 +115,7 @@ pub struct TrainOptions {
     pub input_shape: Vec<usize>,
     pub output_shape: Vec<usize>,
     pub epochs: usize,
+    pub batches: usize,
     pub rate: f32,
 }
 

@@ -32,7 +32,7 @@ export class WASMBackendLoader implements BackendLoader {
     if (!WASMInstance.initialized) {
       throw new NoBackendError(BackendType.WASM);
     }
-    return new WASMBackend(config);
+    return WASMBackend.create(config);
   }
 
   load(data: Uint8Array): Backend {

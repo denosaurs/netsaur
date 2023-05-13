@@ -4,6 +4,10 @@ use ndarray::ArrayD;
 use safetensors::tensor::TensorView;
 use serde::Deserialize;
 
+pub struct Logger {
+    pub log: fn(string: String) -> ()
+}
+
 pub fn length(shape: Vec<usize>) -> usize {
     return shape.iter().fold(1, |i, x| i * x);
 }

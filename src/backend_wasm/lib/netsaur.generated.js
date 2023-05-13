@@ -1,8 +1,9 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: de42fe1f0a8733258320d239e0c9e425606451cd
+// source-hash: 39a2439a14f1198dc14c8241cd28f7149d3e38e6
 let wasm;
+let cachedInt32Memory0;
 
 const heap = new Array(128).fill(undefined);
 
@@ -26,6 +27,15 @@ function takeObject(idx) {
   return ret;
 }
 
+function addHeapObject(obj) {
+  if (heap_next === heap.length) heap.push(heap.length + 1);
+  const idx = heap_next;
+  heap_next = heap[idx];
+
+  heap[idx] = obj;
+  return idx;
+}
+
 const cachedTextDecoder = new TextDecoder("utf-8", {
   ignoreBOM: true,
   fatal: true,
@@ -44,15 +54,6 @@ function getUint8Memory0() {
 
 function getStringFromWasm0(ptr, len) {
   return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
-}
-
-function addHeapObject(obj) {
-  if (heap_next === heap.length) heap.push(heap.length + 1);
-  const idx = heap_next;
-  heap_next = heap[idx];
-
-  heap[idx] = obj;
-  return idx;
 }
 
 let WASM_VECTOR_LEN = 0;
@@ -101,16 +102,17 @@ function passStringToWasm0(arg, malloc, realloc) {
 }
 /**
  * @param {string} config
+ * @param {Array<any>} shape
  * @returns {number}
  */
-export function wasm_backend_create(config) {
+export function wasm_backend_create(config, shape) {
   const ptr0 = passStringToWasm0(
     config,
     wasm.__wbindgen_malloc,
     wasm.__wbindgen_realloc,
   );
   const len0 = WASM_VECTOR_LEN;
-  const ret = wasm.wasm_backend_create(ptr0, len0);
+  const ret = wasm.wasm_backend_create(ptr0, len0, addHeapObject(shape));
   return ret >>> 0;
 }
 
@@ -166,34 +168,26 @@ export function wasm_backend_predict(id, buffer, options) {
   return takeObject(ret);
 }
 
-let cachedInt32Memory0 = null;
-
-function getInt32Memory0() {
-  if (cachedInt32Memory0 === null || cachedInt32Memory0.byteLength === 0) {
-    cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
-  }
-  return cachedInt32Memory0;
-}
-
-function getArrayU8FromWasm0(ptr, len) {
-  return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
-}
 /**
- * @param {number} _id
+ * @param {number} id
  * @returns {Uint8Array}
  */
-export function wasm_backend_save(_id) {
-  try {
-    const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-    wasm.wasm_backend_save(retptr, _id);
-    var r0 = getInt32Memory0()[retptr / 4 + 0];
-    var r1 = getInt32Memory0()[retptr / 4 + 1];
-    var v0 = getArrayU8FromWasm0(r0, r1).slice();
-    wasm.__wbindgen_free(r0, r1 * 1);
-    return v0;
-  } finally {
-    wasm.__wbindgen_add_to_stack_pointer(16);
-  }
+export function wasm_backend_save(id) {
+  const ret = wasm.wasm_backend_save(id);
+  return takeObject(ret);
+}
+
+/**
+ * @param {Uint8Array} buffer
+ * @param {Array<any>} shape
+ * @returns {number}
+ */
+export function wasm_backend_load(buffer, shape) {
+  const ret = wasm.wasm_backend_load(
+    addHeapObject(buffer),
+    addHeapObject(shape),
+  );
+  return ret >>> 0;
 }
 
 function handleError(f, args) {
@@ -208,6 +202,13 @@ const imports = {
   __wbindgen_placeholder__: {
     __wbindgen_object_drop_ref: function (arg0) {
       takeObject(arg0);
+    },
+    __wbg_log_02bd49bd77ccc1c4: function (arg0, arg1) {
+      console.log(getStringFromWasm0(arg0, arg1));
+    },
+    __wbindgen_number_new: function (arg0) {
+      const ret = arg0;
+      return addHeapObject(ret);
     },
     __wbg_getRandomValues_3774744e221a22ad: function () {
       return handleError(function (arg0, arg1) {
@@ -304,6 +305,12 @@ const imports = {
       const ret = getObject(arg0) === undefined;
       return ret;
     },
+    __wbg_set_17224bc548dd1d7b: function (arg0, arg1, arg2) {
+      getObject(arg0)[arg1 >>> 0] = takeObject(arg2);
+    },
+    __wbg_setlength_c0e533b51f477fd2: function (arg0, arg1) {
+      getObject(arg0).length = arg1 >>> 0;
+    },
     __wbg_call_9495de66fdbe016b: function () {
       return handleError(function (arg0, arg1, arg2) {
         const ret = getObject(arg0).call(getObject(arg1), getObject(arg2));
@@ -328,6 +335,10 @@ const imports = {
     },
     __wbg_set_17499e8aa4003ebd: function (arg0, arg1, arg2) {
       getObject(arg0).set(getObject(arg1), arg2 >>> 0);
+    },
+    __wbg_length_27a2afe8ab42b09f: function (arg0) {
+      const ret = getObject(arg0).length;
+      return ret;
     },
     __wbg_newwithbyteoffsetandlength_4078d56428eb2926: function (
       arg0,
@@ -400,7 +411,7 @@ let lastLoadPromise;
  * @param {InstantiateOptions=} opts
  * @returns {Promise<{
  *   instance: WebAssembly.Instance;
- *   exports: { wasm_backend_create: typeof wasm_backend_create; wasm_backend_train: typeof wasm_backend_train; wasm_backend_predict: typeof wasm_backend_predict; wasm_backend_save: typeof wasm_backend_save }
+ *   exports: { wasm_backend_create: typeof wasm_backend_create; wasm_backend_train: typeof wasm_backend_train; wasm_backend_predict: typeof wasm_backend_predict; wasm_backend_save: typeof wasm_backend_save; wasm_backend_load: typeof wasm_backend_load }
  * }>}
  */
 export function instantiateWithInstance(opts) {
@@ -433,6 +444,7 @@ function getWasmInstanceExports() {
     wasm_backend_train,
     wasm_backend_predict,
     wasm_backend_save,
+    wasm_backend_load,
   };
 }
 

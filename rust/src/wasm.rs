@@ -1,16 +1,30 @@
-use js_sys::Float32Array;
+use js_sys::{Array, Float32Array, Uint8Array};
 use ndarray::ArrayD;
-use safetensors::{serialize, SafeTensors};
 
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-use crate::{CPUBackend, Dataset, PredictOptions, TrainOptions, RESOURCES};
+use crate::{CPUBackend, Dataset, Logger, PredictOptions, TrainOptions, RESOURCES};
 
 #[wasm_bindgen]
-pub fn wasm_backend_create(config: String) -> usize {
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
+
+fn console_log(string: String) {
+    log(string.as_str())
+}
+
+#[wasm_bindgen]
+pub fn wasm_backend_create(config: String, shape: Array) -> usize {
     let config = serde_json::from_str(&config).unwrap();
     let mut len = 0;
-    let net_backend = CPUBackend::new(config);
+    let logger = Logger { log: console_log };
+    let net_backend = CPUBackend::new(config, logger, None);
+    shape.set_length(net_backend.size.len() as u32);
+    for (i, s) in net_backend.size.iter().enumerate() {
+        shape.set(i as u32, JsValue::from(*s))
+    }
 
     RESOURCES.with(|cell| {
         let mut backend = cell.backend.borrow_mut();
@@ -36,7 +50,7 @@ pub fn wasm_backend_train(id: usize, buffers: Vec<Float32Array>, options: String
 
     RESOURCES.with(|cell| {
         let mut backend = cell.backend.borrow_mut();
-        backend[id].train(datasets, options.epochs, options.rate)
+        backend[id].train(datasets, options.epochs, options.batches, options.rate)
     });
 }
 
@@ -55,17 +69,29 @@ pub fn wasm_backend_predict(id: usize, buffer: Float32Array, options: String) ->
 }
 
 #[wasm_bindgen]
-pub fn wasm_backend_save(_id: usize) -> Vec<u8> {
-    // temporary data
-    let serialized = b"8\x00\x00\x00\x00\x00\x00\x00{\"test\":{\"dtype\":\"I32\",\"shape\":[],\"data_offsets\":[0,4]}}\x00\x00\x00\x00";
-    let loaded = SafeTensors::deserialize(serialized).unwrap();
+pub fn wasm_backend_save(id: usize) -> Uint8Array {
+    let mut buffer = Vec::new();
+    RESOURCES.with(|cell| {
+        let backend = cell.backend.borrow_mut();
+        buffer = backend[id].save();
+    });
+    Uint8Array::from(buffer.as_slice())
+}
 
-    serialize(
-        loaded
-            .tensors()
-            .iter()
-            .map(|(name, view)| (name.to_string(), view)),
-        &None,
-    )
-    .unwrap()
+#[wasm_bindgen]
+pub fn wasm_backend_load(buffer: Uint8Array, shape: Array) -> usize {
+    let mut len = 0;
+    let logger = Logger { log: console_log };
+    let net_backend = CPUBackend::load(buffer.to_vec().as_slice(), logger);
+    shape.set_length(net_backend.size.len() as u32);
+    for (i, s) in net_backend.size.iter().enumerate() {
+        shape.set(i as u32, JsValue::from(*s))
+    }
+
+    RESOURCES.with(|cell| {
+        let mut backend = cell.backend.borrow_mut();
+        len = backend.len();
+        backend.push(net_backend);
+    });
+    len
 }

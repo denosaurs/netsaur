@@ -20,8 +20,8 @@ export class Sequential implements NeuralNetwork {
   /**
    * Train the Neural Network.
    */
-  train(datasets: DataSet[], epochs = 1000, rate = 0.1) {
-    this.backend.train(datasets, epochs, rate);
+  train(datasets: DataSet[], epochs = 1000, batches = 1, rate = 0.1) {
+    this.backend.train(datasets, epochs, batches, rate);
   }
 
   /**

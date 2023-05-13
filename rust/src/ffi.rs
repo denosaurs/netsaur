@@ -1,15 +1,19 @@
 use std::slice::{from_raw_parts, from_raw_parts_mut};
 
 use crate::{
-    decode_array, decode_json, length, CPUBackend, Dataset, PredictOptions, TrainOptions, RESOURCES,
+    decode_array, decode_json, length, CPUBackend, Dataset, PredictOptions, TrainOptions, RESOURCES, Logger,
 };
 
 type AllocBufferFn = extern "C" fn(usize) -> *mut u8;
 
+fn log(string: String) {
+    println!("{}", string)
+}
+
 #[no_mangle]
 pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize, alloc: AllocBufferFn) -> usize {
     let config = decode_json(ptr, len);
-    let net_backend = CPUBackend::new(config, None);
+    let net_backend = CPUBackend::new(config, Logger { log }, None);
     let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
     let size_ptr = alloc(buf.len());
     let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };
@@ -47,7 +51,7 @@ pub extern "C" fn ffi_backend_train(
 
     RESOURCES.with(|cell| {
         let mut backend = cell.backend.borrow_mut();
-        backend[id].train(datasets, options.epochs, options.rate)
+        backend[id].train(datasets, options.epochs, options.batches, options.rate)
     });
 }
 
@@ -84,7 +88,7 @@ pub extern "C" fn ffi_backend_save(id: usize, alloc: AllocBufferFn) {
 #[no_mangle]
 pub extern "C" fn ffi_backend_load(file_ptr: *const u8, file_len: usize, alloc: AllocBufferFn) -> usize {
     let buffer = unsafe { from_raw_parts(file_ptr, file_len) };
-    let net_backend = CPUBackend::load(buffer);
+    let net_backend = CPUBackend::load(buffer, Logger { log });
     let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
     let size_ptr = alloc(buf.len());
     let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };

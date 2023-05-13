@@ -1,11 +1,11 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use ndarray::{ArrayD, ArrayViewD, IxDyn};
 use safetensors::{serialize, SafeTensors};
 
 use crate::{
-    to_arr, ActivationCPULayer, FlattenCPULayer, BackendConfig, CPUCost, CPULayer, Conv2DCPULayer,
-    Dataset, DenseCPULayer, Layer, Pool2DCPULayer, Tensor, SoftmaxCPULayer,
+    to_arr, ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Conv2DCPULayer, Dataset,
+    DenseCPULayer, FlattenCPULayer, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor,
 };
 
 pub struct CPUBackend {
@@ -14,10 +14,11 @@ pub struct CPUBackend {
     pub layers: Vec<CPULayer>,
     pub size: Vec<usize>,
     pub cost: CPUCost,
+    pub logger: Logger,
 }
 
 impl CPUBackend {
-    pub fn new(config: BackendConfig, tensors: Option<SafeTensors>) -> Self {
+    pub fn new(config: BackendConfig, logger: Logger, tensors: Option<SafeTensors>) -> Self {
         let mut layers = Vec::new();
         let mut size = config.size.clone();
         for (i, layer) in config.layers.iter().enumerate() {
@@ -63,7 +64,7 @@ impl CPUBackend {
                     let layer = Pool2DCPULayer::new(config, IxDyn(&size));
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Pool2D(layer));
-                },
+                }
                 Layer::Softmax => {
                     let layer = SoftmaxCPULayer::new(IxDyn(&size));
                     layers.push(CPULayer::Softmax(layer));
@@ -73,6 +74,7 @@ impl CPUBackend {
         let cost = CPUCost::from(config.cost.clone());
         let silent = config.silent.is_some();
         Self {
+            logger,
             silent,
             config,
             layers,
@@ -101,7 +103,7 @@ impl CPUBackend {
         d_outputs
     }
 
-    pub fn train(&mut self, datasets: Vec<Dataset>, epochs: usize, rate: f32) {
+    pub fn train(&mut self, datasets: Vec<Dataset>, epochs: usize, batches: usize, rate: f32) {
         let mut epoch = 0;
         while epoch < epochs {
             let mut total = 0.0;
@@ -109,8 +111,10 @@ impl CPUBackend {
                 let outputs = self.forward_propagate(dataset.inputs.clone());
                 self.backward_propagate(outputs.view(), dataset.outputs.view(), rate);
                 total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
-                if !self.silent && i % 32 == 0 {
-                    println!("Epoch={}, Dataset={}, Cost={}", epoch, i, total / 32.0);
+                if !self.silent && i % batches == 0 {
+                    let cost = total / batches as f32;
+                    let msg = format!("Epoch={}, Dataset={}, Cost={}", epoch, i, cost);
+                    (self.logger.log)(msg);
                     total = 0.0;
                 }
             }
@@ -150,13 +154,13 @@ impl CPUBackend {
         serialize(tensors, &Some(metadata)).unwrap()
     }
 
-    pub fn load(buffer: &[u8]) -> Self {
+    pub fn load(buffer: &[u8], logger: Logger) -> Self {
         let tensors = SafeTensors::deserialize(buffer).unwrap();
         let (_, metadata) = SafeTensors::read_metadata(buffer).unwrap();
         let data = metadata.metadata().as_ref().unwrap();
         let json = data.get("metadata").unwrap();
         let config = serde_json::from_str(json).unwrap();
 
-        CPUBackend::new(config, Some(tensors))
+        CPUBackend::new(config, logger, Some(tensors))
     }
 }

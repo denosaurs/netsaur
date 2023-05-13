@@ -8,6 +8,7 @@ export type TrainOptions = {
   inputShape: Shape[Rank];
   outputShape: Shape[Rank];
   epochs: number;
+  batches: number;
   rate: number;
 };
 

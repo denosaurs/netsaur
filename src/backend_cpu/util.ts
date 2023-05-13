@@ -7,7 +7,7 @@ export class Buffer {
     result: "buffer",
   }, (length) => {
     this.buffer = new Uint8Array(Number(length));
-    return this.buffer
+    return this.buffer;
   }).pointer;
 }
 
@@ -19,6 +19,7 @@ export type TrainOptions = {
   inputShape: Shape[Rank];
   outputShape: Shape[Rank];
   epochs: number;
+  batches: number;
   rate: number;
 };
 

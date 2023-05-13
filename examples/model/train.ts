@@ -18,7 +18,7 @@ await setupBackend(CPU);
  */
 const net = new Sequential({
   /**
-   * The input size is set to 4 and the output size is set to 2.
+   * The number of minibatches is set to 4 and the output size is set to 2.
    */
   size: [4, 2],
 
