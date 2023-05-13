@@ -1,5 +1,5 @@
 use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix1, Ix4, IxDyn};
-use std::ops::{Add, AddAssign, Mul};
+use std::ops::{Add, SubAssign, AddAssign, Mul};
 
 use crate::{CPUInit, Conv2DLayer, Init};
 
@@ -128,8 +128,8 @@ impl Conv2DCPULayer {
             }
         }
 
-        self.weights.add_assign(&d_weights.mul(rate));
-        self.biases.add_assign(&d_biases.mul(rate));
+        self.weights.sub_assign(&d_weights.mul(rate));
+        self.biases.sub_assign(&d_biases.mul(rate));
 
         d_inputs.into_dyn()
     }

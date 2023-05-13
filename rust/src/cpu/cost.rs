@@ -1,4 +1,4 @@
-use std::ops::{Mul, Sub};
+use std::ops::{Mul, Sub, Div};
 
 use ndarray::{ArrayD, ArrayViewD};
 
@@ -38,5 +38,5 @@ fn cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 
 }
 
 fn cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
-    return y.sub(&y_hat);
+    return -y_hat.div(&y);
 }

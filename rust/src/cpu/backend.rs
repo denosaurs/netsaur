@@ -94,7 +94,7 @@ impl CPUBackend {
         data: ArrayViewD<'b, f32>,
         rate: f32,
     ) -> ArrayD<f32> {
-        let mut d_outputs = (self.cost.prime)(outputs, data);
+        let mut d_outputs = (self.cost.prime)(data, outputs);
         for layer in self.layers.iter_mut().rev() {
             d_outputs = layer.backward_propagate(d_outputs, rate);
         }
@@ -104,13 +104,15 @@ impl CPUBackend {
     pub fn train(&mut self, datasets: Vec<Dataset>, epochs: usize, rate: f32) {
         let mut epoch = 0;
         while epoch < epochs {
+            let mut total = 0.0;
             for (i, dataset) in datasets.iter().enumerate() {
                 let outputs = self.forward_propagate(dataset.inputs.clone());
-                if !self.silent {
-                    let cost = (self.cost.cost)(outputs.view(), dataset.outputs.view());
-                    println!("Epoch={}, Dataset={}, Cost={}", epoch, i, cost);
-                }
                 self.backward_propagate(outputs.view(), dataset.outputs.view(), rate);
+                total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
+                if !self.silent && i % 32 == 0 {
+                    println!("Epoch={}, Dataset={}, Cost={}", epoch, i, total / 32.0);
+                    total = 0.0;
+                }
             }
 
             epoch += 1

@@ -1,5 +1,5 @@
 use ndarray::{Array1, Array2, ArrayD, Axis, Dimension, Ix1, Ix2, IxDyn};
-use std::ops::{Add, AddAssign, Mul};
+use std::ops::{Add, SubAssign, Mul};
 
 use crate::{CPUInit, DenseLayer, Init};
 
@@ -57,9 +57,9 @@ impl DenseCPULayer {
         let mut inputs_t = self.inputs.view();
         inputs_t.swap_axes(0, 1);
         let d_weights = inputs_t.dot(&d_outputs);
-        self.weights.add_assign(&d_weights.mul(rate));
+        self.weights.sub_assign(&d_weights.mul(rate));
         self.biases
-            .add_assign(&d_outputs.mul(rate).sum_axis(Axis(0)));
+            .sub_assign(&d_outputs.mul(rate).sum_axis(Axis(0)));
         d_inputs.into_dyn()
     }
 }
