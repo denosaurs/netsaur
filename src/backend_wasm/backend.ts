@@ -62,7 +62,11 @@ export class WASMBackend implements Backend {
     Deno.writeFileSync(input, this.save());
   }
 
-  static loadModel(_input: string | Uint8Array): WASMBackend {
+  static loadFile(_input: string): WASMBackend {
+    return null as unknown as WASMBackend;
+  }
+
+  static load(_input: Uint8Array): WASMBackend {
     return null as unknown as WASMBackend;
   }
 }
