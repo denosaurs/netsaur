@@ -30,7 +30,7 @@ await setupBackend(WASM);
  */
 const network = new Sequential({
   /**
-   * The input size is set to 4 and the output size is set to 1.
+   * The number of minibatches is set to 4 and the output size is set to 1.
    */
   size: [4, 1],
 
@@ -67,6 +67,10 @@ network.train(
    * The number of iterations is set to 400.
    */
   400,
+  /**
+   * The number of batches is set to 1.
+   */
+  1,
   /**
    * The learning rate is set to 0.01.
    */

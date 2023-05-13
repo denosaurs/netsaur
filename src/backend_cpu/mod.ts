@@ -17,20 +17,24 @@ const options: FetchOptions = {
 
 const symbols = {
   ffi_backend_create: {
-    parameters: ["buffer", "usize", "buffer"],
-    result: "u32",
+    parameters: ["buffer", "usize", "pointer"],
+    result: "usize",
   } as const,
   ffi_backend_train: {
-    parameters: ["buffer", "usize", "buffer", "usize"],
+    parameters: ["usize", "buffer", "usize", "buffer", "usize"],
     result: "void",
   } as const,
   ffi_backend_predict: {
-    parameters: ["buffer", "buffer", "usize", "buffer"],
-    result: "buffer",
+    parameters: ["usize", "buffer", "buffer", "usize", "buffer"],
+    result: "void",
   } as const,
   ffi_backend_save: {
-    parameters: [],
-    result: "buffer",
+    parameters: ["usize", "pointer"],
+    result: "void",
+  } as const,
+  ffi_backend_load: {
+    parameters: ["buffer", "usize", "pointer"],
+    result: "usize",
   } as const,
 };
 
@@ -60,13 +64,15 @@ export class CPUBackendLoader implements BackendLoader {
     if (!CPUInstance.initialized) {
       throw new NoBackendError(BackendType.CPU);
     }
-    return new CPUBackend(config, CPUInstance.library!);
+    return CPUBackend.create(config, CPUInstance.library!);
   }
 
-  loadModel(path: string): Backend;
-  loadModel(path: Uint8Array): Backend;
-  loadModel(path: string | Uint8Array): Backend {
-    return CPUBackend.loadModel(path);
+  load(path: Uint8Array): Backend {
+    return CPUBackend.load(path, CPUInstance.library!);
+  }
+
+  loadFile(path: string): Backend{
+    return CPUBackend.loadFile(path, CPUInstance.library!);
   }
 }
 

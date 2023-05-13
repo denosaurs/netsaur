@@ -1,5 +1,5 @@
-use ndarray::{Array1, Array2, ArrayD, Axis, Dimension, Ix2, IxDyn};
-use std::ops::{Add, AddAssign, Mul};
+use ndarray::{Array1, Array2, ArrayD, Axis, Dimension, Ix1, Ix2, IxDyn};
+use std::ops::{Add, SubAssign, Mul};
 
 use crate::{CPUInit, DenseLayer, Init};
 
@@ -11,22 +11,27 @@ pub struct DenseCPULayer {
 }
 
 impl DenseCPULayer {
-    pub fn new(config: DenseLayer, size: IxDyn) -> Self {
+    pub fn new(
+        config: DenseLayer,
+        size: IxDyn,
+        weights: Option<ArrayD<f32>>,
+        biases: Option<ArrayD<f32>>,
+    ) -> Self {
         let init = CPUInit::from_default(config.init, Init::Uniform);
         let input_size = Ix2(size[0], size[1]);
         let weight_size = Ix2(size[1], config.size[0]);
         let output_size = Ix2(size[0], config.size[0]);
+        let weights =
+            weights.unwrap_or(init.init(weight_size.into_dyn(), size.size(), output_size.size()));
+        let biases = biases.unwrap_or(ArrayD::zeros(config.size));
         Self {
             inputs: Array2::zeros(input_size),
-            weights: init
-                .init(weight_size.into_dyn(), size.size(), output_size.size())
-                .into_dimensionality::<Ix2>()
-                .unwrap(),
-            biases: Array1::zeros(config.size[0]),
+            weights: weights.into_dimensionality::<Ix2>().unwrap(),
+            biases: biases.into_dimensionality::<Ix1>().unwrap(),
             outputs: Array2::zeros(output_size),
         }
     }
-    
+
     pub fn output_size(&self) -> Vec<usize> {
         self.outputs.shape().to_vec()
     }
@@ -52,9 +57,9 @@ impl DenseCPULayer {
         let mut inputs_t = self.inputs.view();
         inputs_t.swap_axes(0, 1);
         let d_weights = inputs_t.dot(&d_outputs);
-        self.weights.add_assign(&d_weights.mul(rate));
+        self.weights.sub_assign(&d_weights.mul(rate));
         self.biases
-            .add_assign(&d_outputs.mul(rate).sum_axis(Axis(0)));
+            .sub_assign(&d_outputs.mul(rate).sum_axis(Axis(0)));
         d_inputs.into_dyn()
     }
 }

@@ -3,6 +3,7 @@ import { length } from "../core/tensor/util.ts";
 import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
 import { Library } from "./mod.ts";
 import {
+  Buffer,
   encodeDatasets,
   encodeJSON,
   PredictOptions,
@@ -13,35 +14,46 @@ import {
  * CPU Backend.
  */
 export class CPUBackend implements Backend {
-  config: NetworkConfig;
   library: Library;
   outputShape: Shape[Rank];
+  #id: bigint;
 
-  constructor(config: NetworkConfig, library: Library) {
-    this.config = config;
+  constructor(
+    library: Library,
+    outputShape: Shape[Rank],
+    id: bigint,
+  ) {
     this.library = library;
-
-    const buffer = encodeJSON(config);
-    const shape = new Uint8Array(6);
-    const length = this.library.symbols.ffi_backend_create(
-      buffer,
-      buffer.length,
-      shape,
-    );
-    this.outputShape = Array.from(shape.slice(1, length)) as Shape[Rank];
+    this.outputShape = outputShape;
+    this.#id = id;
   }
 
-  train(datasets: DataSet[], epochs: number, rate: number) {
+  static create(config: NetworkConfig, library: Library) {
+    const buffer = encodeJSON(config);
+    const shape = new Buffer();
+    const id = library.symbols.ffi_backend_create(
+      buffer,
+      buffer.length,
+      shape.allocBuffer,
+    ) as bigint;
+    const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
+
+    return new CPUBackend(library, outputShape, id);
+  }
+
+  train(datasets: DataSet[], epochs: number, batches: number, rate: number) {
     const buffer = encodeDatasets(datasets);
     const options = encodeJSON({
       datasets: datasets.length,
       inputShape: datasets[0].inputs.shape,
       outputShape: datasets[0].outputs.shape,
       epochs,
+      batches,
       rate,
     } as TrainOptions);
 
     this.library.symbols.ffi_backend_train(
+      this.#id,
       buffer,
       buffer.byteLength,
       options,
@@ -57,6 +69,7 @@ export class CPUBackend implements Backend {
     } as PredictOptions);
     const output = new Float32Array(length(this.outputShape));
     this.library.symbols.ffi_backend_predict(
+      this.#id,
       input.data as Float32Array,
       options,
       options.length,
@@ -65,19 +78,29 @@ export class CPUBackend implements Backend {
     return new Tensor(output, this.outputShape);
   }
 
-  save(input: string): void {
-    const ptr = new Deno.UnsafePointerView(
-      this.library.symbols.ffi_backend_save()!,
-    );
-    const lengthBe = new Uint8Array(4);
-    const view = new DataView(lengthBe.buffer);
-    ptr.copyInto(lengthBe, 0);
-    const buf = new Uint8Array(view.getUint32(0));
-    ptr.copyInto(buf, 4);
-    Deno.writeFileSync(input, buf);
+  save(): Uint8Array {
+    const shape = new Buffer();
+    this.library.symbols.ffi_backend_save(this.#id, shape.allocBuffer);
+    return shape.buffer;
   }
 
-  static loadModel(_input: string | Uint8Array): CPUBackend {
-    return null as unknown as CPUBackend;
+  saveFile(path: string): void {
+    Deno.writeFileSync(path, this.save())
+  }
+
+  static load(buffer: Uint8Array, library: Library): CPUBackend {
+    const shape = new Buffer();
+    const id = library.symbols.ffi_backend_load(
+      buffer,
+      buffer.length,
+      shape.allocBuffer,
+    ) as bigint;
+    const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
+
+    return new CPUBackend(library, outputShape, id);
+  }
+
+  static loadFile(path: string, library: Library): CPUBackend {
+    return this.load(Deno.readFileSync(path), library)
   }
 }

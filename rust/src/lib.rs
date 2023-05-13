@@ -1,4 +1,5 @@
 mod cpu;
+mod tensor;
 mod types;
 mod util;
 #[cfg(not(target_arch = "wasm32"))]
@@ -7,6 +8,7 @@ mod ffi;
 mod wasm;
 
 pub use cpu::*;
+pub use tensor::*;
 pub use types::*;
 pub use util::*;
 #[cfg(not(target_arch = "wasm32"))]
@@ -17,13 +19,13 @@ pub use wasm::*;
 use std::cell::RefCell;
 
 pub struct Resources {
-    pub backend: RefCell<Option<CPUBackend>>,
+    pub backend: RefCell<Vec<CPUBackend>>,
 }
 
 impl Resources {
     pub fn new() -> Self {
         Self {
-            backend: RefCell::new(None),
+            backend: RefCell::new(Vec::new()),
         }
     }
 }

@@ -20,15 +20,14 @@ await setupBackend(CPU);
 // training
 const network = new Sequential({
   size: [1, 1, 28, 28],
-  silent: true,
   layers: [
-    Conv2DLayer({ kernelSize: [5, 5, 1, 6], padding: [2, 2] }),
+    Conv2DLayer({ kernelSize: [6, 1, 5, 5], padding: [2, 2] }),
     ReluLayer(),
     MaxPool2DLayer({ strides: [2, 2] }),
-    Conv2DLayer({ kernelSize: [5, 5, 6, 16] }),
+    Conv2DLayer({ kernelSize: [16, 6, 5, 5] }),
     ReluLayer(),
     MaxPool2DLayer({ strides: [2, 2] }),
-    Conv2DLayer({ kernelSize: [5, 5, 16, 120] }),
+    Conv2DLayer({ kernelSize: [120, 16, 5, 5] }),
     ReluLayer(),
     FlattenLayer({ size: [120] }),
     DenseLayer({ size: [84], init: Init.Kaiming }),
@@ -45,13 +44,13 @@ const trainSet = loadDataset("train-images.idx", "train-labels.idx", 0, 5000);
 const epochs = 1;
 console.log("Training (" + epochs + " epochs)...");
 const start = performance.now();
-network.train(trainSet, epochs, 0.01);
+network.train(trainSet, epochs, 32, 0.01);
 console.log("Training complete!", performance.now() - start);
 
 // predicting
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx", 0, 1000);
-testSet.map((_, i) => (testSet[i].inputs.shape = [28, 28, 1]));
+testSet.map((_, i) => (testSet[i].inputs.shape = [1, 1, 28, 28]));
 
 function argmax(mat: Tensor<Rank>) {
   let max = -Infinity;
@@ -65,13 +64,18 @@ function argmax(mat: Tensor<Rank>) {
   return index;
 }
 
-const correct = testSet.filter(async (e) => {
-  const prediction = argmax(await network.predict(e.inputs as Tensor<Rank>));
-  const expected = argmax(e.outputs as Tensor<Rank>);
-  return prediction === expected;
-});
+let correct = 0;
+for (const test of testSet) {
+  const prediction = argmax(await network.predict(test.inputs as Tensor<Rank>));
+  const expected = argmax(test.outputs as Tensor<Rank>);
+  if (expected === prediction) {
+    correct += 1
+  }
+}
 
-console.log(`${correct.length} / ${testSet.length} correct`);
+console.log(`${correct} / ${testSet.length} correct`);
 console.log(
-  `accuracy: ${((correct.length / testSet.length) * 100).toFixed(2)}%`,
+  `accuracy: ${((correct / testSet.length) * 100).toFixed(2)}%`,
 );
+
+network.saveFile("examples/mnist/mnist.test.bin");

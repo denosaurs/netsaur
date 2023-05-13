@@ -6,13 +6,13 @@ import {
   AveragePool2DLayer,
   Conv2DLayer,
   Cost,
-  WASM,
   MaxPool2DLayer,
   Rank,
   Sequential,
   setupBackend,
   Tensor,
   tensor4D,
+  WASM,
 } from "../../mod.ts";
 import { decode } from "https://deno.land/x/pngs@0.1.1/mod.ts";
 import { createCanvas } from "https://deno.land/x/canvas@v1.4.1/mod.ts";

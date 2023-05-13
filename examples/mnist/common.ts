@@ -55,7 +55,7 @@ export function loadDataset(
     outputs[labelView.getUint8(8 + i)] = 1;
 
     results.push({
-      inputs: new Tensor(inputs[i], [28, 28, 1, 1]),
+      inputs: new Tensor(inputs[i], [1, 1, 28, 28]),
       outputs: new Tensor(outputs, [10]),
     });
   }

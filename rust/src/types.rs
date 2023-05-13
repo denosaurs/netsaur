@@ -1,8 +1,9 @@
 use ndarray::ArrayD;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BackendConfig {
+    pub silent: Option<bool>,
     pub size: Vec<usize>,
     pub layers: Vec<Layer>,
     pub cost: Cost,
@@ -14,7 +15,7 @@ pub struct Dataset {
     pub outputs: ArrayD<f32>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type", content = "config")]
 #[serde(rename_all = "lowercase")]
 pub enum Layer {
@@ -25,9 +26,10 @@ pub enum Layer {
     Flatten(FlattenLayer),
     Dropout1D(Dropout1DLayer),
     Dropout2D(Dropout2DLayer),
+    Softmax,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Activation {
     Sigmoid,
@@ -40,63 +42,64 @@ pub enum Activation {
     Selu,
 }
 
-#[derive(Deserialize, Debug, Clone)]
-pub struct Tensor {
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct JSTensor {
     pub data: Vec<f32>,
-    pub shape: Vec<usize>
+    pub shape: Vec<usize>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DenseLayer {
     pub size: Vec<usize>,
     pub init: Option<Init>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Conv2DLayer {
     pub init: Option<Init>,
-    pub kernel: Option<Tensor>,
+    pub kernel: Option<JSTensor>,
     pub kernel_size: Vec<usize>,
     pub padding: Option<Vec<usize>>,
-    pub strides: Option<Vec<usize>>
+    pub strides: Option<Vec<usize>>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Pool2DLayer {
     pub mode: usize, // 0 = avg, 1 = max
-    pub strides: Option<Vec<usize>>
+    pub strides: Option<Vec<usize>>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FlattenLayer {
     pub size: Vec<usize>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Dropout1DLayer {
     pub probability: f32,
     pub inplace: bool,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Dropout2DLayer {
     pub probability: f32,
     pub inplace: bool,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ActivationLayer {
     pub activation: Activation,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Cost {
+    CrossEntropy,
     MSE,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Init {
     Uniform,
@@ -105,17 +108,18 @@ pub enum Init {
     Kaiming,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TrainOptions {
     pub datasets: usize,
     pub input_shape: Vec<usize>,
     pub output_shape: Vec<usize>,
     pub epochs: usize,
+    pub batches: usize,
     pub rate: f32,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PredictOptions {
     pub input_shape: Vec<usize>,

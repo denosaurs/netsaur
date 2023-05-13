@@ -1,7 +1,12 @@
 use std::slice::from_raw_parts;
 
 use ndarray::ArrayD;
+use safetensors::tensor::TensorView;
 use serde::Deserialize;
+
+pub struct Logger {
+    pub log: fn(string: String) -> ()
+}
 
 pub fn length(shape: Vec<usize>) -> usize {
     return shape.iter().fold(1, |i, x| i * x);
@@ -20,4 +25,10 @@ where
     let buffer = unsafe { from_raw_parts(ptr, len) };
     let json = std::str::from_utf8(&buffer[0..len]).unwrap();
     return serde_json::from_str(&json).unwrap();
+}
+
+pub fn to_arr(view: TensorView) -> ArrayD<f32> {
+    let slice: &[f32] =
+        unsafe { from_raw_parts(view.data().as_ptr() as *const f32, view.data().len() / 4) };
+    return ArrayD::from_shape_vec(view.shape(), slice.to_vec()).unwrap();
 }

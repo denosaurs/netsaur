@@ -1,6 +1,6 @@
 use ndarray::ArrayD;
 
-use crate::{DenseCPULayer, ActivationCPULayer, Conv2DCPULayer, Pool2DCPULayer, FlattenCPULayer, Dropout1DCPULayer, Dropout2DCPULayer};
+use crate::{DenseCPULayer, ActivationCPULayer, Conv2DCPULayer, Pool2DCPULayer, FlattenCPULayer, Dropout1DCPULayer, Dropout2DCPULayer, SoftmaxCPULayer};
 
 pub enum CPULayer {
     Activation(ActivationCPULayer),
@@ -10,6 +10,7 @@ pub enum CPULayer {
     Dropout2D(Dropout2DCPULayer),
     Flatten(FlattenCPULayer),
     Pool2D(Pool2DCPULayer),
+    Softmax(SoftmaxCPULayer),
 }
 
 impl CPULayer {
@@ -22,6 +23,7 @@ impl CPULayer {
             CPULayer::Dropout2D(layer) => layer.output_size(),
             CPULayer::Flatten(layer) => layer.output_size(),
             CPULayer::Pool2D(layer) => layer.output_size(),
+            CPULayer::Softmax(layer) => layer.output_size(),
         }
     }
 
@@ -34,6 +36,7 @@ impl CPULayer {
             CPULayer::Dropout2D(layer) => layer.forward_propagate(inputs),
             CPULayer::Flatten(layer) => layer.forward_propagate(inputs),
             CPULayer::Pool2D(layer) => layer.forward_propagate(inputs),
+            CPULayer::Softmax(layer) => layer.forward_propagate(inputs),
         }
     }
 
@@ -46,6 +49,7 @@ impl CPULayer {
             CPULayer::Dropout2D(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::Flatten(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::Pool2D(layer) => layer.backward_propagate(d_outputs, rate),
+            CPULayer::Softmax(layer) => layer.backward_propagate(d_outputs, rate),
         }
     }
 
@@ -58,6 +62,7 @@ impl CPULayer {
             CPULayer::Dropout2D(layer) => layer.reset(batches),
             CPULayer::Flatten(layer) => layer.reset(batches),
             CPULayer::Pool2D(layer) => layer.reset(batches),
+            CPULayer::Softmax(layer) => layer.reset(batches),
         }
     }
 }

@@ -16,3 +16,4 @@ Cargo.lock
 /target
 
 *.test.bin
+*.test.st
