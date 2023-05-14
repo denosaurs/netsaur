@@ -6,7 +6,7 @@ await setupBackend(CPU);
 const network = Sequential.loadFile("examples/mnist/mnist.test.bin");
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx", 0, 1000);
-testSet.map((_, i) => (testSet[i].inputs.shape = [1, 1, 28, 28]));
+testSet.map((_, i) => (testSet[i].inputs.shape = [1, 28, 28]));
 
 function argmax(mat: Tensor<Rank>) {
   let max = -Infinity;

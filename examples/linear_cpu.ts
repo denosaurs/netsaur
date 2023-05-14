@@ -8,6 +8,7 @@ import {
   DenseLayer,
   Sequential,
   setupBackend,
+  tensor1D,
   tensor2D,
 } from "../mod.ts";
 
@@ -84,7 +85,7 @@ for (const test of testData) {
   /**
    * Make a prediction on the test data.
    */
-  const predicted = await network.predict(tensor2D([[test]]));
+  const predicted = await network.predict(tensor1D([test]));
   console.log(
     `input: ${test}\noutput: ${fmt(predicted)}\nexpected: ${2 * test + 1}\n`,
   );

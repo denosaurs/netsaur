@@ -12,5 +12,5 @@ Deno.test("save wasm", () => {
     cost: Cost.MSE,
   });
 
-  network.save("./save_test_wasm.test.bin");
+  network.saveFile("./save_test_wasm.test.bin");
 });

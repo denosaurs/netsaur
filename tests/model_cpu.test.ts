@@ -11,5 +11,5 @@ Deno.test("save cpu", () => {
     cost: Cost.MSE,
   });
 
-  network.save("./save_test_cpu.test.bin");
+  network.saveFile("./save_test_cpu.test.bin");
 });
