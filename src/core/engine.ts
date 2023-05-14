@@ -1,5 +1,15 @@
-import { CPU } from "../backend_cpu/mod.ts";
+import { WASM } from "../backend_wasm/mod.ts";
+import { Sequential } from "./mod.ts";
 import { Backend, BackendType, NetworkConfig } from "./types.ts";
+
+// deno-lint-ignore no-window-prefix
+window.onerror = () => {
+  if (typeof Deno == "undefined") {
+    throw new Error(
+      "Warning: Deno is not defined. Did you mean to import from ./web.ts instead of ./mod.ts?",
+    );
+  }
+};
 
 export interface BackendInstance {
   /**
@@ -25,12 +35,12 @@ export interface BackendLoader {
   /**
    * Load a model from a safe tensors file path.
    */
-  loadFile(path: string): Backend;
+  loadFile(path: string): Sequential;
 
   /**
    * Load a model from Uint8Array data.
    */
-  load(data: Uint8Array): Backend;
+  load(data: Uint8Array): Sequential;
 }
 
 /**
@@ -40,7 +50,7 @@ export async function setupBackend(loader: BackendLoader, silent = false) {
   const success = await loader.setup(silent);
   if (!success) {
     if (!silent) console.log("Defaulting to CPU Backend");
-    await CPU.setup(silent);
+    await WASM.setup(silent);
   }
   Engine.backendLoader = loader;
 }

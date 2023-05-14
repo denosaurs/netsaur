@@ -1,4 +1,5 @@
-import { Rank, Shape, Tensor } from "../../mod.ts";
+import { Rank, Shape } from "../core/api/shape.ts";
+import { Tensor } from "../core/tensor/tensor.ts";
 import { length } from "../core/tensor/util.ts";
 import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
 import { Library } from "./mod.ts";
@@ -64,7 +65,7 @@ export class CPUBackend implements Backend {
   //deno-lint-ignore require-await
   async predict(input: Tensor<Rank>): Promise<Tensor<Rank>> {
     const options = encodeJSON({
-      inputShape: input.shape,
+      inputShape: [1, ...input.shape],
       outputShape: this.outputShape,
     } as PredictOptions);
     const output = new Float32Array(length(this.outputShape));
@@ -85,7 +86,7 @@ export class CPUBackend implements Backend {
   }
 
   saveFile(path: string): void {
-    Deno.writeFileSync(path, this.save())
+    Deno.writeFileSync(path, this.save());
   }
 
   static load(buffer: Uint8Array, library: Library): CPUBackend {
@@ -101,6 +102,6 @@ export class CPUBackend implements Backend {
   }
 
   static loadFile(path: string, library: Library): CPUBackend {
-    return this.load(Deno.readFileSync(path), library)
+    return this.load(Deno.readFileSync(path), library);
   }
 }

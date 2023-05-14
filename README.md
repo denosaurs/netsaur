@@ -21,15 +21,16 @@
 
 ## Features
 
-- Lightweight and easy-to-use neural network library for [Deno](https://deno.land).
+- Lightweight and easy-to-use neural network library for
+  [Deno](https://deno.land).
 - Blazingly fast and efficient.
 - Provides a simple API for creating and training neural networks.
 - Can run on both the CPU and the GPU (WIP).
 - Allows you to simply run the code without downloading any prior dependencies.
 - Perfect for serverless environments.
-- Allows you to quickly build and deploy machine learning models for a variety of applications with just a few lines of code.
+- Allows you to quickly build and deploy machine learning models for a variety
+  of applications with just a few lines of code.
 - Suitable for both beginners and experienced machine learning practitioners.
-
 
 ### Backends
 
@@ -50,7 +51,8 @@
 
 ### QuickStart
 
-This example shows how to train a neural network to predict the output of the XOR function our speedy CPU backend written in rust.
+This example shows how to train a neural network to predict the output of the
+XOR function our speedy CPU backend written in rust.
 
 ```typescript
 import {
@@ -60,6 +62,7 @@ import {
   Sequential,
   setupBackend,
   SigmoidLayer,
+  tensor1D,
   tensor2D,
 } from "https://deno.land/x/netsaur/mod.ts";
 
@@ -73,7 +76,7 @@ await setupBackend(CPU);
  */
 const net = new Sequential({
   /**
-   * The input size is set to 4 and the output size is set to 2.
+   * The number of minibatches is set to 4 and the output size is set to 2.
    */
   size: [4, 2],
 
@@ -132,32 +135,34 @@ console.log(`training time: ${performance.now() - time}ms`);
 /**
  * Predict the output of the XOR function for the given inputs.
  */
-const out1 = (await net.predict(tensor2D([[0, 0]]))).data;
+const out1 = (await net.predict(tensor1D([0, 0]))).data;
 console.log(`0 xor 0 = ${out1[0]} (should be close to 0)`);
 
-const out2 = (await net.predict(tensor2D([[1, 0]]))).data;
+const out2 = (await net.predict(tensor1D([1, 0]))).data;
 console.log(`1 xor 0 = ${out2[0]} (should be close to 1)`);
 
-const out3 = (await net.predict(tensor2D([[0, 1]]))).data;
+const out3 = (await net.predict(tensor1D([0, 1]))).data;
 console.log(`0 xor 1 = ${out3[0]} (should be close to 1)`);
 
-const out4 = (await net.predict(tensor2D([[1, 1]]))).data;
+const out4 = (await net.predict(tensor1D([1, 1]))).data;
 console.log(`1 xor 1 = ${out4[0]} (should be close to 0)`);
 ```
 
 #### Use the WASM Backend
 
-By changing the CPU backend to the WASM backend we sacrifice some speed but this allows us to run on the edge.
+By changing the CPU backend to the WASM backend we sacrifice some speed but this
+allows us to run on the edge.
 
 ```typescript
 import {
   Cost,
-  WASM,
   DenseLayer,
   Sequential,
   setupBackend,
   SigmoidLayer,
+  tensor1D,
   tensor2D,
+  WASM,
 } from "https://deno.land/x/netsaur/mod.ts";
 
 /**
@@ -170,7 +175,7 @@ await setupBackend(WASM);
  */
 const net = new Sequential({
   /**
-   * The input size is set to 4 and the output size is set to 2.
+   * The number of minibatches is set to 4 and the output size is set to 2.
    */
   size: [4, 2],
 
@@ -229,19 +234,18 @@ console.log(`training time: ${performance.now() - time}ms`);
 /**
  * Predict the output of the XOR function for the given inputs.
  */
-const out1 = (await net.predict(tensor2D([[0, 0]]))).data;
+const out1 = (await net.predict(tensor1D([0, 0]))).data;
 console.log(`0 xor 0 = ${out1[0]} (should be close to 0)`);
 
-const out2 = (await net.predict(tensor2D([[1, 0]]))).data;
+const out2 = (await net.predict(tensor1D([1, 0]))).data;
 console.log(`1 xor 0 = ${out2[0]} (should be close to 1)`);
 
-const out3 = (await net.predict(tensor2D([[0, 1]]))).data;
+const out3 = (await net.predict(tensor1D([0, 1]))).data;
 console.log(`0 xor 1 = ${out3[0]} (should be close to 1)`);
 
-const out4 = (await net.predict(tensor2D([[1, 1]]))).data;
+const out4 = (await net.predict(tensor1D([1, 1]))).data;
 console.log(`1 xor 1 = ${out4[0]} (should be close to 0)`);
 ```
-
 
 ### Documentation
 

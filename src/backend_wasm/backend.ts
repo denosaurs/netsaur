@@ -1,4 +1,5 @@
-import { Rank, Shape, Tensor } from "../../mod.ts";
+import { Rank, Shape } from "../core/api/shape.ts";
+import { Tensor } from "../core/tensor/tensor.ts";
 import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
 import {
   wasm_backend_create,
@@ -49,7 +50,7 @@ export class WASMBackend implements Backend {
   //deno-lint-ignore require-await
   async predict(input: Tensor<Rank>): Promise<Tensor<Rank>> {
     const options = JSON.stringify({
-      inputShape: input.shape,
+      inputShape: [1, ...input.shape],
       outputShape: this.outputShape,
     } as PredictOptions);
     const output = wasm_backend_predict(
@@ -68,8 +69,8 @@ export class WASMBackend implements Backend {
     Deno.writeFileSync(input, this.save());
   }
 
-  static loadFile(_input: string): WASMBackend {
-    return null as unknown as WASMBackend;
+  static loadFile(path: string): WASMBackend {
+    return this.load(Deno.readFileSync(path));
   }
 
   static load(input: Uint8Array): WASMBackend {

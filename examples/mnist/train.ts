@@ -50,7 +50,7 @@ console.log("Training complete!", performance.now() - start);
 // predicting
 
 const testSet = loadDataset("test-images.idx", "test-labels.idx", 0, 1000);
-testSet.map((_, i) => (testSet[i].inputs.shape = [1, 1, 28, 28]));
+testSet.map((_, i) => (testSet[i].inputs.shape = [1, 28, 28]));
 
 function argmax(mat: Tensor<Rank>) {
   let max = -Infinity;
@@ -69,7 +69,7 @@ for (const test of testSet) {
   const prediction = argmax(await network.predict(test.inputs as Tensor<Rank>));
   const expected = argmax(test.outputs as Tensor<Rank>);
   if (expected === prediction) {
-    correct += 1
+    correct += 1;
   }
 }
 

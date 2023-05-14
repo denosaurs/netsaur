@@ -1,8 +1,9 @@
 import { WASMBackend } from "./backend.ts";
 import { NoBackendError } from "../core/api/error.ts";
 import { BackendLoader, Engine } from "../core/engine.ts";
-import { Backend, BackendType, NetworkConfig } from "../core/types.ts";
+import { Backend, BackendType, Cost, NetworkConfig } from "../core/types.ts";
 import { instantiate } from "./lib/netsaur.generated.js";
+import { Sequential } from "../core/mod.ts";
 
 /**
  * Web Assembly backend instance.
@@ -23,6 +24,8 @@ export class WASMInstance {
  * Web Assembly Backend Loader.
  */
 export class WASMBackendLoader implements BackendLoader {
+  backend?: WASMBackend;
+
   async setup(silent = false) {
     Engine.type = BackendType.WASM;
     return await WASMInstance.init(silent);
@@ -32,15 +35,21 @@ export class WASMBackendLoader implements BackendLoader {
     if (!WASMInstance.initialized) {
       throw new NoBackendError(BackendType.WASM);
     }
-    return WASMBackend.create(config);
+    return this.backend ? this.backend : WASMBackend.create(config);
   }
 
-  load(data: Uint8Array): Backend {
-    return WASMBackend.load(data);
+  load(buffer: Uint8Array): Sequential {
+    this.backend = WASMBackend.load(buffer);
+    const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
+    this.backend = undefined;
+    return net;
   }
 
-  loadFile(path: string): Backend {
-    return WASMBackend.loadFile(path);
+  loadFile(path: string): Sequential {
+    this.backend = WASMBackend.loadFile(path);
+    const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
+    this.backend = undefined;
+    return net;
   }
 }
 

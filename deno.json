@@ -10,6 +10,6 @@
     "example:run": "deno run -A --unstable examples/model/run.ts ",
     "build": "deno task build:cpu && deno task build:wasm",
     "build:cpu": "cargo build --release",
-    "build:wasm": "deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backend_wasm/lib"
+    "build:wasm": "deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --sync --out src/backend_wasm/lib"
   }
 }

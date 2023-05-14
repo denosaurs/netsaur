@@ -5,6 +5,7 @@ import {
   Sequential,
   setupBackend,
   SigmoidLayer,
+  tensor1D,
   tensor2D,
 } from "../mod.ts";
 
@@ -40,10 +41,10 @@ Deno.bench(
       10000,
     );
 
-    console.log((await net.predict(tensor2D([[0, 0]]))).data);
-    console.log((await net.predict(tensor2D([[1, 0]]))).data);
-    console.log((await net.predict(tensor2D([[0, 1]]))).data);
-    console.log((await net.predict(tensor2D([[1, 1]]))).data);
+    console.log((await net.predict(tensor1D([0, 0]))).data);
+    console.log((await net.predict(tensor1D([1, 0]))).data);
+    console.log((await net.predict(tensor1D([0, 1]))).data);
+    console.log((await net.predict(tensor1D([1, 1]))).data);
   },
 );
 

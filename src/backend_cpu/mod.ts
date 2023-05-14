@@ -2,7 +2,8 @@ import { dlopen, FetchOptions } from "../../deps.ts";
 import { CPUBackend } from "./backend.ts";
 import { NoBackendError } from "../core/api/error.ts";
 import { BackendLoader, Engine } from "../core/engine.ts";
-import { Backend, BackendType, NetworkConfig } from "../core/types.ts";
+import { Backend, BackendType, Cost, NetworkConfig } from "../core/types.ts";
+import { Sequential } from "../core/mod.ts";
 
 const options: FetchOptions = {
   name: "netsaur",
@@ -55,6 +56,8 @@ export class CPUInstance {
 }
 
 export class CPUBackendLoader implements BackendLoader {
+  backend?: CPUBackend;
+
   async setup(silent = false) {
     Engine.type = BackendType.CPU;
     return await CPUInstance.init(silent);
@@ -64,15 +67,23 @@ export class CPUBackendLoader implements BackendLoader {
     if (!CPUInstance.initialized) {
       throw new NoBackendError(BackendType.CPU);
     }
-    return CPUBackend.create(config, CPUInstance.library!);
+    return this.backend
+      ? this.backend
+      : CPUBackend.create(config, CPUInstance.library!);
   }
 
-  load(path: Uint8Array): Backend {
-    return CPUBackend.load(path, CPUInstance.library!);
+  load(buffer: Uint8Array): Sequential {
+    this.backend = CPUBackend.load(buffer, CPUInstance.library!);
+    const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
+    this.backend = undefined;
+    return net;
   }
 
-  loadFile(path: string): Backend{
-    return CPUBackend.loadFile(path, CPUInstance.library!);
+  loadFile(path: string): Sequential {
+    this.backend = CPUBackend.loadFile(path, CPUInstance.library!);
+    const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
+    this.backend = undefined;
+    return net;
   }
 }
 
