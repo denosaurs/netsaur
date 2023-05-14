@@ -4,10 +4,12 @@ import { Backend, BackendType, NetworkConfig } from "./types.ts";
 
 // deno-lint-ignore no-window-prefix
 window.onerror = () => {
-  if (typeof Deno == 'undefined') {
-    throw new Error("Warning: Deno is not defined. Did you mean to import from ./web.ts instead of ./mod.ts?")
+  if (typeof Deno == "undefined") {
+    throw new Error(
+      "Warning: Deno is not defined. Did you mean to import from ./web.ts instead of ./mod.ts?",
+    );
   }
-}
+};
 
 export interface BackendInstance {
   /**

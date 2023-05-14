@@ -39,17 +39,17 @@ export class WASMBackendLoader implements BackendLoader {
   }
 
   load(buffer: Uint8Array): Sequential {
-    this.backend = WASMBackend.load(buffer)
+    this.backend = WASMBackend.load(buffer);
     const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
-    this.backend = undefined
-    return net
+    this.backend = undefined;
+    return net;
   }
 
   loadFile(path: string): Sequential {
-    this.backend = WASMBackend.loadFile(path)
+    this.backend = WASMBackend.loadFile(path);
     const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
-    this.backend = undefined
-    return net
+    this.backend = undefined;
+    return net;
   }
 }
 

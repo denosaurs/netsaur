@@ -69,7 +69,7 @@ for (const test of testSet) {
   const prediction = argmax(await network.predict(test.inputs as Tensor<Rank>));
   const expected = argmax(test.outputs as Tensor<Rank>);
   if (expected === prediction) {
-    correct += 1
+    correct += 1;
   }
 }
 

@@ -11,7 +11,12 @@ export interface Backend {
    * It takes in an array of DataSet objects, the number of epochs to train for, and the learning rate.
    * The method modifies the weights and biases of the network to minimize the cost function and improve its accuracy on the training data.
    */
-  train(datasets: DataSet[], epochs: number, batches: number, rate: number): void;
+  train(
+    datasets: DataSet[],
+    epochs: number,
+    batches: number,
+    rate: number,
+  ): void;
 
   /**
    * The predict method is a function that takes in a Tensor object
@@ -28,7 +33,7 @@ export interface Backend {
    */
   save(): Uint8Array;
 
-    /**
+  /**
    * The saveFile method is a function that takes in a string representing the path to a file and saves the network to that file.
    * This method is used to save the network after it has been trained.
    */

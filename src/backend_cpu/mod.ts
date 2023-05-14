@@ -73,17 +73,17 @@ export class CPUBackendLoader implements BackendLoader {
   }
 
   load(buffer: Uint8Array): Sequential {
-    this.backend = CPUBackend.load(buffer, CPUInstance.library!)
+    this.backend = CPUBackend.load(buffer, CPUInstance.library!);
     const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
-    this.backend = undefined
-    return net
+    this.backend = undefined;
+    return net;
   }
 
   loadFile(path: string): Sequential {
-    this.backend = CPUBackend.loadFile(path, CPUInstance.library!)
+    this.backend = CPUBackend.loadFile(path, CPUInstance.library!);
     const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
-    this.backend = undefined
-    return net
+    this.backend = undefined;
+    return net;
   }
 }
 

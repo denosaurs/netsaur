@@ -86,7 +86,7 @@ export class CPUBackend implements Backend {
   }
 
   saveFile(path: string): void {
-    Deno.writeFileSync(path, this.save())
+    Deno.writeFileSync(path, this.save());
   }
 
   static load(buffer: Uint8Array, library: Library): CPUBackend {
@@ -102,6 +102,6 @@ export class CPUBackend implements Backend {
   }
 
   static loadFile(path: string, library: Library): CPUBackend {
-    return this.load(Deno.readFileSync(path), library)
+    return this.load(Deno.readFileSync(path), library);
   }
 }
