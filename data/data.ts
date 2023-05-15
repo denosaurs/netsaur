@@ -1,5 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
-import { Tensor } from "../mod.ts";
+import { Rank, Tensor } from "../mod.ts";
 import { CsvLoaderConfig, loadCsv } from "./csv.ts";
 import type { DataLike } from "./types.ts";
 
@@ -7,12 +6,12 @@ export class Data {
   /**
    * Model input data
    */
-  inputs: Tensor<any>;
+  inputs: Tensor<Rank>;
 
   /**
    * Model output data / labels
    */
-  outputs: Tensor<any>;
+  outputs: Tensor<Rank>;
 
   constructor(data: DataLike) {
     this.inputs = data.train_x;

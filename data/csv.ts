@@ -3,6 +3,9 @@ import type { DataLike } from "./types.ts";
 import { CsvParseStream } from "./deps.ts";
 
 export interface CsvColumnConfig {
+  /**
+   * Whether this column is a label column.
+   */
   label?: boolean;
 }
 

@@ -5,7 +5,8 @@ use safetensors::{serialize, SafeTensors};
 
 use crate::{
     to_arr, ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Conv2DCPULayer, Dataset,
-    DenseCPULayer, FlattenCPULayer, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor,
+    DenseCPULayer, Dropout1DCPULayer, FlattenCPULayer, Layer, Logger, Pool2DCPULayer,
+    SoftmaxCPULayer, Tensor, Dropout2DCPULayer,
 };
 
 pub struct CPUBackend {
@@ -38,11 +39,13 @@ impl CPUBackend {
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Conv2D(layer));
                 }
-                Layer::Dropout1D(_config) => {
-                    unimplemented!("Dropout1D is not implemented yet")
+                Layer::Dropout1D(config) => {
+                    let layer = Dropout1DCPULayer::new(config, IxDyn(&size));
+                    layers.push(CPULayer::Dropout1D(layer));
                 }
-                Layer::Dropout2D(_config) => {
-                    unimplemented!("Dropout2D is not implemented yet")
+                Layer::Dropout2D(config) => {
+                    let layer = Dropout2DCPULayer::new(config, IxDyn(&size));
+                    layers.push(CPULayer::Dropout2D(layer));
                 }
                 Layer::Dense(config) => {
                     let layer = if let Some(tensors) = &tensors {

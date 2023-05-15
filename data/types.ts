@@ -1,24 +1,23 @@
-// deno-lint-ignore-file no-explicit-any
-import { Tensor } from "../mod.ts";
+import { Rank, Tensor } from "../mod.ts";
 
 export interface DataLike {
   /**
    * Model input data
    */
-  train_x: Tensor<any>;
+  train_x: Tensor<Rank>;
 
   /**
    * Model output data / labels
    */
-  train_y: Tensor<any>;
+  train_y: Tensor<Rank>;
 
   /**
    *  Model test input data
    */
-  test_x?: Tensor<any>;
+  test_x?: Tensor<Rank>;
 
   /**
    * Model test output data / labels
    */
-  test_y?: Tensor<any>;
+  test_y?: Tensor<Rank>;
 }
