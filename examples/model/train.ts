@@ -74,4 +74,4 @@ net.train(
 
 console.log(`training time: ${performance.now() - time}ms`);
 
-net.saveFile("examples/model/xor.test.bin");
+net.saveFile("examples/model/xor.test.st");

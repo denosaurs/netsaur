@@ -381,8 +381,8 @@ const imports = {
  * @remarks It is safe to call this multiple times and once successfully
  * loaded it will always return a reference to the same object.
  */
-export function instantiate() {
-  return instantiateWithInstance().exports;
+export async function instantiate() {
+  return (await instantiateWithInstance()).exports;
 }
 
 let instanceWithExports;
@@ -395,9 +395,9 @@ let instanceWithExports;
  *   exports: { wasm_backend_create: typeof wasm_backend_create; wasm_backend_train: typeof wasm_backend_train; wasm_backend_predict: typeof wasm_backend_predict; wasm_backend_save: typeof wasm_backend_save; wasm_backend_load: typeof wasm_backend_load }
  * }}
  */
-export function instantiateWithInstance() {
+export async function instantiateWithInstance() {
   if (instanceWithExports == null) {
-    const instance = instantiateInstance();
+    const instance = await instantiateInstance();
     wasm = instance.exports;
     cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
     cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
@@ -420,7 +420,7 @@ export function isInstantiated() {
   return instanceWithExports != null;
 }
 
-function instantiateInstance() {
+async function instantiateInstance() {
   const wasmBytes = base64decode(
 "\
 AGFzbQEAAAABhoOAgAA0YAAAYAABf2ABfwBgAX8Bf2ABfwF+YAF/AX1gAn9/AGACf38Bf2ACf38Bfm\
@@ -11156,8 +11156,8 @@ FzbS1iaW5kZ2VuBjAuMi44NACsgICAAA90YXJnZXRfZmVhdHVyZXMCKw9tdXRhYmxlLWdsb2JhbHMr\
 CHNpZ24tZXh0\
 ",
   );
-  const wasmModule = new WebAssembly.Module(wasmBytes);
-  return new WebAssembly.Instance(wasmModule, imports);
+  const wasmModule = await WebAssembly.compile(wasmBytes);
+  return await WebAssembly.instantiate(wasmModule, imports);
 }
 
 function base64decode(b64) {
