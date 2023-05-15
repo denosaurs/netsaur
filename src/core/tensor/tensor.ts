@@ -15,7 +15,6 @@ import {
   Shape6D,
 } from "../api/shape.ts";
 import { inferShape, length } from "./util.ts";
-import { TensorJSON } from "../../model/types.ts";
 
 /**
  * A generic N-dimensional tensor.
@@ -43,13 +42,6 @@ export class Tensor<R extends Rank> {
     const data = new Array(this.data.length).fill(1);
     this.data.forEach((value, i) => data[i] = value);
     return { data, shape: this.shape };
-  }
-
-  /**
-   * Deserialise a tensor from JSON.
-   */
-  static fromJSON(tensor: TensorJSON): Tensor<Rank> {
-    return new Tensor(new Float32Array(tensor.data), tensor.shape);
   }
 }
 

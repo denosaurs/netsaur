@@ -1,6 +1,6 @@
-import { tensor2D } from "./core/tensor.ts";
-import type { DataLike } from "./data.ts";
-import { CsvStream } from "../../../deps.ts";
+import { tensor2D } from "../mod.ts";
+import type { DataLike } from "./types.ts";
+import { CsvParseStream } from "./deps.ts";
 
 export interface CsvColumnConfig {
   label?: boolean;
@@ -16,7 +16,7 @@ export async function loadCsv(
 ): Promise<DataLike> {
   const data = await fetch(url).then((res) =>
     res.body!.pipeThrough(new TextDecoderStream())
-      .pipeThrough(new CsvStream())
+      .pipeThrough(new CsvParseStream())
   );
   const colConfigs = Object.entries(config.columns ?? {});
   const train_x: number[][] = [];
@@ -52,7 +52,7 @@ export async function loadCsv(
     train_y.push(y);
   }
   return {
-    train_x: await tensor2D(train_x),
-    train_y: await tensor2D(train_y),
+    train_x: tensor2D(train_x),
+    train_y: tensor2D(train_y),
   };
 }
