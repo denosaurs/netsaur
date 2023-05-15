@@ -24,8 +24,8 @@ pub enum Layer {
     Conv2D(Conv2DLayer),
     Pool2D(Pool2DLayer),
     Flatten(FlattenLayer),
-    Dropout1D(Dropout1DLayer),
-    Dropout2D(Dropout2DLayer),
+    Dropout1D(DropoutLayer),
+    Dropout2D(DropoutLayer),
     Softmax,
 }
 
@@ -76,15 +76,9 @@ pub struct FlattenLayer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Dropout1DLayer {
+pub struct DropoutLayer {
     pub probability: f32,
-    pub inplace: bool,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Dropout2DLayer {
-    pub probability: f32,
-    pub inplace: bool,
+    pub inplace: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

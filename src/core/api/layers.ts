@@ -23,8 +23,17 @@ export function DenseLayer(config: DenseLayerConfig): Layer {
  * The technique temporarily drops units (artificial neurons) from the network, along with all of those units' incoming and outgoing connections.
  *  See https://en.wikipedia.org/wiki/Dropout_(neural_networks)
  */
-export function DropoutLayer(config: DropoutLayerConfig): Layer {
-  return { type: LayerType.Dropout, config };
+export function Dropout1DLayer(config: DropoutLayerConfig): Layer {
+  return { type: LayerType.Dropout1D, config };
+}
+
+/**
+ * Creates a dropout layer. Dropout is a regularization technique for reducing overfitting.
+ * The technique temporarily drops units (artificial neurons) from the network, along with all of those units' incoming and outgoing connections.
+ *  See https://en.wikipedia.org/wiki/Dropout_(neural_networks)
+ */
+export function Dropout2DLayer(config: DropoutLayerConfig): Layer {
+  return { type: LayerType.Dropout2D, config };
 }
 
 /**

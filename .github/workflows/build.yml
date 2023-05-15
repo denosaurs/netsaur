@@ -32,6 +32,7 @@ jobs:
           rustc --version
           cargo --version
           cargo build --release
+          deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backend_wasm/lib
       - name: Release
         uses: softprops/action-gh-release@master
         env:
@@ -43,3 +44,4 @@ jobs:
             target/release/libnetsaur.so
             target/release/libnetsaur.dylib
             target/release/netsaur.dll
+            src/backend_wasm/lib/netsaur_bg.wasm
