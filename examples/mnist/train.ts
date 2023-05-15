@@ -78,4 +78,4 @@ console.log(
   `accuracy: ${((correct / testSet.length) * 100).toFixed(2)}%`,
 );
 
-network.saveFile("examples/mnist/mnist.test.bin");
+network.saveFile("examples/mnist/mnist.test.st");
