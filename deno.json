@@ -1,6 +1,7 @@
 {
   "tasks": {
-    "example:xor": "deno run -A --unstable ./examples/xor_cpu.ts",
+    "example:xor": "deno run -A --unstable ./examples/xor_auto.ts",
+    "example:xor-cpu": "deno run -A --unstable ./examples/xor_cpu.ts",
     "example:xor-wasm": "deno run -A --unstable ./examples/xor_wasm.ts",
     "example:linear": "deno run -A --unstable ./examples/linear_cpu.ts",
     "example:linear-wasm": "deno run -A --unstable ./examples/linear_wasm.ts",
@@ -8,8 +9,11 @@
     "example:filters-wasm": "deno run -A --unstable examples/filters/conv_wasm.ts ",
     "example:train": "deno run -A --unstable examples/model/train.ts ",
     "example:run": "deno run -A --unstable examples/model/run.ts ",
+    "example:mnist-download": "deno run -A --unstable examples/mnist/download.ts ",
     "example:mnist-train": "deno run -A --unstable examples/mnist/train.ts ",
+    "example:mnist-train-wasm": "deno run -A --unstable examples/mnist/train_wasm.ts ",
     "example:mnist-predict": "deno run -A --unstable examples/mnist/predict.ts ",
+    "example:mnist-predict-wasm": "deno run -A --unstable examples/mnist/predict_wasm.ts ",
     "build": "deno task build:cpu && deno task build:wasm",
     "build:cpu": "cargo build --release",
     "build:wasm": "deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backend_wasm/lib"

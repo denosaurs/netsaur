@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: 9f779b6c99edda2d0ccde29252507e2ae03a1383
+// source-hash: 4203dd766cf48e6566d8c86983466e97610b3726
 let wasm;
 let cachedInt32Memory0;
 
@@ -9,11 +9,20 @@ const heap = new Array(128).fill(undefined);
 
 heap.push(undefined, null, true, false);
 
+let heap_next = heap.length;
+
+function addHeapObject(obj) {
+  if (heap_next === heap.length) heap.push(heap.length + 1);
+  const idx = heap_next;
+  heap_next = heap[idx];
+
+  heap[idx] = obj;
+  return idx;
+}
+
 function getObject(idx) {
   return heap[idx];
 }
-
-let heap_next = heap.length;
 
 function dropObject(idx) {
   if (idx < 132) return;
@@ -25,15 +34,6 @@ function takeObject(idx) {
   const ret = getObject(idx);
   dropObject(idx);
   return ret;
-}
-
-function addHeapObject(obj) {
-  if (heap_next === heap.length) heap.push(heap.length + 1);
-  const idx = heap_next;
-  heap_next = heap[idx];
-
-  heap[idx] = obj;
-  return idx;
 }
 
 const cachedTextDecoder = new TextDecoder("utf-8", {
@@ -200,9 +200,6 @@ function handleError(f, args) {
 
 const imports = {
   __wbindgen_placeholder__: {
-    __wbindgen_object_drop_ref: function (arg0) {
-      takeObject(arg0);
-    },
     __wbg_log_5ef8f8c0b981cbbd: function (arg0, arg1) {
       console.log(getStringFromWasm0(arg0, arg1));
     },
@@ -210,15 +207,8 @@ const imports = {
       const ret = arg0;
       return addHeapObject(ret);
     },
-    __wbg_getRandomValues_3774744e221a22ad: function () {
-      return handleError(function (arg0, arg1) {
-        getObject(arg0).getRandomValues(getObject(arg1));
-      }, arguments);
-    },
-    __wbg_randomFillSync_e950366c42764a07: function () {
-      return handleError(function (arg0, arg1) {
-        getObject(arg0).randomFillSync(takeObject(arg1));
-      }, arguments);
+    __wbindgen_object_drop_ref: function (arg0) {
+      takeObject(arg0);
     },
     __wbg_crypto_70a96de3b6b73dac: function (arg0) {
       const ret = getObject(arg0).crypto;
@@ -262,6 +252,16 @@ const imports = {
     __wbindgen_string_new: function (arg0, arg1) {
       const ret = getStringFromWasm0(arg0, arg1);
       return addHeapObject(ret);
+    },
+    __wbg_getRandomValues_3774744e221a22ad: function () {
+      return handleError(function (arg0, arg1) {
+        getObject(arg0).getRandomValues(getObject(arg1));
+      }, arguments);
+    },
+    __wbg_randomFillSync_e950366c42764a07: function () {
+      return handleError(function (arg0, arg1) {
+        getObject(arg0).randomFillSync(takeObject(arg1));
+      }, arguments);
     },
     __wbg_newnoargs_2b8b6bd7753c76ba: function (arg0, arg1) {
       const ret = new Function(getStringFromWasm0(arg0, arg1));
