@@ -9,7 +9,8 @@ export type Layer =
   | { type: LayerType.Activation; config: ActivationLayerConfig }
   | { type: LayerType.Conv2D; config: Conv2DLayerConfig }
   | { type: LayerType.Dense; config: DenseLayerConfig }
-  | { type: LayerType.Dropout; config: DropoutLayerConfig }
+  | { type: LayerType.Dropout1D; config: DropoutLayerConfig }
+  | { type: LayerType.Dropout2D; config: DropoutLayerConfig }
   | { type: LayerType.Flatten; config: FlattenLayerConfig }
   | { type: LayerType.Pool2D; config: Pool2DLayerConfig }
   | { type: LayerType.Softmax };

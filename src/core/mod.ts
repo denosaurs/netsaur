@@ -17,16 +17,10 @@ export class Sequential implements NeuralNetwork {
     this.backend = Engine.backendLoader.loadBackend(this.config);
   }
 
-  /**
-   * Train the Neural Network.
-   */
   train(datasets: DataSet[], epochs = 1000, batches = 1, rate = 0.1) {
     this.backend.train(datasets, epochs, batches, rate);
   }
 
-  /**
-   * Use the network to make predictions.
-   */
   async predict(data: Tensor<Rank>) {
     return await this.backend.predict(data);
   }
@@ -45,16 +39,10 @@ export class Sequential implements NeuralNetwork {
     return Engine.backendLoader.loadFile(data);
   }
 
-  /**
-   * Save model to binary file
-   */
   save(): Uint8Array {
     return this.backend.save();
   }
 
-  /**
-   * Save model to a buffer
-   */
   saveFile(path: string) {
     this.backend.saveFile(path);
   }

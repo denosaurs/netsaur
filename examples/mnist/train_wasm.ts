@@ -1,7 +1,6 @@
 import {
   Conv2DLayer,
   Cost,
-  CPU,
   DenseLayer,
   FlattenLayer,
   Init,
@@ -10,11 +9,11 @@ import {
   Sequential,
   setupBackend,
   SoftmaxLayer,
+  WASM,
 } from "../../mod.ts";
-
 import { loadDataset } from "./common.ts";
 
-await setupBackend(CPU);
+await setupBackend(WASM);
 
 // training
 const network = new Sequential({

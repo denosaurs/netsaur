@@ -22,8 +22,6 @@ export interface Backend {
    * The predict method is a function that takes in a Tensor object
    * representing the input to the neural network and returns a Promise that resolves to a Tensor object representing the output of the network.
    * This method is used to make predictions on new data after the network has been trained.
-   * The Tensor objects passed to and returned from this method have a rank,
-   * which represents the number of dimensions of the tensor.
    */
   predict(input: Tensor<Rank>): Promise<Tensor<Rank>>;
 
@@ -124,7 +122,8 @@ export enum LayerType {
   Dense = "dense",
   Activation = "activation",
   Conv2D = "conv2d",
-  Dropout = "dropout",
+  Dropout1D = "dropout1d",
+  Dropout2D = "dropout2d",
   Pool2D = "pool2d",
   Flatten = "flatten",
   Softmax = "softmax",
