@@ -82,6 +82,12 @@ pub struct DropoutLayer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct BatchNormLayer {
+    pub momentum: f32,
+    pub epsilon: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ActivationLayer {
     pub activation: Activation,
 }

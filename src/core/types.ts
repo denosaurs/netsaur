@@ -119,9 +119,10 @@ export type DataSet = {
 };
 
 export enum LayerType {
-  Dense = "dense",
   Activation = "activation",
+  BatchNorm2D = "batchnorm2d",
   Conv2D = "conv2d",
+  Dense = "dense",
   Dropout1D = "dropout1d",
   Dropout2D = "dropout2d",
   Pool2D = "pool2d",

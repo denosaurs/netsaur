@@ -1,6 +1,6 @@
 use ndarray::ArrayD;
 
-use crate::{DenseCPULayer, ActivationCPULayer, Conv2DCPULayer, Pool2DCPULayer, FlattenCPULayer, Dropout1DCPULayer, Dropout2DCPULayer, SoftmaxCPULayer};
+use crate::{DenseCPULayer, BatchNorm2DCPULayer, ActivationCPULayer, Conv2DCPULayer, Pool2DCPULayer, FlattenCPULayer, Dropout1DCPULayer, Dropout2DCPULayer, SoftmaxCPULayer};
 
 pub enum CPULayer {
     Activation(ActivationCPULayer),
@@ -11,12 +11,14 @@ pub enum CPULayer {
     Flatten(FlattenCPULayer),
     Pool2D(Pool2DCPULayer),
     Softmax(SoftmaxCPULayer),
+    BatchNorm2D(BatchNorm2DCPULayer),
 }
 
 impl CPULayer {
     pub fn output_size(&mut self) -> Vec<usize> {
         match self {
             CPULayer::Activation(layer) => layer.output_size(),
+            CPULayer::BatchNorm2D(layer) => layer.output_size(),
             CPULayer::Conv2D(layer) => layer.output_size(),
             CPULayer::Dense(layer) => layer.output_size(),
             CPULayer::Dropout1D(layer) => layer.output_size(),
@@ -27,9 +29,10 @@ impl CPULayer {
         }
     }
 
-    pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
+    pub fn forward_propagate(&mut self, inputs: ArrayD<f32>, training: bool) -> ArrayD<f32> {
         match self {
             CPULayer::Activation(layer) => layer.forward_propagate(inputs),
+            CPULayer::BatchNorm2D(layer) => layer.forward_propagate(inputs, training),
             CPULayer::Conv2D(layer) => layer.forward_propagate(inputs),
             CPULayer::Dense(layer) => layer.forward_propagate(inputs),
             CPULayer::Dropout1D(layer) => layer.forward_propagate(inputs),
@@ -43,6 +46,7 @@ impl CPULayer {
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, rate: f32) -> ArrayD<f32> {
         match self {
             CPULayer::Activation(layer) => layer.backward_propagate(d_outputs, rate),
+            CPULayer::BatchNorm2D(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::Conv2D(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::Dense(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::Dropout1D(layer) => layer.backward_propagate(d_outputs, rate),
@@ -56,6 +60,7 @@ impl CPULayer {
     pub fn reset(&mut self, batches: usize) {
         match self {
             CPULayer::Activation(layer) => layer.reset(batches),
+            CPULayer::BatchNorm2D(layer) => layer.reset(batches),
             CPULayer::Conv2D(layer) => layer.reset(batches),
             CPULayer::Dense(layer) => layer.reset(batches),
             CPULayer::Dropout1D(layer) => layer.reset(batches),
