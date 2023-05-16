@@ -37,7 +37,7 @@ impl BatchNorm2DCPULayer {
         self.inputs.shape().to_vec()
     }
 
-    pub fn reset(&mut self, batches: usize) {}
+    pub fn reset(&mut self, _batches: usize) {}
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>, training: bool) -> ArrayD<f32> {
         let inputs = inputs.into_dimensionality::<Ix4>().unwrap();

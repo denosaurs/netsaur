@@ -5,8 +5,8 @@ use safetensors::{serialize, SafeTensors};
 
 use crate::{
     to_arr, ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Conv2DCPULayer, Dataset,
-    DenseCPULayer, Dropout1DCPULayer, FlattenCPULayer, Layer, Logger, Pool2DCPULayer,
-    SoftmaxCPULayer, Tensor, Dropout2DCPULayer,
+    DenseCPULayer, Dropout1DCPULayer, Dropout2DCPULayer, FlattenCPULayer, Layer, Logger,
+    Pool2DCPULayer, SoftmaxCPULayer, Tensor,
 };
 
 pub struct CPUBackend {

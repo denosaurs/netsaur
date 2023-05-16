@@ -158,6 +158,9 @@ export function FlattenLayer(config: FlattenLayerConfig): Layer {
 
 /**
  * Creates a BatchNorm2D layer.
+ * BatchNorm2D layers normalize the input.
+ * They are usually used to improve the speed, performance, and stability of neural networks.
+ * See https://en.wikipedia.org/wiki/Batch_normalization
  */
 export function BatchNorm2D(config: BatchNorm2DLayerConfig): Layer {
   if (!config.epsilon) config.epsilon = 0.001;

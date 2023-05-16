@@ -1,15 +1,15 @@
-mod dense;
 mod activation;
-mod conv2d;
-mod pool2d;
-mod flatten;
-mod dropout;
 mod batchnorm;
+mod conv2d;
+mod dense;
+mod dropout;
+mod flatten;
+mod pool2d;
 
-pub use dense::*;
 pub use activation::*;
-pub use conv2d::*;
-pub use pool2d::*;
-pub use flatten::*;
-pub use dropout::*;
 pub use batchnorm::*;
+pub use conv2d::*;
+pub use dense::*;
+pub use dropout::*;
+pub use flatten::*;
+pub use pool2d::*;

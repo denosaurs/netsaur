@@ -96,6 +96,7 @@ pub struct ActivationLayer {
 #[serde(rename_all = "lowercase")]
 pub enum Cost {
     CrossEntropy,
+    Hinge,
     MSE,
 }
 

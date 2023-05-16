@@ -1,4 +1,4 @@
-use std::ops::{Mul, Sub, Div};
+use std::ops::{Div, Mul, Sub};
 
 use ndarray::{ArrayD, ArrayViewD};
 
@@ -20,6 +20,10 @@ impl CPUCost {
                 cost: cross_entropy,
                 prime: cross_entropy_prime,
             },
+            Cost::Hinge => CPUCost {
+                cost: hinge,
+                prime: hinge_prime,
+            },
         }
     }
 }
@@ -39,4 +43,26 @@ fn cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 
 
 fn cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
     return -y_hat.div(&y);
+}
+
+fn hinge<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
+    let mut sum = 0.0;
+    for (y_hat_i, y_i) in y_hat.iter().zip(y.iter()) {
+        let margin = 1.0 - y_hat_i * y_i;
+        if margin > 0.0 {
+            sum += margin;
+        }
+    }
+    return sum;
+}
+
+fn hinge_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
+    let mut result = ArrayD::zeros(y_hat.shape());
+    for ((result_i, y_hat_i), y_i) in result.iter_mut().zip(y_hat.iter()).zip(y.iter()) {
+        let margin = 1.0 - y_hat_i * y_i;
+        if margin > 0.0 {
+            *result_i = -y_i;
+        }
+    }
+    return result;
 }

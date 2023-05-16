@@ -1,5 +1,5 @@
 use ndarray::{Array1, Array2, ArrayD, Axis, Dimension, Ix1, Ix2, IxDyn};
-use std::ops::{Add, SubAssign, Mul};
+use std::ops::{Add, Mul, SubAssign};
 
 use crate::{CPUInit, DenseLayer, Init};
 

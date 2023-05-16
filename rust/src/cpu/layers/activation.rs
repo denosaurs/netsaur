@@ -1,7 +1,7 @@
-use ndarray::{ArrayD, IxDyn, Dimension};
-use std::ops::{Mul, Div, Sub};
+use ndarray::{ArrayD, Dimension, IxDyn};
+use std::ops::{Div, Mul, Sub};
 
-use crate::{CPUActivation, ActivationLayer};
+use crate::{ActivationLayer, CPUActivation};
 
 pub struct ActivationCPULayer {
     pub outputs: ArrayD<f32>,
@@ -15,7 +15,7 @@ impl ActivationCPULayer {
             activation: CPUActivation::from(config.activation),
         }
     }
-    
+
     pub fn output_size(&self) -> Vec<usize> {
         self.outputs.shape().to_vec()
     }
@@ -53,7 +53,7 @@ impl SoftmaxCPULayer {
             outputs: ArrayD::zeros(size),
         }
     }
-    
+
     pub fn output_size(&self) -> Vec<usize> {
         self.outputs.shape().to_vec()
     }

@@ -1,6 +1,9 @@
 use ndarray::ArrayD;
 
-use crate::{DenseCPULayer, BatchNorm2DCPULayer, ActivationCPULayer, Conv2DCPULayer, Pool2DCPULayer, FlattenCPULayer, Dropout1DCPULayer, Dropout2DCPULayer, SoftmaxCPULayer};
+use crate::{
+    ActivationCPULayer, BatchNorm2DCPULayer, Conv2DCPULayer, DenseCPULayer, Dropout1DCPULayer,
+    Dropout2DCPULayer, FlattenCPULayer, Pool2DCPULayer, SoftmaxCPULayer,
+};
 
 pub enum CPULayer {
     Activation(ActivationCPULayer),

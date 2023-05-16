@@ -80,7 +80,7 @@ fn relu6(x: &f32) -> f32 {
 }
 
 fn relu6_prime(x: &f32) -> f32 {
-    return if *x > 0.0 { 1.0 } else { 0.0 };
+    return if *x > 0.0 && *x < 6.0 { 1.0 } else { 0.0 };
 }
 
 fn leaky_relu(x: &f32) -> f32 {

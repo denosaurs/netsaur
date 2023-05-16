@@ -127,6 +127,17 @@ export type FlattenLayerConfig = {
  * The configuration for a batch normalization layer.
  */
 export type BatchNorm2DLayerConfig = {
+  /**
+   * The momentum to use for the batch normalization.
+   * Defaults to 0.99.
+   * https://arxiv.org/abs/1502.03167
+   */
   momentum?: number;
+
+  /**
+   * The epsilon to use for the batch normalization.
+   * Defaults to 0.001.
+   * https://arxiv.org/abs/1502.03167
+   */
   epsilon?: number;
 };

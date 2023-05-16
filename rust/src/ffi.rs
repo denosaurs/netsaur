@@ -1,7 +1,8 @@
 use std::slice::{from_raw_parts, from_raw_parts_mut};
 
 use crate::{
-    decode_array, decode_json, length, CPUBackend, Dataset, PredictOptions, TrainOptions, RESOURCES, Logger,
+    decode_array, decode_json, length, CPUBackend, Dataset, Logger, PredictOptions, TrainOptions,
+    RESOURCES,
 };
 
 type AllocBufferFn = extern "C" fn(usize) -> *mut u8;
@@ -86,7 +87,11 @@ pub extern "C" fn ffi_backend_save(id: usize, alloc: AllocBufferFn) {
 }
 
 #[no_mangle]
-pub extern "C" fn ffi_backend_load(file_ptr: *const u8, file_len: usize, alloc: AllocBufferFn) -> usize {
+pub extern "C" fn ffi_backend_load(
+    file_ptr: *const u8,
+    file_len: usize,
+    alloc: AllocBufferFn,
+) -> usize {
     let buffer = unsafe { from_raw_parts(file_ptr, file_len) };
     let net_backend = CPUBackend::load(buffer, Logger { log });
     let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
