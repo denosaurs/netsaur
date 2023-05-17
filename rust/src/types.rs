@@ -32,14 +32,14 @@ pub enum Layer {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Activation {
-    Sigmoid,
-    Tanh,
+    Elu,
+    LeakyRelu,
     Linear,
     Relu,
     Relu6,
-    LeakyRelu,
-    Elu,
     Selu,
+    Sigmoid,
+    Tanh,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
