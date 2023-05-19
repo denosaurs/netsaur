@@ -22,12 +22,15 @@ export interface NeuralNetwork {
    * The method modifies the weights and biases of the network to minimize the cost function and improve its accuracy on the training data.
    *
    * ```ts
-   * network.train([
-   *  { input: [0, 0], output: [0] },
-   *  { input: [0, 1], output: [1] },
-   *  { input: [1, 0], output: [1] },
-   *  { input: [1, 1], output: [0] },
-   * ]);
+   *  network.train([{
+   *    inputs: tensor2D([
+   *      [0, 0],
+   *      [1, 0],
+   *      [0, 1],
+   *      [1, 1],
+   *    ]),
+   *    outputs: tensor2D([[0], [1], [1], [0]]),
+   *  }]);
    * ```
    */
   train(datasets: DataSet[], epochs?: number, rate?: number): void;

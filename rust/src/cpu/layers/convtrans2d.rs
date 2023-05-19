@@ -1,9 +1,9 @@
 use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix1, Ix4, IxDyn};
 use std::ops::{Add, AddAssign, Mul, SubAssign};
 
-use crate::{CPUInit, Conv2DLayer, Init};
+use crate::{CPUInit, ConvTranspose2DLayer, Init};
 
-pub struct Conv2DCPULayer {
+pub struct ConvTranspose2DCPULayer {
     pub strides: Vec<usize>,
     pub padding: Vec<usize>,
     pub inputs: Array4<f32>,
@@ -12,9 +12,9 @@ pub struct Conv2DCPULayer {
     pub outputs: Array4<f32>,
 }
 
-impl Conv2DCPULayer {
+impl ConvTranspose2DCPULayer {
     pub fn new(
-        config: Conv2DLayer,
+        config: ConvTranspose2DLayer,
         size: IxDyn,
         weights: Option<ArrayD<f32>>,
         biases: Option<ArrayD<f32>>,

@@ -32,14 +32,14 @@ pub enum Layer {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Activation {
-    Sigmoid,
-    Tanh,
+    Elu,
+    LeakyRelu,
     Linear,
     Relu,
     Relu6,
-    LeakyRelu,
-    Elu,
     Selu,
+    Sigmoid,
+    Tanh,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -65,6 +65,16 @@ pub struct Conv2DLayer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ConvTranspose2DLayer {
+    pub init: Option<Init>,
+    pub kernel: Option<JSTensor>,
+    pub kernel_size: Vec<usize>,
+    pub padding: Option<Vec<usize>>,
+    pub strides: Option<Vec<usize>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Pool2DLayer {
     pub mode: usize, // 0 = avg, 1 = max
     pub strides: Option<Vec<usize>>,
@@ -82,6 +92,12 @@ pub struct DropoutLayer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct BatchNormLayer {
+    pub momentum: f32,
+    pub epsilon: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ActivationLayer {
     pub activation: Activation,
 }
@@ -90,6 +106,7 @@ pub struct ActivationLayer {
 #[serde(rename_all = "lowercase")]
 pub enum Cost {
     CrossEntropy,
+    Hinge,
     MSE,
 }
 

@@ -61,16 +61,20 @@ impl Dropout2DCPULayer {
         self.mask = Array4::zeros([batches, size.1, size.2, size.3]);
     }
 
-    pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
-        let size = self.mask.dim();
-        self.mask = Array2::random([size.0, size.1], Uniform::new(0.0, 1.0))
-            .map(|x| (if x > &self.probability { 1.0 } else { 0.0 }))
-            .insert_axis(Axis(2))
-            .insert_axis(Axis(3))
-            .broadcast(size)
-            .unwrap()
-            .to_owned();
-        inputs.mul(&self.mask).mul(1.0 / 1.0 - self.probability)
+    pub fn forward_propagate(&mut self, inputs: ArrayD<f32>, training: bool) -> ArrayD<f32> {
+        if training {
+            let size = self.mask.dim();
+            self.mask = Array2::random([size.0, size.1], Uniform::new(0.0, 1.0))
+                .map(|x| (if x > &self.probability { 1.0 } else { 0.0 }))
+                .insert_axis(Axis(2))
+                .insert_axis(Axis(3))
+                .broadcast(size)
+                .unwrap()
+                .to_owned();
+            inputs.mul(&self.mask).mul(1.0 / 1.0 - self.probability)
+        } else {
+            inputs
+        }
     }
 
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, _rate: f32) -> ArrayD<f32> {

@@ -1,5 +1,6 @@
 import { Activation, LayerType } from "../types.ts";
 import {
+  BatchNorm2DLayerConfig,
   Conv2DLayerConfig,
   DenseLayerConfig,
   DropoutLayerConfig,
@@ -153,4 +154,16 @@ export function SeluLayer(): Layer {
  */
 export function FlattenLayer(config: FlattenLayerConfig): Layer {
   return { type: LayerType.Flatten, config };
+}
+
+/**
+ * Creates a BatchNorm2D layer.
+ * BatchNorm2D layers normalize the input.
+ * They are usually used to improve the speed, performance, and stability of neural networks.
+ * See https://en.wikipedia.org/wiki/Batch_normalization
+ */
+export function BatchNorm2D(config: BatchNorm2DLayerConfig): Layer {
+  if (!config.epsilon) config.epsilon = 0.001;
+  if (!config.momentum) config.momentum = 0.99;
+  return { type: LayerType.BatchNorm2D, config };
 }

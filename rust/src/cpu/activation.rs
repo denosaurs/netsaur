@@ -10,14 +10,14 @@ type ActivationFn = fn(x: &f32) -> f32;
 impl CPUActivation {
     pub fn from(activation: Activation) -> Self {
         let (activate, prime): (ActivationFn, ActivationFn) = match activation {
-            Activation::Sigmoid => (sigmoid, sigmoid_prime),
-            Activation::Tanh => (tanh, tanh_prime),
+            Activation::Elu => (elu, elu_prime),
+            Activation::LeakyRelu => (leaky_relu, leaky_relu_prime),
             Activation::Linear => (linear, linear_prime),
             Activation::Relu => (relu, relu_prime),
             Activation::Relu6 => (relu6, relu6_prime),
-            Activation::LeakyRelu => (leaky_relu, leaky_relu_prime),
-            Activation::Elu => (elu, elu_prime),
             Activation::Selu => (selu, selu_prime),
+            Activation::Sigmoid => (sigmoid, sigmoid_prime),
+            Activation::Tanh => (tanh, tanh_prime),
         };
 
         Self {
@@ -80,7 +80,7 @@ fn relu6(x: &f32) -> f32 {
 }
 
 fn relu6_prime(x: &f32) -> f32 {
-    return if *x > 0.0 { 1.0 } else { 0.0 };
+    return if *x > 0.0 && *x < 6.0 { 1.0 } else { 0.0 };
 }
 
 fn leaky_relu(x: &f32) -> f32 {

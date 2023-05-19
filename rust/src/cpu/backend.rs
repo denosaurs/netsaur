@@ -5,8 +5,8 @@ use safetensors::{serialize, SafeTensors};
 
 use crate::{
     to_arr, ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Conv2DCPULayer, Dataset,
-    DenseCPULayer, Dropout1DCPULayer, FlattenCPULayer, Layer, Logger, Pool2DCPULayer,
-    SoftmaxCPULayer, Tensor, Dropout2DCPULayer,
+    DenseCPULayer, Dropout1DCPULayer, Dropout2DCPULayer, FlattenCPULayer, Layer, Logger,
+    Pool2DCPULayer, SoftmaxCPULayer, Tensor,
 };
 
 pub struct CPUBackend {
@@ -86,9 +86,9 @@ impl CPUBackend {
         }
     }
 
-    pub fn forward_propagate(&mut self, mut inputs: ArrayD<f32>) -> ArrayD<f32> {
+    pub fn forward_propagate(&mut self, mut inputs: ArrayD<f32>, training: bool) -> ArrayD<f32> {
         for layer in &mut self.layers {
-            inputs = layer.forward_propagate(inputs);
+            inputs = layer.forward_propagate(inputs, training);
         }
         inputs
     }
@@ -111,7 +111,7 @@ impl CPUBackend {
         while epoch < epochs {
             let mut total = 0.0;
             for (i, dataset) in datasets.iter().enumerate() {
-                let outputs = self.forward_propagate(dataset.inputs.clone());
+                let outputs = self.forward_propagate(dataset.inputs.clone(), true);
                 self.backward_propagate(outputs.view(), dataset.outputs.view(), rate);
                 total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
                 if !self.silent && i % batches == 0 {
@@ -130,7 +130,7 @@ impl CPUBackend {
         for layer in &mut self.layers {
             layer.reset(1)
         }
-        self.forward_propagate(data)
+        self.forward_propagate(data, false)
     }
 
     pub fn save(&self) -> Vec<u8> {

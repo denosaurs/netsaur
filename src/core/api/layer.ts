@@ -13,6 +13,7 @@ export type Layer =
   | { type: LayerType.Dropout2D; config: DropoutLayerConfig }
   | { type: LayerType.Flatten; config: FlattenLayerConfig }
   | { type: LayerType.Pool2D; config: Pool2DLayerConfig }
+  | { type: LayerType.BatchNorm2D; config: BatchNorm2DLayerConfig }
   | { type: LayerType.Softmax };
 
 /**
@@ -120,4 +121,23 @@ export type FlattenLayerConfig = {
    * The size of the layer.
    */
   size: Shape[Rank];
+};
+
+/**
+ * The configuration for a batch normalization layer.
+ */
+export type BatchNorm2DLayerConfig = {
+  /**
+   * The momentum to use for the batch normalization.
+   * Defaults to 0.99.
+   * https://arxiv.org/abs/1502.03167
+   */
+  momentum?: number;
+
+  /**
+   * The epsilon to use for the batch normalization.
+   * Defaults to 0.001.
+   * https://arxiv.org/abs/1502.03167
+   */
+  epsilon?: number;
 };
