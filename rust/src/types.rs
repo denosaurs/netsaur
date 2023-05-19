@@ -65,6 +65,16 @@ pub struct Conv2DLayer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ConvTranspose2DLayer {
+    pub init: Option<Init>,
+    pub kernel: Option<JSTensor>,
+    pub kernel_size: Vec<usize>,
+    pub padding: Option<Vec<usize>>,
+    pub strides: Option<Vec<usize>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Pool2DLayer {
     pub mode: usize, // 0 = avg, 1 = max
     pub strides: Option<Vec<usize>>,

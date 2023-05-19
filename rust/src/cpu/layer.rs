@@ -1,13 +1,14 @@
 use ndarray::ArrayD;
 
 use crate::{
-    ActivationCPULayer, BatchNorm2DCPULayer, Conv2DCPULayer, DenseCPULayer, Dropout1DCPULayer,
+    ActivationCPULayer, BatchNorm2DCPULayer, Conv2DCPULayer, ConvTranspose2DCPULayer, DenseCPULayer, Dropout1DCPULayer,
     Dropout2DCPULayer, FlattenCPULayer, Pool2DCPULayer, SoftmaxCPULayer,
 };
 
 pub enum CPULayer {
     Activation(ActivationCPULayer),
     Conv2D(Conv2DCPULayer),
+    ConvTranspose2D(ConvTranspose2DCPULayer),
     Dense(DenseCPULayer),
     Dropout1D(Dropout1DCPULayer),
     Dropout2D(Dropout2DCPULayer),
@@ -23,6 +24,7 @@ impl CPULayer {
             CPULayer::Activation(layer) => layer.output_size(),
             CPULayer::BatchNorm2D(layer) => layer.output_size(),
             CPULayer::Conv2D(layer) => layer.output_size(),
+            CPULayer::ConvTranspose2D(layer) => layer.output_size(),
             CPULayer::Dense(layer) => layer.output_size(),
             CPULayer::Dropout1D(layer) => layer.output_size(),
             CPULayer::Dropout2D(layer) => layer.output_size(),
@@ -37,9 +39,10 @@ impl CPULayer {
             CPULayer::Activation(layer) => layer.forward_propagate(inputs),
             CPULayer::BatchNorm2D(layer) => layer.forward_propagate(inputs, training),
             CPULayer::Conv2D(layer) => layer.forward_propagate(inputs),
+            CPULayer::ConvTranspose2D(layer) => layer.forward_propagate(inputs),
             CPULayer::Dense(layer) => layer.forward_propagate(inputs),
             CPULayer::Dropout1D(layer) => layer.forward_propagate(inputs),
-            CPULayer::Dropout2D(layer) => layer.forward_propagate(inputs),
+            CPULayer::Dropout2D(layer) => layer.forward_propagate(inputs, training),
             CPULayer::Flatten(layer) => layer.forward_propagate(inputs),
             CPULayer::Pool2D(layer) => layer.forward_propagate(inputs),
             CPULayer::Softmax(layer) => layer.forward_propagate(inputs),
@@ -51,6 +54,7 @@ impl CPULayer {
             CPULayer::Activation(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::BatchNorm2D(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::Conv2D(layer) => layer.backward_propagate(d_outputs, rate),
+            CPULayer::ConvTranspose2D(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::Dense(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::Dropout1D(layer) => layer.backward_propagate(d_outputs, rate),
             CPULayer::Dropout2D(layer) => layer.backward_propagate(d_outputs, rate),
@@ -71,6 +75,7 @@ impl CPULayer {
             CPULayer::Flatten(layer) => layer.reset(batches),
             CPULayer::Pool2D(layer) => layer.reset(batches),
             CPULayer::Softmax(layer) => layer.reset(batches),
+            CPULayer::ConvTranspose2D(layer) => layer.reset(batches),
         }
     }
 }
