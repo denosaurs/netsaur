@@ -142,35 +142,3 @@ impl BatchNorm2DCPULayer {
             .into_dyn()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use ndarray::{Array4, IxDyn};
-
-    use crate::{BatchNorm2DCPULayer, BatchNormLayer};
-
-    #[test]
-    fn batch_norm_test() {
-        let mut layer = BatchNorm2DCPULayer::new(
-            BatchNormLayer {
-                epsilon: 1e-5,
-                momentum: 0.9,
-            },
-            IxDyn(&[2, 2, 2, 4]),
-        );
-
-        let tensor = Array4::from_shape_vec(
-            (2, 2, 2, 4),
-            vec![
-                1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0,
-                1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0,
-            ],
-        )
-        .unwrap();
-
-        let out = layer.forward_propagate(tensor.clone().into_dyn(), true);
-        // let d_out = layer.backward_propagate(tensor.clone().into_dyn(), 1.0);
-
-        println!("d_out {:#?}", out);
-    }
-}

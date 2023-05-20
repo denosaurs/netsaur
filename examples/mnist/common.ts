@@ -39,8 +39,6 @@ export function loadDataset(
     inputs.push(input);
   }
 
-  console.log(inputs.length)
-
   mean /= count * 784;
   sd /= count * 784;
   sd -= Math.pow(mean, 2);
@@ -56,7 +54,7 @@ export function loadDataset(
 
     const outputs = new Float32Array(10 * minibatch);
     for (let j = 0; j < minibatch; j++) {
-      outputs[labelView.getUint8(8 + i * minibatch + j)] = 1;
+      outputs[labelView.getUint8(8 + i * minibatch + j) + j * 10] = 1;
     }
 
     results.push({
