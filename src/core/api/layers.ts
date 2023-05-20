@@ -2,6 +2,7 @@ import { Activation, LayerType } from "../types.ts";
 import {
   BatchNorm2DLayerConfig,
   Conv2DLayerConfig,
+  ConvTranspose2DLayerConfig,
   DenseLayerConfig,
   DropoutLayerConfig,
   FlattenLayerConfig,
@@ -45,6 +46,10 @@ export function Dropout2DLayer(config: DropoutLayerConfig): Layer {
  */
 export function Conv2DLayer(config: Conv2DLayerConfig): Layer {
   return { type: LayerType.Conv2D, config };
+}
+
+export function ConvTranspose2DLayer(config: ConvTranspose2DLayerConfig): Layer {
+  return { type: LayerType.ConvTranspose2D, config };
 }
 
 /**

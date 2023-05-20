@@ -23,6 +23,7 @@ pub enum Layer {
     Dense(DenseLayer),
     BatchNorm2D(BatchNormLayer),
     Conv2D(Conv2DLayer),
+    ConvTranspose2D(ConvTranspose2DLayer),
     Pool2D(Pool2DLayer),
     Flatten(FlattenLayer),
     Dropout1D(DropoutLayer),

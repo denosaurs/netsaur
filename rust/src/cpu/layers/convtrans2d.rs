@@ -23,21 +23,17 @@ impl ConvTranspose2DCPULayer {
         let padding = config.padding.unwrap_or(vec![0, 0]);
         let input_y = size[2] + 2 * padding[0];
         let input_x = size[3] + 2 * padding[1];
-        let output_y = 1 + (input_y - config.kernel_size[2]) / strides[0];
-        let output_x = 1 + (input_x - config.kernel_size[3]) / strides[1];
+        let output_y = (input_y + config.kernel_size[2]) / strides[0] - 1;
+        let output_x = (input_x + config.kernel_size[3]) / strides[1] - 1;
         let input_size = Ix4(size[0], size[1], input_y, input_x);
         let weight_size = IxDyn(config.kernel_size.as_slice());
         let output_size = Ix4(size[0], weight_size[0], output_y, output_x);
 
-        let weights = weights.unwrap_or(if let Some(tensor) = config.kernel {
-            ArrayD::from_shape_vec(tensor.shape, tensor.data).unwrap()
-        } else {
-            CPUInit::from_default(config.init, Init::Kaiming).init(
-                weight_size,
-                input_size.size(),
-                output_size.size(),
-            )
-        });
+        let weights = weights.unwrap_or(CPUInit::from_default(config.init, Init::Xavier).init(
+            weight_size,
+            input_size.size(),
+            output_size.size(),
+        ));
         let biases = biases.unwrap_or(ArrayD::zeros(vec![config.kernel_size[0]]));
 
         Self {
@@ -63,7 +59,7 @@ impl ConvTranspose2DCPULayer {
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
         let inputs = inputs.into_dimensionality::<Ix4>().unwrap();
-        let (_, _, input_y, input_x) = self.inputs.dim();
+        let (batches, _, input_y, input_x) = self.inputs.dim();
         let unpadded_y = self.padding[0]..input_y - self.padding[0];
         let unpadded_x = self.padding[1]..input_x - self.padding[1];
         self.inputs
@@ -71,20 +67,20 @@ impl ConvTranspose2DCPULayer {
             .assign(&inputs);
 
         let (filters, _, weight_y, weight_x) = self.weights.dim();
-        let (batches, _, output_y, output_x) = self.outputs.dim();
 
         for b in 0..batches {
             for f in 0..filters {
                 let mut h = 0;
-                for y in (0..output_y).step_by(self.strides[0]) {
+                for y in (0..input_y).step_by(self.strides[0]) {
                     let mut w = 0;
-                    for x in (0..output_x).step_by(self.strides[1]) {
-                        self.outputs[(b, f, h, w)] = self
-                            .inputs
-                            .slice(s![b, .., y..y + weight_y, x..x + weight_x])
-                            .mul(&self.weights.slice(s![f, .., .., ..]))
-                            .sum()
-                            .add(self.biases[f]);
+                    for x in (0..input_x).step_by(self.strides[1]) {
+                        self.outputs
+                            .slice_mut(s![b, .., y..y + weight_y, x..x + weight_x])
+                            .add_assign(
+                                &self.inputs[(b, f, h, w)]
+                                    .mul(&self.weights.slice(s![f, .., .., ..]))
+                                    .add(self.biases[f]),
+                            );
                         w += 1;
                     }
                     h += 1;
@@ -98,29 +94,31 @@ impl ConvTranspose2DCPULayer {
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, rate: f32) -> ArrayD<f32> {
         let d_outputs = d_outputs.into_dimensionality::<Ix4>().unwrap();
 
+        let (batches, _, input_y, input_x) = self.inputs.dim();
         let (filters, _, weight_y, weight_x) = self.weights.dim();
-        let (batches, _, output_y, output_x) = self.outputs.dim();
+        let unpadded_y = input_y - self.padding[0];
+        let unpadded_x = input_x - self.padding[1];
 
         let mut d_inputs = Array4::zeros(self.inputs.dim());
         let mut d_weights = Array4::zeros(self.weights.dim());
         let mut d_biases = Array1::<f32>::zeros(self.biases.dim());
         for b in 0..batches {
             for f in 0..filters {
-                for y in (0..output_y).step_by(self.strides[0]) {
-                    for x in (0..output_x).step_by(self.strides[1]) {
-                        d_inputs
-                            .slice_mut(s![b, .., y..y + weight_y, x..x + weight_x])
-                            .add_assign(
-                                &self
-                                    .weights
-                                    .slice(s![f, .., .., ..])
-                                    .mul(d_outputs[(b, f, y, x)]),
-                            );
-                        d_weights.slice_mut(s![f, .., .., ..]).add_assign(
+                for y in (self.padding[0]..unpadded_y).step_by(self.strides[0]) {
+                    for x in (self.padding[1]..unpadded_x).step_by(self.strides[1]) {
+                        d_inputs.slice_mut(s![b, .., y, x]).add_assign(
                             &self
-                                .inputs
-                                .slice(s![b, .., y..y + weight_y, x..x + weight_x])
-                                .mul(d_outputs[(b, f, y, x)]),
+                                .weights
+                                .slice(s![f, .., .., ..])
+                                .mul(&d_outputs.slice(s![b, f, y..y + weight_y, x..x + weight_x])),
+                        );
+                        d_weights.slice_mut(s![f, .., .., ..]).add_assign(
+                            &self.inputs.slice(s![b, .., y, x]).mul(&d_outputs.slice(s![
+                                b,
+                                f,
+                                y..y + weight_y,
+                                x..x + weight_x
+                            ])),
                         );
                         d_biases[f] += d_outputs[(b, f, y, x)];
                     }

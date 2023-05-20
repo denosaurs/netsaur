@@ -4,9 +4,9 @@ use ndarray::{ArrayD, ArrayViewD, IxDyn};
 use safetensors::{serialize, SafeTensors};
 
 use crate::{
-    to_arr, ActivationCPULayer, BackendConfig, CPUCost, CPULayer, Conv2DCPULayer, Dataset,
-    DenseCPULayer, Dropout1DCPULayer, Dropout2DCPULayer, FlattenCPULayer, Layer, Logger,
-    Pool2DCPULayer, SoftmaxCPULayer, Tensor, BatchNorm2DCPULayer,
+    to_arr, ActivationCPULayer, BackendConfig, BatchNorm2DCPULayer, CPUCost, CPULayer,
+    Conv2DCPULayer, ConvTranspose2DCPULayer, Dataset, DenseCPULayer, Dropout1DCPULayer,
+    Dropout2DCPULayer, FlattenCPULayer, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor,
 };
 
 pub struct CPUBackend {
@@ -38,6 +38,11 @@ impl CPUBackend {
                     };
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Conv2D(layer));
+                }
+                Layer::ConvTranspose2D(config) => {
+                    let layer = ConvTranspose2DCPULayer::new(config, IxDyn(&size), None, None);
+                    size = layer.output_size().to_vec();
+                    layers.push(CPULayer::ConvTranspose2D(layer));
                 }
                 Layer::BatchNorm2D(config) => {
                     let layer = BatchNorm2DCPULayer::new(config, IxDyn(&size));

@@ -122,6 +122,7 @@ export enum LayerType {
   Activation = "activation",
   BatchNorm2D = "batchnorm2d",
   Conv2D = "conv2d",
+  ConvTranspose2D = "convtranspose2d",
   Dense = "dense",
   Dropout1D = "dropout1d",
   Dropout2D = "dropout2d",
