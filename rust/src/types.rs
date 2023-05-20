@@ -110,6 +110,7 @@ pub enum Cost {
     CrossEntropy,
     Hinge,
     MSE,
+    BinCrossEntropy,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -97,6 +97,11 @@ export enum Cost {
   /**
    * Cross entropy cost function is the standard cost function for binary classification.
    */
+  BinCrossEntropy = "bincrossentropy",
+
+  /**
+   * Cross entropy cost function is the standard cost function for classification.
+   */
   CrossEntropy = "crossentropy",
 
   /**
