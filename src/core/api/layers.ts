@@ -162,7 +162,7 @@ export function FlattenLayer(config: FlattenLayerConfig): Layer {
  * They are usually used to improve the speed, performance, and stability of neural networks.
  * See https://en.wikipedia.org/wiki/Batch_normalization
  */
-export function BatchNorm2D(config: BatchNorm2DLayerConfig): Layer {
+export function BatchNorm2D(config: BatchNorm2DLayerConfig = {}): Layer {
   if (!config.epsilon) config.epsilon = 0.001;
   if (!config.momentum) config.momentum = 0.99;
   return { type: LayerType.BatchNorm2D, config };
