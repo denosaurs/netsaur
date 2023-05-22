@@ -97,6 +97,11 @@ export enum Cost {
   /**
    * Cross entropy cost function is the standard cost function for binary classification.
    */
+  BinCrossEntropy = "bincrossentropy",
+
+  /**
+   * Cross entropy cost function is the standard cost function for classification.
+   */
   CrossEntropy = "crossentropy",
 
   /**
@@ -122,6 +127,7 @@ export enum LayerType {
   Activation = "activation",
   BatchNorm2D = "batchnorm2d",
   Conv2D = "conv2d",
+  ConvTranspose2D = "convtranspose2d",
   Dense = "dense",
   Dropout1D = "dropout1d",
   Dropout2D = "dropout2d",

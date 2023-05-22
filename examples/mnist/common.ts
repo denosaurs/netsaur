@@ -12,6 +12,7 @@ export function loadDataset(
   labelsFile: string,
   start: number,
   end: number,
+  minibatch = 1,
 ) {
   const images = Deno.readFileSync(new URL(imagesFile, import.meta.url));
   const labels = Deno.readFileSync(new URL(labelsFile, import.meta.url));
@@ -28,10 +29,10 @@ export function loadDataset(
   const inputs: Float32Array[] = [];
   let mean = 0;
   let sd = 0;
-  for (let i = 0; i < count; i++) {
-    const input = new Float32Array(784);
-    for (let j = 0; j < 784; j++) {
-      input[j] = imageView.getUint8(16 + i * 784 + j);
+  for (let i = 0; i < count / minibatch; i++) {
+    const input = new Float32Array(784 * minibatch);
+    for (let j = 0; j < 784 * minibatch; j++) {
+      input[j] = imageView.getUint8(16 + i * (784 * minibatch) + j);
       mean += input[j];
       sd += Math.pow(input[j], 2);
     }
@@ -45,14 +46,16 @@ export function loadDataset(
 
   const results: DataSet[] = [];
 
-  for (let i = start; i < end; i++) {
-    for (let j = 0; j < 784; j++) {
+  for (let i = start; i < end / minibatch; i++) {
+    for (let j = 0; j < 784 * minibatch; j++) {
       inputs[i][j] -= mean;
       inputs[i][j] /= sd;
     }
 
-    const outputs = new Float32Array(10);
-    outputs[labelView.getUint8(8 + i)] = 1;
+    const outputs = new Float32Array(10 * minibatch);
+    for (let j = 0; j < minibatch; j++) {
+      outputs[labelView.getUint8(8 + i * minibatch + j) + j * 10] = 1;
+    }
 
     results.push({
       inputs: new Tensor(inputs[i], [1, 1, 28, 28]),

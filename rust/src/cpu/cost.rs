@@ -20,6 +20,10 @@ impl CPUCost {
                 cost: cross_entropy,
                 prime: cross_entropy_prime,
             },
+            Cost::BinCrossEntropy => CPUCost {
+                cost: bin_cross_entropy,
+                prime: bin_cross_entropy_prime,
+            },
             Cost::Hinge => CPUCost {
                 cost: hinge,
                 prime: hinge_prime,
@@ -43,6 +47,18 @@ fn cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 
 
 fn cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
     return -y_hat.div(&y);
+}
+
+fn bin_cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
+    return -y_hat
+        .mul(y.map(|x| x.ln()))
+        .sub(((1.0).sub(&y_hat)).mul(y.map(|x| 1.0 - x.ln())))
+        .sum()
+        / y.len() as f32;
+}
+
+fn bin_cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
+    return y.sub(&y_hat).div(y.mul(1.0.sub(&y)));
 }
 
 fn hinge<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {

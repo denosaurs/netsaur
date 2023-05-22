@@ -2,6 +2,7 @@ import { Activation, LayerType } from "../types.ts";
 import {
   BatchNorm2DLayerConfig,
   Conv2DLayerConfig,
+  ConvTranspose2DLayerConfig,
   DenseLayerConfig,
   DropoutLayerConfig,
   FlattenLayerConfig,
@@ -45,6 +46,10 @@ export function Dropout2DLayer(config: DropoutLayerConfig): Layer {
  */
 export function Conv2DLayer(config: Conv2DLayerConfig): Layer {
   return { type: LayerType.Conv2D, config };
+}
+
+export function ConvTranspose2DLayer(config: ConvTranspose2DLayerConfig): Layer {
+  return { type: LayerType.ConvTranspose2D, config };
 }
 
 /**
@@ -162,7 +167,7 @@ export function FlattenLayer(config: FlattenLayerConfig): Layer {
  * They are usually used to improve the speed, performance, and stability of neural networks.
  * See https://en.wikipedia.org/wiki/Batch_normalization
  */
-export function BatchNorm2D(config: BatchNorm2DLayerConfig): Layer {
+export function BatchNorm2DLayer(config: BatchNorm2DLayerConfig = {}): Layer {
   if (!config.epsilon) config.epsilon = 0.001;
   if (!config.momentum) config.momentum = 0.99;
   return { type: LayerType.BatchNorm2D, config };

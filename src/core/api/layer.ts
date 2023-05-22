@@ -8,6 +8,7 @@ import { Rank, Shape, Shape1D, Shape2D, Shape4D } from "./shape.ts";
 export type Layer =
   | { type: LayerType.Activation; config: ActivationLayerConfig }
   | { type: LayerType.Conv2D; config: Conv2DLayerConfig }
+  | { type: LayerType.ConvTranspose2D; config: ConvTranspose2DLayerConfig }
   | { type: LayerType.Dense; config: DenseLayerConfig }
   | { type: LayerType.Dropout1D; config: DropoutLayerConfig }
   | { type: LayerType.Dropout2D; config: DropoutLayerConfig }
@@ -69,6 +70,31 @@ export type Conv2DLayerConfig = {
    * The kernel to use.
    */
   kernel?: Tensor<Rank>;
+
+  /**
+   * The size of the kernel.
+   */
+  kernelSize: Shape4D;
+
+  /**
+   * The optional padding to use.
+   */
+  padding?: Shape2D;
+
+  /**
+   * The optional strides to use.
+   */
+  strides?: Shape2D;
+};
+
+/**
+ * The configuration for a convolutional transpose layer.
+ */
+export type ConvTranspose2DLayerConfig = {
+  /**
+   * The type of initialization to use.
+   */
+  init?: Init;
 
   /**
    * The size of the kernel.
