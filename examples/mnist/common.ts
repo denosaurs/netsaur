@@ -58,8 +58,8 @@ export function loadDataset(
     }
 
     results.push({
-      inputs: new Tensor(inputs[i], [1, 1, 28, 28]),
-      outputs: new Tensor(outputs, [10]),
+      inputs: new Tensor(inputs[i], [minibatch, 1, 28, 28]),
+      outputs: new Tensor(outputs, [minibatch, 10]),
     });
   }
 

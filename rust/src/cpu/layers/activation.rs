@@ -1,5 +1,5 @@
-use ndarray::{ArrayD, Dimension, IxDyn};
-use std::ops::{Div, Mul, Sub};
+use ndarray::{ArrayD, IxDyn, s};
+use std::ops::{Div, Mul};
 
 use crate::{ActivationLayer, CPUActivation};
 
@@ -65,29 +65,34 @@ impl SoftmaxCPULayer {
     }
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
-        self.outputs = inputs.map(|x| x.exp()).div(inputs.map(|x| x.exp()).sum());
+        let batches = self.outputs.dim()[0];
+        for b in 0..batches {
+            let exp = inputs.slice(s![b, ..]).map(|x| x.exp());
+            self.outputs.slice_mut(s![b, ..]).assign(&exp.clone().div(exp.sum()));
+        }
         self.outputs.clone().into_dyn()
     }
 
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, _rate: f32) -> ArrayD<f32> {
-        let batches = self.outputs.dim()[0];
-        let array_size = self.outputs.dim().size() / batches;
+        // let batches = self.outputs.dim()[0];
+        // let array_size = self.outputs.dim().size() / batches;
 
-        let mut d_inputs = ArrayD::zeros(self.outputs.dim());
-        for b in 0..batches {
-            for y in 0..array_size {
-                for x in 0..array_size {
-                    let out1 = self.outputs[[b, y]];
-                    let out2 = self.outputs[[b, x]];
-                    let d_out = d_outputs[[b, x]];
-                    if x == y {
-                        d_inputs[[b, y]] += out1.sub(out1.powi(2)).mul(d_out);
-                    } else {
-                        d_inputs[[b, y]] += -out1.mul(out2).mul(d_out);
-                    }
-                }
-            }
-        }
-        d_inputs
+        // let mut d_inputs = ArrayD::zeros(self.outputs.dim());
+        // for b in 0..batches {
+        //     for y in 0..array_size {
+        //         for x in 0..array_size {
+        //             let out1 = self.outputs[[b, y]];
+        //             let out2 = self.outputs[[b, x]];
+        //             let d_out = d_outputs[[b, x]];
+        //             if x == y {
+        //                 d_inputs[[b, y]] += out1.sub(out1.powi(2)).mul(d_out);
+        //             } else {
+        //                 d_inputs[[b, y]] += -out1.mul(out2).mul(d_out);
+        //             }
+        //         }
+        //     }
+        // }
+        // d_inputs
+        d_outputs
     }
 }

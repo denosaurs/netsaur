@@ -16,9 +16,11 @@ import { loadDataset } from "./common.ts";
 
 await setupBackend(CPU);
 
+const minibatch = 1;
+
 // training
 const network = new Sequential({
-  size: [1, 1, 28, 28],
+  size: [minibatch, 1, 28, 28],
   layers: [
     Conv2DLayer({ kernelSize: [6, 1, 5, 5], padding: [2, 2] }),
     ReluLayer(),
@@ -38,7 +40,7 @@ const network = new Sequential({
 });
 
 console.log("Loading training dataset...");
-const trainSet = loadDataset("train-images.idx", "train-labels.idx", 0, 5000);
+const trainSet = loadDataset("train-images.idx", "train-labels.idx", 0, 5000, minibatch);
 
 const epochs = 1;
 console.log("Training (" + epochs + " epochs)...");
