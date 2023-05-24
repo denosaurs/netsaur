@@ -1,4 +1,4 @@
-use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix1, Ix4, IxDyn};
+use ndarray::{s, Array1, Array4, ArrayD, Ix1, Ix4, IxDyn};
 use std::ops::{Add, AddAssign, Mul, SubAssign};
 
 use crate::{CPUInit, Conv2DLayer, Init};
@@ -33,9 +33,9 @@ impl Conv2DCPULayer {
             ArrayD::from_shape_vec(tensor.shape, tensor.data).unwrap()
         } else {
             CPUInit::from_default(config.init, Init::Kaiming).init(
-                weight_size,
-                input_size.size(),
-                output_size.size(),
+                weight_size.clone(),
+                size[1] * input_y * input_x,
+                weight_size[0] * output_y * output_x,
             )
         });
         let biases = biases.unwrap_or(ArrayD::zeros(vec![config.kernel_size[0]]));

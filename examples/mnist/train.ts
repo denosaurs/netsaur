@@ -18,7 +18,7 @@ await setupBackend(CPU);
 
 // training
 const network = new Sequential({
-  size: [1, 1, 28, 28],
+  size: [32, 1, 28, 28],
   layers: [
     Conv2DLayer({ kernelSize: [6, 1, 5, 5], padding: [2, 2] }),
     ReluLayer(),
@@ -38,10 +38,12 @@ const network = new Sequential({
 });
 
 console.log("Loading training dataset...");
-const trainSet = loadDataset("train-images.idx", "train-labels.idx", 0, 5000);
+const trainSet = loadDataset("train-images.idx", "train-labels.idx", 0, 5000, 32);
 
 const epochs = 1;
 console.log("Training (" + epochs + " epochs)...");
 const start = performance.now();
-network.train(trainSet, epochs, 32, 0.01);
+network.train(trainSet, epochs, 1, 0.005);
 console.log("Training complete!", performance.now() - start);
+
+network.saveFile("examples/mnist/mnist.test.st")

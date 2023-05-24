@@ -28,7 +28,9 @@ impl FlattenCPULayer {
         self.output_size.clone()
     }
 
-    pub fn reset(&mut self, _batches: usize) {}
+    pub fn reset(&mut self, batches: usize) {
+        self.output_size[0] = batches
+    }
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
         let output_size = IxDyn(&self.output_size);

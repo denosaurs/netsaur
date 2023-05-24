@@ -1,4 +1,4 @@
-use ndarray::{ArrayD, Dimension, IxDyn};
+use ndarray::{ArrayD, IxDyn, s, Dimension};
 use std::ops::{Div, Mul, Sub};
 
 use crate::{ActivationLayer, CPUActivation};
@@ -65,7 +65,11 @@ impl SoftmaxCPULayer {
     }
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
-        self.outputs = inputs.map(|x| x.exp()).div(inputs.map(|x| x.exp()).sum());
+        let batches = self.outputs.dim()[0];
+        for b in 0..batches {
+            let exp = inputs.slice(s![b, ..]).map(|x| x.exp());
+            self.outputs.slice_mut(s![b, ..]).assign(&exp.clone().div(exp.sum()));
+        }
         self.outputs.clone().into_dyn()
     }
 

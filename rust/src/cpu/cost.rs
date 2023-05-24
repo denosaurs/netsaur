@@ -1,6 +1,6 @@
 use std::ops::{Div, Mul, Sub};
 
-use ndarray::{ArrayD, ArrayViewD};
+use ndarray::{ArrayD, ArrayViewD, s};
 
 use crate::Cost;
 
@@ -42,7 +42,12 @@ fn mse_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f
 }
 
 fn cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
-    return -y_hat.mul(&y).sum().ln();
+    let batches = y_hat.dim()[0];
+    let mut total = 0.0;
+    for b in 0..batches {
+        total -= y_hat.slice(s![b, ..]).mul(&y.slice(s![b, ..])).sum().ln()
+    }
+    return total / batches as f32;
 }
 
 fn cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
