@@ -22,7 +22,7 @@ impl DenseCPULayer {
         let weight_size = Ix2(size[1], config.size[0]);
         let output_size = Ix2(size[0], config.size[0]);
         let weights =
-            weights.unwrap_or(init.init(weight_size.into_dyn(), size.size(), output_size.size()));
+            weights.unwrap_or(init.init(weight_size.into_dyn(), size[1], output_size[1]));
         let biases = biases.unwrap_or(ArrayD::zeros(config.size));
         Self {
             inputs: Array2::zeros(input_size),

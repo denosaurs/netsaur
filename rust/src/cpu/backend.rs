@@ -124,10 +124,12 @@ impl CPUBackend {
                 self.backward_propagate(outputs.view(), dataset.outputs.view(), rate);
                 total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
                 let minibatch = outputs.dim()[0];
-                if !self.silent && (i * minibatch) % batches == 0 && i != 0 {
-                    let cost = total / (batches / minibatch) as f32;
+                if !self.silent && (i * minibatch) % batches == 0 {
+                    let cost = total / (batches) as f32;
                     let msg = format!("Epoch={}, Dataset={}, Cost={}", epoch, i * minibatch, cost);
-                    (self.logger.log)(msg);
+                    if i != 0 {
+                        (self.logger.log)(msg);
+                    }
                     total = 0.0;
                 }
             }
