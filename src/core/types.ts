@@ -15,7 +15,7 @@ export interface Backend {
     datasets: DataSet[],
     epochs: number,
     batches: number,
-    rate: number,
+    rate: number
   ): void;
 
   /**
@@ -42,9 +42,24 @@ export interface Backend {
  * NetworkConfig represents the configuration of a neural network.
  */
 export type NetworkConfig = {
+  /**
+   * Input size of the neural network.
+   */
   size: Shape[Rank];
+
+  /**
+   * List of layers in the neural network.
+   */
   layers: Layer[];
+
+  /**
+   * Cost function used to train the neural network.
+   */
   cost: Cost;
+
+  /**
+   * Whether or not to silence the verbose messages.
+   */
   silent?: boolean;
 };
 
@@ -125,6 +140,7 @@ export type DataSet = {
 
 export enum LayerType {
   Activation = "activation",
+  BatchNorm1D = "batchnorm1d",
   BatchNorm2D = "batchnorm2d",
   Conv2D = "conv2d",
   ConvTranspose2D = "convtranspose2d",

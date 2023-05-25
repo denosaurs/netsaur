@@ -1,7 +1,7 @@
 use ndarray::{Array1, Array2, ArrayD, Axis, Dimension, Ix1, Ix2, IxDyn};
 use std::ops::{Add, Mul, SubAssign};
 
-use crate::{CPUInit, DenseLayer, Init};
+use crate::{CPUInit, DenseLayer, Init, Tensors};
 
 pub struct DenseCPULayer {
     pub inputs: Array2<f32>,
@@ -11,19 +11,20 @@ pub struct DenseCPULayer {
 }
 
 impl DenseCPULayer {
-    pub fn new(
-        config: DenseLayer,
-        size: IxDyn,
-        weights: Option<ArrayD<f32>>,
-        biases: Option<ArrayD<f32>>,
-    ) -> Self {
+    pub fn new(config: DenseLayer, size: IxDyn, tensors: Option<Tensors>) -> Self {
         let init = CPUInit::from_default(config.init, Init::Uniform);
         let input_size = Ix2(size[0], size[1]);
         let weight_size = Ix2(size[1], config.size[0]);
         let output_size = Ix2(size[0], config.size[0]);
-        let weights =
-            weights.unwrap_or(init.init(weight_size.into_dyn(), size[1], output_size[1]));
-        let biases = biases.unwrap_or(ArrayD::zeros(config.size));
+
+        let (weights, biases) = if let Some(Tensors::Dense(tensors)) = tensors {
+            (tensors.weights, tensors.biases)
+        } else {
+            let weights = init.init(weight_size.into_dyn(), size[1], output_size[1]);
+            let biases = ArrayD::zeros(config.size);
+            (weights, biases)
+        };
+
         Self {
             inputs: Array2::zeros(input_size),
             weights: weights.into_dimensionality::<Ix2>().unwrap(),

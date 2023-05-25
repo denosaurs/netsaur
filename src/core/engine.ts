@@ -47,7 +47,7 @@ export interface BackendLoader {
  * setupBackend loads the backend and sets it up.
  * ```ts
  * import { setupBackend, CPU } from "https://deno.land/x/netsaur/mod.ts";
- * 
+ *
  * await setupBackend(CPU);
  * ```
  */

@@ -1,4 +1,4 @@
-use ndarray::{ArrayD, IxDyn, s, Dimension};
+use ndarray::{s, ArrayD, Dimension, IxDyn};
 use std::ops::{Div, Mul, Sub};
 
 use crate::{ActivationLayer, CPUActivation};
@@ -68,7 +68,9 @@ impl SoftmaxCPULayer {
         let batches = self.outputs.dim()[0];
         for b in 0..batches {
             let exp = inputs.slice(s![b, ..]).map(|x| x.exp());
-            self.outputs.slice_mut(s![b, ..]).assign(&exp.clone().div(exp.sum()));
+            self.outputs
+                .slice_mut(s![b, ..])
+                .assign(&exp.clone().div(exp.sum()));
         }
         self.outputs.clone().into_dyn()
     }

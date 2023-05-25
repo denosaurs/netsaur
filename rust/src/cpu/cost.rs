@@ -1,6 +1,6 @@
 use std::ops::{Div, Mul, Sub};
 
-use ndarray::{ArrayD, ArrayViewD, s};
+use ndarray::{s, ArrayD, ArrayViewD};
 
 use crate::Cost;
 

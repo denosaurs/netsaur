@@ -28,10 +28,14 @@ impl Dropout1DCPULayer {
         self.mask = ArrayD::zeros(output_size);
     }
 
-    pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
-        self.mask = ArrayD::random(self.mask.dim(), Uniform::new(0.0, 1.0))
-            .map(|x| (if x > &self.probability { 1.0 } else { 0.0 }));
-        inputs.mul(&self.mask).mul(1.0 / 1.0 - self.probability)
+    pub fn forward_propagate(&mut self, inputs: ArrayD<f32>, training: bool) -> ArrayD<f32> {
+        if training {
+            self.mask = ArrayD::random(self.mask.dim(), Uniform::new(0.0, 1.0))
+                .map(|x| (if x > &self.probability { 1.0 } else { 0.0 }));
+            inputs.mul(&self.mask).mul(1.0 / 1.0 - self.probability)
+        } else {
+            inputs
+        }
     }
 
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, _rate: f32) -> ArrayD<f32> {

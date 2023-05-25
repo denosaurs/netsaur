@@ -1,6 +1,6 @@
 import { Activation, LayerType } from "../types.ts";
 import {
-  BatchNorm2DLayerConfig,
+  BatchNormLayerConfig,
   Conv2DLayerConfig,
   ConvTranspose2DLayerConfig,
   DenseLayerConfig,
@@ -48,7 +48,9 @@ export function Conv2DLayer(config: Conv2DLayerConfig): Layer {
   return { type: LayerType.Conv2D, config };
 }
 
-export function ConvTranspose2DLayer(config: ConvTranspose2DLayerConfig): Layer {
+export function ConvTranspose2DLayer(
+  config: ConvTranspose2DLayerConfig,
+): Layer {
   return { type: LayerType.ConvTranspose2D, config };
 }
 
@@ -162,12 +164,24 @@ export function FlattenLayer(config: FlattenLayerConfig): Layer {
 }
 
 /**
+ * Creates a BatchNorm1D layer.
+ * BatchNorm1D layers normalize the input.
+ * They are usually used to improve the speed, performance, and stability of neural networks.
+ * See https://en.wikipedia.org/wiki/Batch_normalization
+ */
+export function BatchNorm1DLayer(config: BatchNormLayerConfig = {}): Layer {
+  if (!config.epsilon) config.epsilon = 0.001;
+  if (!config.momentum) config.momentum = 0.99;
+  return { type: LayerType.BatchNorm1D, config };
+}
+
+/**
  * Creates a BatchNorm2D layer.
  * BatchNorm2D layers normalize the input.
  * They are usually used to improve the speed, performance, and stability of neural networks.
  * See https://en.wikipedia.org/wiki/Batch_normalization
  */
-export function BatchNorm2DLayer(config: BatchNorm2DLayerConfig = {}): Layer {
+export function BatchNorm2DLayer(config: BatchNormLayerConfig = {}): Layer {
   if (!config.epsilon) config.epsilon = 0.001;
   if (!config.momentum) config.momentum = 0.99;
   return { type: LayerType.BatchNorm2D, config };

@@ -1,6 +1,6 @@
 use std::{borrow::Cow, slice::from_raw_parts};
 
-use ndarray::ArrayViewD;
+use ndarray::{ArrayD, ArrayViewD};
 use safetensors::{Dtype, View};
 
 pub struct Tensor<'a> {
@@ -31,5 +31,45 @@ impl<'a> View for Tensor<'a> {
 
     fn data_len(&self) -> usize {
         self.data.len() * 4
+    }
+}
+
+#[derive(Debug)]
+pub struct DenseTensors {
+    pub weights: ArrayD<f32>,
+    pub biases: ArrayD<f32>,
+}
+
+#[derive(Debug)]
+pub struct ConvTensors {
+    pub weights: ArrayD<f32>,
+    pub biases: ArrayD<f32>,
+}
+
+#[derive(Debug)]
+pub struct BatchNormTensors {
+    pub gamma: ArrayD<f32>,
+    pub beta: ArrayD<f32>,
+    pub running_mean: ArrayD<f32>,
+    pub running_var: ArrayD<f32>,
+}
+
+#[derive(Debug)]
+pub enum Tensors {
+    Dense(DenseTensors),
+    Conv(ConvTensors),
+    BatchNorm(BatchNormTensors),
+}
+
+pub trait GetTensor {
+    fn get(&mut self) -> Option<Tensors>;
+}
+
+impl GetTensor for Option<Vec<Tensors>> {
+    fn get(&mut self) -> Option<Tensors> {
+        if let Some(tensors) = self {
+            return Some(tensors.remove(0));
+        }
+        None
     }
 }
