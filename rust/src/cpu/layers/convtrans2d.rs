@@ -1,7 +1,7 @@
-use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix1, Ix4, IxDyn};
+use ndarray::{s, Array1, Array4, ArrayD, Ix1, Ix4, IxDyn};
 use std::ops::{Add, AddAssign, Mul, SubAssign};
 
-use crate::{CPUInit, ConvTranspose2DLayer, Init};
+use crate::{CPUInit, ConvTranspose2DLayer, Init, Tensors};
 
 pub struct ConvTranspose2DCPULayer {
     pub strides: Vec<usize>,
@@ -16,8 +16,7 @@ impl ConvTranspose2DCPULayer {
     pub fn new(
         config: ConvTranspose2DLayer,
         size: IxDyn,
-        weights: Option<ArrayD<f32>>,
-        biases: Option<ArrayD<f32>>,
+        tensors: Option<Tensors>,
     ) -> Self {
         let strides = config.strides.unwrap_or(vec![1, 1]);
         let padding = config.padding.unwrap_or(vec![0, 0]);
@@ -29,12 +28,21 @@ impl ConvTranspose2DCPULayer {
         let weight_size = IxDyn(config.kernel_size.as_slice());
         let output_size = Ix4(size[0], weight_size[0], output_y, output_x);
 
-        let weights = weights.unwrap_or(CPUInit::from_default(config.init, Init::Xavier).init(
-            weight_size,
-            input_size.size(),
-            output_size.size(),
-        ));
-        let biases = biases.unwrap_or(ArrayD::zeros(vec![config.kernel_size[0]]));
+        let (weights, biases) = if let Some(Tensors::Conv(tensors)) = tensors {
+            (tensors.weights, tensors.biases)
+        } else {
+            let weights = if let Some(tensor) = config.kernel {
+                ArrayD::from_shape_vec(tensor.shape, tensor.data).unwrap()
+            } else {
+                CPUInit::from_default(config.init, Init::Xavier).init(
+                    weight_size.clone(),
+                    size[1] * input_y * input_x,
+                    weight_size[0] * output_y * output_x,
+                )
+            };
+            let biases = ArrayD::zeros(vec![config.kernel_size[0]]);
+            (weights, biases)
+        };
 
         Self {
             strides,

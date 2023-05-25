@@ -4,9 +4,10 @@ use ndarray::{ArrayD, ArrayViewD, IxDyn};
 use safetensors::{serialize, SafeTensors};
 
 use crate::{
-    to_arr, ActivationCPULayer, BackendConfig, BatchNorm2DCPULayer, CPUCost, CPULayer,
-    Conv2DCPULayer, ConvTranspose2DCPULayer, Dataset, DenseCPULayer, Dropout1DCPULayer,
-    Dropout2DCPULayer, FlattenCPULayer, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor, BatchNorm1DCPULayer,
+    to_arr, ActivationCPULayer, BackendConfig, BatchNorm1DCPULayer, BatchNorm2DCPULayer,
+    BatchNormTensors, CPUCost, CPULayer, Conv2DCPULayer, ConvTensors, ConvTranspose2DCPULayer,
+    Dataset, DenseCPULayer, DenseTensors, Dropout1DCPULayer, Dropout2DCPULayer, FlattenCPULayer,
+    GetTensor, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor, Tensors,
 };
 
 pub struct CPUBackend {
@@ -19,37 +20,31 @@ pub struct CPUBackend {
 }
 
 impl CPUBackend {
-    pub fn new(config: BackendConfig, logger: Logger, tensors: Option<SafeTensors>) -> Self {
+    pub fn new(config: BackendConfig, logger: Logger, mut tensors: Option<Vec<Tensors>>) -> Self {
         let mut layers = Vec::new();
         let mut size = config.size.clone();
-        for (i, layer) in config.layers.iter().enumerate() {
+        for layer in config.layers.iter() {
             match layer.clone() {
                 Layer::Activation(config) => {
                     let layer = ActivationCPULayer::new(config, IxDyn(&size));
                     layers.push(CPULayer::Activation(layer));
                 }
                 Layer::Conv2D(config) => {
-                    let layer = if let Some(tensors) = &tensors {
-                        let weights = to_arr(tensors.tensor(&format!("{}w", i)).unwrap());
-                        let biases = to_arr(tensors.tensor(&format!("{}b", i)).unwrap());
-                        Conv2DCPULayer::new(config, IxDyn(&size), Some(weights), Some(biases))
-                    } else {
-                        Conv2DCPULayer::new(config, IxDyn(&size), None, None)
-                    };
+                    let layer = Conv2DCPULayer::new(config, IxDyn(&size), tensors.get());
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Conv2D(layer));
                 }
                 Layer::ConvTranspose2D(config) => {
-                    let layer = ConvTranspose2DCPULayer::new(config, IxDyn(&size), None, None);
+                    let layer = ConvTranspose2DCPULayer::new(config, IxDyn(&size), tensors.get());
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::ConvTranspose2D(layer));
                 }
                 Layer::BatchNorm1D(config) => {
-                    let layer = BatchNorm1DCPULayer::new(config, IxDyn(&size));
+                    let layer = BatchNorm1DCPULayer::new(config, IxDyn(&size), tensors.get());
                     layers.push(CPULayer::BatchNorm1D(layer));
                 }
                 Layer::BatchNorm2D(config) => {
-                    let layer = BatchNorm2DCPULayer::new(config, IxDyn(&size));
+                    let layer = BatchNorm2DCPULayer::new(config, IxDyn(&size), tensors.get());
                     layers.push(CPULayer::BatchNorm2D(layer));
                 }
                 Layer::Dropout1D(config) => {
@@ -61,13 +56,7 @@ impl CPUBackend {
                     layers.push(CPULayer::Dropout2D(layer));
                 }
                 Layer::Dense(config) => {
-                    let layer = if let Some(tensors) = &tensors {
-                        let weights = to_arr(tensors.tensor(&format!("{}w", i)).unwrap());
-                        let biases = to_arr(tensors.tensor(&format!("{}b", i)).unwrap());
-                        DenseCPULayer::new(config, IxDyn(&size), Some(weights), Some(biases))
-                    } else {
-                        DenseCPULayer::new(config, IxDyn(&size), None, None)
-                    };
+                    let layer = DenseCPULayer::new(config, IxDyn(&size), tensors.get());
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Dense(layer));
                 }
@@ -153,16 +142,42 @@ impl CPUBackend {
         let mut tensors = Vec::new();
         for (i, layer) in self.layers.iter().enumerate() {
             match layer {
+                CPULayer::BatchNorm1D(layer) => {
+                    let gamma = Tensor::new(layer.gamma.view().into_dyn());
+                    let beta = Tensor::new(layer.beta.view().into_dyn());
+                    let running_mean = Tensor::new(layer.running_mean.view().into_dyn());
+                    let running_var = Tensor::new(layer.running_var.view().into_dyn());
+                    tensors.push((format!("{}g", i), gamma));
+                    tensors.push((format!("{}b", i), beta));
+                    tensors.push((format!("{}m", i), running_mean));
+                    tensors.push((format!("{}v", i), running_var));
+                }
+                CPULayer::BatchNorm2D(layer) => {
+                    let gamma = Tensor::new(layer.gamma.view().into_dyn());
+                    let beta = Tensor::new(layer.beta.view().into_dyn());
+                    let running_mean = Tensor::new(layer.running_mean.view().into_dyn());
+                    let running_var = Tensor::new(layer.running_var.view().into_dyn());
+                    tensors.push((format!("{}g", i), gamma));
+                    tensors.push((format!("{}b", i), beta));
+                    tensors.push((format!("{}m", i), running_mean));
+                    tensors.push((format!("{}v", i), running_var));
+                }
+                CPULayer::ConvTranspose2D(layer) => {
+                    let weights = Tensor::new(layer.weights.view().into_dyn());
+                    let biases = Tensor::new(layer.biases.view().into_dyn());
+                    tensors.push((format!("{}w", i), weights));
+                    tensors.push((format!("{}b", i), biases));
+                }
                 CPULayer::Conv2D(layer) => {
                     let weights = Tensor::new(layer.weights.view().into_dyn());
-                    tensors.push((format!("{}w", i), weights));
                     let biases = Tensor::new(layer.biases.view().into_dyn());
+                    tensors.push((format!("{}w", i), weights));
                     tensors.push((format!("{}b", i), biases));
                 }
                 CPULayer::Dense(layer) => {
                     let weights = Tensor::new(layer.weights.view().into_dyn());
-                    tensors.push((format!("{}w", i), weights));
                     let biases = Tensor::new(layer.biases.view().into_dyn());
+                    tensors.push((format!("{}w", i), weights));
                     tensors.push((format!("{}b", i), biases));
                 }
                 _ => {}
@@ -178,8 +193,33 @@ impl CPUBackend {
         let (_, metadata) = SafeTensors::read_metadata(buffer).unwrap();
         let data = metadata.metadata().as_ref().unwrap();
         let json = data.get("metadata").unwrap();
-        let config = serde_json::from_str(json).unwrap();
+        let config: BackendConfig = serde_json::from_str(json).unwrap();
+        let mut layers = Vec::new();
 
-        CPUBackend::new(config, logger, Some(tensors))
+        for (i, layer) in config.layers.iter().enumerate() {
+            match layer {
+                Layer::BatchNorm1D(_) | Layer::BatchNorm2D(_) => {
+                    layers.push(Tensors::BatchNorm(BatchNormTensors {
+                        gamma: to_arr(tensors.tensor(&format!("{}g", i)).unwrap()),
+                        beta: to_arr(tensors.tensor(&format!("{}b", i)).unwrap()),
+                        running_mean: to_arr(tensors.tensor(&format!("{}m", i)).unwrap()),
+                        running_var: to_arr(tensors.tensor(&format!("{}v", i)).unwrap()),
+                    }))
+                }
+                Layer::Dense(_) => layers.push(Tensors::Dense(DenseTensors {
+                    weights: to_arr(tensors.tensor(&format!("{}w", i)).unwrap()),
+                    biases: to_arr(tensors.tensor(&format!("{}b", i)).unwrap()),
+                })),
+                Layer::Conv2D(_) | Layer::ConvTranspose2D(_) => {
+                    layers.push(Tensors::Conv(ConvTensors {
+                        weights: to_arr(tensors.tensor(&format!("{}w", i)).unwrap()),
+                        biases: to_arr(tensors.tensor(&format!("{}b", i)).unwrap()),
+                    }))
+                }
+                _ => {}
+            };
+        }
+
+        CPUBackend::new(config, logger, Some(layers))
     }
 }

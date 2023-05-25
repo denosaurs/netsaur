@@ -2,7 +2,7 @@ use std::ops::{Add, AddAssign, Div, Mul, Sub, SubAssign};
 
 use ndarray::{Array4, ArrayD, Axis, Ix4, IxDyn};
 
-use crate::BatchNormLayer;
+use crate::{BatchNormLayer, Tensors};
 
 macro_rules! axes {
     (($array:expr).sum_axes($($axis:literal),+)) => {
@@ -32,17 +32,34 @@ pub struct BatchNorm2DCPULayer {
 }
 
 impl BatchNorm2DCPULayer {
-    pub fn new(config: BatchNormLayer, size: IxDyn) -> Self {
+    pub fn new(config: BatchNormLayer, size: IxDyn, tensors: Option<Tensors>) -> Self {
         let input_size = [size[0], size[1], size[2], size[3]];
+
+        let (gamma, beta, running_mean, running_var) =
+            if let Some(Tensors::BatchNorm(tensors)) = tensors {
+                (
+                    tensors.gamma.into_dimensionality().unwrap(),
+                    tensors.beta.into_dimensionality().unwrap(),
+                    tensors.running_mean.into_dimensionality().unwrap(),
+                    tensors.running_var.into_dimensionality().unwrap(),
+                )
+            } else {
+                (
+                    Array4::ones((1, size[1], 1, 1)),
+                    Array4::zeros((1, size[1], 1, 1)),
+                    Array4::zeros((1, size[1], 1, 1)),
+                    Array4::ones((1, size[1], 1, 1)),
+                )
+            };
 
         Self {
             epsilon: config.epsilon,
             momentum: config.momentum,
 
-            gamma: Array4::ones((1, size[1], 1, 1)),
-            beta: Array4::zeros((1, size[1], 1, 1)),
-            running_mean: Array4::zeros((1, size[1], 1, 1)),
-            running_var: Array4::ones((1, size[1], 1, 1)),
+            gamma,
+            beta,
+            running_mean,
+            running_var,
             
             inputs: Array4::zeros(input_size),
             mean: Array4::zeros((1, size[1], 1, 1)),

@@ -7,10 +7,12 @@ import {
   FlattenLayer,
   Init,
   MaxPool2DLayer,
+  Rank,
   ReluLayer,
   Sequential,
   setupBackend,
   SoftmaxLayer,
+Tensor,
 } from "../../mod.ts";
 
 import { loadDataset } from "./common.ts";
@@ -22,11 +24,11 @@ const network = new Sequential({
   size: [32, 1, 28, 28],
   layers: [
     Conv2DLayer({ kernelSize: [6, 1, 5, 5], padding: [2, 2] }),
-    BatchNorm2DLayer(),
+    BatchNorm2DLayer({ momentum: 0.89 }),
     ReluLayer(),
     MaxPool2DLayer({ strides: [2, 2] }),
     Conv2DLayer({ kernelSize: [16, 6, 5, 5] }),
-    BatchNorm2DLayer(),
+    BatchNorm2DLayer({ momentum: 0.89 }),
     ReluLayer(),
     MaxPool2DLayer({ strides: [2, 2] }),
     Conv2DLayer({ kernelSize: [120, 16, 5, 5] }),
@@ -52,7 +54,35 @@ const trainSet = loadDataset(
 const epochs = 1;
 console.log("Training (" + epochs + " epochs)...");
 const start = performance.now();
-network.train(trainSet, epochs, 1, 0.005);
+network.train(trainSet, epochs, 1, 0.01);
 console.log("Training complete!", performance.now() - start);
 
-network.saveFile("examples/mnist/mnist.test.st");
+const testSet = loadDataset("test-images.idx", "test-labels.idx", 0, 1000);
+testSet.map((_, i) => (testSet[i].inputs.shape = [1, 28, 28]));
+
+function argmax(mat: Tensor<Rank>) {
+  let max = -Infinity;
+  let index = -1;
+  for (let i = 0; i < mat.data.length; i++) {
+    if (mat.data[i] > max) {
+      max = mat.data[i];
+      index = i;
+    }
+  }
+  return index;
+}
+
+let correct = 0;
+for (const test of testSet) {
+  const prediction = argmax(await network.predict(test.inputs as Tensor<Rank>));
+  const expected = argmax(test.outputs as Tensor<Rank>);
+  if (expected === prediction) {
+    correct += 1;
+  }
+}
+
+console.log(`${correct} / ${testSet.length} correct`);
+console.log(
+  `accuracy: ${((correct / testSet.length) * 100).toFixed(2)}%`,
+);
+

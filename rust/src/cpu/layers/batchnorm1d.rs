@@ -2,7 +2,7 @@ use std::ops::{Add, AddAssign, Div, Mul, Sub, SubAssign};
 
 use ndarray::{Array2, ArrayD, Axis, Ix2, IxDyn};
 
-use crate::BatchNormLayer;
+use crate::{BatchNormLayer, Tensors};
 
 macro_rules! axes {
     (($array:expr).sum_axes($($axis:literal),+)) => {
@@ -35,18 +35,35 @@ pub struct BatchNorm1DCPULayer {
 }
 
 impl BatchNorm1DCPULayer {
-    pub fn new(config: BatchNormLayer, size: IxDyn) -> Self {
+    pub fn new(config: BatchNormLayer, size: IxDyn, tensors: Option<Tensors>) -> Self {
         let input_size = [size[0], size[1]];
+
+        let (gamma, beta, running_mean, running_var) =
+            if let Some(Tensors::BatchNorm(tensors)) = tensors {
+                (
+                    tensors.gamma.into_dimensionality().unwrap(),
+                    tensors.beta.into_dimensionality().unwrap(),
+                    tensors.running_mean.into_dimensionality().unwrap(),
+                    tensors.running_var.into_dimensionality().unwrap(),
+                )
+            } else {
+                (
+                    Array2::ones((1, size[1])),
+                    Array2::zeros((1, size[1])),
+                    Array2::zeros((1, size[1])),
+                    Array2::ones((1, size[1])),
+                )
+            };
 
         Self {
             epsilon: config.epsilon,
             momentum: config.momentum,
 
-            gamma: Array2::ones((1, size[1])),
-            beta: Array2::zeros((1, size[1])),
-            running_mean: Array2::zeros((1, size[1])),
-            running_var: Array2::ones((1, size[1])),
-            
+            gamma,
+            beta,
+            running_mean,
+            running_var,
+
             inputs: Array2::zeros(input_size),
             mean: Array2::zeros((1, size[1])),
             var: Array2::zeros((1, size[1])),
@@ -133,12 +150,7 @@ impl BatchNorm1DCPULayer {
         d_normalized
             .view()
             .div(&self.std_dev.view())
-            .add(
-                &d_var
-                    .mul(2.0)
-                    .mul(&mean_diff.view())
-                    .div(batches),
-            )
+            .add(&d_var.mul(2.0).mul(&mean_diff.view()).div(batches))
             .add(d_mean.div(batches))
             .into_dyn()
     }
