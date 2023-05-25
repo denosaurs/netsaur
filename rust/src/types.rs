@@ -21,6 +21,7 @@ pub struct Dataset {
 pub enum Layer {
     Activation(ActivationLayer),
     Dense(DenseLayer),
+    BatchNorm1D(BatchNormLayer),
     BatchNorm2D(BatchNormLayer),
     Conv2D(Conv2DLayer),
     ConvTranspose2D(ConvTranspose2DLayer),

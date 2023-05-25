@@ -125,6 +125,7 @@ export type DataSet = {
 
 export enum LayerType {
   Activation = "activation",
+  BatchNorm1D = "batchnorm1d",
   BatchNorm2D = "batchnorm2d",
   Conv2D = "conv2d",
   ConvTranspose2D = "convtranspose2d",

@@ -1,6 +1,6 @@
 import { Activation, LayerType } from "../types.ts";
 import {
-  BatchNorm2DLayerConfig,
+  BatchNormLayerConfig,
   Conv2DLayerConfig,
   ConvTranspose2DLayerConfig,
   DenseLayerConfig,
@@ -162,12 +162,25 @@ export function FlattenLayer(config: FlattenLayerConfig): Layer {
 }
 
 /**
+ * Creates a BatchNorm1D layer.
+ * BatchNorm1D layers normalize the input.
+ * They are usually used to improve the speed, performance, and stability of neural networks.
+ * See https://en.wikipedia.org/wiki/Batch_normalization
+ */
+export function BatchNorm1DLayer(config: BatchNormLayerConfig = {}): Layer {
+  if (!config.epsilon) config.epsilon = 0.001;
+  if (!config.momentum) config.momentum = 0.99;
+  return { type: LayerType.BatchNorm1D, config };
+}
+
+
+/**
  * Creates a BatchNorm2D layer.
  * BatchNorm2D layers normalize the input.
  * They are usually used to improve the speed, performance, and stability of neural networks.
  * See https://en.wikipedia.org/wiki/Batch_normalization
  */
-export function BatchNorm2DLayer(config: BatchNorm2DLayerConfig = {}): Layer {
+export function BatchNorm2DLayer(config: BatchNormLayerConfig = {}): Layer {
   if (!config.epsilon) config.epsilon = 0.001;
   if (!config.momentum) config.momentum = 0.99;
   return { type: LayerType.BatchNorm2D, config };

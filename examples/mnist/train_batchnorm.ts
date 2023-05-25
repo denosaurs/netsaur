@@ -1,4 +1,5 @@
 import {
+  BatchNorm2DLayer,
   Conv2DLayer,
   Cost,
   CPU,
@@ -21,9 +22,11 @@ const network = new Sequential({
   size: [32, 1, 28, 28],
   layers: [
     Conv2DLayer({ kernelSize: [6, 1, 5, 5], padding: [2, 2] }),
+    BatchNorm2DLayer(),
     ReluLayer(),
     MaxPool2DLayer({ strides: [2, 2] }),
     Conv2DLayer({ kernelSize: [16, 6, 5, 5] }),
+    BatchNorm2DLayer(),
     ReluLayer(),
     MaxPool2DLayer({ strides: [2, 2] }),
     Conv2DLayer({ kernelSize: [120, 16, 5, 5] }),

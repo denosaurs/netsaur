@@ -6,7 +6,7 @@ use safetensors::{serialize, SafeTensors};
 use crate::{
     to_arr, ActivationCPULayer, BackendConfig, BatchNorm2DCPULayer, CPUCost, CPULayer,
     Conv2DCPULayer, ConvTranspose2DCPULayer, Dataset, DenseCPULayer, Dropout1DCPULayer,
-    Dropout2DCPULayer, FlattenCPULayer, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor,
+    Dropout2DCPULayer, FlattenCPULayer, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor, BatchNorm1DCPULayer,
 };
 
 pub struct CPUBackend {
@@ -43,6 +43,10 @@ impl CPUBackend {
                     let layer = ConvTranspose2DCPULayer::new(config, IxDyn(&size), None, None);
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::ConvTranspose2D(layer));
+                }
+                Layer::BatchNorm1D(config) => {
+                    let layer = BatchNorm1DCPULayer::new(config, IxDyn(&size));
+                    layers.push(CPULayer::BatchNorm1D(layer));
                 }
                 Layer::BatchNorm2D(config) => {
                     let layer = BatchNorm2DCPULayer::new(config, IxDyn(&size));
