@@ -12,7 +12,7 @@ import {
   Sequential,
   setupBackend,
   SoftmaxLayer,
-Tensor,
+  Tensor,
 } from "../../mod.ts";
 
 import { loadDataset } from "./common.ts";
@@ -85,4 +85,3 @@ console.log(`${correct} / ${testSet.length} correct`);
 console.log(
   `accuracy: ${((correct / testSet.length) * 100).toFixed(2)}%`,
 );
-

@@ -15,7 +15,7 @@ export interface CsvLoaderConfig {
 
 export async function loadCsv(
   url: string | URL,
-  config: CsvLoaderConfig = {}
+  config: CsvLoaderConfig = {},
 ): Promise<DataLike> {
   const data = await fetch(url).then((res) =>
     res

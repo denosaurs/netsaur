@@ -1,4 +1,13 @@
-import { Cost, DenseLayer, Sequential, setupBackend, SigmoidLayer, tensor1D, tensor2D, WASM } from "../mod.ts";
+import {
+  Cost,
+  DenseLayer,
+  Sequential,
+  setupBackend,
+  SigmoidLayer,
+  tensor1D,
+  tensor2D,
+  WASM,
+} from "../mod.ts";
 
 await setupBackend(WASM);
 
@@ -14,7 +23,6 @@ Deno.test("save wasm", () => {
 
   network.saveFile("./save_test_wasm.test.st");
 });
-
 
 Deno.test("cost(wasm): hinge", async () => {
   const net = new Sequential({

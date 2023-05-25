@@ -48,7 +48,9 @@ export function Conv2DLayer(config: Conv2DLayerConfig): Layer {
   return { type: LayerType.Conv2D, config };
 }
 
-export function ConvTranspose2DLayer(config: ConvTranspose2DLayerConfig): Layer {
+export function ConvTranspose2DLayer(
+  config: ConvTranspose2DLayerConfig,
+): Layer {
   return { type: LayerType.ConvTranspose2D, config };
 }
 
@@ -172,7 +174,6 @@ export function BatchNorm1DLayer(config: BatchNormLayerConfig = {}): Layer {
   if (!config.momentum) config.momentum = 0.99;
   return { type: LayerType.BatchNorm1D, config };
 }
-
 
 /**
  * Creates a BatchNorm2D layer.

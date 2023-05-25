@@ -45,8 +45,7 @@
   [WASM](./examples/linear_wasm.ts))
 - Filters ([CPU](./examples/filters/conv.ts),
   [WASM](./examples/filters/conv_wasm.ts))
-- Mnist ([CPU](./examples/mnist),
-  [WASM](./examples/mnist))
+- Mnist ([CPU](./examples/mnist), [WASM](./examples/mnist))
 
 ### Maintainers
 
@@ -131,7 +130,7 @@ net.train(
   /**
    * The number of iterations is set to 10000.
    */
-  10000
+  10000,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
@@ -230,7 +229,7 @@ net.train(
   /**
    * The number of iterations is set to 10000.
    */
-  10000
+  10000,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
