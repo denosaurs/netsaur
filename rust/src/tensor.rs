@@ -1,6 +1,6 @@
 use std::{borrow::Cow, slice::from_raw_parts};
 
-use ndarray::{ArrayViewD, ArrayD};
+use ndarray::{ArrayD, ArrayViewD};
 use safetensors::{Dtype, View};
 
 pub struct Tensor<'a> {
@@ -68,7 +68,7 @@ pub trait GetTensor {
 impl GetTensor for Option<Vec<Tensors>> {
     fn get(&mut self) -> Option<Tensors> {
         if let Some(tensors) = self {
-            return Some(tensors.remove(0))
+            return Some(tensors.remove(0));
         }
         None
     }

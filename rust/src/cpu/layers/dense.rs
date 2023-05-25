@@ -11,16 +11,12 @@ pub struct DenseCPULayer {
 }
 
 impl DenseCPULayer {
-    pub fn new(
-        config: DenseLayer,
-        size: IxDyn,
-        tensors: Option<Tensors>,
-    ) -> Self {
+    pub fn new(config: DenseLayer, size: IxDyn, tensors: Option<Tensors>) -> Self {
         let init = CPUInit::from_default(config.init, Init::Uniform);
         let input_size = Ix2(size[0], size[1]);
         let weight_size = Ix2(size[1], config.size[0]);
         let output_size = Ix2(size[0], config.size[0]);
-        
+
         let (weights, biases) = if let Some(Tensors::Dense(tensors)) = tensors {
             (tensors.weights, tensors.biases)
         } else {
@@ -28,7 +24,7 @@ impl DenseCPULayer {
             let biases = ArrayD::zeros(config.size);
             (weights, biases)
         };
-        
+
         Self {
             inputs: Array2::zeros(input_size),
             weights: weights.into_dimensionality::<Ix2>().unwrap(),

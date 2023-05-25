@@ -60,7 +60,7 @@ impl BatchNorm2DCPULayer {
             beta,
             running_mean,
             running_var,
-            
+
             inputs: Array4::zeros(input_size),
             mean: Array4::zeros((1, size[1], 1, 1)),
             var: Array4::zeros((1, size[1], 1, 1)),

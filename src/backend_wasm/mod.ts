@@ -13,7 +13,14 @@ export class WASMInstance {
 
   static async init(silent = false) {
     if (WASMInstance.initialized) return true;
-    await instantiate();
+    await instantiate({
+      url: new URL(import.meta.url).protocol !== "file:"
+        ? new URL(
+          "https://github.com/denosaurs/netsaur/releases/download/0.2.7/netsaur_bg.wasm",
+          import.meta.url,
+        )
+        : undefined,
+    });
     WASMInstance.initialized = true;
     if (!silent) console.log("WASM Backend Initialised");
     return true;

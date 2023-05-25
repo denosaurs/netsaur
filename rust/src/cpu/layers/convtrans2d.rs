@@ -13,11 +13,7 @@ pub struct ConvTranspose2DCPULayer {
 }
 
 impl ConvTranspose2DCPULayer {
-    pub fn new(
-        config: ConvTranspose2DLayer,
-        size: IxDyn,
-        tensors: Option<Tensors>,
-    ) -> Self {
+    pub fn new(config: ConvTranspose2DLayer, size: IxDyn, tensors: Option<Tensors>) -> Self {
         let strides = config.strides.unwrap_or(vec![1, 1]);
         let padding = config.padding.unwrap_or(vec![0, 0]);
         let input_y = size[2] + 2 * padding[0];
