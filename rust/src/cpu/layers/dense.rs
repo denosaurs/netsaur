@@ -49,6 +49,7 @@ impl DenseCPULayer {
     pub fn reset(&mut self, batches: usize) {
         let input_size = self.inputs.dim().1;
         self.inputs = Array2::zeros((batches, input_size));
+        self.output_size[0] = batches;
     }
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {

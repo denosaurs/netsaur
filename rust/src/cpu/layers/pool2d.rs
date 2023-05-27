@@ -85,7 +85,7 @@ impl Pool2DCPULayer {
         self.outputs.clone().into_dyn()
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, _rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let d_outputs = d_outputs.into_dimensionality::<Ix4>().unwrap();
 
         let (batches, channels, output_y, output_x) = self.outputs.dim();

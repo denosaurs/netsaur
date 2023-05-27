@@ -38,7 +38,7 @@ impl Dropout1DCPULayer {
         }
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, _rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         d_outputs.mul(&self.mask).mul(1.0 / 1.0 - self.probability)
     }
 }
@@ -81,7 +81,7 @@ impl Dropout2DCPULayer {
         }
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, _rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         d_outputs.mul(&self.mask).mul(1.0 / 1.0 - self.probability)
     }
 }

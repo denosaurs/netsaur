@@ -67,19 +67,19 @@ impl CPULayer {
         }
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         match self {
-            CPULayer::Activation(layer) => layer.backward_propagate(d_outputs, rate),
-            CPULayer::BatchNorm1D(layer) => layer.backward_propagate(d_outputs, rate),
-            CPULayer::BatchNorm2D(layer) => layer.backward_propagate(d_outputs, rate),
+            CPULayer::Activation(layer) => layer.backward_propagate(d_outputs),
+            CPULayer::BatchNorm1D(layer) => layer.backward_propagate(d_outputs),
+            CPULayer::BatchNorm2D(layer) => layer.backward_propagate(d_outputs),
             CPULayer::Conv2D(layer) => layer.backward_propagate(d_outputs),
-            CPULayer::ConvTranspose2D(layer) => layer.backward_propagate(d_outputs, rate),
+            CPULayer::ConvTranspose2D(layer) => layer.backward_propagate(d_outputs),
             CPULayer::Dense(layer) => layer.backward_propagate(d_outputs),
-            CPULayer::Dropout1D(layer) => layer.backward_propagate(d_outputs, rate),
-            CPULayer::Dropout2D(layer) => layer.backward_propagate(d_outputs, rate),
-            CPULayer::Flatten(layer) => layer.backward_propagate(d_outputs, rate),
-            CPULayer::Pool2D(layer) => layer.backward_propagate(d_outputs, rate),
-            CPULayer::Softmax(layer) => layer.backward_propagate(d_outputs, rate),
+            CPULayer::Dropout1D(layer) => layer.backward_propagate(d_outputs),
+            CPULayer::Dropout2D(layer) => layer.backward_propagate(d_outputs),
+            CPULayer::Flatten(layer) => layer.backward_propagate(d_outputs),
+            CPULayer::Pool2D(layer) => layer.backward_propagate(d_outputs),
+            CPULayer::Softmax(layer) => layer.backward_propagate(d_outputs),
         }
     }
 

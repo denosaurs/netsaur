@@ -5,9 +5,10 @@ use safetensors::{serialize, SafeTensors};
 
 use crate::{
     to_arr, ActivationCPULayer, BackendConfig, BatchNorm1DCPULayer, BatchNorm2DCPULayer,
-    BatchNormTensors, CPUCost, CPULayer, Conv2DCPULayer, ConvTensors, ConvTranspose2DCPULayer,
-    Dataset, DenseCPULayer, DenseTensors, Dropout1DCPULayer, Dropout2DCPULayer, FlattenCPULayer,
-    GetTensor, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor, Tensors, CPUOptimizer,
+    BatchNormTensors, CPUCost, CPULayer, CPUOptimizer, Conv2DCPULayer, ConvTensors,
+    ConvTranspose2DCPULayer, Dataset, DenseCPULayer, DenseTensors, Dropout1DCPULayer,
+    Dropout2DCPULayer, FlattenCPULayer, GetTensor, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer,
+    Tensor, Tensors,
 };
 
 pub struct CPUBackend {
@@ -108,11 +109,10 @@ impl CPUBackend {
         &mut self,
         outputs: ArrayViewD<'b, f32>,
         data: ArrayViewD<'b, f32>,
-        rate: f32,
     ) -> ArrayD<f32> {
         let mut d_outputs = (self.cost.prime)(data, outputs);
         for layer in self.layers.iter_mut().rev() {
-            d_outputs = layer.backward_propagate(d_outputs, rate);
+            d_outputs = layer.backward_propagate(d_outputs);
         }
         d_outputs
     }
@@ -123,7 +123,7 @@ impl CPUBackend {
             let mut total = 0.0;
             for (i, dataset) in datasets.iter().enumerate() {
                 let outputs = self.forward_propagate(dataset.inputs.clone(), true);
-                self.backward_propagate(outputs.view(), dataset.outputs.view(), rate);
+                self.backward_propagate(outputs.view(), dataset.outputs.view());
                 self.update_grads(rate);
                 total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
                 let minibatch = outputs.dim()[0];

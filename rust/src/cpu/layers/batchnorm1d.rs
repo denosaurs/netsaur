@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, Mul, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, Sub};
 
 use ndarray::{Array2, ArrayD, Axis, Ix2, IxDyn};
 
@@ -17,21 +17,24 @@ macro_rules! axes {
 }
 
 pub struct BatchNorm1DCPULayer {
-    pub epsilon: f32,
-    pub momentum: f32,
-
-    // variables
-    pub gamma: Array2<f32>,
-    pub beta: Array2<f32>,
-    pub running_mean: Array2<f32>,
-    pub running_var: Array2<f32>,
-
     // cache
     pub inputs: Array2<f32>,
     pub mean: Array2<f32>,
     pub var: Array2<f32>,
     pub std_dev: Array2<f32>,
     pub normalized: Array2<f32>,
+    pub epsilon: f32,
+    pub momentum: f32,
+
+    // parameters
+    pub gamma: Array2<f32>,
+    pub beta: Array2<f32>,
+    pub running_mean: Array2<f32>,
+    pub running_var: Array2<f32>,
+
+    // gradients
+    pub d_gamma: Array2<f32>,
+    pub d_beta: Array2<f32>,
 }
 
 impl BatchNorm1DCPULayer {
@@ -56,6 +59,11 @@ impl BatchNorm1DCPULayer {
             };
 
         Self {
+            inputs: Array2::zeros(input_size),
+            mean: Array2::zeros((1, size[1])),
+            var: Array2::zeros((1, size[1])),
+            std_dev: Array2::zeros((1, size[1])),
+            normalized: Array2::zeros(input_size),
             epsilon: config.epsilon,
             momentum: config.momentum,
 
@@ -64,11 +72,8 @@ impl BatchNorm1DCPULayer {
             running_mean,
             running_var,
 
-            inputs: Array2::zeros(input_size),
-            mean: Array2::zeros((1, size[1])),
-            var: Array2::zeros((1, size[1])),
-            std_dev: Array2::zeros((1, size[1])),
-            normalized: Array2::zeros(input_size),
+            d_gamma: Array2::zeros((1, size[1])),
+            d_beta: Array2::zeros((1, size[1])),
         }
     }
 
@@ -118,7 +123,7 @@ impl BatchNorm1DCPULayer {
         batch_norm.into_dyn()
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let d_outputs = d_outputs.into_dimensionality::<Ix2>().unwrap();
 
         let batches = self.inputs.shape()[0] as f32;
@@ -140,12 +145,8 @@ impl BatchNorm1DCPULayer {
                     .mul(&axes!(((-2.0).mul(&mean_diff.view())).sum_axes(0)))
                     .div(batches),
             );
-
-        self.gamma.sub_assign(
-            &axes!((d_outputs.view().mul(&self.normalized.view())).sum_axes(0)).mul(rate),
-        );
-        self.beta
-            .sub_assign(&axes!((d_outputs).sum_axes(0)).mul(rate));
+        self.d_gamma = axes!((d_outputs.view().mul(&self.normalized.view())).sum_axes(0));
+        self.d_beta = axes!((d_outputs).sum_axes(0));
 
         d_normalized
             .view()

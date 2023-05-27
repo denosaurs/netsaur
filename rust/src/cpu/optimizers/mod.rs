@@ -37,6 +37,36 @@ impl CPUOptimizer {
                     layer.d_biases.view().into_dyn(),
                 ],
             ),
+            CPULayer::ConvTranspose2D(layer) => (
+                vec![
+                    layer.weights.view_mut().into_dyn(),
+                    layer.biases.view_mut().into_dyn(),
+                ],
+                vec![
+                    layer.d_weights.view().into_dyn(),
+                    layer.d_biases.view().into_dyn(),
+                ],
+            ),
+            CPULayer::BatchNorm1D(layer) => (
+                vec![
+                    layer.gamma.view_mut().into_dyn(),
+                    layer.beta.view_mut().into_dyn(),
+                ],
+                vec![
+                    layer.d_gamma.view().into_dyn(),
+                    layer.d_beta.view().into_dyn(),
+                ],
+            ),
+            CPULayer::BatchNorm2D(layer) => (
+                vec![
+                    layer.gamma.view_mut().into_dyn(),
+                    layer.beta.view_mut().into_dyn(),
+                ],
+                vec![
+                    layer.d_gamma.view().into_dyn(),
+                    layer.d_beta.view().into_dyn(),
+                ],
+            ),
             _ => return,
         };
         match self {

@@ -68,6 +68,7 @@ impl Conv2DCPULayer {
     pub fn reset(&mut self, batches: usize) {
         let input_size = self.inputs.shape();
         self.inputs = Array4::zeros((batches, input_size[1], input_size[2], input_size[3]));
+        self.output_size[0] = batches;
     }
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {

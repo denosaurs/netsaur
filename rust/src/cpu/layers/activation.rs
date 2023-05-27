@@ -37,7 +37,7 @@ impl ActivationCPULayer {
         outputs.into_dyn()
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, _rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let d_inputs = d_outputs.mul(self.outputs.map(self.activation.prime));
         d_inputs.into_dyn()
     }
@@ -75,7 +75,7 @@ impl SoftmaxCPULayer {
         self.outputs.clone().into_dyn()
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, _rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let batches = self.outputs.dim()[0];
         let array_size = self.outputs.dim().size() / batches;
 

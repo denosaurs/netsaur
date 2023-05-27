@@ -1,15 +1,22 @@
-use ndarray::{s, Array1, Array4, ArrayD, Ix1, Ix4, IxDyn};
-use std::ops::{Add, AddAssign, Mul, SubAssign};
+use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix1, Ix4, IxDyn};
+use std::ops::{Add, AddAssign, Mul};
 
 use crate::{CPUInit, ConvTranspose2DLayer, Init, Tensors};
 
 pub struct ConvTranspose2DCPULayer {
+    // cache
     pub strides: Vec<usize>,
     pub padding: Vec<usize>,
     pub inputs: Array4<f32>,
+    pub output_size: Ix4,
+
+    // parameters
     pub weights: Array4<f32>,
     pub biases: Array1<f32>,
-    pub outputs: Array4<f32>,
+
+    // gradients
+    pub d_weights: Array4<f32>,
+    pub d_biases: Array1<f32>,
 }
 
 impl ConvTranspose2DCPULayer {
@@ -43,22 +50,25 @@ impl ConvTranspose2DCPULayer {
         Self {
             strides,
             padding,
+            output_size,
             inputs: Array4::zeros(input_size),
             weights: weights.into_dimensionality::<Ix4>().unwrap(),
             biases: biases.into_dimensionality::<Ix1>().unwrap(),
-            outputs: Array4::zeros(output_size),
+            d_weights: ArrayD::zeros(weight_size)
+                .into_dimensionality::<Ix4>()
+                .unwrap(),
+            d_biases: Array1::zeros(config.kernel_size[0]),
         }
     }
 
     pub fn output_size(&self) -> Vec<usize> {
-        self.outputs.shape().to_vec()
+        self.output_size.as_array_view().to_vec()
     }
 
     pub fn reset(&mut self, batches: usize) {
         let input_size = self.inputs.shape();
         self.inputs = Array4::zeros((batches, input_size[1], input_size[2], input_size[3]));
-        let output_size = self.outputs.shape();
-        self.outputs = Array4::zeros((batches, output_size[1], output_size[2], output_size[3]));
+        self.output_size[0] = batches;
     }
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
@@ -72,13 +82,14 @@ impl ConvTranspose2DCPULayer {
 
         let (filters, _, weight_y, weight_x) = self.weights.dim();
 
+        let mut outputs = Array4::zeros(self.output_size);
         for b in 0..batches {
             for f in 0..filters {
                 let mut h = 0;
                 for y in (0..input_y).step_by(self.strides[0]) {
                     let mut w = 0;
                     for x in (0..input_x).step_by(self.strides[1]) {
-                        self.outputs
+                        outputs
                             .slice_mut(s![b, .., y..y + weight_y, x..x + weight_x])
                             .add_assign(
                                 &self.inputs[(b, f, h, w)]
@@ -92,10 +103,10 @@ impl ConvTranspose2DCPULayer {
             }
         }
 
-        self.outputs.clone().into_dyn()
+        outputs.into_dyn()
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let d_outputs = d_outputs.into_dimensionality::<Ix4>().unwrap();
 
         let (batches, _, input_y, input_x) = self.inputs.dim();
@@ -104,8 +115,8 @@ impl ConvTranspose2DCPULayer {
         let unpadded_x = input_x - self.padding[1];
 
         let mut d_inputs = Array4::zeros(self.inputs.dim());
-        let mut d_weights = Array4::zeros(self.weights.dim());
-        let mut d_biases = Array1::<f32>::zeros(self.biases.dim());
+        self.d_weights = Array4::zeros(self.weights.dim());
+        self.d_biases = Array1::<f32>::zeros(self.biases.dim());
         for b in 0..batches {
             for f in 0..filters {
                 for y in (self.padding[0]..unpadded_y).step_by(self.strides[0]) {
@@ -116,7 +127,7 @@ impl ConvTranspose2DCPULayer {
                                 .slice(s![f, .., .., ..])
                                 .mul(&d_outputs.slice(s![b, f, y..y + weight_y, x..x + weight_x])),
                         );
-                        d_weights.slice_mut(s![f, .., .., ..]).add_assign(
+                        self.d_weights.slice_mut(s![f, .., .., ..]).add_assign(
                             &self.inputs.slice(s![b, .., y, x]).mul(&d_outputs.slice(s![
                                 b,
                                 f,
@@ -124,14 +135,11 @@ impl ConvTranspose2DCPULayer {
                                 x..x + weight_x
                             ])),
                         );
-                        d_biases[f] += d_outputs[(b, f, y, x)];
+                        self.d_biases[f] += d_outputs[(b, f, y, x)];
                     }
                 }
             }
         }
-
-        self.weights.sub_assign(&d_weights.mul(rate));
-        self.biases.sub_assign(&d_biases.mul(rate));
 
         d_inputs.into_dyn()
     }
