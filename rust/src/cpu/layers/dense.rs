@@ -1,5 +1,5 @@
 use ndarray::{Array1, Array2, ArrayD, Axis, Dimension, Ix1, Ix2, IxDyn};
-use std::ops::{Add, Mul, SubAssign};
+use std::ops::{Add, Mul};
 
 use crate::{CPUInit, DenseLayer, Init, Tensors};
 
@@ -62,10 +62,5 @@ impl DenseCPULayer {
         self.d_weights = inputs_t.dot(&d_outputs);
         self.d_biases = d_outputs.mul(rate).sum_axis(Axis(0));
         d_inputs.into_dyn()
-    }
-
-    pub fn update_gradients(&mut self) {
-        self.weights.sub_assign(&self.d_weights);
-        self.biases.sub_assign(&self.d_biases);
     }
 }

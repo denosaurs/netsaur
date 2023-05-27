@@ -7,7 +7,7 @@ use crate::{
     to_arr, ActivationCPULayer, BackendConfig, BatchNorm1DCPULayer, BatchNorm2DCPULayer,
     BatchNormTensors, CPUCost, CPULayer, Conv2DCPULayer, ConvTensors, ConvTranspose2DCPULayer,
     Dataset, DenseCPULayer, DenseTensors, Dropout1DCPULayer, Dropout2DCPULayer, FlattenCPULayer,
-    GetTensor, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor, Tensors,
+    GetTensor, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer, Tensor, Tensors, CPUOptimizer,
 };
 
 pub struct CPUBackend {
@@ -16,6 +16,7 @@ pub struct CPUBackend {
     pub layers: Vec<CPULayer>,
     pub size: Vec<usize>,
     pub cost: CPUCost,
+    pub optimizer: CPUOptimizer,
     pub logger: Logger,
 }
 
@@ -76,6 +77,7 @@ impl CPUBackend {
                 }
             }
         }
+        let optimizer = CPUOptimizer::from(config.optimizer.clone());
         let cost = CPUCost::from(config.cost.clone());
         let silent = config.silent.is_some();
         Self {
@@ -84,6 +86,7 @@ impl CPUBackend {
             config,
             layers,
             cost,
+            optimizer,
             size,
         }
     }
@@ -93,6 +96,12 @@ impl CPUBackend {
             inputs = layer.forward_propagate(inputs, training);
         }
         inputs
+    }
+
+    pub fn update_grads(&mut self, rate: f32) {
+        for layer in &mut self.layers {
+            self.optimizer.update_grads(layer, rate);
+        }
     }
 
     pub fn backward_propagate<'b>(
@@ -115,6 +124,7 @@ impl CPUBackend {
             for (i, dataset) in datasets.iter().enumerate() {
                 let outputs = self.forward_propagate(dataset.inputs.clone(), true);
                 self.backward_propagate(outputs.view(), dataset.outputs.view(), rate);
+                self.update_grads(rate);
                 total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
                 let minibatch = outputs.dim()[0];
                 if !self.silent && (i * minibatch) % batches == 0 {
