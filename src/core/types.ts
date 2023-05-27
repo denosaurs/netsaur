@@ -15,7 +15,7 @@ export interface Backend {
     datasets: DataSet[],
     epochs: number,
     batches: number,
-    rate: number
+    rate: number,
   ): void;
 
   /**
@@ -55,7 +55,9 @@ export type NetworkConfig = {
   /**
    * Cost function used to train the neural network.
    */
-  cost: Cost;
+  cost?: Cost;
+
+  optimizer?: Optimizer;
 
   /**
    * Whether or not to silence the verbose messages.
@@ -128,6 +130,10 @@ export enum Cost {
    * Mean squared error cost function is the standard cost function for regression.
    */
   MSE = "mse",
+}
+
+export enum Optimizer {
+  SGD = "sgd",
 }
 
 /**

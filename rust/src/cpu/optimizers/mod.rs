@@ -17,14 +17,24 @@ impl CPUOptimizer {
 
     pub fn update_grads(&mut self, layer: &mut CPULayer, rate: f32) {
         let (params, grads) = match layer {
-            CPULayer::Dense(dense) => (
+            CPULayer::Dense(layer) => (
                 vec![
-                    dense.weights.view_mut().into_dyn(),
-                    dense.biases.view_mut().into_dyn(),
+                    layer.weights.view_mut().into_dyn(),
+                    layer.biases.view_mut().into_dyn(),
                 ],
                 vec![
-                    dense.d_weights.view().into_dyn(),
-                    dense.d_biases.view().into_dyn(),
+                    layer.d_weights.view().into_dyn(),
+                    layer.d_biases.view().into_dyn(),
+                ],
+            ),
+            CPULayer::Conv2D(layer) => (
+                vec![
+                    layer.weights.view_mut().into_dyn(),
+                    layer.biases.view_mut().into_dyn(),
+                ],
+                vec![
+                    layer.d_weights.view().into_dyn(),
+                    layer.d_biases.view().into_dyn(),
                 ],
             ),
             _ => return,
