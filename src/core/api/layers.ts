@@ -170,8 +170,8 @@ export function FlattenLayer(config: FlattenLayerConfig): Layer {
  * See https://en.wikipedia.org/wiki/Batch_normalization
  */
 export function BatchNorm1DLayer(config: BatchNormLayerConfig = {}): Layer {
-  if (!config.epsilon) config.epsilon = 0.001;
-  if (!config.momentum) config.momentum = 0.99;
+  config.epsilon = config.epsilon || 0.001;
+  config.momentum =  config.momentum || 0.99;
   return { type: LayerType.BatchNorm1D, config };
 }
 
@@ -182,7 +182,7 @@ export function BatchNorm1DLayer(config: BatchNormLayerConfig = {}): Layer {
  * See https://en.wikipedia.org/wiki/Batch_normalization
  */
 export function BatchNorm2DLayer(config: BatchNormLayerConfig = {}): Layer {
-  if (!config.epsilon) config.epsilon = 0.001;
-  if (!config.momentum) config.momentum = 0.99;
+  config.epsilon = config.epsilon || 0.001;
+  config.momentum =  config.momentum || 0.99;
   return { type: LayerType.BatchNorm2D, config };
 }

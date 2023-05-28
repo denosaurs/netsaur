@@ -126,8 +126,18 @@ pub enum Init {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
+pub struct  AdamOptimizer {
+    pub beta1: f32,
+    pub beta2: f32,
+    pub epsilon: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type", content = "config")]
+#[serde(rename_all = "lowercase")]
 pub enum Optimizer {
     SGD,
+    Adam(AdamOptimizer)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

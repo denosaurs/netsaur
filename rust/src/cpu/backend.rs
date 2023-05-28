@@ -78,7 +78,7 @@ impl CPUBackend {
                 }
             }
         }
-        let optimizer = CPUOptimizer::from(config.optimizer.clone());
+        let optimizer = CPUOptimizer::from(config.optimizer.clone(), &mut layers);
         let cost = CPUCost::from(config.cost.clone());
         let silent = config.silent.is_some();
         Self {
@@ -97,12 +97,6 @@ impl CPUBackend {
             inputs = layer.forward_propagate(inputs, training);
         }
         inputs
-    }
-
-    pub fn update_grads(&mut self, rate: f32) {
-        for layer in &mut self.layers {
-            self.optimizer.update_grads(layer, rate);
-        }
     }
 
     pub fn backward_propagate<'b>(
@@ -124,7 +118,7 @@ impl CPUBackend {
             for (i, dataset) in datasets.iter().enumerate() {
                 let outputs = self.forward_propagate(dataset.inputs.clone(), true);
                 self.backward_propagate(outputs.view(), dataset.outputs.view());
-                self.update_grads(rate);
+                self.optimizer.update_grads(&mut self.layers, rate);
                 total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
                 let minibatch = outputs.dim()[0];
                 if !self.silent && (i * minibatch) % batches == 0 {

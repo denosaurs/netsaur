@@ -1,6 +1,7 @@
 import { Tensor } from "./tensor/tensor.ts";
 import { Rank, Shape } from "./api/shape.ts";
 import { Layer } from "./api/layer.ts";
+import { Optimizer } from "./api/optimizer.ts";
 
 /**
  * The Backend is responsible for eveything related to the neural network.
@@ -132,8 +133,9 @@ export enum Cost {
   MSE = "mse",
 }
 
-export enum Optimizer {
+export enum OptimizerType {
   SGD = "sgd",
+  Adam = "adam"
 }
 
 /**
