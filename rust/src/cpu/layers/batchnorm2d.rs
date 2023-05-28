@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, Mul, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, Sub};
 
 use ndarray::{Array4, ArrayD, Axis, Ix4, IxDyn};
 
@@ -14,21 +14,24 @@ macro_rules! axes {
 }
 
 pub struct BatchNorm2DCPULayer {
-    pub epsilon: f32,
-    pub momentum: f32,
-
-    // variables
-    pub gamma: Array4<f32>,
-    pub beta: Array4<f32>,
-    pub running_mean: Array4<f32>,
-    pub running_var: Array4<f32>,
-
     // cache
     pub inputs: Array4<f32>,
     pub mean: Array4<f32>,
     pub var: Array4<f32>,
     pub std_dev: Array4<f32>,
     pub normalized: Array4<f32>,
+    pub epsilon: f32,
+    pub momentum: f32,
+
+    // parameters
+    pub gamma: Array4<f32>,
+    pub beta: Array4<f32>,
+    pub running_mean: Array4<f32>,
+    pub running_var: Array4<f32>,
+
+    // gradients
+    pub d_gamma: Array4<f32>,
+    pub d_beta: Array4<f32>,
 }
 
 impl BatchNorm2DCPULayer {
@@ -53,6 +56,11 @@ impl BatchNorm2DCPULayer {
             };
 
         Self {
+            inputs: Array4::zeros(input_size),
+            mean: Array4::zeros((1, size[1], 1, 1)),
+            var: Array4::zeros((1, size[1], 1, 1)),
+            std_dev: Array4::zeros((1, size[1], 1, 1)),
+            normalized: Array4::zeros(input_size),
             epsilon: config.epsilon,
             momentum: config.momentum,
 
@@ -61,11 +69,8 @@ impl BatchNorm2DCPULayer {
             running_mean,
             running_var,
 
-            inputs: Array4::zeros(input_size),
-            mean: Array4::zeros((1, size[1], 1, 1)),
-            var: Array4::zeros((1, size[1], 1, 1)),
-            std_dev: Array4::zeros((1, size[1], 1, 1)),
-            normalized: Array4::zeros(input_size),
+            d_gamma: Array4::zeros((1, size[1], 1, 1)),
+            d_beta: Array4::zeros((1, size[1], 1, 1)),
         }
     }
 
@@ -117,7 +122,7 @@ impl BatchNorm2DCPULayer {
         batch_norm.into_dyn()
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let d_outputs = d_outputs.into_dimensionality::<Ix4>().unwrap();
         let output_y = self.inputs.shape()[2] as f32;
         let output_x = self.inputs.shape()[3] as f32;
@@ -139,12 +144,8 @@ impl BatchNorm2DCPULayer {
                     .mul(&axes!(((-2.0).mul(&mean_diff.view())).sum_axes(0, 2, 3)))
                     .div(output_y * output_x),
             );
-
-        self.gamma.sub_assign(
-            &axes!((d_outputs.view().mul(&self.normalized.view())).sum_axes(0, 2, 3)).mul(rate),
-        );
-        self.beta
-            .sub_assign(&axes!((d_outputs).sum_axes(0, 2, 3)).mul(rate));
+        self.d_gamma = axes!((d_outputs.view().mul(&self.normalized.view())).sum_axes(0, 2, 3));
+        self.d_beta = axes!((d_outputs).sum_axes(0, 2, 3));
 
         d_normalized
             .view()

@@ -37,7 +37,7 @@ impl FlattenCPULayer {
         inputs.into_shape(output_size).unwrap()
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>, _rate: f32) -> ArrayD<f32> {
+    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         d_outputs.into_shape(self.input_size.clone()).unwrap()
     }
 }

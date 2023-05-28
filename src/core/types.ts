@@ -1,6 +1,7 @@
 import { Tensor } from "./tensor/tensor.ts";
 import { Rank, Shape } from "./api/shape.ts";
 import { Layer } from "./api/layer.ts";
+import { Optimizer } from "./api/optimizer.ts";
 
 /**
  * The Backend is responsible for eveything related to the neural network.
@@ -15,7 +16,7 @@ export interface Backend {
     datasets: DataSet[],
     epochs: number,
     batches: number,
-    rate: number
+    rate: number,
   ): void;
 
   /**
@@ -55,7 +56,9 @@ export type NetworkConfig = {
   /**
    * Cost function used to train the neural network.
    */
-  cost: Cost;
+  cost?: Cost;
+
+  optimizer?: Optimizer;
 
   /**
    * Whether or not to silence the verbose messages.
@@ -128,6 +131,11 @@ export enum Cost {
    * Mean squared error cost function is the standard cost function for regression.
    */
   MSE = "mse",
+}
+
+export enum OptimizerType {
+  SGD = "sgd",
+  Adam = "adam"
 }
 
 /**

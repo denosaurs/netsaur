@@ -7,6 +7,7 @@ pub struct BackendConfig {
     pub size: Vec<usize>,
     pub layers: Vec<Layer>,
     pub cost: Cost,
+    pub optimizer: Optimizer,
 }
 
 #[derive(Debug)]
@@ -121,6 +122,22 @@ pub enum Init {
     Xavier,
     XavierN,
     Kaiming,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub struct  AdamOptimizer {
+    pub beta1: f32,
+    pub beta2: f32,
+    pub epsilon: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type", content = "config")]
+#[serde(rename_all = "lowercase")]
+pub enum Optimizer {
+    SGD,
+    Adam(AdamOptimizer)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

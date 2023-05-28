@@ -1,8 +1,9 @@
-import { Backend, DataSet, NetworkConfig } from "./types.ts";
+import { Backend, Cost, DataSet, NetworkConfig } from "./types.ts";
 import { Engine } from "./engine.ts";
 import { Rank } from "./api/shape.ts";
 import { Tensor } from "./tensor/tensor.ts";
 import { NeuralNetwork } from "./api/network.ts";
+import { SGDOptimizer } from "./api/optimizer.ts";
 
 /**
  * Sequential Neural Network
@@ -14,6 +15,8 @@ export class Sequential implements NeuralNetwork {
    * Create a Sequential Neural Network.
    */
   constructor(public config: NetworkConfig) {
+    this.config.cost = this.config.cost || Cost.MSE
+    this.config.optimizer = this.config.optimizer || SGDOptimizer()
     this.backend = Engine.backendLoader.loadBackend(this.config);
   }
 
