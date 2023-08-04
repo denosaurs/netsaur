@@ -1,6 +1,7 @@
 {
   "tasks": {
     "example:xor": "deno run -A --unstable ./examples/xor_auto.ts",
+    "example:xor-option": "deno run -A --unstable ./examples/xor_option.ts",
     "example:xor-cpu": "deno run -A --unstable ./examples/xor_cpu.ts",
     "example:xor-wasm": "deno run -A --unstable ./examples/xor_wasm.ts",
     "example:linear": "deno run -A --unstable ./examples/linear.ts",

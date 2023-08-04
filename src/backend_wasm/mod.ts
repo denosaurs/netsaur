@@ -33,6 +33,10 @@ export class WASMInstance {
 export class WASMBackendLoader implements BackendLoader {
   backend?: WASMBackend;
 
+  isSupported(): boolean {
+    return true;
+  }
+
   async setup(silent = false) {
     Engine.type = BackendType.WASM;
     return await WASMInstance.init(silent);

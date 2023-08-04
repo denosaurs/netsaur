@@ -23,6 +23,11 @@ export interface BackendInstance {
  */
 export interface BackendLoader {
   /**
+   * Whether the backend is supported.
+   */
+  isSupported(): boolean;
+  
+  /**
    * Setup the backend. Returns true if the backend was successfully setup.
    */
   setup(silent: boolean): Promise<boolean>;

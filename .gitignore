@@ -10,10 +10,7 @@ digit_model.json
 package-lock.json
 test.ts
 experiments
-deno.lock
 target/
-Cargo.lock
-/target
 
 *.test.bin
 *.test.st

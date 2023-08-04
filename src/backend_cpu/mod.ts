@@ -58,6 +58,10 @@ export class CPUInstance {
 export class CPUBackendLoader implements BackendLoader {
   backend?: CPUBackend;
 
+  isSupported(): boolean {
+    return Deno.dlopen !== undefined;
+  }
+
   async setup(silent = false) {
     Engine.type = BackendType.CPU;
     return await CPUInstance.init(silent);

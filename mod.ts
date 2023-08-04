@@ -8,10 +8,22 @@ export * from "./src/core/api/network.ts";
 
 import { CPU } from "./src/backend_cpu/mod.ts";
 import { WASM } from "./src/backend_wasm/mod.ts";
+import { BackendLoader } from "./src/core/engine.ts";
 
 /**
  * The AUTO backend is chosen automatically based on the environment.
  */
 const AUTO = Deno.dlopen === undefined ? WASM : CPU;
 
+/**
+ * The OPTION function is used to choose a backend from a list of options.
+ */
+export function OPTION(...backends: BackendLoader[]) {
+  for (const backend of backends) {
+    if (backend.isSupported()) {
+      return backend;
+    }
+  }
+  throw new Error("No provided backend is supported");
+}
 export { AUTO, CPU, WASM };
