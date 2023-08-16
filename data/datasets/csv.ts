@@ -1,6 +1,6 @@
-import { tensor2D } from "../mod.ts";
-import type { DataLike } from "./types.ts";
-import { CsvParseStream } from "./deps.ts";
+import { tensor2D } from "../../mod.ts";
+import type { DataLike } from "../types.ts";
+import { CsvParseStream } from "../deps.ts";
 
 export interface CsvColumnConfig {
   /**
