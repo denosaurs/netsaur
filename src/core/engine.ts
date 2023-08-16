@@ -1,4 +1,4 @@
-import { WASM } from "../backend_wasm/mod.ts";
+import { WASM } from "../backends/wasm/mod.ts";
 import { Sequential } from "./mod.ts";
 import { Backend, BackendType, NetworkConfig } from "./types.ts";
 

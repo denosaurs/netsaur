@@ -1,6 +1,6 @@
-import { Rank, Shape } from "../core/api/shape.ts";
-import { Tensor } from "../core/tensor/tensor.ts";
-import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
+import { Rank, Shape } from "../../core/api/shape.ts";
+import { Tensor } from "../../core/tensor/tensor.ts";
+import { Backend, DataSet, NetworkConfig } from "../../core/types.ts";
 import {
   wasm_backend_create,
   wasm_backend_load,

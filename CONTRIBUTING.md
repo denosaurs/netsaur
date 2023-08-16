@@ -1,6 +1,6 @@
 # Contributing
 
-## Building `backend_cpu`
+## Building `backends/cpu`
 
 Unoptimized:
 
@@ -14,16 +14,16 @@ Optimized:
 cargo build --release
 ```
 
-## Building `backend_wasm`
+## Building `backends/wasm`
 
 Unoptimized:
 
 ```sh
-deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backend_wasm/lib --debug
+deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backends/wasm/lib --debug
 ```
 
 Optimized:
 
 ```sh
-deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backend_wasm/lib
+deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backends/wasm/lib
 ```

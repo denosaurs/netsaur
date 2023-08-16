@@ -1,7 +1,7 @@
-import { Rank, Shape } from "../core/api/shape.ts";
-import { Tensor } from "../core/tensor/tensor.ts";
-import { length } from "../core/tensor/util.ts";
-import { Backend, DataSet, NetworkConfig } from "../core/types.ts";
+import { Rank, Shape } from "../../core/api/shape.ts";
+import { Tensor } from "../../core/tensor/tensor.ts";
+import { length } from "../../core/tensor/util.ts";
+import { Backend, DataSet, NetworkConfig } from "../../core/types.ts";
 import { Library } from "./mod.ts";
 import {
   Buffer,

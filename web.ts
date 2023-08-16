@@ -6,4 +6,4 @@ export * from "./src/core/api/layers.ts";
 export * from "./src/core/api/shape.ts";
 export * from "./src/core/api/network.ts";
 
-export { WASM } from "./src/backend_wasm/mod.ts";
+export { WASM } from "./src/backends/wasm/mod.ts";
