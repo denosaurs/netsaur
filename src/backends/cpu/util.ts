@@ -1,5 +1,5 @@
-import { Rank, Shape } from "../core/api/shape.ts";
-import { DataSet } from "../core/types.ts";
+import { Rank, Shape } from "../../core/api/shape.ts";
+import { DataSet } from "../../core/types.ts";
 
 export class Buffer {
   buffer = new Uint8Array();

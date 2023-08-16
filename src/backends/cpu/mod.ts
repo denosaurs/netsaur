@@ -1,9 +1,9 @@
-import { dlopen, FetchOptions } from "../../deps.ts";
+import { dlopen, FetchOptions } from "../../../deps.ts";
 import { CPUBackend } from "./backend.ts";
-import { NoBackendError } from "../core/api/error.ts";
-import { BackendLoader, Engine } from "../core/engine.ts";
-import { Backend, BackendType, Cost, NetworkConfig } from "../core/types.ts";
-import { Sequential } from "../core/mod.ts";
+import { NoBackendError } from "../../core/api/error.ts";
+import { BackendLoader, Engine } from "../../core/engine.ts";
+import { Backend, BackendType, Cost, NetworkConfig } from "../../core/types.ts";
+import { Sequential } from "../../core/mod.ts";
 
 const options: FetchOptions = {
   name: "netsaur",
