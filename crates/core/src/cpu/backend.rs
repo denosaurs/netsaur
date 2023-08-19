@@ -5,7 +5,7 @@ use safetensors::{serialize, SafeTensors};
 
 use crate::{
     to_arr, ActivationCPULayer, BackendConfig, BatchNorm1DCPULayer, BatchNorm2DCPULayer,
-    BatchNormTensors, CPUCost, CPULayer, CPUOptimizer, Conv2DCPULayer, ConvTensors,
+    BatchNormTensors, CPUCost, CPULayer, CPUOptimizer, CPUScheduler, Conv2DCPULayer, ConvTensors,
     ConvTranspose2DCPULayer, Dataset, DenseCPULayer, DenseTensors, Dropout1DCPULayer,
     Dropout2DCPULayer, FlattenCPULayer, GetTensor, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer,
     Tensor, Tensors,
@@ -18,6 +18,7 @@ pub struct CPUBackend {
     pub size: Vec<usize>,
     pub cost: CPUCost,
     pub optimizer: CPUOptimizer,
+    pub scheduler: CPUScheduler,
     pub logger: Logger,
 }
 
@@ -79,6 +80,7 @@ impl CPUBackend {
             }
         }
         let optimizer = CPUOptimizer::from(config.optimizer.clone(), &mut layers);
+        let scheduler = CPUScheduler::from(&config.scheduler);
         let cost = CPUCost::from(config.cost.clone());
         let silent = config.silent.is_some();
         Self {
@@ -88,6 +90,7 @@ impl CPUBackend {
             layers,
             cost,
             optimizer,
+            scheduler,
             size,
         }
     }
@@ -118,7 +121,8 @@ impl CPUBackend {
             for (i, dataset) in datasets.iter().enumerate() {
                 let outputs = self.forward_propagate(dataset.inputs.clone(), true);
                 self.backward_propagate(outputs.view(), dataset.outputs.view());
-                self.optimizer.update_grads(&mut self.layers, rate);
+                self.optimizer
+                    .update_grads(&mut self.layers, &self.scheduler, rate, epoch);
                 total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
                 let minibatch = outputs.dim()[0];
                 if !self.silent && (i * minibatch) % batches == 0 {
@@ -130,7 +134,6 @@ impl CPUBackend {
                     total = 0.0;
                 }
             }
-
             epoch += 1
         }
     }

@@ -2,6 +2,7 @@ import { Tensor } from "./tensor/tensor.ts";
 import { Rank, Shape } from "./api/shape.ts";
 import { Layer } from "./api/layer.ts";
 import { Optimizer } from "./api/optimizer.ts";
+import { Scheduler } from "./api/scheduler.ts";
 
 /**
  * The Backend is responsible for eveything related to the neural network.
@@ -58,7 +59,15 @@ export type NetworkConfig = {
    */
   cost?: Cost;
 
+  /**
+   * Optimizer to update parameters.
+   */
   optimizer?: Optimizer;
+
+  /**
+   * Learning rate scheduler.
+   */
+  scheduler?: Scheduler;
 
   /**
    * Whether or not to silence the verbose messages.
@@ -135,7 +144,14 @@ export enum Cost {
 
 export enum OptimizerType {
   SGD = "sgd",
-  Adam = "adam"
+  Adam = "adam",
+}
+
+export enum SchedulerType {
+  None = "none",
+  LinearDecay = "lineardecay",
+  ExponentialDecay = "exponentialdecay",
+  OneCycle = "onecycle",
 }
 
 /**

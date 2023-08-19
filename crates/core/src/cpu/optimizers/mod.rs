@@ -5,7 +5,7 @@ pub use adam::*;
 use ndarray::{ArrayViewD, ArrayViewMutD};
 pub use sgd::*;
 
-use crate::{CPULayer, Optimizer};
+use crate::{CPULayer, Optimizer, CPUScheduler};
 
 pub enum CPUOptimizer {
     SGD(CPUSGDOptimizer),
@@ -28,7 +28,7 @@ impl CPUOptimizer {
         }
     }
 
-    pub fn update_grads(&mut self, layers: &mut Vec<CPULayer>, rate: f32) {
+    pub fn update_grads(&mut self, layers: &mut Vec<CPULayer>, scheduler: &CPUScheduler, rate: f32, epoch: usize) {
         match self {
             CPUOptimizer::Adam(adam) => adam.t += 1.0,
             _ => {}
@@ -37,8 +37,8 @@ impl CPUOptimizer {
         for layer in layers.iter_mut() {
             if let Some((params, grads)) = CPUOptimizer::get_params(layer) {
                 match self {
-                    CPUOptimizer::SGD(sgd) => sgd.update_grads(params, grads, rate),
-                    CPUOptimizer::Adam(adam) => adam.update_grads(params, grads, idx, rate),
+                    CPUOptimizer::SGD(sgd) => sgd.update_grads(params, grads, scheduler, rate, epoch),
+                    CPUOptimizer::Adam(adam) => adam.update_grads(params, grads, idx, scheduler, rate),
                 }
                 idx += 1;
             }
