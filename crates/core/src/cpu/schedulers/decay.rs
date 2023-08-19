@@ -13,9 +13,9 @@ impl CPUDecayScheduler {
         }
     }
     pub fn exponential(&self, rate: f32, step: usize) -> f32 {
-        rate * self.rate.powi((step / self.step_size) as i32).max(1.0)
+        rate * self.rate.powi((step / self.step_size) as i32)
     }
     pub fn linear(&self, rate: f32, step: usize) -> f32 {
-        rate - (self.rate * (step / self.step_size) as f32)
+        rate / (self.rate * (1 + step / self.step_size) as f32)
     }
 }
