@@ -80,7 +80,7 @@ impl CPUBackend {
         }
         let optimizer = CPUOptimizer::from(config.optimizer.clone(), &mut layers);
         let cost = CPUCost::from(config.cost.clone());
-        let silent = config.silent.is_some();
+        let silent = config.silent.is_some_and(|x| x == true);
         Self {
             logger,
             silent,
@@ -121,12 +121,10 @@ impl CPUBackend {
                 self.optimizer.update_grads(&mut self.layers, rate);
                 total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
                 let minibatch = outputs.dim()[0];
-                if !self.silent && (i * minibatch) % batches == 0 {
+                if !self.silent && ((i + 1) * minibatch) % batches == 0 {
                     let cost = total / (batches) as f32;
                     let msg = format!("Epoch={}, Dataset={}, Cost={}", epoch, i * minibatch, cost);
-                    if i != 0 {
-                        (self.logger.log)(msg);
-                    }
+                    (self.logger.log)(msg);
                     total = 0.0;
                 }
             }
