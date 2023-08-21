@@ -33,6 +33,7 @@ jobs:
           cargo --version
           cargo build --release
           deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backends/wasm/lib
+          deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts -p netsaur-tokenizers --out tokenizers/lib
       - name: Release
         uses: softprops/action-gh-release@master
         env:
@@ -45,3 +46,4 @@ jobs:
             target/release/libnetsaur.dylib
             target/release/netsaur.dll
             src/backends/wasm/lib/netsaur_bg.wasm
+            tokenizers/lib/netsaur_tokenizers_bg.wasm
