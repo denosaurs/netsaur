@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: 3a389ae0809ba6cb50400242f192cc219f066953
+// source-hash: 5398ef42b278da24ecd2c2e6781856e44a3d6484
 let wasm;
 
 const heap = new Array(128).fill(undefined);
@@ -121,6 +121,36 @@ function getInt32Memory0() {
     cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
   }
   return cachedInt32Memory0;
+}
+
+function getArrayU8FromWasm0(ptr, len) {
+  return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
+}
+/**
+ * @param {number} id
+ * @param {boolean} pretty
+ * @returns {Uint8Array}
+ */
+export function wasm_tokenizer_save(id, pretty) {
+  try {
+    const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+    wasm.wasm_tokenizer_save(retptr, id, pretty);
+    var r0 = getInt32Memory0()[retptr / 4 + 0];
+    var r1 = getInt32Memory0()[retptr / 4 + 1];
+    var v0 = getArrayU8FromWasm0(r0, r1).slice();
+    wasm.__wbindgen_free(r0, r1 * 1);
+    return v0;
+  } finally {
+    wasm.__wbindgen_add_to_stack_pointer(16);
+  }
+}
+
+/**
+ * @returns {number}
+ */
+export function wasm_bpe_default() {
+  const ret = wasm.wasm_bpe_default();
+  return ret >>> 0;
 }
 
 let cachedUint32Memory0 = null;
@@ -345,7 +375,7 @@ let lastLoadPromise;
  * @param {InstantiateOptions=} opts
  * @returns {Promise<{
  *   instance: WebAssembly.Instance;
- *   exports: { wasm_tokenizer_from_json: typeof wasm_tokenizer_from_json; wasm_tokenizer_tokenize: typeof wasm_tokenizer_tokenize }
+ *   exports: { wasm_tokenizer_from_json: typeof wasm_tokenizer_from_json; wasm_tokenizer_save: typeof wasm_tokenizer_save; wasm_bpe_default: typeof wasm_bpe_default; wasm_tokenizer_tokenize: typeof wasm_tokenizer_tokenize }
  * }>}
  */
 export function instantiateWithInstance(opts) {
@@ -373,7 +403,12 @@ export function instantiateWithInstance(opts) {
 }
 
 function getWasmInstanceExports() {
-  return { wasm_tokenizer_from_json, wasm_tokenizer_tokenize };
+  return {
+    wasm_tokenizer_from_json,
+    wasm_tokenizer_save,
+    wasm_bpe_default,
+    wasm_tokenizer_tokenize,
+  };
 }
 
 /** Gets if the Wasm module has been instantiated. */
