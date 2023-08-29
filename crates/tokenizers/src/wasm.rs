@@ -16,14 +16,14 @@ pub fn wasm_tokenizer_from_json(json: String) -> usize {
 }
 
 #[wasm_bindgen]
-pub fn wasm_tokenizer_save(id: usize, pretty: bool) -> Vec<u8> {
-    let mut bytes: Vec<u8> = Vec::new();
+pub fn wasm_tokenizer_save(id: usize, pretty: bool) -> String {
+    let mut data: String = String::new();
     RESOURCES.with(|cell| {
         let tokenizers = cell.tokenizer.borrow_mut();
         let tokenizer = &tokenizers[id];
-        bytes = tokenizer.to_string(pretty).unwrap().as_bytes().to_vec();
+        data = tokenizer.to_string(pretty).unwrap();
     });
-    bytes
+    data
 }
 
 #[wasm_bindgen]

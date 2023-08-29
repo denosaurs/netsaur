@@ -38,16 +38,16 @@ export class Tokenizer {
   }
 
   /**
-   * Save the tokenizer to a Uint8Array
+   * Save the tokenizer as json
    */
-  save(): Uint8Array;
+  save(): string;
   /**
-   * Save the tokenizer to a Uint8Array
+   * Save the tokenizer as json
    * @param pretty pretty print the json
    */
-  save(pretty: boolean): Uint8Array;
-  save(pretty = false) {
-    return wasm_tokenizer_save(this.#id, pretty);
+  save(pretty: boolean): string;
+  save(...args: [boolean?]) {
+    return wasm_tokenizer_save(this.#id, args[0] ?? false);
   }
   /**
    * Load a tokenizer from json data

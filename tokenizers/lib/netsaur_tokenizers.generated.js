@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: 5398ef42b278da24ecd2c2e6781856e44a3d6484
+// source-hash: bdb9e63b15ea8bd3aed0da32d3139f0ee3b5f346
 let wasm;
 
 const heap = new Array(128).fill(undefined);
@@ -122,14 +122,10 @@ function getInt32Memory0() {
   }
   return cachedInt32Memory0;
 }
-
-function getArrayU8FromWasm0(ptr, len) {
-  return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
-}
 /**
  * @param {number} id
  * @param {boolean} pretty
- * @returns {Uint8Array}
+ * @returns {string}
  */
 export function wasm_tokenizer_save(id, pretty) {
   try {
@@ -137,11 +133,10 @@ export function wasm_tokenizer_save(id, pretty) {
     wasm.wasm_tokenizer_save(retptr, id, pretty);
     var r0 = getInt32Memory0()[retptr / 4 + 0];
     var r1 = getInt32Memory0()[retptr / 4 + 1];
-    var v0 = getArrayU8FromWasm0(r0, r1).slice();
-    wasm.__wbindgen_free(r0, r1 * 1);
-    return v0;
+    return getStringFromWasm0(r0, r1);
   } finally {
     wasm.__wbindgen_add_to_stack_pointer(16);
+    wasm.__wbindgen_free(r0, r1);
   }
 }
 
