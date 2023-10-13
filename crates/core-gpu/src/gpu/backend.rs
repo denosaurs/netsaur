@@ -1,24 +1,135 @@
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 use ndarray::{ArrayD, ArrayViewD, IxDyn};
 use safetensors::{serialize, SafeTensors};
 
 use crate::{
-    to_arr, ActivationCPULayer, BackendConfig, BatchNorm1DCPULayer, BatchNorm2DCPULayer,
-    BatchNormTensors, CPUCost, CPULayer, CPUOptimizer, CPUScheduler, Conv2DCPULayer, ConvTensors,
-    ConvTranspose2DCPULayer, Dataset, DenseCPULayer, DenseTensors, Dropout1DCPULayer,
-    Dropout2DCPULayer, FlattenCPULayer, GetTensor, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer,
-    Tensor, Tensors,
+    to_arr, ActivationGPULayer, BackendConfig, BatchNorm1DGPULayer, BatchNorm2DGPULayer,
+    BatchNormTensors, Conv2DGPULayer, ConvTensors, ConvTranspose2DGPULayer, Dataset, DenseGPULayer,
+    DenseTensors, Dropout1DGPULayer, Dropout2DGPULayer, FlattenGPULayer, GPUCost, GPULayer,
+    GPUOptimizer, GPUScheduler, GetTensor, Layer, Logger, Pool2DGPULayer, SoftmaxGPULayer, Tensor,
+    Tensors,
 };
+pub use cudarc;
+
+use crate::DType;
+
+/// cudarc related errors
+#[derive(thiserror::Error, Debug)]
+pub enum CudaError {
+    #[error(transparent)]
+    Cuda(#[from] cudarc::driver::DriverError),
+
+    #[error(transparent)]
+    Compiler(#[from] cudarc::nvrtc::CompileError),
+
+    #[error(transparent)]
+    Cublas(#[from] cudarc::cublas::result::CublasError),
+
+    #[error(transparent)]
+    Curand(#[from] cudarc::curand::result::CurandError),
+
+    #[error("missing kernel '{module_name}'")]
+    MissingKernel { module_name: String },
+
+    #[error("unsupported dtype {dtype:?} for {op}")]
+    UnsupportedDtype { dtype: DType, op: &'static str },
+
+    #[error("internal error '{0}'")]
+    InternalError(&'static str),
+
+    #[error("matmul is only supported for contiguous tensors lstride: {lhs_stride:?} rstride: {rhs_stride:?} mnk: {mnk:?}")]
+    MatMulNonContiguous {
+        lhs_stride: Vec<usize>,
+        rhs_stride: Vec<usize>,
+        mnk: (usize, usize, usize),
+    },
+
+    #[error("{msg}, expected: {expected:?}, got: {got:?}")]
+    UnexpectedDType {
+        msg: &'static str,
+        expected: DType,
+        got: DType,
+    },
+
+    #[error("{cuda} when loading {module_name}")]
+    Load {
+        cuda: cudarc::driver::DriverError,
+        module_name: String,
+    },
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct DeviceId(usize);
+
+impl DeviceId {
+    fn new() -> Self {
+        use std::sync::atomic;
+        static COUNTER: atomic::AtomicUsize = atomic::AtomicUsize::new(1);
+        Self(COUNTER.fetch_add(1, atomic::Ordering::Relaxed))
+    }
+}
+
+struct CudaRng(cudarc::curand::CudaRng);
+unsafe impl Send for CudaRng {}
+
+#[derive(Clone)]
+pub struct CudaDevice {
+    id: DeviceId,
+    device: Arc<cudarc::driver::CudaDevice>,
+    #[allow(dead_code)]
+    blas: Arc<cudarc::cublas::CudaBlas>,
+    #[allow(dead_code)]
+    curand: Arc<Mutex<CudaRng>>,
+}
+
+impl std::fmt::Debug for CudaDevice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "CudaDevice({:?})", self.id)
+    }
+}
+
+impl std::ops::Deref for CudaDevice {
+    type Target = Arc<cudarc::driver::CudaDevice>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.device
+    }
+}
+
+impl CudaDevice {
+    pub fn new(ordinal: usize) -> Self {
+        let device = cudarc::driver::CudaDevice::new(ordinal).unwrap();
+        let blas = cudarc::cublas::CudaBlas::new(device.clone()).unwrap();
+        let curand = cudarc::curand::CudaRng::new(299792458, device.clone()).unwrap();
+
+        Self {
+            id: DeviceId::new(),
+            device,
+            blas: Arc::new(blas),
+            curand: Arc::new(Mutex::new(CudaRng(curand))),
+        }
+    }
+
+    pub fn cuda_device(&self) -> Arc<cudarc::driver::CudaDevice> {
+        self.device.clone()
+    }
+
+    pub fn id(&self) -> DeviceId {
+        self.id
+    }
+}
 
 pub struct Backend {
     pub silent: bool,
     pub config: BackendConfig,
-    pub layers: Vec<CPULayer>,
+    pub cuda_device: CudaDevice,
+    pub layers: Vec<GPULayer>,
     pub size: Vec<usize>,
-    pub cost: CPUCost,
-    pub optimizer: CPUOptimizer,
-    pub scheduler: CPUScheduler,
+    pub cost: GPUCost,
+    pub optimizer: GPUOptimizer,
+    pub scheduler: GPUScheduler,
     pub logger: Logger,
 }
 
@@ -29,62 +140,64 @@ impl Backend {
         for layer in config.layers.iter() {
             match layer.clone() {
                 Layer::Activation(config) => {
-                    let layer = ActivationCPULayer::new(config, IxDyn(&size));
-                    layers.push(CPULayer::Activation(layer));
+                    let layer = ActivationGPULayer::new(config, IxDyn(&size));
+                    layers.push(GPULayer::Activation(layer));
                 }
                 Layer::Conv2D(config) => {
-                    let layer = Conv2DCPULayer::new(config, IxDyn(&size), tensors.get());
+                    let layer = Conv2DGPULayer::new(config, IxDyn(&size), tensors.get());
                     size = layer.output_size().to_vec();
-                    layers.push(CPULayer::Conv2D(layer));
+                    layers.push(GPULayer::Conv2D(layer));
                 }
                 Layer::ConvTranspose2D(config) => {
-                    let layer = ConvTranspose2DCPULayer::new(config, IxDyn(&size), tensors.get());
+                    let layer = ConvTranspose2DGPULayer::new(config, IxDyn(&size), tensors.get());
                     size = layer.output_size().to_vec();
-                    layers.push(CPULayer::ConvTranspose2D(layer));
+                    layers.push(GPULayer::ConvTranspose2D(layer));
                 }
                 Layer::BatchNorm1D(config) => {
-                    let layer = BatchNorm1DCPULayer::new(config, IxDyn(&size), tensors.get());
-                    layers.push(CPULayer::BatchNorm1D(layer));
+                    let layer = BatchNorm1DGPULayer::new(config, IxDyn(&size), tensors.get());
+                    layers.push(GPULayer::BatchNorm1D(layer));
                 }
                 Layer::BatchNorm2D(config) => {
-                    let layer = BatchNorm2DCPULayer::new(config, IxDyn(&size), tensors.get());
-                    layers.push(CPULayer::BatchNorm2D(layer));
+                    let layer = BatchNorm2DGPULayer::new(config, IxDyn(&size), tensors.get());
+                    layers.push(GPULayer::BatchNorm2D(layer));
                 }
                 Layer::Dropout1D(config) => {
-                    let layer = Dropout1DCPULayer::new(config, IxDyn(&size));
-                    layers.push(CPULayer::Dropout1D(layer));
+                    let layer = Dropout1DGPULayer::new(config, IxDyn(&size));
+                    layers.push(GPULayer::Dropout1D(layer));
                 }
                 Layer::Dropout2D(config) => {
-                    let layer = Dropout2DCPULayer::new(config, IxDyn(&size));
-                    layers.push(CPULayer::Dropout2D(layer));
+                    let layer = Dropout2DGPULayer::new(config, IxDyn(&size));
+                    layers.push(GPULayer::Dropout2D(layer));
                 }
                 Layer::Dense(config) => {
-                    let layer = DenseCPULayer::new(config, IxDyn(&size), tensors.get());
+                    let layer = DenseGPULayer::new(config, IxDyn(&size), tensors.get());
                     size = layer.output_size().to_vec();
-                    layers.push(CPULayer::Dense(layer));
+                    layers.push(GPULayer::Dense(layer));
                 }
                 Layer::Flatten(config) => {
-                    let layer = FlattenCPULayer::new(config, IxDyn(&size));
+                    let layer = FlattenGPULayer::new(config, IxDyn(&size));
                     size = layer.output_size().to_vec();
-                    layers.push(CPULayer::Flatten(layer));
+                    layers.push(GPULayer::Flatten(layer));
                 }
                 Layer::Pool2D(config) => {
-                    let layer = Pool2DCPULayer::new(config, IxDyn(&size));
+                    let layer = Pool2DGPULayer::new(config, IxDyn(&size));
                     size = layer.output_size().to_vec();
-                    layers.push(CPULayer::Pool2D(layer));
+                    layers.push(GPULayer::Pool2D(layer));
                 }
                 Layer::Softmax => {
-                    let layer = SoftmaxCPULayer::new(IxDyn(&size));
-                    layers.push(CPULayer::Softmax(layer));
+                    let layer = SoftmaxGPULayer::new(IxDyn(&size));
+                    layers.push(GPULayer::Softmax(layer));
                 }
             }
         }
-        let optimizer = CPUOptimizer::from(config.optimizer.clone(), &mut layers);
-        let scheduler = CPUScheduler::from(&config.scheduler);
-        let cost = CPUCost::from(config.cost.clone());
+        let optimizer = GPUOptimizer::from(config.optimizer.clone(), &mut layers);
+        let scheduler = GPUScheduler::from(&config.scheduler);
+        let cost = GPUCost::from(config.cost.clone());
         let silent = config.silent.is_some_and(|x| x == true);
+        let cuda_device = CudaDevice::new(0);
         Self {
             logger,
+            cuda_device,
             silent,
             config,
             layers,
@@ -147,7 +260,7 @@ impl Backend {
         let mut tensors = Vec::new();
         for (i, layer) in self.layers.iter().enumerate() {
             match layer {
-                CPULayer::BatchNorm1D(layer) => {
+                GPULayer::BatchNorm1D(layer) => {
                     let gamma = Tensor::new(layer.gamma.view().into_dyn());
                     let beta = Tensor::new(layer.beta.view().into_dyn());
                     let running_mean = Tensor::new(layer.running_mean.view().into_dyn());
@@ -157,7 +270,7 @@ impl Backend {
                     tensors.push((format!("{}m", i), running_mean));
                     tensors.push((format!("{}v", i), running_var));
                 }
-                CPULayer::BatchNorm2D(layer) => {
+                GPULayer::BatchNorm2D(layer) => {
                     let gamma = Tensor::new(layer.gamma.view().into_dyn());
                     let beta = Tensor::new(layer.beta.view().into_dyn());
                     let running_mean = Tensor::new(layer.running_mean.view().into_dyn());
@@ -167,19 +280,19 @@ impl Backend {
                     tensors.push((format!("{}m", i), running_mean));
                     tensors.push((format!("{}v", i), running_var));
                 }
-                CPULayer::ConvTranspose2D(layer) => {
+                GPULayer::ConvTranspose2D(layer) => {
                     let weights = Tensor::new(layer.weights.view().into_dyn());
                     let biases = Tensor::new(layer.biases.view().into_dyn());
                     tensors.push((format!("{}w", i), weights));
                     tensors.push((format!("{}b", i), biases));
                 }
-                CPULayer::Conv2D(layer) => {
+                GPULayer::Conv2D(layer) => {
                     let weights = Tensor::new(layer.weights.view().into_dyn());
                     let biases = Tensor::new(layer.biases.view().into_dyn());
                     tensors.push((format!("{}w", i), weights));
                     tensors.push((format!("{}b", i), biases));
                 }
-                CPULayer::Dense(layer) => {
+                GPULayer::Dense(layer) => {
                     let weights = Tensor::new(layer.weights.view().into_dyn());
                     let biases = Tensor::new(layer.biases.view().into_dyn());
                     tensors.push((format!("{}w", i), weights));

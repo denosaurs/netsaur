@@ -1,9 +1,9 @@
 use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix1, Ix4, IxDyn};
 use std::ops::{Add, AddAssign, Mul};
 
-use crate::{CPUInit, Conv2DLayer, Init, Tensors};
+use crate::{GPUInit, Conv2DLayer, Init, Tensors};
 
-pub struct Conv2DCPULayer {
+pub struct Conv2DGPULayer {
     // cache
     pub strides: Vec<usize>,
     pub padding: Vec<usize>,
@@ -19,7 +19,7 @@ pub struct Conv2DCPULayer {
     pub d_biases: Array1<f32>,
 }
 
-impl Conv2DCPULayer {
+impl Conv2DGPULayer {
     pub fn new(config: Conv2DLayer, size: IxDyn, tensors: Option<Tensors>) -> Self {
         let strides = config.strides.unwrap_or(vec![1, 1]);
         let padding = config.padding.unwrap_or(vec![0, 0]);
@@ -37,7 +37,7 @@ impl Conv2DCPULayer {
             let weights = if let Some(tensor) = config.kernel {
                 ArrayD::from_shape_vec(tensor.shape, tensor.data).unwrap()
             } else {
-                CPUInit::from_default(config.init, Init::Kaiming).init(
+                GPUInit::from_default(config.init, Init::Kaiming).init(
                     weight_size.clone(),
                     size[1] * input_y * input_x,
                     weight_size[0] * output_y * output_x,

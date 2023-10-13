@@ -2,11 +2,11 @@ use std::ops::{Mul, SubAssign};
 
 use ndarray::{ArrayViewD, ArrayViewMutD};
 
-use crate::CPUScheduler;
+use crate::GPUScheduler;
 
-pub struct CPUSGDOptimizer {}
+pub struct GPUSGDOptimizer {}
 
-impl CPUSGDOptimizer {
+impl GPUSGDOptimizer {
     pub fn new() -> Self {
         Self {}
     }
@@ -15,7 +15,7 @@ impl CPUSGDOptimizer {
         &mut self,
         mut params: Vec<ArrayViewMutD<f32>>,
         grads: Vec<ArrayViewD<f32>>,
-        scheduler: &CPUScheduler,
+        scheduler: &GPUScheduler,
         rate: f32,
         epoch: usize,
     ) {

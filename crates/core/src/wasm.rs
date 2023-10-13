@@ -3,7 +3,7 @@ use ndarray::ArrayD;
 
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-use crate::{CPUBackend, Dataset, Logger, PredictOptions, TrainOptions, RESOURCES};
+use crate::{Backend, Dataset, Logger, PredictOptions, TrainOptions, RESOURCES};
 
 #[wasm_bindgen]
 extern "C" {
@@ -20,7 +20,7 @@ pub fn wasm_backend_create(config: String, shape: Array) -> usize {
     let config = serde_json::from_str(&config).unwrap();
     let mut len = 0;
     let logger = Logger { log: console_log };
-    let net_backend = CPUBackend::new(config, logger, None);
+    let net_backend = Backend::new(config, logger, None);
     shape.set_length(net_backend.size.len() as u32);
     for (i, s) in net_backend.size.iter().enumerate() {
         shape.set(i as u32, JsValue::from(*s))
@@ -82,7 +82,7 @@ pub fn wasm_backend_save(id: usize) -> Uint8Array {
 pub fn wasm_backend_load(buffer: Uint8Array, shape: Array) -> usize {
     let mut len = 0;
     let logger = Logger { log: console_log };
-    let net_backend = CPUBackend::load(buffer.to_vec().as_slice(), logger);
+    let net_backend = Backend::load(buffer.to_vec().as_slice(), logger);
     shape.set_length(net_backend.size.len() as u32);
     for (i, s) in net_backend.size.iter().enumerate() {
         shape.set(i as u32, JsValue::from(*s))

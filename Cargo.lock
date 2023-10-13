@@ -103,6 +103,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "cudarc"
+version = "0.9.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc4cab390f4a32340211f015292a4551742a63e528e9ade9e0bde0d1a989d2a1"
+
+[[package]]
 name = "darling"
 version = "0.14.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -372,7 +378,7 @@ dependencies = [
 
 [[package]]
 name = "netsaur"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "getrandom",
  "js-sys",
@@ -385,8 +391,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "netsaur-gpu"
+version = "0.2.8"
+dependencies = [
+ "cudarc",
+ "ndarray",
+ "ndarray-rand",
+ "safetensors",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "netsaur-tokenizers"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "getrandom",
  "js-sys",
@@ -599,9 +618,9 @@ checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
 
 [[package]]
 name = "safetensors"
-version = "0.3.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1d818a2cb3f564a1844be835011acf5c7ec8ad1986a47f73abc7b5fea91cc3a"
+checksum = "f1e5186bd51ae3f90999d243853f5e8cb51f3467f55da42dc611ed2342483dad"
 dependencies = [
  "serde",
  "serde_json",
@@ -692,18 +711,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.47"
+version = "1.0.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97a802ec30afc17eee47b2855fc72e0c4cd62be9b4efe6591edde0ec5bd68d8f"
+checksum = "1177e8c6d7ede7afde3585fd2513e611227efd6481bd78d2e82ba1ce16557ed4"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.47"
+version = "1.0.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bb623b56e39ab7dcd4b1b98bb6c8f8d907ed255b18de254088016b27a8ee19b"
+checksum = "10712f02019e9288794769fba95cd6847df9874d49d871d062172f9dd41bc4cc"
 dependencies = [
  "proc-macro2",
  "quote",
