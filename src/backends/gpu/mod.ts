@@ -50,7 +50,7 @@ export class GPUInstance {
 
     GPUInstance.library = await dlopen(options, symbols);
     GPUInstance.initialized = true;
-    if (!silent) console.log("GPU Backend Initialised");
+    if (!silent) console.log("GPU Backend Initialized");
     return true;
   }
 }

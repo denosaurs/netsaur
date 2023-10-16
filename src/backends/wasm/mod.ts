@@ -22,7 +22,7 @@ export class WASMInstance {
         : undefined,
     });
     WASMInstance.initialized = true;
-    if (!silent) console.log("WASM Backend Initialised");
+    if (!silent) console.log("WASM Backend Initialized");
     return true;
   }
 }

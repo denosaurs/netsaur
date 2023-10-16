@@ -50,7 +50,7 @@ export class CPUInstance {
 
     CPUInstance.library = await dlopen(options, symbols);
     CPUInstance.initialized = true;
-    if (!silent) console.log("CPU Backend Initialised");
+    if (!silent) console.log("CPU Backend Initialized");
     return true;
   }
 }
