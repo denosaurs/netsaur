@@ -1,7 +1,4 @@
-#[cfg(not(feature = "cuda"))]
 mod cpu;
-#[cfg(feature = "cuda")]
-mod gpu;
 #[cfg(not(target_arch = "wasm32"))]
 mod ffi;
 mod tensor;
@@ -10,11 +7,8 @@ mod util;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 
-#[cfg(not(feature = "cuda"))]
 pub use cpu::*;
 
-#[cfg(feature = "cuda")]
-pub use gpu::*;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use ffi::*;
