@@ -32,8 +32,7 @@ jobs:
           rustc --version
           cargo --version
           cargo build --release -p netsaur
-          cargo build --release -p netsaur-gpu
-          deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backends/wasm/lib
+          deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts -p netsaur --out src/backends/wasm/lib
           deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts -p netsaur-tokenizers --out tokenizers/lib
       - name: Release
         uses: softprops/action-gh-release@master
@@ -44,10 +43,7 @@ jobs:
           draft: true
           files: |
             target/release/libnetsaur.so
-            target/release/libnetsaur_gpu.so
             target/release/libnetsaur.dylib
-            target/release/libnetsaur_gpu.dylib
             target/release/netsaur.dll
-            target/release/netsaur_gpu.dll
             src/backends/wasm/lib/netsaur_bg.wasm
             tokenizers/lib/netsaur_tokenizers_bg.wasm

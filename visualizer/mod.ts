@@ -2,9 +2,21 @@ import type { NeuralNetwork, Rank, Tensor } from "../mod.ts";
 import { Line } from "./types.ts";
 
 /**
- * Visualizer for Neural Networks
+ * Visualizer for Neural Networks in Jupyter Notebook
  */
 export class Visualizer {
+  /**
+   * Graph title
+   */
+  #title: string;
+
+  constructor(title: string) {
+    this.#title = title;
+  }
+
+  /**
+   * Graph the results of a Neural Network
+   */
   async graph<R extends Rank>(
     net: NeuralNetwork,
     inputs: Tensor<R>[],
@@ -14,6 +26,7 @@ export class Visualizer {
       x: [],
       y: [],
       type: "scatter",
+      mode: "lines+markers",
       name: "Expected",
       line: {
         color: "blue",
@@ -24,6 +37,7 @@ export class Visualizer {
       x: [],
       y: [],
       type: "scatter",
+      mode: "lines+markers",
       name: "Results",
       line: {
         color: "red",
@@ -38,12 +52,16 @@ export class Visualizer {
       expected.y.push(expectedResults[i].data[0]);
       results.y.push(output[0]);
     }
+    const title = this.#title;
 
     return {
       [Symbol.for("Jupyter.display")]() {
         return {
           "application/vnd.plotly.v1+json": {
             data: [expected, results],
+            layout: {
+              title,
+            },
           },
         };
       },
