@@ -253,7 +253,7 @@ console.log(`1 xor 1 = ${out4[0]} (should be close to 0)`);
 ### Documentation
 
 The full documentation for Netsaur can be found
-[here](https://deno.land/x/netsaur@0.2.10/mod.ts).
+[here](https://deno.land/x/netsaur@0.2.12/mod.ts).
 
 ### License
 
