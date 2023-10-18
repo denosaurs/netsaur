@@ -54,7 +54,7 @@ export class Tokenizer {
    * @param json string
    * @returns
    */
-  static fromJson(json: string) {
+  static fromJSON(json: string) {
     return new Tokenizer(wasm_tokenizer_from_json(json));
   }
 }
