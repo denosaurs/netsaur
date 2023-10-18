@@ -5,6 +5,7 @@ export * from "./src/core/tensor/tensor.ts";
 export * from "./src/core/api/layers.ts";
 export * from "./src/core/api/shape.ts";
 export * from "./src/core/api/network.ts";
+export * from "./src/core/api/optimizer.ts";
 export { GPU } from "./src/backends/gpu/mod.ts";
 
 import { CPU } from "./src/backends/cpu/mod.ts";
