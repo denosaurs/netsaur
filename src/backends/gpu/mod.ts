@@ -1,12 +1,12 @@
-import { dlopen, FetchOptions } from "../../deps.ts";
-import { CPUBackend } from "./backend.ts";
-import { NoBackendError } from "../core/api/error.ts";
-import { BackendLoader, Engine } from "../core/engine.ts";
-import { Backend, BackendType, Cost, NetworkConfig } from "../core/types.ts";
-import { Sequential } from "../core/mod.ts";
+import { dlopen, FetchOptions } from "../../../deps.ts";
+import { GPUBackend } from "./backend.ts";
+import { NoBackendError } from "../../core/api/error.ts";
+import { BackendLoader, Engine } from "../../core/engine.ts";
+import { Backend, BackendType, Cost, NetworkConfig } from "../../core/types.ts";
+import { Sequential } from "../../core/mod.ts";
 
 const options: FetchOptions = {
-  name: "netsaur",
+  name: "netsaur_gpu",
   url: new URL(import.meta.url).protocol !== "file:"
     ? new URL(
       "https://github.com/denosaurs/netsaur/releases/download/0.2.8/",
@@ -41,50 +41,50 @@ const symbols = {
 
 export type Library = Deno.DynamicLibrary<typeof symbols>;
 
-export class CPUInstance {
+export class GPUInstance {
   static library?: Library;
   static initialized = false;
 
   static async init(silent = false) {
-    if (CPUInstance.initialized) return true;
+    if (GPUInstance.initialized) return true;
 
-    CPUInstance.library = await dlopen(options, symbols);
-    CPUInstance.initialized = true;
-    if (!silent) console.log("CPU Backend Initialised");
+    GPUInstance.library = await dlopen(options, symbols);
+    GPUInstance.initialized = true;
+    if (!silent) console.log("GPU Backend Initialized");
     return true;
   }
 }
 
-export class CPUBackendLoader implements BackendLoader {
-  backend?: CPUBackend;
+export class GPUBackendLoader implements BackendLoader {
+  backend?: GPUBackend;
 
   isSupported(): boolean {
     return Deno.dlopen !== undefined;
   }
 
   async setup(silent = false) {
-    Engine.type = BackendType.CPU;
-    return await CPUInstance.init(silent);
+    Engine.type = BackendType.GPU;
+    return await GPUInstance.init(silent);
   }
 
   loadBackend(config: NetworkConfig): Backend {
-    if (!CPUInstance.initialized) {
-      throw new NoBackendError(BackendType.CPU);
+    if (!GPUInstance.initialized) {
+      throw new NoBackendError(BackendType.GPU);
     }
     return this.backend
       ? this.backend
-      : CPUBackend.create(config, CPUInstance.library!);
+      : GPUBackend.create(config, GPUInstance.library!);
   }
 
   load(buffer: Uint8Array): Sequential {
-    this.backend = CPUBackend.load(buffer, CPUInstance.library!);
+    this.backend = GPUBackend.load(buffer, GPUInstance.library!);
     const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
     this.backend = undefined;
     return net;
   }
 
   loadFile(path: string): Sequential {
-    this.backend = CPUBackend.loadFile(path, CPUInstance.library!);
+    this.backend = GPUBackend.loadFile(path, GPUInstance.library!);
     const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
     this.backend = undefined;
     return net;
@@ -92,6 +92,6 @@ export class CPUBackendLoader implements BackendLoader {
 }
 
 /**
- * CPU Backend written in Rust.
+ * GPU Backend written in Rust.
  */
-export const CPU = new CPUBackendLoader();
+export const GPU = new GPUBackendLoader();

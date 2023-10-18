@@ -2,7 +2,7 @@ use std::ops::{Add, Div, Mul, SubAssign};
 
 use ndarray::{ArrayD, ArrayViewD, ArrayViewMutD};
 
-use crate::AdamOptimizer;
+use crate::{AdamOptimizer, CPUScheduler};
 
 pub struct CPUAdamOptimizer {
     pub beta1: f32,
@@ -46,6 +46,7 @@ impl CPUAdamOptimizer {
         mut params: Vec<ArrayViewMutD<f32>>,
         grads: Vec<ArrayViewD<f32>>,
         idx: usize,
+        scheduler: &CPUScheduler,
         rate: f32,
     ) {
         for (j, (param, grad)) in params.iter_mut().zip(grads).enumerate() {
@@ -60,6 +61,8 @@ impl CPUAdamOptimizer {
 
             let m_hat = self.m[idx][j].view().div(1.0 - self.beta1.powf(self.t));
             let v_hat = self.v[idx][j].view().div(1.0 - self.beta2.powf(self.t));
+
+            let rate = scheduler.eta(rate, self.t as usize);
 
             param.sub_assign(
                 &rate

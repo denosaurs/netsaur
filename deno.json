@@ -3,6 +3,7 @@
     "example:xor": "deno run -A --unstable ./examples/xor_auto.ts",
     "example:xor-option": "deno run -A --unstable ./examples/xor_option.ts",
     "example:xor-cpu": "deno run -A --unstable ./examples/xor_cpu.ts",
+    "example:xor-gpu": "deno run -A --unstable ./examples/xor_gpu.ts",
     "example:xor-wasm": "deno run -A --unstable ./examples/xor_wasm.ts",
     "example:linear": "deno run -A --unstable ./examples/linear.ts",
     "example:filters": "deno run -A --unstable examples/filters/conv.ts ",
@@ -11,8 +12,11 @@
     "example:mnist-download": "deno run -A --unstable examples/mnist/download.ts ",
     "example:mnist-train": "deno run -A --unstable examples/mnist/train.ts ",
     "example:mnist-predict": "deno run -A --unstable examples/mnist/predict.ts ",
-    "build": "deno task build:cpu && deno task build:wasm",
-    "build:cpu": "cargo build --release",
-    "build:wasm": "deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backend_wasm/lib"
+    "example:tokenizers-basic": "deno run -A --unstable examples/tokenizers/basic.ts",
+    "build": "deno task build:cpu && deno task build:wasm && deno task build:gpu && deno task build:tokenizers",
+    "build:cpu": "cargo build --release -p netsaur",
+    "build:gpu": "cargo build --release -p netsaur-gpu",
+    "build:wasm": "deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts -p netsaur --out src/backends/wasm/lib",
+    "build:tokenizers": "deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts -p netsaur-tokenizers --out tokenizers/lib"
   }
 }

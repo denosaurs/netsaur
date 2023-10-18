@@ -1,4 +1,4 @@
-use ndarray::{s, Array1, Array4, ArrayD, Ix1, Ix4, IxDyn, Dimension};
+use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix1, Ix4, IxDyn};
 use std::ops::{Add, AddAssign, Mul};
 
 use crate::{CPUInit, Conv2DLayer, Init, Tensors};

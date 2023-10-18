@@ -34,9 +34,9 @@
 
 ### Backends
 
-- [CPU](./src/backend_cpu/) - Native backend written in Rust.
-- [WASM](./src/backend_wasm/) - WebAssembly backend written in Rust.
-- [GPU](./src/backend_gpu/) (TODO)
+- [CPU](./src/backends/cpu/) - Native backend written in Rust.
+- [WASM](./src/backends/wasm/) - WebAssembly backend written in Rust.
+- [GPU](./src/backends/gpu/) (TODO)
 
 ### Examples
 

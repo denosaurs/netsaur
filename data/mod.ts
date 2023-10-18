@@ -1,2 +1,2 @@
-export * from "./csv.ts";
+export * from "./datasets/csv.ts";
 export * from "./data.ts";

@@ -5,9 +5,10 @@ export * from "./src/core/tensor/tensor.ts";
 export * from "./src/core/api/layers.ts";
 export * from "./src/core/api/shape.ts";
 export * from "./src/core/api/network.ts";
+export { GPU } from "./src/backends/gpu/mod.ts";
 
-import { CPU } from "./src/backend_cpu/mod.ts";
-import { WASM } from "./src/backend_wasm/mod.ts";
+import { CPU } from "./src/backends/cpu/mod.ts";
+import { WASM } from "./src/backends/wasm/mod.ts";
 import { BackendLoader } from "./src/core/engine.ts";
 
 /**

@@ -8,18 +8,21 @@ mod util;
 mod wasm;
 
 pub use cpu::*;
+
+
 #[cfg(not(target_arch = "wasm32"))]
 pub use ffi::*;
 pub use tensor::*;
 pub use types::*;
 pub use util::*;
+
 #[cfg(target_arch = "wasm32")]
 pub use wasm::*;
 
 use std::cell::RefCell;
 
 pub struct Resources {
-    pub backend: RefCell<Vec<CPUBackend>>,
+    pub backend: RefCell<Vec<Backend>>,
 }
 
 impl Resources {

@@ -1,9 +1,9 @@
 import { WASMBackend } from "./backend.ts";
-import { NoBackendError } from "../core/api/error.ts";
-import { BackendLoader, Engine } from "../core/engine.ts";
-import { Backend, BackendType, Cost, NetworkConfig } from "../core/types.ts";
+import { NoBackendError } from "../../core/api/error.ts";
+import { BackendLoader, Engine } from "../../core/engine.ts";
+import { Backend, BackendType, Cost, NetworkConfig } from "../../core/types.ts";
 import { instantiate } from "./lib/netsaur.generated.js";
-import { Sequential } from "../core/mod.ts";
+import { Sequential } from "../../core/mod.ts";
 
 /**
  * Web Assembly backend instance.
@@ -22,7 +22,7 @@ export class WASMInstance {
         : undefined,
     });
     WASMInstance.initialized = true;
-    if (!silent) console.log("WASM Backend Initialised");
+    if (!silent) console.log("WASM Backend Initialized");
     return true;
   }
 }

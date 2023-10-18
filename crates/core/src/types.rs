@@ -8,6 +8,7 @@ pub struct BackendConfig {
     pub layers: Vec<Layer>,
     pub cost: Cost,
     pub optimizer: Optimizer,
+    pub scheduler: Scheduler,
 }
 
 #[derive(Debug)]
@@ -126,7 +127,7 @@ pub enum Init {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
-pub struct  AdamOptimizer {
+pub struct AdamOptimizer {
     pub beta1: f32,
     pub beta2: f32,
     pub epsilon: f32,
@@ -137,7 +138,31 @@ pub struct  AdamOptimizer {
 #[serde(rename_all = "lowercase")]
 pub enum Optimizer {
     SGD,
-    Adam(AdamOptimizer)
+    Adam(AdamOptimizer),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub struct DecayScheduler {
+    pub rate: f32,
+    pub step_size: usize,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub struct OneCycleScheduler {
+    pub max_rate: f32,
+    pub step_size: usize,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type", content = "config")]
+#[serde(rename_all = "lowercase")]
+pub enum Scheduler {
+    None,
+    LinearDecay(DecayScheduler),
+    ExponentialDecay(DecayScheduler),
+    OneCycle(OneCycleScheduler),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -1,5 +1,5 @@
 import { Rank, Tensor } from "../mod.ts";
-import { CsvLoaderConfig, loadCsv } from "./csv.ts";
+import { CsvLoaderConfig, loadCsv } from "./datasets/csv.ts";
 import type { DataLike } from "./types.ts";
 
 export class Data {
