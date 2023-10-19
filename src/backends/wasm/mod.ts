@@ -1,7 +1,13 @@
 import { WASMBackend } from "./backend.ts";
 import { NoBackendError } from "../../core/api/error.ts";
 import { BackendLoader, Engine } from "../../core/engine.ts";
-import { Backend, BackendType, Cost, NetworkConfig } from "../../core/types.ts";
+import {
+  Backend,
+  BackendType,
+  Cost,
+  NetworkConfig,
+  SchedulerType,
+} from "../../core/types.ts";
 import { instantiate } from "./lib/netsaur.generated.js";
 import { Sequential } from "../../core/mod.ts";
 
@@ -16,7 +22,7 @@ export class WASMInstance {
     await instantiate({
       url: new URL(import.meta.url).protocol !== "file:"
         ? new URL(
-          "https://github.com/denosaurs/netsaur/releases/download/0.2.13/netsaur_bg.wasm",
+          "https://github.com/denosaurs/netsaur/releases/download/0.2.14/netsaur_bg.wasm",
           import.meta.url,
         )
         : undefined,
@@ -51,14 +57,28 @@ export class WASMBackendLoader implements BackendLoader {
 
   load(buffer: Uint8Array): Sequential {
     this.backend = WASMBackend.load(buffer);
-    const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
+    const net = new Sequential({
+      size: [0],
+      layers: [],
+      cost: Cost.MSE,
+      scheduler: {
+        type: SchedulerType.None,
+      },
+    });
     this.backend = undefined;
     return net;
   }
 
   loadFile(path: string): Sequential {
     this.backend = WASMBackend.loadFile(path);
-    const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
+    const net = new Sequential({
+      size: [0],
+      layers: [],
+      cost: Cost.MSE,
+      scheduler: {
+        type: SchedulerType.None,
+      },
+    });
     this.backend = undefined;
     return net;
   }

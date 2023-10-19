@@ -2,14 +2,20 @@ import { dlopen, FetchOptions } from "../../../deps.ts";
 import { CPUBackend } from "./backend.ts";
 import { NoBackendError } from "../../core/api/error.ts";
 import { BackendLoader, Engine } from "../../core/engine.ts";
-import { Backend, BackendType, Cost, NetworkConfig } from "../../core/types.ts";
+import {
+  Backend,
+  BackendType,
+  Cost,
+  NetworkConfig,
+  SchedulerType,
+} from "../../core/types.ts";
 import { Sequential } from "../../core/mod.ts";
 
 const options: FetchOptions = {
   name: "netsaur",
   url: new URL(import.meta.url).protocol !== "file:"
     ? new URL(
-      "https://github.com/denosaurs/netsaur/releases/download/0.2.13/",
+      "https://github.com/denosaurs/netsaur/releases/download/0.2.14/",
       import.meta.url,
     )
     : "./target/release/",
@@ -78,14 +84,28 @@ export class CPUBackendLoader implements BackendLoader {
 
   load(buffer: Uint8Array): Sequential {
     this.backend = CPUBackend.load(buffer, CPUInstance.library!);
-    const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
+    const net = new Sequential({
+      size: [0],
+      layers: [],
+      cost: Cost.MSE,
+      scheduler: {
+        type: SchedulerType.None,
+      },
+    });
     this.backend = undefined;
     return net;
   }
 
   loadFile(path: string): Sequential {
     this.backend = CPUBackend.loadFile(path, CPUInstance.library!);
-    const net = new Sequential({ size: [0], layers: [], cost: Cost.MSE });
+    const net = new Sequential({
+      size: [0],
+      layers: [],
+      cost: Cost.MSE,
+      scheduler: {
+        type: SchedulerType.None,
+      },
+    });
     this.backend = undefined;
     return net;
   }
