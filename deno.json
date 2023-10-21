@@ -6,6 +6,7 @@
     "example:xor-gpu": "deno run -A --unstable ./examples/xor_gpu.ts",
     "example:xor-wasm": "deno run -A --unstable ./examples/xor_wasm.ts",
     "example:linear": "deno run -A --unstable ./examples/linear.ts",
+    "example:multiple-linear": "deno run -A --unstable ./examples/multiple-linear/student.ts",
     "example:binary": "deno run -A --unstable ./examples/classification/binary_iris.ts",
     "example:filters": "deno run -A --unstable examples/filters/conv.ts ",
     "example:train": "deno run -A --unstable examples/model/train.ts ",
