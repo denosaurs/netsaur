@@ -1,5 +1,5 @@
 use crate::RESOURCES;
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 use tokenizers::{models::bpe::BPE, tokenizer::Tokenizer};
 use wasm_bindgen::prelude::*;
 
@@ -39,7 +39,7 @@ pub fn wasm_bpe_default() -> usize {
 }
 
 #[wasm_bindgen]
-pub fn wasm_tokenizer_tokenize(id: usize, string: String) -> Vec<u32> {
+pub fn wasm_tokenizer_encode(id: usize, string: String) -> Vec<u32> {
     let mut data: Vec<u32> = Vec::new();
     RESOURCES.with(|cell| {
         let tokenizers = cell.tokenizer.borrow_mut();
@@ -50,6 +50,36 @@ pub fn wasm_tokenizer_tokenize(id: usize, string: String) -> Vec<u32> {
             .into_iter()
             .cloned()
             .collect()
+    });
+    data
+}
+
+#[wasm_bindgen]
+pub fn wasm_tokenizer_get_vocab(id: usize, with_added_tokens: bool) -> JsValue {
+    let mut data: HashMap<String, u32> = HashMap::new();
+    RESOURCES.with(|cell| {
+        let tokenizers = cell.tokenizer.borrow_mut();
+        data = tokenizers[id].get_vocab(with_added_tokens)
+    });
+    serde_wasm_bindgen::to_value(&data).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn wasm_tokenizer_get_vocab_size(id: usize, with_added_tokens: bool) -> usize {
+    let mut data: usize = 0;
+    RESOURCES.with(|cell| {
+        let tokenizers = cell.tokenizer.borrow_mut();
+        data = tokenizers[id].get_vocab_size(with_added_tokens)
+    });
+    data
+}
+
+#[wasm_bindgen]
+pub fn wasm_tokenizer_decode(id: usize, ids: &[u32], skip_special_tokens: bool) -> String {
+    let mut data: String = String::new();
+    RESOURCES.with(|cell| {
+        let tokenizers = cell.tokenizer.borrow_mut();
+        data = tokenizers[id].decode(ids, skip_special_tokens).unwrap()
     });
     data
 }

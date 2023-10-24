@@ -2,10 +2,13 @@ import { init, Tokenizer } from "../../tokenizers/mod.ts";
 
 await init();
 
-const tokenizer = Tokenizer.fromJson(
+const tokenizer = Tokenizer.fromJSON(
   await (await fetch(
     `https://huggingface.co/satvikag/chatbot/resolve/main/tokenizer.json`,
   )).text(),
 );
 
-console.log(tokenizer.tokenize("Hello World!"));
+const encoded = tokenizer.encode("Hello World!");
+console.log(encoded);
+const decoded = tokenizer.decode(encoded);
+console.log(decoded);
