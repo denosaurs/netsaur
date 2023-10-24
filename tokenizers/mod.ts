@@ -6,6 +6,8 @@ import {
   wasm_tokenizer_get_vocab,
   wasm_tokenizer_get_vocab_size,
   wasm_tokenizer_save,
+  wasm_tokenizer_id_to_token,
+  wasm_tokenizer_token_to_id,
 } from "./lib/netsaur_tokenizers.generated.js";
 
 let initialized = false;
@@ -45,6 +47,20 @@ export class Tokenizer {
     return wasm_tokenizer_get_vocab(this.#id, withAddedTokens);
   }
 
+  /**
+   * Get the token from an id
+   */
+  idToToken(id: number) {
+    return wasm_tokenizer_id_to_token(this.#id, id);
+  }
+
+  /**
+   * Get the id from a token
+   */
+  tokenToId(token: string) {
+    return wasm_tokenizer_token_to_id(this.#id, token);
+  }
+  
   /**
    * Encode a sentence
    * @param sentence sentence to tokenize

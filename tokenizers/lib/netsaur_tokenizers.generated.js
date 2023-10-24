@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: 91acee8ea47923e0e666e643a9fe83d6644ef252
+// source-hash: 8beb82a36802cbe280139e22e69a33415c0cb780
 let wasm;
 
 const heap = new Array(128).fill(undefined);
@@ -298,6 +298,40 @@ export function wasm_tokenizer_decode(id, ids, skip_special_tokens) {
   }
 }
 
+/**
+ * @param {number} id
+ * @param {string} token
+ * @returns {number}
+ */
+export function wasm_tokenizer_token_to_id(id, token) {
+  const ptr0 = passStringToWasm0(
+    token,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
+  const len0 = WASM_VECTOR_LEN;
+  const ret = wasm.wasm_tokenizer_token_to_id(id, ptr0, len0);
+  return ret >>> 0;
+}
+
+/**
+ * @param {number} id
+ * @param {number} token_id
+ * @returns {string}
+ */
+export function wasm_tokenizer_id_to_token(id, token_id) {
+  try {
+    const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+    wasm.wasm_tokenizer_id_to_token(retptr, id, token_id);
+    var r0 = getInt32Memory0()[retptr / 4 + 0];
+    var r1 = getInt32Memory0()[retptr / 4 + 1];
+    return getStringFromWasm0(r0, r1);
+  } finally {
+    wasm.__wbindgen_add_to_stack_pointer(16);
+    wasm.__wbindgen_free(r0, r1);
+  }
+}
+
 function handleError(f, args) {
   try {
     return f.apply(this, args);
@@ -517,7 +551,7 @@ let lastLoadPromise;
  * @param {InstantiateOptions=} opts
  * @returns {Promise<{
  *   instance: WebAssembly.Instance;
- *   exports: { wasm_tokenizer_from_json: typeof wasm_tokenizer_from_json; wasm_tokenizer_save: typeof wasm_tokenizer_save; wasm_bpe_default: typeof wasm_bpe_default; wasm_tokenizer_encode: typeof wasm_tokenizer_encode; wasm_tokenizer_get_vocab: typeof wasm_tokenizer_get_vocab; wasm_tokenizer_get_vocab_size: typeof wasm_tokenizer_get_vocab_size; wasm_tokenizer_decode: typeof wasm_tokenizer_decode }
+ *   exports: { wasm_tokenizer_from_json: typeof wasm_tokenizer_from_json; wasm_tokenizer_save: typeof wasm_tokenizer_save; wasm_bpe_default: typeof wasm_bpe_default; wasm_tokenizer_encode: typeof wasm_tokenizer_encode; wasm_tokenizer_get_vocab: typeof wasm_tokenizer_get_vocab; wasm_tokenizer_get_vocab_size: typeof wasm_tokenizer_get_vocab_size; wasm_tokenizer_decode: typeof wasm_tokenizer_decode; wasm_tokenizer_token_to_id: typeof wasm_tokenizer_token_to_id; wasm_tokenizer_id_to_token: typeof wasm_tokenizer_id_to_token }
  * }>}
  */
 export function instantiateWithInstance(opts) {
@@ -553,6 +587,8 @@ function getWasmInstanceExports() {
     wasm_tokenizer_get_vocab,
     wasm_tokenizer_get_vocab_size,
     wasm_tokenizer_decode,
+    wasm_tokenizer_token_to_id,
+    wasm_tokenizer_id_to_token,
   };
 }
 

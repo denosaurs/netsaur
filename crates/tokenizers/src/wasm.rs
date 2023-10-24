@@ -83,3 +83,23 @@ pub fn wasm_tokenizer_decode(id: usize, ids: &[u32], skip_special_tokens: bool) 
     });
     data
 }
+
+#[wasm_bindgen]
+pub fn wasm_tokenizer_token_to_id(id: usize, token: String) -> u32 {
+    let mut data: u32 = 0;
+    RESOURCES.with(|cell| {
+        let tokenizers = cell.tokenizer.borrow_mut();
+        data = tokenizers[id].token_to_id(token.as_str()).unwrap()
+    });
+    data
+}
+
+#[wasm_bindgen]
+pub fn wasm_tokenizer_id_to_token(id: usize, token_id: u32) -> String {
+    let mut data: String = String::new();
+    RESOURCES.with(|cell| {
+        let tokenizers = cell.tokenizer.borrow_mut();
+        data = tokenizers[id].id_to_token(token_id).unwrap()
+    });
+    data
+}
