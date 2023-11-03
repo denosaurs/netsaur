@@ -2,7 +2,7 @@ use std::slice::{from_raw_parts, from_raw_parts_mut};
 
 use crate::{
     decode_array, decode_json, length, Backend, Dataset, Logger, PredictOptions, TrainOptions,
-    RESOURCES, WGPUBackend,
+    WGPUBackend, RESOURCES,
 };
 
 type AllocBufferFn = extern "C" fn(usize) -> *mut u8;

@@ -1,7 +1,7 @@
 use ndarray::{Array1, Array2, ArrayD, Axis, Dimension, Ix1, Ix2, IxDyn};
 use std::ops::Add;
 
-use crate::{GPUInit, DenseLayer, Init, Tensors};
+use crate::{DenseLayer, GPUInit, Init, Tensors};
 
 pub struct DenseGPULayer {
     // cache
