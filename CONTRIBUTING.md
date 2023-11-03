@@ -19,11 +19,11 @@ cargo build --release
 Unoptimized:
 
 ```sh
-deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backends/wasm/lib --debug
+deno run -A https://deno.land/x/wasmbuild@0.15.1/main.ts --out src/backends/wasm/lib --debug
 ```
 
 Optimized:
 
 ```sh
-deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backends/wasm/lib
+deno run -A https://deno.land/x/wasmbuild@0.15.1/main.ts --out src/backends/wasm/lib
 ```
