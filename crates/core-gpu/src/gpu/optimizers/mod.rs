@@ -69,46 +69,6 @@ impl GPUOptimizer {
                     layer.d_biases.view().into_dyn(),
                 ],
             )),
-            GPULayer::Conv2D(layer) => Some((
-                vec![
-                    layer.weights.view_mut().into_dyn(),
-                    layer.biases.view_mut().into_dyn(),
-                ],
-                vec![
-                    layer.d_weights.view().into_dyn(),
-                    layer.d_biases.view().into_dyn(),
-                ],
-            )),
-            GPULayer::ConvTranspose2D(layer) => Some((
-                vec![
-                    layer.weights.view_mut().into_dyn(),
-                    layer.biases.view_mut().into_dyn(),
-                ],
-                vec![
-                    layer.d_weights.view().into_dyn(),
-                    layer.d_biases.view().into_dyn(),
-                ],
-            )),
-            GPULayer::BatchNorm1D(layer) => Some((
-                vec![
-                    layer.gamma.view_mut().into_dyn(),
-                    layer.beta.view_mut().into_dyn(),
-                ],
-                vec![
-                    layer.d_gamma.view().into_dyn(),
-                    layer.d_beta.view().into_dyn(),
-                ],
-            )),
-            GPULayer::BatchNorm2D(layer) => Some((
-                vec![
-                    layer.gamma.view_mut().into_dyn(),
-                    layer.beta.view_mut().into_dyn(),
-                ],
-                vec![
-                    layer.d_gamma.view().into_dyn(),
-                    layer.d_beta.view().into_dyn(),
-                ],
-            )),
             _ => return None,
         }
     }

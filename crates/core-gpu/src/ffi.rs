@@ -2,7 +2,7 @@ use std::slice::{from_raw_parts, from_raw_parts_mut};
 
 use crate::{
     decode_array, decode_json, length, Backend, Dataset, Logger, PredictOptions, TrainOptions,
-    RESOURCES,
+    RESOURCES, WGPUBackend,
 };
 
 type AllocBufferFn = extern "C" fn(usize) -> *mut u8;
@@ -13,8 +13,9 @@ fn log(string: String) {
 
 #[no_mangle]
 pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize, alloc: AllocBufferFn) -> usize {
+    let webgpu = WGPUBackend::new();
     let config = decode_json(ptr, len);
-    let net_backend = Backend::new(config, Logger { log }, None);
+    let net_backend = Backend::new(webgpu, config, Logger { log }, None);
     let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
     let size_ptr = alloc(buf.len());
     let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };
@@ -92,8 +93,9 @@ pub extern "C" fn ffi_backend_load(
     file_len: usize,
     alloc: AllocBufferFn,
 ) -> usize {
+    let webgpu = WGPUBackend::new();
     let buffer = unsafe { from_raw_parts(file_ptr, file_len) };
-    let net_backend = Backend::load(buffer, Logger { log });
+    let net_backend = Backend::load(webgpu, buffer, Logger { log });
     let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
     let size_ptr = alloc(buf.len());
     let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };
