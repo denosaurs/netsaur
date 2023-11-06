@@ -1,31 +1,30 @@
 use std::borrow::Cow;
 
+use ndarray::{ArrayD, Dimension, IxDyn};
+
+pub struct WGPUDataset {
+    pub inputs: WGPUBuffer,
+    pub outputs: WGPUBuffer,
+}
+
 pub struct WGPUBackend {
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
-    pub kernels: Vec<WGPUKernel>,
 }
 
 pub struct WGPUKernel {
     pub pipeline: wgpu::ComputePipeline,
     pub layout: wgpu::BindGroupLayout,
+    pub workgroups: (u32, u32, u32),
 }
 
 impl WGPUBackend {
     pub fn new() -> Self {
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends: wgpu::Backends::all(),
-            dx12_shader_compiler: Default::default(),
-            flags: wgpu::InstanceFlags::empty(),
-            gles_minor_version: wgpu::Gles3MinorVersion::Automatic,
-        });
+        let instance = wgpu::Instance::default();
 
-        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
-            compatible_surface: None,
-            force_fallback_adapter: false,
-        }))
-        .unwrap();
+        let adapter =
+            pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default()))
+                .unwrap();
 
         let (device, queue) = pollster::block_on(adapter.request_device(
             &wgpu::DeviceDescriptor {
@@ -37,19 +36,15 @@ impl WGPUBackend {
         ))
         .unwrap();
 
-        Self {
-            device,
-            queue,
-            kernels: Vec::new(),
-        }
+        Self { device, queue }
     }
 
-    pub fn register(&mut self, source: Cow<'_, str>) {
+    pub fn register(&mut self, source: String, workgroups: (u32, u32, u32)) -> WGPUKernel {
         let module = self
             .device
             .create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: None,
-                source: wgpu::ShaderSource::Wgsl(source),
+                source: wgpu::ShaderSource::Wgsl(Cow::Owned(source)),
             });
 
         let pipeline = self
@@ -62,10 +57,14 @@ impl WGPUBackend {
             });
 
         let layout = pipeline.get_bind_group_layout(0);
-        self.kernels.push(WGPUKernel { pipeline, layout });
+        WGPUKernel {
+            pipeline,
+            layout,
+            workgroups,
+        }
     }
 
-    pub fn execute(&mut self, kernel: usize, buffers: Vec<WGPUBuffer>) {
+    pub fn execute(&mut self, kernel: &WGPUKernel, buffers: Vec<&WGPUBuffer>) {
         let entries: Vec<wgpu::BindGroupEntry<'_>> = buffers
             .iter()
             .enumerate()
@@ -80,7 +79,7 @@ impl WGPUBackend {
             .collect();
         let bindgroup = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,
-            layout: &self.kernels[kernel].layout,
+            layout: &kernel.layout,
             entries: &entries,
         });
 
@@ -93,8 +92,9 @@ impl WGPUBackend {
                 timestamp_writes: None,
             });
             pass.set_bind_group(0, &bindgroup, &[]);
-            pass.set_pipeline(&self.kernels[kernel].pipeline);
-            pass.dispatch_workgroups(8, 8, 8);
+            pass.set_pipeline(&kernel.pipeline);
+            let (group_x, group_y, group_z) = kernel.workgroups;
+            pass.dispatch_workgroups(group_x, group_y, group_z);
         }
         self.queue.submit([encoder.finish()]);
     }
@@ -103,27 +103,40 @@ impl WGPUBackend {
 pub struct WGPUBuffer {
     pub buffer: wgpu::Buffer,
     pub size: u64,
+    pub shape: IxDyn,
 }
 
 impl WGPUBuffer {
-    pub fn new(backend: &mut WGPUBackend, size: u64) -> Self {
+    pub fn new(backend: &mut WGPUBackend, shape: IxDyn) -> Self {
         let buffer = backend.device.create_buffer(&wgpu::BufferDescriptor {
             label: None,
-            size,
+            size: shape.size() as u64 * 4,
             usage: wgpu::BufferUsages::STORAGE
                 | wgpu::BufferUsages::COPY_DST
                 | wgpu::BufferUsages::COPY_SRC,
             mapped_at_creation: false,
         });
 
-        Self { buffer, size }
+        Self {
+            buffer,
+            size: shape.size() as u64 * 4,
+            shape,
+        }
     }
 
-    pub fn read(&self, backend: &mut WGPUBackend) -> Vec<u8> {
+    pub fn from(backend: &mut WGPUBackend, data: ArrayD<f32>) -> Self {
+        let slice = data.as_slice().unwrap();
+        let buffer = WGPUBuffer::new(backend, data.dim());
+        let (_, bytes, _) = unsafe { slice.align_to() };
+        backend.queue.write_buffer(&buffer.buffer, 0, bytes);
+        buffer
+    }
+
+    pub fn read(&self, backend: &mut WGPUBackend) -> ArrayD<f32> {
         let buffer = backend.device.create_buffer(&wgpu::BufferDescriptor {
             label: None,
             size: self.size,
-            usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_SRC,
+            usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
 
@@ -140,13 +153,16 @@ impl WGPUBuffer {
         });
         backend.device.poll(wgpu::Maintain::Wait);
         receiver.recv().unwrap().unwrap();
-        let data = slice.get_mapped_range();
 
-        data.to_vec()
+        let bytes = slice.get_mapped_range();
+        let (_, data, _) = unsafe { bytes.align_to() };
+        ArrayD::from_shape_vec(self.shape.clone(), data.to_vec()).unwrap()
     }
 
-    pub fn write(&self, backend: &mut WGPUBackend, data: &[u8]) {
-        backend.queue.write_buffer(&self.buffer, 0, data)
+    pub fn write(&self, backend: &mut WGPUBackend, data: ArrayD<f32>) {
+        let slice = data.as_slice().unwrap();
+        let (_, bytes, _) = unsafe { slice.align_to() };
+        backend.queue.write_buffer(&self.buffer, 0, bytes)
     }
 }
 

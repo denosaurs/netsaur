@@ -38,6 +38,11 @@ export class GPUBackend implements Backend {
       shape.allocBuffer,
     ) as bigint;
     const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
+    
+    // free gpu resources when program loop exits
+    globalThis.onunload = () => {
+      library.symbols.ffi_backend_drop(id)
+    };
 
     return new GPUBackend(library, outputShape, id);
   }

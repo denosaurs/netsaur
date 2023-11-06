@@ -4,7 +4,7 @@ mod dense;
 pub use activation::*;
 pub use dense::*;
 
-use ndarray::ArrayD;
+use crate::{Tensors, WGPUBackend, WGPUBuffer};
 
 pub enum GPULayer {
     Activation(ActivationGPULayer),
@@ -12,31 +12,55 @@ pub enum GPULayer {
 }
 
 impl GPULayer {
-    pub fn output_size(&mut self) -> Vec<usize> {
+    pub fn outputs<'a>(&'a self) -> &'a WGPUBuffer {
         match self {
-            GPULayer::Activation(layer) => layer.output_size(),
-            GPULayer::Dense(layer) => layer.output_size(),
+            GPULayer::Activation(layer) => &layer.outputs,
+            GPULayer::Dense(layer) => &layer.outputs,
         }
     }
 
-    pub fn forward_propagate(&mut self, inputs: ArrayD<f32>, _training: bool) -> ArrayD<f32> {
+    pub fn d_inputs<'a>(&'a self) -> &'a WGPUBuffer {
         match self {
-            GPULayer::Activation(layer) => layer.forward_propagate(inputs),
-            GPULayer::Dense(layer) => layer.forward_propagate(inputs),
+            GPULayer::Activation(layer) => &layer.d_inputs,
+            GPULayer::Dense(layer) => &layer.d_inputs,
         }
     }
 
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
+    pub fn forward_propagate(
+        &self,
+        backend: &mut WGPUBackend,
+        inputs: &WGPUBuffer,
+        _training: bool,
+    ) {
         match self {
-            GPULayer::Activation(layer) => layer.backward_propagate(d_outputs),
-            GPULayer::Dense(layer) => layer.backward_propagate(d_outputs),
+            GPULayer::Activation(layer) => layer.forward_propagate(backend, inputs),
+            GPULayer::Dense(layer) => layer.forward_propagate(backend, inputs),
         }
     }
 
-    pub fn reset(&mut self, batches: usize) {
+    pub fn backward_propagate(
+        &self,
+        backend: &mut WGPUBackend,
+        inputs: &WGPUBuffer,
+        d_outputs: &WGPUBuffer,
+    ) {
         match self {
-            GPULayer::Activation(layer) => layer.reset(batches),
-            GPULayer::Dense(layer) => layer.reset(batches),
+            GPULayer::Activation(layer) => layer.backward_propagate(backend, inputs, d_outputs),
+            GPULayer::Dense(layer) => layer.backward_propagate(backend, inputs, d_outputs),
+        }
+    }
+
+    pub fn reset(&mut self, backend: &mut WGPUBackend, batches: usize) {
+        match self {
+            GPULayer::Activation(layer) => layer.reset(backend, batches),
+            GPULayer::Dense(layer) => layer.reset(backend, batches),
+        }
+    }
+
+    pub fn save(&self, backend: &mut WGPUBackend) -> Tensors {
+        match self {
+            GPULayer::Activation(_) => Tensors::None,
+            GPULayer::Dense(layer) => layer.save(backend),
         }
     }
 }

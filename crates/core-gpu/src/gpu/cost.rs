@@ -1,89 +1,65 @@
-use std::ops::{Div, Mul, Sub};
+use ndarray::{Dimension, IxDyn};
 
-use ndarray::{s, ArrayD, ArrayViewD};
-
-use crate::Cost;
+use crate::{Cost, WGPUBackend, WGPUBuffer, WGPUKernel};
 
 pub struct GPUCost {
-    pub cost: for<'a> fn(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32,
-    pub prime: for<'a> fn(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32>,
+    pub d_inputs: WGPUBuffer,
+    pub cost_kernel: WGPUKernel,
+    pub prime_kernel: WGPUKernel,
 }
 
 impl GPUCost {
-    pub fn from(cost: Cost) -> GPUCost {
-        match cost {
-            Cost::MSE => GPUCost {
-                cost: mse,
-                prime: mse_prime,
-            },
-            Cost::CrossEntropy => GPUCost {
-                cost: cross_entropy,
-                prime: cross_entropy_prime,
-            },
-            Cost::BinCrossEntropy => GPUCost {
-                cost: bin_cross_entropy,
-                prime: bin_cross_entropy_prime,
-            },
-            Cost::Hinge => GPUCost {
-                cost: hinge,
-                prime: hinge_prime,
-            },
+    pub fn from(backend: &mut WGPUBackend, cost: Cost, size: IxDyn) -> GPUCost {
+        let (cost, prime) = match cost {
+            Cost::MSE => (MSE, MSE_PRIME),
+            _ => unimplemented!(),
+        };
+        GPUCost {
+            d_inputs: WGPUBuffer::new(backend, size.clone()),
+            cost_kernel: kernel_cost(backend, cost.to_string(), size.size()),
+            prime_kernel: kernel_cost(backend, prime.to_string(), size.size()),
         }
     }
-}
 
-fn mse<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
-    let sub = y.sub(&y_hat);
-    return sub.clone().mul(sub).sum();
-}
-
-fn mse_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
-    return y.sub(&y_hat);
-}
-
-fn cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
-    let batches = y_hat.dim()[0];
-    let mut total = 0.0;
-    for b in 0..batches {
-        total -= y_hat.slice(s![b, ..]).mul(&y.slice(s![b, ..])).sum().ln()
+    pub fn cost(
+        &self,
+        backend: &mut WGPUBackend,
+        dataset: &WGPUBuffer,
+        outputs: &WGPUBuffer,
+    ) -> f32 {
+        backend.execute(&self.cost_kernel, vec![dataset, outputs, &self.d_inputs]);
+        self.d_inputs.read(backend)[0]
     }
-    return total / batches as f32;
-}
 
-fn cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
-    return -y_hat.div(&y);
-}
-
-fn bin_cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
-    return -y_hat
-        .mul(y.map(|x| x.ln()))
-        .sub(((1.0).sub(&y_hat)).mul(y.map(|x| 1.0 - x.ln())))
-        .sum()
-        / y.len() as f32;
-}
-
-fn bin_cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
-    return y.sub(&y_hat).div(y.mul(1.0.sub(&y)));
-}
-
-fn hinge<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
-    let mut sum = 0.0;
-    for (y_hat_i, y_i) in y_hat.iter().zip(y.iter()) {
-        let margin = 1.0 - y_hat_i * y_i;
-        if margin > 0.0 {
-            sum += margin;
-        }
+    pub fn prime(&self, backend: &mut WGPUBackend, dataset: &WGPUBuffer, outputs: &WGPUBuffer) {
+        backend.execute(&self.prime_kernel, vec![dataset, outputs, &self.d_inputs]);
     }
-    return sum;
 }
 
-fn hinge_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
-    let mut result = ArrayD::zeros(y_hat.shape());
-    for ((result_i, y_hat_i), y_i) in result.iter_mut().zip(y_hat.iter()).zip(y.iter()) {
-        let margin = 1.0 - y_hat_i * y_i;
-        if margin > 0.0 {
-            *result_i = -y_i;
-        }
-    }
-    return result;
+const MSE: &str = "cost.values[global_id.x] = y.values[global_id.x] - y_hat.values[global_id.x];";
+
+const MSE_PRIME: &str =
+    "cost.values[global_id.x] = y.values[global_id.x] - y_hat.values[global_id.x];";
+
+fn kernel_cost(backend: &mut WGPUBackend, cost: String, size: usize) -> WGPUKernel {
+    let source = format!(
+        "struct Matrix {{
+            values: array<f32>
+        }};
+        
+        @group(0) @binding(0)
+        var<storage, read> y_hat: Matrix;
+        @group(0) @binding(1)
+        var<storage, read> y: Matrix;
+        @group(0) @binding(2)
+        var<storage, read_write> cost: Matrix;
+        
+        @compute @workgroup_size(64, 1, 1)
+        fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {{
+            if (global_id.x < {size}u) {{
+                {cost}
+            }}
+        }}"
+    );
+    backend.register(source, ((size as f64 / 64.0).ceil() as u32, 1, 1))
 }

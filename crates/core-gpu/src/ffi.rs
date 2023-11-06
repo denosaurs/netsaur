@@ -27,6 +27,12 @@ pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize, alloc: AllocBuf
         len = backend.len();
         backend.push(net_backend);
     });
+
+    std::panic::set_hook(Box::new(|info| {
+        println!("{}", info);
+        ffi_backend_drop(0);
+    }));
+
     len
 }
 
@@ -79,7 +85,7 @@ pub extern "C" fn ffi_backend_predict(
 #[no_mangle]
 pub extern "C" fn ffi_backend_save(id: usize, alloc: AllocBufferFn) {
     RESOURCES.with(|cell| {
-        let backend = cell.backend.borrow_mut();
+        let mut backend = cell.backend.borrow_mut();
         let data = backend[id].save();
         let file_ptr = alloc(data.len());
         let file = unsafe { from_raw_parts_mut(file_ptr, data.len()) };
@@ -108,4 +114,14 @@ pub extern "C" fn ffi_backend_load(
         backend.push(net_backend);
     });
     len
+}
+
+#[no_mangle]
+pub extern "C" fn ffi_backend_drop(id: usize) {
+    RESOURCES.with(|cell| {
+        let mut backend = cell.backend.borrow_mut();
+        if backend.len() > id {
+            backend.remove(id);
+        }
+    });
 }
