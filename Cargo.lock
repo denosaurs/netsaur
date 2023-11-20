@@ -824,6 +824,7 @@ dependencies = [
  "ndarray",
  "ndarray-rand",
  "serde",
+ "serde-wasm-bindgen",
  "serde_json",
  "tokenizers",
  "wasm-bindgen",
@@ -1153,6 +1154,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6d3e73c93c3240c0bda063c239298e633114c69a888c3e37ca8bb33f343e9890"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-wasm-bindgen"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "30c9933e5689bd420dc6c87b7a1835701810cbc10cd86a26e4da45b73e6b1d78"
+dependencies = [
+ "js-sys",
+ "serde",
+ "wasm-bindgen",
 ]
 
 [[package]]
