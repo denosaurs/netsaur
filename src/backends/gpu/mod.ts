@@ -18,7 +18,7 @@ const options: FetchOptions = {
       "https://github.com/denosaurs/netsaur/releases/download/0.2.14/",
       import.meta.url,
     )
-    : "./target/release/",
+    : "./target/debug/",
   cache: "reloadAll",
 };
 
@@ -42,6 +42,10 @@ const symbols = {
   ffi_backend_load: {
     parameters: ["buffer", "usize", "pointer"],
     result: "usize",
+  } as const,
+  ffi_backend_drop: {
+    parameters: ["usize"],
+    result: "void",
   } as const,
 };
 

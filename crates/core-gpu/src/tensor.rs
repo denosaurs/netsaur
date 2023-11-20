@@ -59,6 +59,7 @@ pub enum Tensors {
     Dense(DenseTensors),
     Conv(ConvTensors),
     BatchNorm(BatchNormTensors),
+    None,
 }
 
 pub trait GetTensor {

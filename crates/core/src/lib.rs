@@ -9,7 +9,6 @@ mod wasm;
 
 pub use cpu::*;
 
-
 #[cfg(not(target_arch = "wasm32"))]
 pub use ffi::*;
 pub use tensor::*;

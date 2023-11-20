@@ -1,5 +1,5 @@
-mod gpu;
 mod ffi;
+mod gpu;
 mod tensor;
 mod types;
 mod util;

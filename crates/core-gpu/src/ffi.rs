@@ -2,7 +2,7 @@ use std::slice::{from_raw_parts, from_raw_parts_mut};
 
 use crate::{
     decode_array, decode_json, length, Backend, Dataset, Logger, PredictOptions, TrainOptions,
-    RESOURCES,
+    WGPUBackend, RESOURCES,
 };
 
 type AllocBufferFn = extern "C" fn(usize) -> *mut u8;
@@ -13,8 +13,9 @@ fn log(string: String) {
 
 #[no_mangle]
 pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize, alloc: AllocBufferFn) -> usize {
+    let webgpu = WGPUBackend::new();
     let config = decode_json(ptr, len);
-    let net_backend = Backend::new(config, Logger { log }, None);
+    let net_backend = Backend::new(webgpu, config, Logger { log }, None);
     let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
     let size_ptr = alloc(buf.len());
     let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };
@@ -26,6 +27,12 @@ pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize, alloc: AllocBuf
         len = backend.len();
         backend.push(net_backend);
     });
+
+    std::panic::set_hook(Box::new(|info| {
+        println!("{}", info);
+        ffi_backend_drop(0);
+    }));
+
     len
 }
 
@@ -78,7 +85,7 @@ pub extern "C" fn ffi_backend_predict(
 #[no_mangle]
 pub extern "C" fn ffi_backend_save(id: usize, alloc: AllocBufferFn) {
     RESOURCES.with(|cell| {
-        let backend = cell.backend.borrow_mut();
+        let mut backend = cell.backend.borrow_mut();
         let data = backend[id].save();
         let file_ptr = alloc(data.len());
         let file = unsafe { from_raw_parts_mut(file_ptr, data.len()) };
@@ -92,8 +99,9 @@ pub extern "C" fn ffi_backend_load(
     file_len: usize,
     alloc: AllocBufferFn,
 ) -> usize {
+    let webgpu = WGPUBackend::new();
     let buffer = unsafe { from_raw_parts(file_ptr, file_len) };
-    let net_backend = Backend::load(buffer, Logger { log });
+    let net_backend = Backend::load(webgpu, buffer, Logger { log });
     let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
     let size_ptr = alloc(buf.len());
     let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };
@@ -106,4 +114,14 @@ pub extern "C" fn ffi_backend_load(
         backend.push(net_backend);
     });
     len
+}
+
+#[no_mangle]
+pub extern "C" fn ffi_backend_drop(id: usize) {
+    RESOURCES.with(|cell| {
+        let mut backend = cell.backend.borrow_mut();
+        if backend.len() > id {
+            backend.remove(id);
+        }
+    });
 }

@@ -1,29 +1,21 @@
 use crate::Activation;
 pub struct GPUActivation {
     pub activation: Activation,
-    pub activate: ActivationFn,
-    pub prime: ActivationFn,
+    pub activate: String,
+    pub prime: String,
 }
-
-type ActivationFn = fn(x: &f32) -> f32;
 
 impl GPUActivation {
     pub fn from(activation: Activation) -> Self {
-        let (activate, prime): (ActivationFn, ActivationFn) = match activation {
-            Activation::Elu => (elu, elu_prime),
-            Activation::LeakyRelu => (leaky_relu, leaky_relu_prime),
-            Activation::Linear => (linear, linear_prime),
-            Activation::Relu => (relu, relu_prime),
-            Activation::Relu6 => (relu6, relu6_prime),
-            Activation::Selu => (selu, selu_prime),
-            Activation::Sigmoid => (sigmoid, sigmoid_prime),
-            Activation::Tanh => (tanh, tanh_prime),
+        let (activate, prime): (&str, &str) = match activation {
+            Activation::Sigmoid => (SIGMOID, SIGMOID_PRIME),
+            _ => unimplemented!()
         };
 
         Self {
             activation,
-            activate,
-            prime,
+            activate: String::from(activate),
+            prime: String::from(prime),
         }
     }
 
@@ -35,78 +27,14 @@ impl GPUActivation {
         }
     }
 
-    pub fn memoize_output(activation: &GPUActivation) -> bool {
-        match activation.activation {
+    pub fn memoize_output(activation: &Activation) -> bool {
+        match activation {
             Activation::Sigmoid | Activation::Tanh => true,
             _ => true,
         }
     }
 }
 
-fn sigmoid(x: &f32) -> f32 {
-    return 1.0 / (1.0 + (-x).exp());
-}
+const SIGMOID: &str = "1.0 / (1.0 + exp(-x))";
 
-fn sigmoid_prime(x: &f32) -> f32 {
-    return x * (1.0 - x);
-}
-
-fn tanh(x: &f32) -> f32 {
-    return x.tanh();
-}
-
-fn tanh_prime(x: &f32) -> f32 {
-    return 1.0 - tanh(x).powi(2);
-}
-
-fn linear(x: &f32) -> f32 {
-    return *x;
-}
-
-fn linear_prime(_x: &f32) -> f32 {
-    return 1.0;
-}
-
-fn relu(x: &f32) -> f32 {
-    return x.max(0.0);
-}
-
-fn relu_prime(x: &f32) -> f32 {
-    return if *x > 0.0 { 1.0 } else { 0.0 };
-}
-
-fn relu6(x: &f32) -> f32 {
-    return x.max(0.0).min(6.0);
-}
-
-fn relu6_prime(x: &f32) -> f32 {
-    return if *x > 0.0 && *x < 6.0 { 1.0 } else { 0.0 };
-}
-
-fn leaky_relu(x: &f32) -> f32 {
-    return if *x > 0.0 { *x } else { x.max(0.01 * x) };
-}
-
-fn leaky_relu_prime(x: &f32) -> f32 {
-    return if *x > 0.0 { 1.0 } else { 0.01 };
-}
-
-fn elu(x: &f32) -> f32 {
-    return if *x >= 0.0 { *x } else { x.exp() - 1.0 };
-}
-
-fn elu_prime(x: &f32) -> f32 {
-    return if *x > 0.0 { 1.0 } else { x.exp() };
-}
-
-fn selu(x: &f32) -> f32 {
-    return if *x >= 0.0 {
-        *x
-    } else {
-        1.0507 * (x.exp() - 1.0)
-    };
-}
-
-fn selu_prime(x: &f32) -> f32 {
-    return if *x > 0.0 { 1.0 } else { 1.0507 * x.exp() };
-}
+const SIGMOID_PRIME: &str = "x * (1.0 - x)";

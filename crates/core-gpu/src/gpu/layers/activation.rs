@@ -1,99 +1,107 @@
-use ndarray::{s, ArrayD, Dimension, IxDyn};
-use std::ops::{Div, Mul, Sub};
+use ndarray::{Dimension, IxDyn};
 
-use crate::{ActivationLayer, GPUActivation};
+use crate::{ActivationLayer, GPUActivation, WGPUBackend, WGPUBuffer, WGPUKernel};
 
 pub struct ActivationGPULayer {
-    pub outputs: ArrayD<f32>,
-    pub activation: GPUActivation,
+    // data
+    pub memoize_output: bool,
+    pub outputs: WGPUBuffer,
+
+    // gradients
+    pub d_inputs: WGPUBuffer,
+
+    // kernels
+    pub forward_kernel: WGPUKernel,
+    pub backward_kernel: WGPUKernel,
 }
 
 impl ActivationGPULayer {
-    pub fn new(config: ActivationLayer, size: IxDyn) -> Self {
+    pub fn new(backend: &mut WGPUBackend, config: ActivationLayer, size: &mut IxDyn) -> Self {
+        let activation = GPUActivation::from(config.activation);
+        let forward_kernel = kernel_forward(backend, size.size(), activation.activate);
+        let backward_kernel = kernel_backward(backend, size.size(), activation.prime);
+
         Self {
-            outputs: ArrayD::zeros(size),
-            activation: GPUActivation::from(config.activation),
+            memoize_output: GPUActivation::memoize_output(&activation.activation),
+            outputs: WGPUBuffer::new(backend, size.clone()),
+            d_inputs: WGPUBuffer::new(backend, size.clone()),
+            forward_kernel,
+            backward_kernel,
         }
     }
 
-    pub fn output_size(&self) -> Vec<usize> {
-        self.outputs.shape().to_vec()
+    pub fn reset(&mut self, backend: &mut WGPUBackend, batches: usize) {
+        let output_size = self.outputs.shape.as_array_view()[1];
+        self.outputs = WGPUBuffer::new(backend, IxDyn(&[batches, output_size]))
     }
 
-    pub fn reset(&mut self, batches: usize) {
-        let mut output_size = self.outputs.shape().to_vec();
-        output_size[0] = batches;
-        self.outputs = ArrayD::zeros(output_size);
+    pub fn forward_propagate(&self, backend: &mut WGPUBackend, inputs: &WGPUBuffer) {
+        backend.execute(&self.forward_kernel, vec![inputs, &self.outputs]);
     }
 
-    pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
-        let outputs = if GPUActivation::memoize_output(&self.activation) {
-            self.outputs = inputs.map(self.activation.activate);
-            self.outputs.clone()
+    pub fn backward_propagate(
+        &self,
+        backend: &mut WGPUBackend,
+        inputs: &WGPUBuffer,
+        d_outputs: &WGPUBuffer,
+    ) {
+        if self.memoize_output {
+            backend.execute(
+                &self.backward_kernel,
+                vec![&self.outputs, d_outputs, &self.d_inputs],
+            );
         } else {
-            self.outputs = inputs.clone();
-            inputs.map(self.activation.activate)
+            backend.execute(
+                &self.backward_kernel,
+                vec![inputs, d_outputs, &self.d_inputs],
+            );
         };
-        outputs.into_dyn()
-    }
-
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
-        let d_inputs = d_outputs.mul(self.outputs.map(self.activation.prime));
-        d_inputs.into_dyn()
     }
 }
 
-pub struct SoftmaxGPULayer {
-    pub outputs: ArrayD<f32>,
+fn kernel_forward(backend: &mut WGPUBackend, size: usize, activation: String) -> WGPUKernel {
+    let source = format!(
+        "struct Matrix {{
+            values: array<f32>
+        }};
+          
+        @group(0) @binding(0)
+        var<storage, read> inputs: Matrix;
+        @group(0) @binding(1)
+        var<storage, read_write> outputs: Matrix;
+          
+        @compute @workgroup_size(64, 1, 1)
+        fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {{
+            if (global_id.x < {size}u) {{
+                var x = inputs.values[global_id.x];
+                outputs.values[global_id.x] = {activation};
+            }}
+        }}"
+    );
+    backend.register(source, ((size as f64 / 64.0).ceil() as u32, 1, 1))
 }
 
-impl SoftmaxGPULayer {
-    pub fn new(size: IxDyn) -> Self {
-        Self {
-            outputs: ArrayD::zeros(size),
-        }
-    }
-
-    pub fn output_size(&self) -> Vec<usize> {
-        self.outputs.shape().to_vec()
-    }
-
-    pub fn reset(&mut self, batches: usize) {
-        let mut output_size = self.outputs.shape().to_vec();
-        output_size[0] = batches;
-        self.outputs = ArrayD::zeros(output_size);
-    }
-
-    pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
-        let batches = self.outputs.dim()[0];
-        for b in 0..batches {
-            let exp = inputs.slice(s![b, ..]).map(|x| x.exp());
-            self.outputs
-                .slice_mut(s![b, ..])
-                .assign(&exp.clone().div(exp.sum()));
-        }
-        self.outputs.clone().into_dyn()
-    }
-
-    pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
-        let batches = self.outputs.dim()[0];
-        let array_size = self.outputs.dim().size() / batches;
-
-        let mut d_inputs = ArrayD::zeros(self.outputs.dim());
-        for b in 0..batches {
-            for y in 0..array_size {
-                for x in 0..array_size {
-                    let out1 = self.outputs[[b, y]];
-                    let out2 = self.outputs[[b, x]];
-                    let d_out = d_outputs[[b, x]];
-                    if x == y {
-                        d_inputs[[b, y]] += out1.sub(out1.powi(2)).mul(d_out);
-                    } else {
-                        d_inputs[[b, y]] += -out1.mul(out2).mul(d_out);
-                    }
-                }
-            }
-        }
-        d_inputs
-    }
+fn kernel_backward(backend: &mut WGPUBackend, size: usize, activation: String) -> WGPUKernel {
+    let source = format!(
+        "struct Matrix {{
+            values: array<f32>
+        }};
+          
+        @group(0) @binding(0)
+        var<storage, read> inputs: Matrix;
+        @group(0) @binding(1)
+        var<storage, read> d_outputs: Matrix;
+        @group(0) @binding(2)
+        var<storage, read_write> d_inputs: Matrix;
+          
+        @compute @workgroup_size(64, 1, 1)
+        fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {{
+            if (global_id.x < {size}u) {{
+                var d_output = d_outputs.values[global_id.x];
+                var x = inputs.values[global_id.x];
+                d_inputs.values[global_id.x] = {activation} * d_output;
+            }}
+        }}"
+    );
+    backend.register(source, ((size as f64 / 64.0).ceil() as u32, 1, 1))
 }
