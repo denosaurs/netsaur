@@ -16,7 +16,7 @@ export async function init() {
   await instantiate({
     url: new URL(import.meta.url).protocol !== "file:"
       ? new URL(
-        "https://github.com/denosaurs/netsaur/releases/download/0.2.13/netsaur_tokenizers_bg.wasm",
+        "https://github.com/denosaurs/netsaur/releases/download/0.2.15/netsaur_tokenizers_bg.wasm",
         import.meta.url,
       )
       : undefined,
