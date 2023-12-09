@@ -13,15 +13,10 @@ import { parse } from "https://deno.land/std@0.204.0/csv/parse.ts";
 
 // Import helpers for metrics
 import {
-  accuracyScore,
-  // Metrics
-  ConfusionMatrix,
-  precisionScore,
-  sensitivityScore,
-  specificityScore,
+  ClassificationReport,
   // Split the dataset
   useSplit,
-} from "https://deno.land/x/vectorizer@v0.2.1/mod.ts";
+} from "https://deno.land/x/vectorizer@v0.2.3/mod.ts";
 
 // Define classes
 const classes = ["Setosa", "Versicolor"];
@@ -63,8 +58,8 @@ const net = new Sequential({
     // Another sigmoid layer
     SigmoidLayer(),
   ],
-  // We are using MSE for finding cost
-  cost: Cost.MSE,
+  // We are using Log Loss for finding cost
+  cost: Cost.BinCrossEntropy,
 });
 
 const time = performance.now();
@@ -77,25 +72,18 @@ net.train(
       outputs: tensor2D(train[1].map((x) => [x])),
     },
   ],
-  // Train for 10000 epochs
-  10000,
+  // Train for 150 epochs
+  150,
+  1,
+  // Use a smaller learning rate
+  0.02
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
 
-// Calculate metrics
-let [tp, fn, fp, tn] = [0, 0, 0, 0];
-for (let i = 0; i < test[0].length; i += 1) {
-  const res = (await net.predict(tensor1D(test[0][i]))).data[0] < 0.5 ? 0 : 1;
-  if (res === 1 && test[1][i] == 1) tp += 1;
-  if (res === 0 && test[1][i] == 1) fn += 1;
-  if (res === 1 && test[1][i] == 0) fp += 1;
-  if (res === 0 && test[1][i] == 0) tn += 1;
-}
-
-const cMatrix = new ConfusionMatrix([tp, fn, fp, tn]);
+const res = await Promise.all(
+  test[0].map((input) => net.predict(tensor1D(input))),
+);
+const y1 = res.map((x) => x.data[0] < 0.5 ? 0 : 1);
+const cMatrix = new ClassificationReport(test[1], y1);
 console.log("Confusion Matrix: ", cMatrix);
-console.log("Accuracy: ", `${accuracyScore(cMatrix) * 100}%`);
-console.log("Precision: ", `${precisionScore(cMatrix) * 100}%`);
-console.log("Sensitivity / Recall: ", `${sensitivityScore(cMatrix) * 100}%`);
-console.log("Specificity: ", `${specificityScore(cMatrix) * 100}%`);
