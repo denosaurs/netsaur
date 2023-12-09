@@ -46,19 +46,19 @@ fn cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 
     let batches = y_hat.dim()[0];
     let mut total = 0.0;
     for b in 0..batches {
-        total -= &y.slice(s![b, ..]).mul(&y_hat.slice(s![b, ..]).map(|x| x.max(EPSILON).ln())).sum()
+        total -= &y.slice(s![b, ..]).mul(&y_hat.slice(s![b, ..]).map(|x| x.max(EPSILON).min(1f32 - EPSILON).ln())).sum()
     }
     return total / batches as f32;
 }
 
 fn cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
-    return -y_hat.div(&y.map(|x| x.max(EPSILON)));
+    return -y_hat.div(&y.map(|x| x.max(EPSILON).min(1f32 - EPSILON)));
 }
 
 fn bin_cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
     return -y_hat
         .mul(y.map(|x| x.max(EPSILON).min(1f32 - EPSILON).ln()))
-        .sub(((1.0).sub(&y_hat)).mul(y.map(|x| 1.0 - x.max(EPSILON).ln())))
+        .sub(((1.0).sub(&y_hat)).mul(y.map(|x| 1.0 - x.max(EPSILON).min(1f32 - EPSILON).ln())))
         .sum()
         / y.len() as f32;
 }
