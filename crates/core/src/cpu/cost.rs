@@ -1,6 +1,6 @@
 use std::{
     f32::EPSILON,
-    ops::{Add, Div, Mul, Sub},
+    ops::{Div, Mul, Sub},
 };
 
 use ndarray::{s, ArrayD, ArrayViewD};
@@ -41,7 +41,6 @@ fn mse<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
 }
 
 fn mse_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
-    //println!("{:?} - {:?}", y, y_hat);
     return y.sub(&y_hat);
 }
 
@@ -49,11 +48,10 @@ fn cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 
     let batches = y_hat.dim()[0];
     let mut total = 0.0;
     for b in 0..batches {
-        total -= &y
+        total -= &y_hat
             .slice(s![b, ..])
             .mul(
-                &y_hat
-                    .slice(s![b, ..])
+                &y.slice(s![b, ..])
                     .map(|x| x.max(EPSILON).min(1f32 - EPSILON).ln()),
             )
             .sum()
@@ -74,7 +72,7 @@ fn bin_cross_entropy<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> 
 }
 
 fn bin_cross_entropy_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {
-    return y.sub(&y_hat).div(y.mul(1.0.sub(&y)).add(EPSILON));
+    return (-&y_hat / (&y + EPSILON)) + (1.0 - &y_hat) / (1.0 - &y + EPSILON);
 }
 
 fn hinge<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
