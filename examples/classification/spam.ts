@@ -90,7 +90,7 @@ const net = new Sequential({
     SigmoidLayer(),
   ],
 
-  // We are using MSE for finding cost
+  // We are using Log Loss for finding cost
   cost: Cost.BinCrossEntropy,
   optimizer: AdamOptimizer(),
 });
@@ -106,7 +106,7 @@ net.train(
       outputs: tensor2D(train[1].map((x) => [x])),
     },
   ],
-  // Train for 10000 epochs
+  // Train for 20 epochs
   20,
   1,
   0.01,

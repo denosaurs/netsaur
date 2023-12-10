@@ -58,17 +58,17 @@ const net = new Sequential({
 
   // Define each layer of the network
   layers: [
-    // A dense layer with 4 neurons
+    // A dense layer with 16 neurons
     DenseLayer({ size: [16] }),
-    // A sigmoid activation layer
+    // A ReLu activation layer
     ReluLayer(),
-    // A dense layer with 1 neuron
+    // A dense layer with 3 neurons
     DenseLayer({ size: [3] }),
-    // Another sigmoid layer
+    // A Softmax activation layer
     SoftmaxLayer(),
   ],
   optimizer: AdamOptimizer(),
-  // We are using MSE for finding cost
+  // We are using CrossEntropy for finding cost
   cost: Cost.CrossEntropy,
   scheduler: OneCycle({ max_rate: 0.05, step_size: 50 }),
 });
@@ -83,7 +83,7 @@ net.train(
       outputs: tensor2D(train[1]),
     },
   ],
-  // Train for 10000 epochs
+  // Train for 300 epochs
   300,
   1,
   0.02,
