@@ -344,7 +344,7 @@ dependencies = [
 
 [[package]]
 name = "netsaur"
-version = "0.2.13"
+version = "0.2.15"
 dependencies = [
  "getrandom",
  "js-sys",
@@ -358,7 +358,7 @@ dependencies = [
 
 [[package]]
 name = "netsaur-gpu"
-version = "0.2.13"
+version = "0.2.15"
 dependencies = [
  "cudarc",
  "ndarray",
@@ -371,7 +371,7 @@ dependencies = [
 
 [[package]]
 name = "netsaur-tokenizers"
-version = "0.2.13"
+version = "0.2.15"
 dependencies = [
  "getrandom",
  "js-sys",

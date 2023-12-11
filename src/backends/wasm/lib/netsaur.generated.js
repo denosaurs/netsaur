@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: d2763e5966c8367f7be14106af540e555164a811
+// source-hash: a728f73002f1cb653f10fe9495ef33f79d70a523
 let wasm;
 let cachedInt32Memory0;
 
@@ -203,7 +203,7 @@ const imports = {
     __wbindgen_object_drop_ref: function (arg0) {
       takeObject(arg0);
     },
-    __wbg_log_fd19485ee91363a8: function (arg0, arg1) {
+    __wbg_log_8d8708b5d26d7ac1: function (arg0, arg1) {
       console.log(getStringFromWasm0(arg0, arg1));
     },
     __wbindgen_number_new: function (arg0) {
