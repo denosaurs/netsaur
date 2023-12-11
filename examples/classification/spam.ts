@@ -4,26 +4,21 @@ import {
   Cost,
   CPU,
   DenseLayer,
-  OneCycle,
   ReluLayer,
   Sequential,
   setupBackend,
   SigmoidLayer,
-  SoftmaxLayer,
   tensor,
-  tensor1D,
   tensor2D,
 } from "../../mod.ts";
 
 // Import helpers for metrics
 import {
   ClassificationReport,
-  Matrix,
   TextVectorizer,
   // Split the dataset
   useSplit,
 } from "https://deno.land/x/vectorizer@v0.2.3/mod.ts";
-import { Sliceable } from "https://deno.land/x/vectorizer@v0.2.3/utils/array/split.ts";
 
 // Define classes
 const ymap = ["spam", "ham"];
