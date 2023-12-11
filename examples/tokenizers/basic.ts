@@ -8,7 +8,4 @@ const tokenizer = Tokenizer.fromJSON(
   )).text(),
 );
 
-const encoded = tokenizer.encode("Hello World!");
-console.log(encoded);
-const decoded = tokenizer.decode(encoded);
-console.log(decoded);
+console.log("Hello World!", tokenizer.tokenize("Hello World!"));

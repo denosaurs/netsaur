@@ -65,6 +65,7 @@ impl SoftmaxCPULayer {
     }
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
+        self.outputs = inputs.clone();
         let batches = self.outputs.dim()[0];
         for b in 0..batches {
             let exp = inputs.slice(s![b, ..]).map(|x| x.exp());
@@ -78,7 +79,7 @@ impl SoftmaxCPULayer {
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let batches = self.outputs.dim()[0];
         let array_size = self.outputs.dim().size() / batches;
-
+        
         let mut d_inputs = ArrayD::zeros(self.outputs.dim());
         for b in 0..batches {
             for y in 0..array_size {
