@@ -1,8 +1,13 @@
 import {
   instantiate,
+  wasm_tokenizer_decode,
+  wasm_tokenizer_encode,
   wasm_tokenizer_from_json,
+  wasm_tokenizer_get_vocab,
+  wasm_tokenizer_get_vocab_size,
   wasm_tokenizer_save,
-  wasm_tokenizer_tokenize,
+  wasm_tokenizer_id_to_token,
+  wasm_tokenizer_token_to_id,
 } from "./lib/netsaur_tokenizers.generated.js";
 
 let initialized = false;
@@ -29,12 +34,49 @@ export class Tokenizer {
   }
 
   /**
-   * Tokenize a sentence
+   * Get the vocab size
+   */
+  getVocabSize(withAddedTokens = true) {
+    return wasm_tokenizer_get_vocab_size(this.#id, withAddedTokens);
+  }
+
+  /**
+   * Get the vocab
+   */
+  getVocab(withAddedTokens = true) {
+    return wasm_tokenizer_get_vocab(this.#id, withAddedTokens);
+  }
+
+  /**
+   * Get the token from an id
+   */
+  idToToken(id: number) {
+    return wasm_tokenizer_id_to_token(this.#id, id);
+  }
+
+  /**
+   * Get the id from a token
+   */
+  tokenToId(token: string) {
+    return wasm_tokenizer_token_to_id(this.#id, token);
+  }
+  
+  /**
+   * Encode a sentence
    * @param sentence sentence to tokenize
    * @returns
    */
-  tokenize(sentence: string) {
-    return wasm_tokenizer_tokenize(this.#id, sentence);
+  encode(sentence: string) {
+    return wasm_tokenizer_encode(this.#id, sentence);
+  }
+
+  /**
+   * Decode a sentence
+   * @param tokens tokens to decode
+   * @returns
+   */
+  decode(ids: Uint32Array, skipSpecialTokens = false) {
+    return wasm_tokenizer_decode(this.#id, ids, skipSpecialTokens);
   }
 
   /**
