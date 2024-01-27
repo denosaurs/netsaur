@@ -153,11 +153,9 @@ impl Backend {
 
     pub fn predict(&mut self, data: ArrayD<f32>, layers: Option<Vec<usize>>) -> ArrayD<f32> {
         for layer in &mut self.layers {
-            layer.reset(1)
+            layer.reset(1);
         }
-        let res = self.forward_propagate(data, false, layers);
-        println!("{:?}", res);
-        res
+        self.forward_propagate(data, false, layers)
     }
 
     pub fn save(&self) -> Vec<u8> {
