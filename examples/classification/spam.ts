@@ -18,7 +18,7 @@ import {
   TextVectorizer,
   // Split the dataset
   useSplit,
-} from "https://deno.land/x/vectorizer@v0.2.3/mod.ts";
+} from "https://deno.land/x/vectorizer@v0.3.6/mod.ts";
 
 // Define classes
 const ymap = ["spam", "ham"];
