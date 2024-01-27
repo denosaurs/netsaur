@@ -24,7 +24,7 @@ import {
   useSplit,
   // One-hot encoding of targets
   CategoricalEncoder,
-} from "https://deno.land/x/vectorizer@v0.3.2/mod.ts";
+} from "https://deno.land/x/vectorizer@v0.3.5/mod.ts";
 
 // Read the training dataset
 const _data = Deno.readTextFileSync("examples/classification/iris.csv");
