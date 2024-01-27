@@ -37,7 +37,7 @@ impl CPUCost {
 
 fn mse<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> f32 {
     let sub = y.sub(&y_hat);
-    return sub.clone().mul(sub).sum();
+    return sub.clone().mul(sub).sum() / y.len() as f32;
 }
 
 fn mse_prime<'a>(y_hat: ArrayViewD<'a, f32>, y: ArrayViewD<'a, f32>) -> ArrayD<f32> {

@@ -4,6 +4,7 @@ import { Rank } from "./api/shape.ts";
 import { Tensor } from "./tensor/tensor.ts";
 import { NeuralNetwork } from "./api/network.ts";
 import { SGDOptimizer } from "./api/optimizer.ts";
+import { Shape } from "./api/shape.ts";
 
 /**
  * Sequential Neural Network
@@ -25,8 +26,8 @@ export class Sequential implements NeuralNetwork {
     this.backend.train(datasets, epochs, batches, rate);
   }
 
-  async predict(data: Tensor<Rank>) {
-    return await this.backend.predict(data);
+  async predict(data: Tensor<Rank>, layers?: number[], outputShape?: Shape[keyof Shape]) {
+    return await this.backend.predict(data, layers, outputShape);
   }
 
   /**

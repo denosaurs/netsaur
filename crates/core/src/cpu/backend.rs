@@ -95,9 +95,24 @@ impl Backend {
         }
     }
 
-    pub fn forward_propagate(&mut self, mut inputs: ArrayD<f32>, training: bool) -> ArrayD<f32> {
-        for layer in &mut self.layers {
-            inputs = layer.forward_propagate(inputs, training);
+    pub fn forward_propagate(
+        &mut self,
+        mut inputs: ArrayD<f32>,
+        training: bool,
+        layers: Option<Vec<usize>>,
+    ) -> ArrayD<f32> {
+        match layers {
+            Some(layer_indices) => {
+                for layer_index in layer_indices {
+                    let layer = self.layers.get_mut(layer_index).expect(&format!("Layer #{} does not exist.", layer_index));
+                    inputs = layer.forward_propagate(inputs, training);
+                }
+            }
+            None => {
+                for layer in &mut self.layers {
+                    inputs = layer.forward_propagate(inputs, training);
+                }
+            }
         }
         inputs
     }
@@ -119,7 +134,7 @@ impl Backend {
         while epoch < epochs {
             let mut total = 0.0;
             for (i, dataset) in datasets.iter().enumerate() {
-                let outputs = self.forward_propagate(dataset.inputs.clone(), true);
+                let outputs = self.forward_propagate(dataset.inputs.clone(), true, None);
                 self.backward_propagate(outputs.view(), dataset.outputs.view());
                 self.optimizer
                     .update_grads(&mut self.layers, &self.scheduler, rate, epoch);
@@ -136,11 +151,13 @@ impl Backend {
         }
     }
 
-    pub fn predict(&mut self, data: ArrayD<f32>) -> ArrayD<f32> {
+    pub fn predict(&mut self, data: ArrayD<f32>, layers: Option<Vec<usize>>) -> ArrayD<f32> {
         for layer in &mut self.layers {
             layer.reset(1)
         }
-        self.forward_propagate(data, false)
+        let res = self.forward_propagate(data, false, layers);
+        println!("{:?}", res);
+        res
     }
 
     pub fn save(&self) -> Vec<u8> {
