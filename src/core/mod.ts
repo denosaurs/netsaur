@@ -11,8 +11,6 @@ import { Rank } from "./api/shape.ts";
 import { Tensor } from "./tensor/tensor.ts";
 import { NeuralNetwork } from "./api/network.ts";
 import { SGDOptimizer } from "./api/optimizer.ts";
-import { Shape } from "./api/shape.ts";
-import { DenseLayer } from "../../mod.ts";
 
 /**
  * Sequential Neural Network
@@ -35,7 +33,12 @@ export class Sequential implements NeuralNetwork {
   train(datasets: DataSet[], epochs = 1000, batches = 1, rate = 0.1) {
     this.backend.train(datasets, epochs, batches, rate);
   }
-
+  /**
+   * 
+   * @param data 
+   * @param layers Range of layers [a, b) (inclusive of a, exclusive of b) to execute.
+   * @returns 
+   */
   async predict(data: Tensor<Rank>, layers?: [number, number]) {
     if (layers) {
       if (layers[0] < 0 || layers[1] > this.config.layers.length)
