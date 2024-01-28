@@ -79,8 +79,7 @@ export class CPUBackend implements Backend {
       options.length,
       output,
     );
-    // @ts-ignore TODO: FIX THIS
-    return new Tensor(output, [input.shape[0], ...(outputShape ?? this.outputShape)]);
+    return new Tensor(output, [input.shape[0], ...(outputShape ?? this.outputShape)] as Shape[keyof Shape]);
   }
 
   save(): Uint8Array {
