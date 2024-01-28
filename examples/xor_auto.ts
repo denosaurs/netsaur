@@ -9,7 +9,6 @@ import {
   Sequential,
   setupBackend,
   SigmoidLayer,
-  tensor1D,
   tensor2D,
 } from "../mod.ts";
 
@@ -82,14 +81,14 @@ console.log(`training time: ${performance.now() - time}ms`);
 /**
  * Predict the output of the XOR function for the given inputs.
  */
-const out1 = (await net.predict(tensor1D([0, 0]))).data;
+const out1 = (await net.predict(tensor2D([[0, 0]]))).data;
 console.log(`0 xor 0 = ${out1[0]} (should be close to 0)`);
 
-const out2 = (await net.predict(tensor1D([1, 0]))).data;
+const out2 = (await net.predict(tensor2D([[1, 0]]))).data;
 console.log(`1 xor 0 = ${out2[0]} (should be close to 1)`);
 
-const out3 = (await net.predict(tensor1D([0, 1]))).data;
+const out3 = (await net.predict(tensor2D([[0, 1]]))).data;
 console.log(`0 xor 1 = ${out3[0]} (should be close to 1)`);
 
-const out4 = (await net.predict(tensor1D([1, 1]))).data;
+const out4 = (await net.predict(tensor2D([[1, 1]]))).data;
 console.log(`1 xor 1 = ${out4[0]} (should be close to 0)`);
