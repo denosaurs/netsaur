@@ -37,8 +37,7 @@ export class CPUBackend implements Backend {
       buffer.length,
       shape.allocBuffer,
     ) as bigint;
-    const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
-
+    const outputShape = Array.from(new Uint32Array(shape.buffer.slice(4).buffer)) as Shape[Rank];
     return new CPUBackend(library, outputShape, id);
   }
 
