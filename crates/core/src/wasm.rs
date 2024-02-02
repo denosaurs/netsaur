@@ -59,11 +59,11 @@ pub fn wasm_backend_predict(id: usize, buffer: Float32Array, options: String) ->
     let options: PredictOptions = serde_json::from_str(&options).unwrap();
     let inputs = ArrayD::from_shape_vec(options.input_shape, buffer.to_vec()).unwrap();
 
-    let mut res = ArrayD::zeros(options.output_shape);
+    let res = ArrayD::zeros(options.output_shape);
 
     RESOURCES.with(|cell| {
         let mut backend = cell.backend.borrow_mut();
-        let res = backend[id].predict(inputs, options.layers);
+        let _res = backend[id].predict(inputs, options.layers);
     });
     Float32Array::from(res.as_slice().unwrap())
 }

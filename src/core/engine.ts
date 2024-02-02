@@ -2,8 +2,7 @@ import { WASM } from "../backends/wasm/mod.ts";
 import { Sequential } from "./mod.ts";
 import { Backend, BackendType, NetworkConfig } from "./types.ts";
 
-// deno-lint-ignore no-window-prefix
-window.onerror = () => {
+onerror = () => {
   if (typeof Deno == "undefined") {
     throw new Error(
       "Warning: Deno is not defined. Did you mean to import from ./web.ts instead of ./mod.ts?",

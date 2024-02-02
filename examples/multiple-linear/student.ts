@@ -10,7 +10,7 @@ import {
   tensor2D,
 } from "../../mod.ts";
 
-import { parse } from "https://deno.land/std@0.204.0/csv/parse.ts";
+import { parse } from "https://deno.land/std@0.214.0/csv/parse.ts";
 
 // Import helpers for splitting dataset
 import { useSplit } from "https://deno.land/x/vectorizer@v0.2.1/mod.ts";

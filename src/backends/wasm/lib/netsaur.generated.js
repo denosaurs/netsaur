@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: a728f73002f1cb653f10fe9495ef33f79d70a523
+// source-hash: c9542d0a368cde5bdc27d321129d74bf6d2c53ee
 let wasm;
 let cachedInt32Memory0;
 
@@ -203,22 +203,12 @@ const imports = {
     __wbindgen_object_drop_ref: function (arg0) {
       takeObject(arg0);
     },
-    __wbg_log_8d8708b5d26d7ac1: function (arg0, arg1) {
+    __wbg_log_05fb09f7b2225305: function (arg0, arg1) {
       console.log(getStringFromWasm0(arg0, arg1));
     },
     __wbindgen_number_new: function (arg0) {
       const ret = arg0;
       return addHeapObject(ret);
-    },
-    __wbg_getRandomValues_37fa2ca9e4e07fab: function () {
-      return handleError(function (arg0, arg1) {
-        getObject(arg0).getRandomValues(getObject(arg1));
-      }, arguments);
-    },
-    __wbg_randomFillSync_dc1e9a60c158336d: function () {
-      return handleError(function (arg0, arg1) {
-        getObject(arg0).randomFillSync(takeObject(arg1));
-      }, arguments);
     },
     __wbg_crypto_c48a774b022d20ac: function (arg0) {
       const ret = getObject(arg0).crypto;
@@ -262,6 +252,16 @@ const imports = {
     __wbindgen_string_new: function (arg0, arg1) {
       const ret = getStringFromWasm0(arg0, arg1);
       return addHeapObject(ret);
+    },
+    __wbg_randomFillSync_dc1e9a60c158336d: function () {
+      return handleError(function (arg0, arg1) {
+        getObject(arg0).randomFillSync(takeObject(arg1));
+      }, arguments);
+    },
+    __wbg_getRandomValues_37fa2ca9e4e07fab: function () {
+      return handleError(function (arg0, arg1) {
+        getObject(arg0).getRandomValues(getObject(arg1));
+      }, arguments);
     },
     __wbg_newnoargs_2b8b6bd7753c76ba: function (arg0, arg1) {
       const ret = new Function(getStringFromWasm0(arg0, arg1));

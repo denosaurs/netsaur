@@ -1,7 +1,7 @@
 // @generated file from wasmbuild -- do not edit
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
-// source-hash: befde420faca401acb360b5de6f414becebadd55
+// source-hash: 3d08e026eef12c6bc0c88735975ec03dac196e29
 let wasm;
 
 const heap = new Array(128).fill(undefined);
@@ -10,20 +10,6 @@ heap.push(undefined, null, true, false);
 
 function getObject(idx) {
   return heap[idx];
-}
-
-let heap_next = heap.length;
-
-function dropObject(idx) {
-  if (idx < 132) return;
-  heap[idx] = heap_next;
-  heap_next = idx;
-}
-
-function takeObject(idx) {
-  const ret = getObject(idx);
-  dropObject(idx);
-  return ret;
 }
 
 const cachedTextDecoder = new TextDecoder("utf-8", {
@@ -46,6 +32,8 @@ function getStringFromWasm0(ptr, len) {
   return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
 
+let heap_next = heap.length;
+
 function addHeapObject(obj) {
   if (heap_next === heap.length) heap.push(heap.length + 1);
   const idx = heap_next;
@@ -53,6 +41,18 @@ function addHeapObject(obj) {
 
   heap[idx] = obj;
   return idx;
+}
+
+function dropObject(idx) {
+  if (idx < 132) return;
+  heap[idx] = heap_next;
+  heap_next = idx;
+}
+
+function takeObject(idx) {
+  const ret = getObject(idx);
+  dropObject(idx);
+  return ret;
 }
 
 function debugString(val) {
@@ -342,9 +342,6 @@ function handleError(f, args) {
 
 const imports = {
   __wbindgen_placeholder__: {
-    __wbindgen_object_drop_ref: function (arg0) {
-      takeObject(arg0);
-    },
     __wbindgen_is_string: function (arg0) {
       const ret = typeof (getObject(arg0)) === "string";
       return ret;
@@ -352,6 +349,14 @@ const imports = {
     __wbindgen_error_new: function (arg0, arg1) {
       const ret = new Error(getStringFromWasm0(arg0, arg1));
       return addHeapObject(ret);
+    },
+    __wbindgen_object_drop_ref: function (arg0) {
+      takeObject(arg0);
+    },
+    __wbindgen_is_object: function (arg0) {
+      const val = getObject(arg0);
+      const ret = typeof val === "object" && val !== null;
+      return ret;
     },
     __wbindgen_number_new: function (arg0) {
       const ret = arg0;
@@ -371,11 +376,6 @@ const imports = {
     __wbg_crypto_c48a774b022d20ac: function (arg0) {
       const ret = getObject(arg0).crypto;
       return addHeapObject(ret);
-    },
-    __wbindgen_is_object: function (arg0) {
-      const val = getObject(arg0);
-      const ret = typeof val === "object" && val !== null;
-      return ret;
     },
     __wbg_process_298734cf255a885d: function (arg0) {
       const ret = getObject(arg0).process;
@@ -403,14 +403,14 @@ const imports = {
       const ret = typeof (getObject(arg0)) === "function";
       return ret;
     },
-    __wbg_getRandomValues_37fa2ca9e4e07fab: function () {
-      return handleError(function (arg0, arg1) {
-        getObject(arg0).getRandomValues(getObject(arg1));
-      }, arguments);
-    },
     __wbg_randomFillSync_dc1e9a60c158336d: function () {
       return handleError(function (arg0, arg1) {
         getObject(arg0).randomFillSync(takeObject(arg1));
+      }, arguments);
+    },
+    __wbg_getRandomValues_37fa2ca9e4e07fab: function () {
+      return handleError(function (arg0, arg1) {
+        getObject(arg0).getRandomValues(getObject(arg1));
       }, arguments);
     },
     __wbg_newnoargs_2b8b6bd7753c76ba: function (arg0, arg1) {
