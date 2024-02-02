@@ -8,7 +8,6 @@ import {
   DenseLayer,
   Sequential,
   setupBackend,
-  tensor1D,
   tensor2D,
 } from "../mod.ts";
 
@@ -16,10 +15,6 @@ import {
  * The test data used for predicting the output of the function y = 2x + 1
  */
 const testData = [20, 40, 43, 87, 43];
-// deno-lint-ignore no-explicit-any
-function fmt(input: any) {
-  return (input.data as Float32Array).map((e: number) => Math.round(e))[0];
-}
 
 /**
  * Setup the CPU backend. This backend is fast but doesn't work on the Edge.
@@ -75,18 +70,20 @@ network.train(
   /**
    * The learning rate is set to 0.01.
    */
-  0.01,
+  0.01
 );
 
 console.log("training time", performance.now() - start, " milliseconds");
 console.log("y = 2x + 1");
 
-for (const test of testData) {
-  /**
-   * Make a prediction on the test data.
-   */
-  const predicted = await network.predict(tensor1D([test]));
+/**
+ * Make a prediction on the test data.
+ */
+const predicted = await network.predict(tensor2D(testData.map((x) => [x])));
+for (const [i, res] of predicted.data.entries()) {
   console.log(
-    `input: ${test}\noutput: ${fmt(predicted)}\nexpected: ${2 * test + 1}\n`,
+    `input: ${testData[i]}\noutput: ${res.toFixed(2)}\nexpected: ${
+      2 * testData[i] + 1
+    }\n`
   );
 }

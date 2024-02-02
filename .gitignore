@@ -14,5 +14,4 @@ target/
 
 *.test.bin
 *.test.st
-_test/run.ts
-_test/Student_Performance.csv
+_test/

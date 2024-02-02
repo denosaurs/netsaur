@@ -63,7 +63,7 @@ pub fn wasm_backend_predict(id: usize, buffer: Float32Array, options: String) ->
 
     RESOURCES.with(|cell| {
         let mut backend = cell.backend.borrow_mut();
-        res = backend[id].predict(inputs);
+        let res = backend[id].predict(inputs, options.layers);
     });
     Float32Array::from(res.as_slice().unwrap())
 }

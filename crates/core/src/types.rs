@@ -181,4 +181,5 @@ pub struct TrainOptions {
 pub struct PredictOptions {
     pub input_shape: Vec<usize>,
     pub output_shape: Vec<usize>,
+    pub layers: Option<Vec<usize>>,
 }

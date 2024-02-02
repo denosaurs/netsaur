@@ -1,4 +1,12 @@
-import { CPU, Rank, Sequential, setupBackend, Tensor } from "../../mod.ts";
+import {
+  CPU,
+  Rank,
+  Sequential,
+  setupBackend,
+  Shape,
+  Tensor,
+  tensor,
+} from "../../mod.ts";
 import { loadDataset } from "./common.ts";
 
 await setupBackend(CPU);
@@ -22,7 +30,11 @@ function argmax(mat: Tensor<Rank>) {
 
 let correct = 0;
 for (const test of testSet) {
-  const prediction = argmax(await network.predict(test.inputs as Tensor<Rank>));
+  const prediction = argmax(
+    await network.predict(
+      tensor(test.inputs.data, [1, ...test.inputs.shape] as Shape[keyof Shape])
+    )
+  );
   const expected = argmax(test.outputs as Tensor<Rank>);
   if (expected === prediction) {
     correct += 1;
@@ -30,6 +42,4 @@ for (const test of testSet) {
 }
 
 console.log(`${correct} / ${testSet.length} correct`);
-console.log(
-  `accuracy: ${((correct / testSet.length) * 100).toFixed(2)}%`,
-);
+console.log(`accuracy: ${((correct / testSet.length) * 100).toFixed(2)}%`);

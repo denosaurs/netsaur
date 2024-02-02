@@ -5,7 +5,6 @@ import {
   Sequential,
   setupBackend,
   SigmoidLayer,
-  tensor1D,
   tensor2D,
 } from "../../mod.ts";
 
@@ -16,7 +15,7 @@ import {
   ClassificationReport,
   // Split the dataset
   useSplit,
-} from "https://deno.land/x/vectorizer@v0.2.3/mod.ts";
+} from "https://deno.land/x/vectorizer@v0.3.7/mod.ts";
 
 // Define classes
 const classes = ["Setosa", "Versicolor"];
@@ -81,9 +80,8 @@ net.train(
 
 console.log(`training time: ${performance.now() - time}ms`);
 
-const res = await Promise.all(
-  test[0].map((input) => net.predict(tensor1D(input))),
-);
-const y1 = res.map((x) => x.data[0] < 0.5 ? 0 : 1);
+const res = await net.predict(tensor2D(test[0]));
+
+const y1 = res.data.map((x) => x < 0.5 ? 0 : 1);
 const cMatrix = new ClassificationReport(test[1], y1);
 console.log("Confusion Matrix: ", cMatrix);

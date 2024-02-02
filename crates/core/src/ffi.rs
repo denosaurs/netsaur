@@ -15,7 +15,12 @@ fn log(string: String) {
 pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize, alloc: AllocBufferFn) -> usize {
     let config = decode_json(ptr, len);
     let net_backend = Backend::new(config, Logger { log }, None);
-    let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
+    let buf: Vec<u8> = net_backend
+        .size
+        .iter()
+        .map(|x| *x as u32)
+        .flat_map(|x| x.to_le_bytes().to_vec())
+        .collect();
     let size_ptr = alloc(buf.len());
     let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };
     output_shape.copy_from_slice(buf.as_slice());
@@ -70,7 +75,7 @@ pub extern "C" fn ffi_backend_predict(
 
     RESOURCES.with(|cell| {
         let mut backend = cell.backend.borrow_mut();
-        let res = backend[id].predict(inputs);
+        let res = backend[id].predict(inputs, options.layers);
         outputs.copy_from_slice(res.as_slice().unwrap());
     });
 }
