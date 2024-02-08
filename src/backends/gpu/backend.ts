@@ -25,20 +25,25 @@ export class GPUBackend implements Backend {
     this.#id = id;
   }
 
-  static create(config: NetworkConfig, library: Library) {
+  static create(config: NetworkConfig, library: Library): GPUBackend {
     const buffer = encodeJSON(config);
     const shape = new Buffer();
     const id = library.symbols.ffi_backend_create(
       buffer,
       buffer.length,
-      shape.allocBuffer
+      shape.allocBuffer,
     ) as bigint;
     const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
 
     return new GPUBackend(library, outputShape, id);
   }
 
-  train(datasets: DataSet[], epochs: number, batches: number, rate: number) {
+  train(
+    datasets: DataSet[],
+    epochs: number,
+    batches: number,
+    rate: number,
+  ): void {
     const buffer = encodeDatasets(datasets);
     const options = encodeJSON({
       datasets: datasets.length,
@@ -54,7 +59,7 @@ export class GPUBackend implements Backend {
       buffer,
       buffer.byteLength,
       options,
-      options.byteLength
+      options.byteLength,
     );
   }
 
@@ -62,13 +67,13 @@ export class GPUBackend implements Backend {
   async predict(
     input: Tensor<Rank>,
     layers: number[],
-    outputShape: Shape[keyof Shape]
+    outputShape: Shape[keyof Shape],
   ): Promise<Tensor<Rank>>;
   //deno-lint-ignore require-await
   async predict(
     input: Tensor<Rank>,
     layers?: number[],
-    outputShape?: Shape[keyof Shape]
+    outputShape?: Shape[keyof Shape],
   ): Promise<Tensor<Rank>> {
     const options = encodeJSON({
       inputShape: input.shape,
@@ -76,21 +81,24 @@ export class GPUBackend implements Backend {
       layers,
     } as PredictOptions);
     const output = new Float32Array(
-      input.shape[0] * length(outputShape ?? this.outputShape)
+      input.shape[0] * length(outputShape ?? this.outputShape),
     );
     this.library.symbols.ffi_backend_predict(
       this.#id,
       input.data as Float32Array,
       options,
       options.length,
-      output
+      output,
     );
-    return new Tensor(output, [
-      input.shape[0],
-      ...(outputShape ?? this.outputShape),
-    ] as Shape[keyof Shape]);
+    return new Tensor(
+      output,
+      [
+        input.shape[0],
+        ...(outputShape ?? this.outputShape),
+      ] as Shape[keyof Shape],
+    );
   }
-  
+
   save(): Uint8Array {
     const shape = new Buffer();
     this.library.symbols.ffi_backend_save(this.#id, shape.allocBuffer);
@@ -106,7 +114,7 @@ export class GPUBackend implements Backend {
     const id = library.symbols.ffi_backend_load(
       buffer,
       buffer.length,
-      shape.allocBuffer
+      shape.allocBuffer,
     ) as bigint;
     const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
 

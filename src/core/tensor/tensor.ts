@@ -38,7 +38,7 @@ export class Tensor<R extends Rank> {
   /**
    * Serialise a tensor into JSON.
    */
-  toJSON() {
+  toJSON(): { data: number[]; shape: Shape[R] } {
     const data = new Array(this.data.length).fill(1);
     this.data.forEach((value, i) => data[i] = value);
     return { data, shape: this.shape };
@@ -51,7 +51,10 @@ export class Tensor<R extends Rank> {
  * tensor([1, 2, 3, 4], [2, 2]);
  * ```
  */
-export function tensor<R extends Rank>(values: Float32Array, shape: Shape[R]) {
+export function tensor<R extends Rank>(
+  values: Float32Array,
+  shape: Shape[R],
+): Tensor<R> {
   return new Tensor(values, shape);
 }
 
@@ -62,7 +65,7 @@ export function tensor<R extends Rank>(values: Float32Array, shape: Shape[R]) {
  * tensor1D([1, 2, 3, 4]);
  * ```
  */
-export function tensor1D(values: Array1D) {
+export function tensor1D(values: Array1D): Tensor<1> {
   const shape = inferShape(values) as Shape1D;
   return new Tensor(new Float32Array(values), shape);
 }
@@ -77,7 +80,7 @@ export function tensor1D(values: Array1D) {
  * ]);
  * ```
  */
-export function tensor2D(values: Array2D) {
+export function tensor2D(values: Array2D): Tensor<2> {
   const shape = inferShape(values) as Shape2D;
   return new Tensor(new Float32Array(values.flat(1)), shape);
 }
@@ -98,7 +101,7 @@ export function tensor2D(values: Array2D) {
  * ]);
  * ```
  */
-export function tensor3D(values: Array3D) {
+export function tensor3D(values: Array3D): Tensor<3> {
   const shape = inferShape(values) as Shape3D;
   return new Tensor(new Float32Array(values.flat(2)), shape);
 }
@@ -131,7 +134,7 @@ export function tensor3D(values: Array3D) {
  * ]);
  * ```
  */
-export function tensor4D(values: Array4D) {
+export function tensor4D(values: Array4D): Tensor<4> {
   const shape = inferShape(values) as Shape4D;
   return new Tensor(new Float32Array(values.flat(3)), shape);
 }
@@ -166,7 +169,7 @@ export function tensor4D(values: Array4D) {
  * ]);
  * ```
  */
-export function tensor5D(values: Array5D) {
+export function tensor5D(values: Array5D): Tensor<5> {
   const shape = inferShape(values) as Shape5D;
   return new Tensor(new Float32Array(values.flat(4)), shape);
 }
@@ -202,7 +205,7 @@ export function tensor5D(values: Array5D) {
  * ]);
  * ```
  */
-export function tensor6D(values: Array6D) {
+export function tensor6D(values: Array6D): Tensor<6> {
   const shape = inferShape(values) as Shape6D;
   return new Tensor(new Float32Array(values.flat(5)), shape);
 }

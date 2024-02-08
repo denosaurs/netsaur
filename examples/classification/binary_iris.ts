@@ -75,7 +75,7 @@ net.train(
   150,
   1,
   // Use a smaller learning rate
-  0.02
+  0.02,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);

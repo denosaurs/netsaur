@@ -24,7 +24,7 @@ export function inferShape(arr: ArrayMap): number[] {
 /**
  * return the length of a shape.
  */
-export function length(shape: Shape[Rank]) {
+export function length(shape: Shape[Rank]): number {
   let length = 1;
   shape.forEach((i) => length *= i);
   return length;
@@ -58,29 +58,29 @@ export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
 /**
  * convert a shape to a 1D shape.
  */
-export function to1D(shape: Shape[Rank]) {
+export function to1D(shape: Shape[Rank]): Shape[1] {
   return toShape(shape, Rank.R1);
 }
 
 /**
  * convert a shape to a 2D shape.
  */
-export function to2D(shape: Shape[Rank]) {
+export function to2D(shape: Shape[Rank]): Shape[2] {
   return toShape(shape, Rank.R2);
 }
 
 /**
  * convert a shape to a 3D shape.
  */
-export function to3D(shape: Shape[Rank]) {
+export function to3D(shape: Shape[Rank]): Shape[3] {
   return toShape(shape, Rank.R3);
 }
 
 /**
  * convert a shape to a 4D shape.
  */
-export function to4D(shape: Shape[Rank]) {
-  return toShape(shape, Rank.R3);
+export function to4D(shape: Shape[Rank]): Shape[4] {
+  return toShape(shape, Rank.R4);
 }
 
 /**

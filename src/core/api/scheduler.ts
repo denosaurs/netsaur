@@ -35,7 +35,7 @@ export function ExponentialDecay(config: DecaySchedulerConfig = {}): Scheduler {
 }
 
 export function OneCycle(config: OneCycleSchedulerConfig = {}): Scheduler {
-    config.max_rate = config.max_rate || 0.01;
-    config.step_size = config.step_size || 100;
-    return { type: SchedulerType.OneCycle, config };
-  }
+  config.max_rate = config.max_rate || 0.01;
+  config.step_size = config.step_size || 100;
+  return { type: SchedulerType.OneCycle, config };
+}

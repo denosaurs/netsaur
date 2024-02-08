@@ -22,13 +22,13 @@ export class WASMBackend implements Backend {
     this.#id = id;
   }
 
-  static create(config: NetworkConfig) {
+  static create(config: NetworkConfig): WASMBackend {
     const shape = Array(0);
     const id = wasm_backend_create(JSON.stringify(config), shape);
     return new WASMBackend(shape as Shape[Rank], id);
   }
 
-  train(datasets: DataSet[], epochs: number, batches: number, rate: number) {
+  train(datasets: DataSet[], epochs: number, batches: number, rate: number): void {
     this.outputShape = datasets[0].outputs.shape.slice(1) as Shape[Rank];
     const buffer = [];
     for (const dataset of datasets) {

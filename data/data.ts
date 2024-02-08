@@ -21,7 +21,7 @@ export class Data {
   /**
    * Load data from a CSV file or URL containing CSV data.
    */
-  static async csv(url: string | URL, config?: CsvLoaderConfig) {
+  static async csv(url: string | URL, config?: CsvLoaderConfig): Promise<Data> {
     return new Data(await loadCsv(url, config));
   }
 }

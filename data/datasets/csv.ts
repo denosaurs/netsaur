@@ -33,7 +33,7 @@ export async function loadCsv(
   let columnIndices!: Record<string, number>;
   for await (const row of data) {
     if (!columnNames) {
-      columnNames = row;
+      columnNames = row as string[];
       columnIndices = columnNames.reduce((acc, col, i) => {
         acc[col] = i;
         return acc;
@@ -45,7 +45,7 @@ export async function loadCsv(
     for (const col in columnIndices) {
       const colConfig = config.columns?.[col];
       const i = columnIndices[col];
-      const value = row[i];
+      const value = (row as string[])[i];
       if (colConfig?.label) {
         y.push(Number(value));
       } else {

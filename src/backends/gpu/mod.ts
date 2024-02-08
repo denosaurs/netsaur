@@ -15,7 +15,7 @@ const options: FetchOptions = {
   name: "netsaur_gpu",
   url: new URL(import.meta.url).protocol !== "file:"
     ? new URL(
-      "https://github.com/denosaurs/netsaur/releases/download/0.3.0/",
+      "https://github.com/denosaurs/netsaur/releases/download/0.3.1/",
       import.meta.url,
     )
     : "./target/release/",
@@ -68,7 +68,7 @@ export class GPUBackendLoader implements BackendLoader {
     return Deno.dlopen !== undefined;
   }
 
-  async setup(silent = false) {
+  async setup(silent = false): Promise<boolean> {
     Engine.type = BackendType.GPU;
     return await GPUInstance.init(silent);
   }
@@ -114,4 +114,4 @@ export class GPUBackendLoader implements BackendLoader {
 /**
  * GPU Backend written in Rust.
  */
-export const GPU = new GPUBackendLoader();
+export const GPU: GPUBackendLoader = new GPUBackendLoader();

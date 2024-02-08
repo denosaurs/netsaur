@@ -25,7 +25,7 @@ export interface BackendLoader {
    * Whether the backend is supported.
    */
   isSupported(): boolean;
-  
+
   /**
    * Setup the backend. Returns true if the backend was successfully setup.
    */
@@ -55,7 +55,10 @@ export interface BackendLoader {
  * await setupBackend(CPU);
  * ```
  */
-export async function setupBackend(loader: BackendLoader, silent = false) {
+export async function setupBackend(
+  loader: BackendLoader,
+  silent = false,
+): Promise<void> {
   const success = await loader.setup(silent);
   if (!success) {
     if (!silent) console.log("Defaulting to CPU Backend");

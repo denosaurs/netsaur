@@ -35,7 +35,7 @@ const y = data.map((msg) => ymap.indexOf(msg[0]));
 // Split the dataset for training and testing
 const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y) as [
   [typeof x, typeof y],
-  [typeof x, typeof y]
+  [typeof x, typeof y],
 ];
 
 // Vectorize the text messages
@@ -88,7 +88,7 @@ net.train(
   // Train for 20 epochs
   20,
   2,
-  0.01
+  0.01,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
@@ -97,7 +97,6 @@ const x_vec_test = vec.transform(test[0]);
 
 // Calculate metrics
 const res = await net.predict(tensor(x_vec_test.data, x_vec_test.shape));
-const y1 = res.data.map(i => i < 0.5 ? 0 : 1)
+const y1 = res.data.map((i) => i < 0.5 ? 0 : 1);
 const cMatrix = new ClassificationReport(test[1], y1);
 console.log("Confusion Matrix: ", cMatrix);
-

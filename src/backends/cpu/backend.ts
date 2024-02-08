@@ -29,7 +29,7 @@ export class CPUBackend implements Backend {
     this.#id = id;
   }
 
-  static create(config: NetworkConfig, library: Library) {
+  static create(config: NetworkConfig, library: Library): CPUBackend {
     const buffer = encodeJSON(config);
     const shape = new Buffer();
     const id = library.symbols.ffi_backend_create(
@@ -37,11 +37,18 @@ export class CPUBackend implements Backend {
       buffer.length,
       shape.allocBuffer,
     ) as bigint;
-    const outputShape = Array.from(new Uint32Array(shape.buffer.slice(4).buffer)) as Shape[Rank];
+    const outputShape = Array.from(
+      new Uint32Array(shape.buffer.slice(4).buffer),
+    ) as Shape[Rank];
     return new CPUBackend(library, outputShape, id);
   }
 
-  train(datasets: DataSet[], epochs: number, batches: number, rate: number) {
+  train(
+    datasets: DataSet[],
+    epochs: number,
+    batches: number,
+    rate: number,
+  ): void {
     const buffer = encodeDatasets(datasets);
     const options = encodeJSON({
       datasets: datasets.length,
@@ -62,15 +69,25 @@ export class CPUBackend implements Backend {
   }
 
   async predict(input: Tensor<Rank>): Promise<Tensor<Rank>>;
-  async predict(input: Tensor<Rank>, layers: number[], outputShape: Shape[keyof Shape]): Promise<Tensor<Rank>>;
+  async predict(
+    input: Tensor<Rank>,
+    layers: number[],
+    outputShape: Shape[keyof Shape],
+  ): Promise<Tensor<Rank>>;
   //deno-lint-ignore require-await
-  async predict(input: Tensor<Rank>, layers?: number[], outputShape?: Shape[keyof Shape]): Promise<Tensor<Rank>> {
+  async predict(
+    input: Tensor<Rank>,
+    layers?: number[],
+    outputShape?: Shape[keyof Shape],
+  ): Promise<Tensor<Rank>> {
     const options = encodeJSON({
       inputShape: input.shape,
-      outputShape: [input.shape[0], ...(outputShape ?? this.outputShape)] ,
+      outputShape: [input.shape[0], ...(outputShape ?? this.outputShape)],
       layers,
     } as PredictOptions);
-    const output = new Float32Array(input.shape[0] * length(outputShape ?? this.outputShape));
+    const output = new Float32Array(
+      input.shape[0] * length(outputShape ?? this.outputShape),
+    );
     this.library.symbols.ffi_backend_predict(
       this.#id,
       input.data as Float32Array,
@@ -78,7 +95,13 @@ export class CPUBackend implements Backend {
       options.length,
       output,
     );
-    return new Tensor(output, [input.shape[0], ...(outputShape ?? this.outputShape)] as Shape[keyof Shape]);
+    return new Tensor(
+      output,
+      [
+        input.shape[0],
+        ...(outputShape ?? this.outputShape),
+      ] as Shape[keyof Shape],
+    );
   }
 
   save(): Uint8Array {

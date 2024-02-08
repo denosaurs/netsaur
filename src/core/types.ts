@@ -25,7 +25,11 @@ export interface Backend {
    * representing the input to the neural network and returns a Promise that resolves to a Tensor object representing the output of the network.
    * This method is used to make predictions on new data after the network has been trained.
    */
-  predict(input: Tensor<Rank>, layers?: number[], outputShape?: Shape[keyof Shape]): Promise<Tensor<Rank>>;
+  predict(
+    input: Tensor<Rank>,
+    layers?: number[],
+    outputShape?: Shape[keyof Shape],
+  ): Promise<Tensor<Rank>>;
 
   /**
    * The save method is a function that saves the network to a Uint8Array.

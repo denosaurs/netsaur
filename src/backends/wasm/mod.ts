@@ -17,12 +17,12 @@ import { Sequential } from "../../core/mod.ts";
 export class WASMInstance {
   static initialized = false;
 
-  static async init(silent = false) {
+  static async init(silent = false): Promise<boolean> {
     if (WASMInstance.initialized) return true;
     await instantiate({
       url: new URL(import.meta.url).protocol !== "file:"
         ? new URL(
-          "https://github.com/denosaurs/netsaur/releases/download/0.3.0/netsaur_bg.wasm",
+          "https://github.com/denosaurs/netsaur/releases/download/0.3.1/netsaur_bg.wasm",
           import.meta.url,
         )
         : undefined,
@@ -43,7 +43,7 @@ export class WASMBackendLoader implements BackendLoader {
     return true;
   }
 
-  async setup(silent = false) {
+  async setup(silent = false): Promise<boolean> {
     Engine.type = BackendType.WASM;
     return await WASMInstance.init(silent);
   }
@@ -87,4 +87,4 @@ export class WASMBackendLoader implements BackendLoader {
 /**
  * Web Assembly Backend written in Rust & compiled to Web Assembly.
  */
-export const WASM = new WASMBackendLoader();
+export const WASM: WASMBackendLoader = new WASMBackendLoader();

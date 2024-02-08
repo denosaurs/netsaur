@@ -9,19 +9,21 @@ export * from "./src/core/api/optimizer.ts";
 export * from "./src/core/api/scheduler.ts";
 export { GPU } from "./src/backends/gpu/mod.ts";
 
-import { CPU } from "./src/backends/cpu/mod.ts";
-import { WASM } from "./src/backends/wasm/mod.ts";
+import { CPU, CPUBackendLoader } from "./src/backends/cpu/mod.ts";
+import { WASM, WASMBackendLoader } from "./src/backends/wasm/mod.ts";
 import { BackendLoader } from "./src/core/engine.ts";
 
 /**
  * The AUTO backend is chosen automatically based on the environment.
  */
-const AUTO = Deno.dlopen === undefined ? WASM : CPU;
+const AUTO: WASMBackendLoader | CPUBackendLoader = Deno.dlopen === undefined
+  ? WASM
+  : CPU;
 
 /**
  * The OPTION function is used to choose a backend from a list of options.
  */
-export function OPTION(...backends: BackendLoader[]) {
+export function OPTION(...backends: BackendLoader[]): BackendLoader {
   for (const backend of backends) {
     if (backend.isSupported()) {
       return backend;

@@ -70,7 +70,7 @@ network.train(
   /**
    * The learning rate is set to 0.01.
    */
-  0.01
+  0.01,
 );
 
 console.log("training time", performance.now() - start, " milliseconds");
@@ -84,6 +84,6 @@ for (const [i, res] of predicted.data.entries()) {
   console.log(
     `input: ${testData[i]}\noutput: ${res.toFixed(2)}\nexpected: ${
       2 * testData[i] + 1
-    }\n`
+    }\n`,
   );
 }

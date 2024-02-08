@@ -55,7 +55,8 @@
 ### QuickStart
 
 This example shows how to train a neural network to predict the output of the
-XOR function our speedy CPU backend written in [Rust](https://www.rust-lang.org/).
+XOR function our speedy CPU backend written in
+[Rust](https://www.rust-lang.org/).
 
 ```typescript
 import {
@@ -253,7 +254,7 @@ console.log(`1 xor 1 = ${out4[0]} (should be close to 0)`);
 ### Documentation
 
 The full documentation for Netsaur can be found
-[here](https://deno.land/x/netsaur@0.3.0/mod.ts).
+[here](https://deno.land/x/netsaur@0.3.1/mod.ts).
 
 ### License
 

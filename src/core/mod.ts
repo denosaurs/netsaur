@@ -30,23 +30,24 @@ export class Sequential implements NeuralNetwork {
     this.backend = Engine.backendLoader.loadBackend(this.config);
   }
 
-  train(datasets: DataSet[], epochs = 1000, batches = 1, rate = 0.1) {
+  train(datasets: DataSet[], epochs = 1000, batches = 1, rate = 0.1): void {
     this.backend.train(datasets, epochs, batches, rate);
   }
   /**
-   * 
-   * @param data 
+   * @param data
    * @param layers Range of layers [a, b) (inclusive of a, exclusive of b) to execute.
-   * @returns 
+   * @returns
    */
-  async predict(data: Tensor<Rank>, layers?: [number, number]) {
+  async predict(data: Tensor<Rank>, layers?: [number, number]): Promise<Tensor<Rank>> {
     if (layers) {
-      if (layers[0] < 0 || layers[1] > this.config.layers.length)
+      if (layers[0] < 0 || layers[1] > this.config.layers.length) {
         throw new RangeError(
-          `Execution range should be within (0, ${
-            this.config.layers.length
-          }). Received (${(layers[0], layers[1])})`
+          `Execution range should be within (0, ${this.config.layers.length}). Received (${(layers[
+            0
+          ],
+            layers[1])})`,
         );
+      }
       const lastLayer = this.config.layers[layers[1] - 1];
       const layerList = new Array(layers[1] - layers[0]);
       for (let i = 0; i < layerList.length; i += 1) {
@@ -56,7 +57,11 @@ export class Sequential implements NeuralNetwork {
         lastLayer.type === LayerType.Dense ||
         lastLayer.type === LayerType.Flatten
       ) {
-        return await this.backend.predict(data, layerList, lastLayer.config.size);
+        return await this.backend.predict(
+          data,
+          layerList,
+          lastLayer.config.size,
+        );
       } else if (lastLayer.type === LayerType.Activation) {
         const penultimate = this.config.layers[layers[1] - 2];
         if (
@@ -66,16 +71,16 @@ export class Sequential implements NeuralNetwork {
           return await this.backend.predict(
             data,
             layerList,
-            penultimate.config.size
+            penultimate.config.size,
           );
         } else {
           throw new Error(
-            `The penultimate layer must be a dense layer, or a flatten layer if the last layer is an activation layer. Received ${penultimate.type}.`
+            `The penultimate layer must be a dense layer, or a flatten layer if the last layer is an activation layer. Received ${penultimate.type}.`,
           );
         }
       } else {
         throw new Error(
-          `The output layer must be a dense layer, activation layer, or a flatten layer. Received ${lastLayer.type}.`
+          `The output layer must be a dense layer, activation layer, or a flatten layer. Received ${lastLayer.type}.`,
         );
       }
     }
@@ -85,14 +90,14 @@ export class Sequential implements NeuralNetwork {
   /**
    * Load model from buffer
    */
-  static load(data: Uint8Array) {
+  static load(data: Uint8Array): Sequential {
     return Engine.backendLoader.load(data);
   }
 
   /**
    * Load model from binary file
    */
-  static loadFile(data: string) {
+  static loadFile(data: string): Sequential {
     return Engine.backendLoader.loadFile(data);
   }
 
@@ -100,7 +105,7 @@ export class Sequential implements NeuralNetwork {
     return this.backend.save();
   }
 
-  saveFile(path: string) {
+  saveFile(path: string): void {
     this.backend.saveFile(path);
   }
 }

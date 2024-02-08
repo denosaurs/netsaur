@@ -2,8 +2,11 @@ import { Rank, Shape } from "../../core/api/shape.ts";
 import { DataSet } from "../../core/types.ts";
 
 export class Buffer {
-  buffer = new Uint8Array();
-  allocBuffer = new Deno.UnsafeCallback({
+  buffer: Uint8Array = new Uint8Array();
+  allocBuffer: Deno.PointerObject<{
+    parameters: ["usize"];
+    result: "buffer";
+  }> = new Deno.UnsafeCallback({
     parameters: ["usize"],
     result: "buffer",
   }, (length) => {
@@ -35,21 +38,21 @@ export type PredictOptions = {
 /**
  * Encode JSON data.
  */
-export function encodeJSON(json: unknown) {
+export function encodeJSON(json: unknown): Uint8Array {
   return new TextEncoder().encode(JSON.stringify(json));
 }
 
 /**
  * Returns the BigInt value of a pointer.
  */
-export function pointer(arr: BufferSource) {
+export function pointer(arr: BufferSource): bigint {
   return BigInt(Deno.UnsafePointer.value(Deno.UnsafePointer.of(arr)));
 }
 
 /**
  * Encode datasets.
  */
-export function encodeDatasets(datasets: DataSet[]) {
+export function encodeDatasets(datasets: DataSet[]): BigUint64Array {
   const pointers: bigint[] = [];
   for (const dataset of datasets) {
     pointers.push(pointer(dataset.inputs.data as Float32Array));

@@ -16,12 +16,12 @@ import { parse } from "https://deno.land/std@0.204.0/csv/parse.ts";
 
 // Import helpers for metrics
 import {
-  ClassificationReport,
-  // Split the dataset
-  useSplit,
   // One-hot encoding of targets
   CategoricalEncoder,
+  ClassificationReport,
   Matrix,
+  // Split the dataset
+  useSplit,
 } from "https://deno.land/x/vectorizer@v0.3.7/mod.ts";
 
 // Read the training dataset
@@ -40,7 +40,7 @@ const y = encoder.fit(y_pre).transform(y_pre, "f32");
 // @ts-ignore Matrices can be split
 const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y) as [
   [typeof x, typeof y],
-  [typeof x, typeof y]
+  [typeof x, typeof y],
 ];
 
 // Setup the CPU backend for Netsaur
@@ -87,7 +87,7 @@ net.train(
   // Train for 300 epochs
   400,
   1,
-  0.02
+  0.02,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
@@ -96,8 +96,8 @@ console.log(`training time: ${performance.now() - time}ms`);
 const res = await net.predict(tensor2D(test[0]));
 const y1 = encoder.untransform(
   CategoricalEncoder.fromSoftmax(
-    new Matrix(res.data, [res.shape[0], res.shape[1]])
-  )
+    new Matrix(res.data, [res.shape[0], res.shape[1]]),
+  ),
 );
 const y0 = encoder.untransform(test[1]);
 
@@ -106,5 +106,5 @@ const cMatrix = new ClassificationReport(y0, y1);
 console.log(cMatrix);
 console.log(
   "Total Accuracy: ",
-  y1.filter((x, i) => x === y0[i]).length / y1.length
+  y1.filter((x, i) => x === y0[i]).length / y1.length,
 );
