@@ -1,6 +1,6 @@
 {
   "name": "@denosaurs/netsaur",
-  "version": "0.3.1",
+  "version": "0.3.1-patch",
   "exports": {
     ".": "./mod.ts",
     "./tokenizers": "./tokenizers/mod.ts",
