@@ -32,7 +32,7 @@ let correct = 0;
 for (const test of testSet) {
   const prediction = argmax(
     await network.predict(
-      tensor(test.inputs.data, [1, ...test.inputs.shape] as Shape[keyof Shape]),
+      tensor(test.inputs.data, [1, ...test.inputs.shape] as Shape<Rank>),
     ),
   );
   const expected = argmax(test.outputs as Tensor<Rank>);

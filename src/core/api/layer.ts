@@ -147,7 +147,7 @@ export type FlattenLayerConfig = {
   /**
    * The size of the layer.
    */
-  size: Shape[Rank];
+  size: Shape<Rank>;
 };
 
 /**

@@ -16,10 +16,10 @@ import {
  */
 export class GPUBackend implements Backend {
   library: Library;
-  outputShape: Shape[Rank];
+  outputShape: Shape<Rank>;
   #id: bigint;
 
-  constructor(library: Library, outputShape: Shape[Rank], id: bigint) {
+  constructor(library: Library, outputShape: Shape<Rank>, id: bigint) {
     this.library = library;
     this.outputShape = outputShape;
     this.#id = id;
@@ -33,7 +33,7 @@ export class GPUBackend implements Backend {
       buffer.length,
       shape.allocBuffer,
     ) as bigint;
-    const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
+    const outputShape = Array.from(shape.buffer.slice(1)) as Shape<Rank>;
 
     return new GPUBackend(library, outputShape, id);
   }
@@ -67,13 +67,13 @@ export class GPUBackend implements Backend {
   async predict(
     input: Tensor<Rank>,
     layers: number[],
-    outputShape: Shape[keyof Shape],
+    outputShape: Shape<Rank>,
   ): Promise<Tensor<Rank>>;
   //deno-lint-ignore require-await
   async predict(
     input: Tensor<Rank>,
     layers?: number[],
-    outputShape?: Shape[keyof Shape],
+    outputShape?: Shape<Rank>,
   ): Promise<Tensor<Rank>> {
     const options = encodeJSON({
       inputShape: input.shape,
@@ -95,7 +95,7 @@ export class GPUBackend implements Backend {
       [
         input.shape[0],
         ...(outputShape ?? this.outputShape),
-      ] as Shape[keyof Shape],
+      ] as Shape<Rank>,
     );
   }
 
@@ -116,7 +116,7 @@ export class GPUBackend implements Backend {
       buffer.length,
       shape.allocBuffer,
     ) as bigint;
-    const outputShape = Array.from(shape.buffer.slice(1)) as Shape[Rank];
+    const outputShape = Array.from(shape.buffer.slice(1)) as Shape<Rank>;
 
     return new GPUBackend(library, outputShape, id);
   }

@@ -24,7 +24,7 @@ export function inferShape(arr: ArrayMap): number[] {
 /**
  * return the length of a shape.
  */
-export function length(shape: Shape[Rank]): number {
+export function length(shape: Shape<Rank>): number {
   let length = 1;
   shape.forEach((i) => length *= i);
   return length;
@@ -33,7 +33,7 @@ export function length(shape: Shape[Rank]): number {
 /**
  * convert a shape to a given rank.
  */
-export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
+export function toShape<R extends Rank>(shape: Shape<Rank>, rank: R): Shape<R> {
   if (rank < shape.length) {
     const res = new Array(rank).fill(1);
     for (let i = 1; i < shape.length + 1; i++) {
@@ -43,43 +43,43 @@ export function toShape<R extends Rank>(shape: Shape[Rank], rank: R): Shape[R] {
         res[0] *= shape[shape.length - i];
       }
     }
-    return res as Shape[R];
+    return res as Shape<R>;
   } else if (rank > shape.length) {
     const res = new Array(rank).fill(1);
     for (let i = 1; i < shape.length + 1; i++) {
       res[rank - i] = shape[shape.length - i];
     }
-    return res as Shape[R];
+    return res as Shape<R>;
   } else {
-    return shape as Shape[R];
+    return shape as Shape<R>;
   }
 }
 
 /**
  * convert a shape to a 1D shape.
  */
-export function to1D(shape: Shape[Rank]): Shape[1] {
+export function to1D(shape: Shape<Rank>): Shape<1> {
   return toShape(shape, Rank.R1);
 }
 
 /**
  * convert a shape to a 2D shape.
  */
-export function to2D(shape: Shape[Rank]): Shape[2] {
+export function to2D(shape: Shape<Rank>): Shape<2> {
   return toShape(shape, Rank.R2);
 }
 
 /**
  * convert a shape to a 3D shape.
  */
-export function to3D(shape: Shape[Rank]): Shape[3] {
+export function to3D(shape: Shape<Rank>): Shape<3> {
   return toShape(shape, Rank.R3);
 }
 
 /**
  * convert a shape to a 4D shape.
  */
-export function to4D(shape: Shape[Rank]): Shape[4] {
+export function to4D(shape: Shape<Rank>): Shape<4> {
   return toShape(shape, Rank.R4);
 }
 
@@ -96,7 +96,7 @@ export function iterate1D(length: number, callback: (i: number) => void): void {
  * iterate over a 2D array.
  */
 export function iterate2D(
-  mat: Tensor<Rank> | Shape[Rank],
+  mat: Tensor<Rank> | Shape<Rank>,
   callback: (i: number, j: number) => void,
 ): void {
   mat = (Array.isArray(mat) ? mat : mat.shape) as Shape2D;
@@ -111,7 +111,7 @@ export function iterate2D(
  * iterate over a 3D array.
  */
 export function iterate3D(
-  mat: Tensor<Rank> | Shape[Rank],
+  mat: Tensor<Rank> | Shape<Rank>,
   callback: (i: number, j: number, k: number) => void,
 ): void {
   mat = (Array.isArray(mat) ? mat : mat.shape) as Shape3D;
@@ -128,7 +128,7 @@ export function iterate3D(
  * iterate over a 4D array.
  */
 export function iterate4D(
-  mat: Tensor<Rank> | Shape[Rank],
+  mat: Tensor<Rank> | Shape<Rank>,
   callback: (i: number, j: number, k: number, l: number) => void,
 ): void {
   mat = (Array.isArray(mat) ? mat : mat.shape) as Shape4D;

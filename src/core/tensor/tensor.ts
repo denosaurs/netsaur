@@ -16,14 +16,19 @@ import {
 } from "../api/shape.ts";
 import { inferShape, length } from "./util.ts";
 
+export type TensorLike<R extends Rank> = {
+  shape: Shape<R>;
+  data: Float32Array;
+};
+
 /**
  * A generic N-dimensional tensor.
  */
 export class Tensor<R extends Rank> {
-  shape: Shape[R];
+  shape: Shape<R>;
   data: Float32Array;
 
-  constructor(data: Float32Array, shape: Shape[R]) {
+  constructor(data: Float32Array, shape: Shape<R>) {
     this.shape = shape;
     this.data = data;
   }
@@ -31,16 +36,16 @@ export class Tensor<R extends Rank> {
   /**
    * Creates an empty tensor.
    */
-  static zeroes<R extends Rank>(shape: Shape[R]): Tensor<R> {
+  static zeroes<R extends Rank>(shape: Shape<R>): Tensor<R> {
     return new Tensor(new Float32Array(length(shape)), shape);
   }
 
   /**
    * Serialise a tensor into JSON.
    */
-  toJSON(): { data: number[]; shape: Shape[R] } {
+  toJSON(): { data: number[]; shape: Shape<R> } {
     const data = new Array(this.data.length).fill(1);
-    this.data.forEach((value, i) => data[i] = value);
+    this.data.forEach((value, i) => (data[i] = value));
     return { data, shape: this.shape };
   }
 }
@@ -51,11 +56,29 @@ export class Tensor<R extends Rank> {
  * tensor([1, 2, 3, 4], [2, 2]);
  * ```
  */
+export function tensor<R extends Rank>(tensorLike: TensorLike<R>): Tensor<R>;
 export function tensor<R extends Rank>(
   values: Float32Array,
-  shape: Shape[R],
+  shape: Shape<R>
+): Tensor<R>;
+export function tensor<R extends Rank>(
+  values: Float32Array | TensorLike<R>,
+  shape?: Shape<R>
 ): Tensor<R> {
-  return new Tensor(values, shape);
+  if (values instanceof Float32Array) {
+    if (!shape)
+      throw new Error("Cannot initialize Tensor without a shape parameter.");
+    return new Tensor(values, shape);
+  }
+  if (!values.data || !values.shape)
+    throw new Error(
+      `Cannot initialize Tensor: Expected keys 'data', 'shape'. Got ${Object.keys(
+        values
+      )
+        .map((x) => `'${x}'`)
+        .join(", ")}.`
+    );
+  return new Tensor(values.data, values.shape);
 }
 
 /**

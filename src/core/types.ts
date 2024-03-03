@@ -28,7 +28,7 @@ export interface Backend {
   predict(
     input: Tensor<Rank>,
     layers?: number[],
-    outputShape?: Shape[keyof Shape],
+    outputShape?: Shape<Rank>,
   ): Promise<Tensor<Rank>>;
 
   /**
@@ -51,7 +51,7 @@ export type NetworkConfig = {
   /**
    * Input size of the neural network.
    */
-  size: Shape[Rank];
+  size: Shape<Rank>;
 
   /**
    * List of layers in the neural network.
