@@ -20,8 +20,8 @@ export class Buffer {
  */
 export type TrainOptions = {
   datasets: number;
-  inputShape: Shape[Rank];
-  outputShape: Shape[Rank];
+  inputShape: Shape<Rank>;
+  outputShape: Shape<Rank>;
   epochs: number;
   batches: number;
   rate: number;
@@ -31,8 +31,8 @@ export type TrainOptions = {
  * Predict Options Interface.
  */
 export type PredictOptions = {
-  inputShape: Shape[Rank];
-  outputShape: Shape[Rank];
+  inputShape: Shape<Rank>;
+  outputShape: Shape<Rank>;
 };
 
 /**

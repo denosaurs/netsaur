@@ -1,32 +1,36 @@
 /**
+ * Shape Type
+ */
+export type Shape<R extends Rank> = [number, ...number[]] & { length: R };
+/**
  * 1st dimentional shape.
  */
-export type Shape1D = [number];
+export type Shape1D = Shape<1>;
 
 /**
  * 2nd dimentional shape.
  */
-export type Shape2D = [number, number];
+export type Shape2D = Shape<2>;
 
 /**
  * 3th dimentional shape.
  */
-export type Shape3D = [number, number, number];
+export type Shape3D = Shape<3>;
 
 /**
  * 4th dimentional shape.
  */
-export type Shape4D = [number, number, number, number];
+export type Shape4D = Shape<4>;
 
 /**
  * 5th dimentional shape.
  */
-export type Shape5D = [number, number, number, number, number];
+export type Shape5D = Shape<5>;
 
 /**
  * 6th dimentional shape.
  */
-export type Shape6D = [number, number, number, number, number, number];
+export type Shape6D = Shape<6>;
 
 /**
  * Rank Types.
@@ -61,18 +65,6 @@ export enum Rank {
    * Rank 6 Tensor
    */
   R6 = 6,
-}
-
-/**
- * Shape Interface
- */
-export interface Shape {
-  1: Shape1D;
-  2: Shape2D;
-  3: Shape3D;
-  4: Shape4D;
-  5: Shape5D;
-  6: Shape6D;
 }
 
 /**

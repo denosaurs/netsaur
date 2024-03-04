@@ -14,10 +14,10 @@ import { PredictOptions, TrainOptions } from "./utils.ts";
  * Web Assembly Backend.
  */
 export class WASMBackend implements Backend {
-  outputShape: Shape[Rank];
+  outputShape: Shape<Rank>;
   #id: number;
 
-  constructor(outputShape: Shape[Rank], id: number) {
+  constructor(outputShape: Shape<Rank>, id: number) {
     this.outputShape = outputShape;
     this.#id = id;
   }
@@ -25,11 +25,11 @@ export class WASMBackend implements Backend {
   static create(config: NetworkConfig): WASMBackend {
     const shape = Array(0);
     const id = wasm_backend_create(JSON.stringify(config), shape);
-    return new WASMBackend(shape as Shape[Rank], id);
+    return new WASMBackend(shape as Shape<Rank>, id);
   }
 
   train(datasets: DataSet[], epochs: number, batches: number, rate: number): void {
-    this.outputShape = datasets[0].outputs.shape.slice(1) as Shape[Rank];
+    this.outputShape = datasets[0].outputs.shape.slice(1) as Shape<Rank>;
     const buffer = [];
     for (const dataset of datasets) {
       buffer.push(dataset.inputs.data as Float32Array);
@@ -76,6 +76,6 @@ export class WASMBackend implements Backend {
   static load(input: Uint8Array): WASMBackend {
     const shape = Array(0);
     const id = wasm_backend_load(input, shape);
-    return new WASMBackend(shape as Shape[Rank], id);
+    return new WASMBackend(shape as Shape<Rank>, id);
   }
 }

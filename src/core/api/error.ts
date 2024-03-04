@@ -16,7 +16,7 @@ export class IncompatibleRankError extends Error {
  * Invalid Flatten Error is thrown when a tensor cannot be flattened.
  */
 export class InvalidFlattenError extends Error {
-  constructor(input: Shape[Rank], output: Shape[Rank]) {
+  constructor(input: Shape<Rank>, output: Shape<Rank>) {
     super(`Cannot flatten tensor of shape ${input} to shape ${output}`);
   }
 }
@@ -36,7 +36,7 @@ export class NoBackendError extends Error {
  * Invalid Pool Error is thrown when a tensor cannot be pooled.
  */
 export class InvalidPoolError extends Error {
-  constructor(size: Shape[Rank], stride: Shape2D) {
+  constructor(size: Shape<Rank>, stride: Shape2D) {
     super(`Cannot pool shape ${size} with stride ${stride}`);
   }
 }
