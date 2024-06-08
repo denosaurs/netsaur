@@ -15,7 +15,7 @@ const options: FetchOptions = {
   name: "netsaur_gpu",
   url: new URL(import.meta.url).protocol !== "file:"
     ? new URL(
-      "https://github.com/denosaurs/netsaur/releases/download/0.3.2/",
+      "https://github.com/denosaurs/netsaur/releases/download/0.3.2-patch/",
       import.meta.url,
     )
     : "./target/release/",

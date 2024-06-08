@@ -1,6 +1,6 @@
 {
   "name": "@denosaurs/netsaur",
-  "version": "0.3.2",
+  "version": "0.3.2-patch",
   "exports": {
     ".": "./mod.ts",
     "./tokenizers": "./tokenizers/mod.ts",
@@ -28,7 +28,7 @@
     "build": "deno task build:cpu && deno task build:wasm && deno task build:tokenizers",
     "build:cpu": "cargo build --release -p netsaur",
     "build:gpu": "cargo build --release -p netsaur-gpu",
-    "build:wasm": "deno run -Ar https://deno.land/x/wasmbuild@0.15.6/main.ts -p netsaur --out src/backends/wasm/lib",
-    "build:tokenizers": "deno run -Ar https://deno.land/x/wasmbuild@0.15.6/main.ts -p netsaur-tokenizers --out tokenizers/lib"
+    "build:wasm": "deno run -Ar jsr:@deno/wasmbuild@0.17.1 -p netsaur --out src/backends/wasm/lib",
+    "build:tokenizers": "deno run -Ar jsr:@deno/wasmbuild@0.17.1 -p netsaur-tokenizers --out tokenizers/lib"
   }
 }
