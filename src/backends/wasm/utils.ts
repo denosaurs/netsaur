@@ -1,4 +1,4 @@
-import { Rank, Shape } from "../../core/api/shape.ts";
+import type { Rank, Shape } from "../../core/api/shape.ts";
 
 /**
  * Train Options Interface.

@@ -1,12 +1,12 @@
-import { dlopen, FetchOptions } from "../../../deps.ts";
+import { dlopen, type FetchOptions } from "../../../deps.ts";
 import { CPUBackend } from "./backend.ts";
 import { NoBackendError } from "../../core/api/error.ts";
-import { BackendLoader, Engine } from "../../core/engine.ts";
+import { type BackendLoader, Engine } from "../../core/engine.ts";
 import {
-  Backend,
+  type Backend,
   BackendType,
   Cost,
-  NetworkConfig,
+  type NetworkConfig,
   SchedulerType,
 } from "../../core/types.ts";
 import { Sequential } from "../../core/mod.ts";
@@ -15,7 +15,7 @@ const options: FetchOptions = {
   name: "netsaur",
   url: new URL(import.meta.url).protocol !== "file:"
     ? new URL(
-      "https://github.com/denosaurs/netsaur/releases/download/0.3.1/",
+      "https://github.com/denosaurs/netsaur/releases/download/0.3.2/",
       import.meta.url,
     )
     : "./target/release/",

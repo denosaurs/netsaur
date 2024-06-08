@@ -1,6 +1,6 @@
-import { Backend, DataSet, NetworkConfig } from "../types.ts";
-import { Tensor } from "../tensor/tensor.ts";
-import { Rank } from "./shape.ts";
+import type { Backend, DataSet, NetworkConfig } from "../types.ts";
+import type { Tensor } from "../tensor/tensor.ts";
+import type { Rank } from "./shape.ts";
 
 /**
  * Base Neural Network Structure. All Neural Networks should implement this.

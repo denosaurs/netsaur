@@ -1,6 +1,6 @@
 import { WASM } from "../backends/wasm/mod.ts";
-import { Sequential } from "./mod.ts";
-import { Backend, BackendType, NetworkConfig } from "./types.ts";
+import type { Sequential } from "./mod.ts";
+import type { Backend, BackendType, NetworkConfig } from "./types.ts";
 
 onerror = () => {
   if (typeof Deno == "undefined") {

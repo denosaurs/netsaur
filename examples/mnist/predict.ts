@@ -1,10 +1,10 @@
 import {
   CPU,
-  Rank,
+  type Rank,
   Sequential,
   setupBackend,
-  Shape,
-  Tensor,
+  type Shape,
+  type Tensor,
   tensor,
 } from "../../mod.ts";
 import { loadDataset } from "./common.ts";

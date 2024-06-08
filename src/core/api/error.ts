@@ -1,5 +1,5 @@
-import { BackendType } from "../types.ts";
-import { Rank, Shape, Shape2D } from "./shape.ts";
+import type { BackendType } from "../types.ts";
+import type { Rank, Shape, Shape2D } from "./shape.ts";
 
 /**
  * Incompatible Rank Error is thrown when a tensor is incompatible with a layer.

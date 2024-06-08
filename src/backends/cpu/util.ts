@@ -1,11 +1,11 @@
-import { Rank, Shape } from "../../core/api/shape.ts";
-import { DataSet } from "../../core/types.ts";
+import type { Rank, Shape } from "../../core/api/shape.ts";
+import type { DataSet } from "../../core/types.ts";
 
 export class Buffer {
   buffer: Uint8Array = new Uint8Array();
   allocBuffer: Deno.PointerObject<{
-    parameters: ["usize"];
-    result: "buffer";
+    readonly parameters: readonly ["usize"];
+    readonly result: "buffer";
   }> = new Deno.UnsafeCallback({
     parameters: ["usize"],
     result: "buffer",

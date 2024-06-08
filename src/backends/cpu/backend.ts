@@ -1,14 +1,14 @@
-import { Rank, Shape } from "../../core/api/shape.ts";
+import type { Rank, Shape } from "../../core/api/shape.ts";
+import type { Backend, DataSet, NetworkConfig } from "../../core/types.ts";
+import type { Library } from "./mod.ts";
 import { Tensor } from "../../core/tensor/tensor.ts";
 import { length } from "../../core/tensor/util.ts";
-import { Backend, DataSet, NetworkConfig } from "../../core/types.ts";
-import { Library } from "./mod.ts";
 import {
   Buffer,
   encodeDatasets,
   encodeJSON,
-  PredictOptions,
-  TrainOptions,
+  type PredictOptions,
+  type TrainOptions,
 } from "./util.ts";
 
 /**
@@ -34,7 +34,7 @@ export class CPUBackend implements Backend {
     const shape = new Buffer();
     const id = library.symbols.ffi_backend_create(
       buffer,
-      buffer.length,
+      BigInt(buffer.length),
       shape.allocBuffer,
     ) as bigint;
     const outputShape = Array.from(
@@ -62,9 +62,9 @@ export class CPUBackend implements Backend {
     this.library.symbols.ffi_backend_train(
       this.#id,
       buffer,
-      buffer.byteLength,
+      BigInt(buffer.byteLength),
       options,
-      options.byteLength,
+      BigInt(options.byteLength),
     );
   }
 
@@ -92,7 +92,7 @@ export class CPUBackend implements Backend {
       this.#id,
       input.data as Float32Array,
       options,
-      options.length,
+      BigInt(options.length),
       output,
     );
     return new Tensor(
@@ -118,7 +118,7 @@ export class CPUBackend implements Backend {
     const shape = new Buffer();
     const id = library.symbols.ffi_backend_load(
       buffer,
-      buffer.length,
+      BigInt(buffer.length),
       shape.allocBuffer,
     ) as bigint;
     const outputShape = Array.from(shape.buffer.slice(1)) as Shape<Rank>;

@@ -1,6 +1,7 @@
-import { Rank, Shape } from "../../core/api/shape.ts";
+import type { Rank, Shape } from "../../core/api/shape.ts";
+import type { Backend, DataSet, NetworkConfig } from "../../core/types.ts";
+import type { PredictOptions, TrainOptions } from "./utils.ts";
 import { Tensor } from "../../core/tensor/tensor.ts";
-import { Backend, DataSet, NetworkConfig } from "../../core/types.ts";
 import {
   wasm_backend_create,
   wasm_backend_load,
@@ -8,7 +9,6 @@ import {
   wasm_backend_save,
   wasm_backend_train,
 } from "./lib/netsaur.generated.js";
-import { PredictOptions, TrainOptions } from "./utils.ts";
 
 /**
  * Web Assembly Backend.
@@ -28,7 +28,12 @@ export class WASMBackend implements Backend {
     return new WASMBackend(shape as Shape<Rank>, id);
   }
 
-  train(datasets: DataSet[], epochs: number, batches: number, rate: number): void {
+  train(
+    datasets: DataSet[],
+    epochs: number,
+    batches: number,
+    rate: number,
+  ): void {
     this.outputShape = datasets[0].outputs.shape.slice(1) as Shape<Rank>;
     const buffer = [];
     for (const dataset of datasets) {

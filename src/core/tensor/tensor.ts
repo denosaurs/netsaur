@@ -1,4 +1,4 @@
-import {
+import type {
   Array1D,
   Array2D,
   Array3D,
@@ -59,25 +59,29 @@ export class Tensor<R extends Rank> {
 export function tensor<R extends Rank>(tensorLike: TensorLike<R>): Tensor<R>;
 export function tensor<R extends Rank>(
   values: Float32Array,
-  shape: Shape<R>
+  shape: Shape<R>,
 ): Tensor<R>;
 export function tensor<R extends Rank>(
   values: Float32Array | TensorLike<R>,
-  shape?: Shape<R>
+  shape?: Shape<R>,
 ): Tensor<R> {
   if (values instanceof Float32Array) {
-    if (!shape)
+    if (!shape) {
       throw new Error("Cannot initialize Tensor without a shape parameter.");
+    }
     return new Tensor(values, shape);
   }
-  if (!values.data || !values.shape)
+  if (!values.data || !values.shape) {
     throw new Error(
-      `Cannot initialize Tensor: Expected keys 'data', 'shape'. Got ${Object.keys(
-        values
-      )
-        .map((x) => `'${x}'`)
-        .join(", ")}.`
+      `Cannot initialize Tensor: Expected keys 'data', 'shape'. Got ${
+        Object.keys(
+          values,
+        )
+          .map((x) => `'${x}'`)
+          .join(", ")
+      }.`,
     );
+  }
   return new Tensor(values.data, values.shape);
 }
 

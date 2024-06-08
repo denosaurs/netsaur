@@ -1,13 +1,13 @@
 import { Activation, LayerType } from "../types.ts";
 import {
-  BatchNormLayerConfig,
-  Conv2DLayerConfig,
-  ConvTranspose2DLayerConfig,
-  DenseLayerConfig,
-  DropoutLayerConfig,
-  FlattenLayerConfig,
-  Layer,
-  Pool2DLayerConfig,
+  type BatchNormLayerConfig,
+  type Conv2DLayerConfig,
+  type ConvTranspose2DLayerConfig,
+  type DenseLayerConfig,
+  type DropoutLayerConfig,
+  type FlattenLayerConfig,
+  type Layer,
+  type Pool2DLayerConfig,
   PoolMode,
 } from "./layer.ts";
 

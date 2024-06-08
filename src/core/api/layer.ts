@@ -1,6 +1,6 @@
-import { Tensor } from "../tensor/tensor.ts";
-import { Activation, Init, LayerType } from "../types.ts";
-import { Rank, Shape, Shape1D, Shape2D, Shape4D } from "./shape.ts";
+import type { Tensor } from "../tensor/tensor.ts";
+import type { Activation, Init, LayerType } from "../types.ts";
+import type { Rank, Shape, Shape1D, Shape2D, Shape4D } from "./shape.ts";
 
 /**
  * Layer is the base type for all layers.

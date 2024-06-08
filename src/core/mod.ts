@@ -1,15 +1,15 @@
 import {
-  Backend,
+  type Backend,
   Cost,
-  DataSet,
+  type DataSet,
   LayerType,
-  NetworkConfig,
+  type NetworkConfig,
   SchedulerType,
 } from "./types.ts";
 import { Engine } from "./engine.ts";
-import { Rank } from "./api/shape.ts";
-import { Tensor } from "./tensor/tensor.ts";
-import { NeuralNetwork } from "./api/network.ts";
+import type { Rank } from "./api/shape.ts";
+import type { Tensor } from "./tensor/tensor.ts";
+import type { NeuralNetwork } from "./api/network.ts";
 import { SGDOptimizer } from "./api/optimizer.ts";
 
 /**
@@ -30,15 +30,22 @@ export class Sequential implements NeuralNetwork {
     this.backend = Engine.backendLoader.loadBackend(this.config);
   }
 
+  /**
+   * Train the network using a set of training data.
+   */
   train(datasets: DataSet[], epochs = 1000, batches = 1, rate = 0.1): void {
     this.backend.train(datasets, epochs, batches, rate);
   }
+
   /**
    * @param data
    * @param layers Range of layers [a, b) (inclusive of a, exclusive of b) to execute.
    * @returns
    */
-  async predict(data: Tensor<Rank>, layers?: [number, number]): Promise<Tensor<Rank>> {
+  async predict(
+    data: Tensor<Rank>,
+    layers?: [number, number],
+  ): Promise<Tensor<Rank>> {
     if (layers) {
       if (layers[0] < 0 || layers[1] > this.config.layers.length) {
         throw new RangeError(

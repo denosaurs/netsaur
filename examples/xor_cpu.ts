@@ -9,7 +9,6 @@ import {
   Sequential,
   setupBackend,
   SigmoidLayer,
-  tensor1D,
   tensor2D,
 } from "../mod.ts";
 

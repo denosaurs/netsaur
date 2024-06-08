@@ -1,11 +1,11 @@
 import { WASMBackend } from "./backend.ts";
 import { NoBackendError } from "../../core/api/error.ts";
-import { BackendLoader, Engine } from "../../core/engine.ts";
+import { type BackendLoader, Engine } from "../../core/engine.ts";
 import {
-  Backend,
+  type Backend,
   BackendType,
   Cost,
-  NetworkConfig,
+  type NetworkConfig,
   SchedulerType,
 } from "../../core/types.ts";
 import { instantiate } from "./lib/netsaur.generated.js";
@@ -22,7 +22,7 @@ export class WASMInstance {
     await instantiate({
       url: new URL(import.meta.url).protocol !== "file:"
         ? new URL(
-          "https://github.com/denosaurs/netsaur/releases/download/0.3.1/netsaur_bg.wasm",
+          "https://github.com/denosaurs/netsaur/releases/download/0.3.2/netsaur_bg.wasm",
           import.meta.url,
         )
         : undefined,

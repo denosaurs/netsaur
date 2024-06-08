@@ -9,9 +9,9 @@ export * from "./src/core/api/optimizer.ts";
 export * from "./src/core/api/scheduler.ts";
 export { GPU } from "./src/backends/gpu/mod.ts";
 
-import { CPU, CPUBackendLoader } from "./src/backends/cpu/mod.ts";
-import { WASM, WASMBackendLoader } from "./src/backends/wasm/mod.ts";
-import { BackendLoader } from "./src/core/engine.ts";
+import { CPU, type CPUBackendLoader } from "./src/backends/cpu/mod.ts";
+import { WASM, type WASMBackendLoader } from "./src/backends/wasm/mod.ts";
+import type { BackendLoader } from "./src/core/engine.ts";
 
 /**
  * The AUTO backend is chosen automatically based on the environment.

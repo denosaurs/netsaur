@@ -1,12 +1,12 @@
 import {
-  ArrayMap,
+  type ArrayMap,
   Rank,
-  Shape,
-  Shape2D,
-  Shape3D,
-  Shape4D,
+  type Shape,
+  type Shape2D,
+  type Shape3D,
+  type Shape4D,
 } from "../api/shape.ts";
-import { Tensor } from "./tensor.ts";
+import type { Tensor } from "./tensor.ts";
 
 /**
  * Infer the shape of an array.

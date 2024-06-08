@@ -1,5 +1,5 @@
 import type { NeuralNetwork, Rank, Tensor } from "../mod.ts";
-import { Line } from "./types.ts";
+import type { Line } from "./types.ts";
 
 /**
  * Visualizer for Neural Networks in Jupyter Notebook
@@ -21,7 +21,16 @@ export class Visualizer {
     net: NeuralNetwork,
     inputs: Tensor<R>[],
     expectedResults: Tensor<R>[],
-  ) {
+  ): Promise<
+    {
+      [x: symbol]: () => {
+        "application/vnd.plotly.v1+json": {
+          data: Line[];
+          layout: { title: string };
+        };
+      };
+    }
+  > {
     const expected: Line = {
       x: [],
       y: [],

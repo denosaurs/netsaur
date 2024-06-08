@@ -1,8 +1,8 @@
-import { Tensor } from "./tensor/tensor.ts";
-import { Rank, Shape } from "./api/shape.ts";
-import { Layer } from "./api/layer.ts";
-import { Optimizer } from "./api/optimizer.ts";
-import { Scheduler } from "./api/scheduler.ts";
+import type { Tensor } from "./tensor/tensor.ts";
+import type { Rank, Shape } from "./api/shape.ts";
+import type { Layer } from "./api/layer.ts";
+import type { Optimizer } from "./api/optimizer.ts";
+import type { Scheduler } from "./api/scheduler.ts";
 
 /**
  * The Backend is responsible for eveything related to the neural network.
