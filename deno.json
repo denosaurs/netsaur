@@ -1,6 +1,6 @@
 {
   "name": "@denosaurs/netsaur",
-  "version": "0.3.2-patch2",
+  "version": "0.3.2-patch3",
   "exports": {
     ".": "./mod.ts",
     "./web": "./web.ts",
