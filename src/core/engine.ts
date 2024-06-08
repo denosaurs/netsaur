@@ -2,14 +2,6 @@ import { WASM } from "../backends/wasm/mod.ts";
 import type { Sequential } from "./mod.ts";
 import type { Backend, BackendType, NetworkConfig } from "./types.ts";
 
-onerror = () => {
-  if (typeof Deno == "undefined") {
-    throw new Error(
-      "Warning: Deno is not defined. Did you mean to import from ./web.ts instead of ./mod.ts?",
-    );
-  }
-};
-
 export interface BackendInstance {
   /**
    * Initialize the backend.

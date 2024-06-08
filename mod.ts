@@ -13,6 +13,14 @@ import { CPU, type CPUBackendLoader } from "./src/backends/cpu/mod.ts";
 import { WASM, type WASMBackendLoader } from "./src/backends/wasm/mod.ts";
 import type { BackendLoader } from "./src/core/engine.ts";
 
+onerror = () => {
+  if (typeof Deno == "undefined") {
+    throw new Error(
+      "Warning: Deno is not defined. Did you mean to import from ./web.ts instead of ./mod.ts?",
+    );
+  }
+};
+
 /**
  * The AUTO backend is chosen automatically based on the environment.
  */
