@@ -2,6 +2,7 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@deno/wasmbuild@0.17.1": "jsr:@deno/wasmbuild@0.17.1",
       "jsr:@denosaurs/plug@1.0.3": "jsr:@denosaurs/plug@1.0.3",
       "jsr:@std/assert@^0.213.1": "jsr:@std/assert@0.213.1",
       "jsr:@std/encoding@0.213.1": "jsr:@std/encoding@0.213.1",
@@ -11,6 +12,9 @@
       "jsr:@std/path@^0.213.1": "jsr:@std/path@0.213.1"
     },
     "jsr": {
+      "@deno/wasmbuild@0.17.1": {
+        "integrity": "420fc1f1130fd3a6afa60e5ba90b8710b46e380773b1b0eb368fd2688853c248"
+      },
       "@denosaurs/plug@1.0.3": {
         "integrity": "b010544e386bea0ff3a1d05e0c88f704ea28cbd4d753439c2f1ee021a85d4640",
         "dependencies": [

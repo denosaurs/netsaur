@@ -4,7 +4,7 @@
 // deno-fmt-ignore-file
 /// <reference types="./netsaur.generated.d.ts" />
 
-// source-hash: c0144020ff3bc5a20072ca9f8a0a0e02af6c6eb7
+// source-hash: af6cb6fb1e5d51212d81be60c88a3b2eb20dfbc5
 let wasm;
 let cachedInt32Memory0;
 
@@ -217,7 +217,7 @@ const imports = {
     __wbindgen_object_drop_ref: function (arg0) {
       takeObject(arg0);
     },
-    __wbg_log_3703f669bffcfc1a: function (arg0, arg1) {
+    __wbg_log_67e9366454666686: function (arg0, arg1) {
       console.log(getStringFromWasm0(arg0, arg1));
     },
     __wbindgen_number_new: function (arg0) {
