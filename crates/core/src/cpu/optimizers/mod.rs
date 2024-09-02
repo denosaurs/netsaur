@@ -1,8 +1,10 @@
 mod adam;
 mod sgd;
+mod rmsprop;
 
-pub use adam::*;
 use ndarray::{ArrayViewD, ArrayViewMutD};
+pub use adam::*;
+pub use rmsprop::*;
 pub use sgd::*;
 
 use crate::{CPULayer, CPUScheduler, Optimizer};
@@ -10,6 +12,7 @@ use crate::{CPULayer, CPUScheduler, Optimizer};
 pub enum CPUOptimizer {
     SGD(CPUSGDOptimizer),
     Adam(CPUAdamOptimizer),
+    RMSProp(CPURMSPropOptimizer),
 }
 
 impl CPUOptimizer {
@@ -24,6 +27,9 @@ impl CPUOptimizer {
             Optimizer::SGD => CPUOptimizer::SGD(CPUSGDOptimizer::new()),
             Optimizer::Adam(config) => {
                 CPUOptimizer::Adam(CPUAdamOptimizer::new(config, all_params))
+            },
+            Optimizer::RMSProp(config) => {
+                CPUOptimizer::RMSProp(CPURMSPropOptimizer::new(config, all_params))
             }
         }
     }
@@ -48,6 +54,9 @@ impl CPUOptimizer {
                     }
                     CPUOptimizer::Adam(adam) => {
                         adam.update_grads(params, grads, idx, scheduler, rate)
+                    }
+                    CPUOptimizer::RMSProp(rmsprop) => {
+                        rmsprop.update_grads(params, grads, idx, scheduler, rate, epoch)
                     }
                 }
                 idx += 1;

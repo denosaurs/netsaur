@@ -134,11 +134,19 @@ pub struct AdamOptimizer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct RMSPropOptimizer {
+    pub decay_rate: f32,
+    pub epsilon: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type", content = "config")]
 #[serde(rename_all = "lowercase")]
 pub enum Optimizer {
     SGD,
     Adam(AdamOptimizer),
+    RMSProp(RMSPropOptimizer),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -183,3 +191,11 @@ pub struct PredictOptions {
     pub output_shape: Vec<usize>,
     pub layers: Option<Vec<usize>>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct RegularizeOptions {
+    pub c: f32,
+    pub l1_ratio: f32,
+}
+
