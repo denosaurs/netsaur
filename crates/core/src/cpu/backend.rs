@@ -128,7 +128,7 @@ impl Backend {
         outputs: ArrayViewD<'b, f32>,
         data: ArrayViewD<'b, f32>,
     ) -> ArrayD<f32> {
-        let mut d_outputs = (self.cost.prime)(data, outputs);
+        let mut d_outputs = (self.cost.prime)(outputs, data);
         for layer in self.layers.iter_mut().rev() {
             d_outputs = layer.backward_propagate(d_outputs);
         }
