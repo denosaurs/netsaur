@@ -1,9 +1,11 @@
 mod adam;
+mod nadam;
 mod sgd;
 mod rmsprop;
 
-use ndarray::{ArrayD, ArrayViewD, ArrayViewMutD};
+use ndarray::{ArrayViewD, ArrayViewMutD};
 pub use adam::*;
+pub use nadam::*;
 pub use rmsprop::*;
 pub use sgd::*;
 
@@ -12,6 +14,7 @@ use crate::{CPULayer, CPUScheduler, Optimizer};
 pub enum CPUOptimizer {
     SGD(CPUSGDOptimizer),
     Adam(CPUAdamOptimizer),
+    Nadam(CPUNadamOptimizer),
     RMSProp(CPURMSPropOptimizer),
 }
 
@@ -19,7 +22,7 @@ impl CPUOptimizer {
     pub fn from(optimizer: Optimizer, layers: &mut Vec<CPULayer>) -> Self {
         let mut all_params = Vec::new();
         for layer in layers {
-            if let Some((params, _)) = CPUOptimizer::get_params(layer) {
+            if let Some((params, _, _)) = CPUOptimizer::get_params(layer) {
                 all_params.push(params)
             }
         }
@@ -27,6 +30,9 @@ impl CPUOptimizer {
             Optimizer::SGD => CPUOptimizer::SGD(CPUSGDOptimizer::new()),
             Optimizer::Adam(config) => {
                 CPUOptimizer::Adam(CPUAdamOptimizer::new(config, all_params))
+            },
+            Optimizer::Nadam(config) => {
+                CPUOptimizer::Nadam(CPUNadamOptimizer::new(config, all_params))
             },
             Optimizer::RMSProp(config) => {
                 CPUOptimizer::RMSProp(CPURMSPropOptimizer::new(config, all_params))
@@ -40,7 +46,6 @@ impl CPUOptimizer {
         scheduler: &CPUScheduler,
         rate: f32,
         epoch: usize,
-        l: ArrayD<f32>,
     ) {
         match self {
             CPUOptimizer::Adam(adam) => adam.t += 1.0,
@@ -48,16 +53,19 @@ impl CPUOptimizer {
         }
         let mut idx = 0;
         for layer in layers.iter_mut() {
-            if let Some((params, grads)) = CPUOptimizer::get_params(layer) {
+            if let Some((params, grads, l)) = CPUOptimizer::get_params(layer) {
                 match self {
                     CPUOptimizer::SGD(sgd) => {
                         sgd.update_grads(params, grads, scheduler, rate, epoch, l)
                     }
                     CPUOptimizer::Adam(adam) => {
-                        adam.update_grads(params, grads, idx, scheduler, rate)
+                        adam.update_grads(params, grads, idx, scheduler, rate, l)
+                    }
+                    CPUOptimizer::Nadam(nadam) => {
+                        nadam.update_grads(params, grads, idx, scheduler, rate, l)
                     }
                     CPUOptimizer::RMSProp(rmsprop) => {
-                        rmsprop.update_grads(params, grads, idx, scheduler, rate, epoch)
+                        rmsprop.update_grads(params, grads, idx, scheduler, rate, epoch, l)
                     }
                 }
                 idx += 1;
@@ -93,8 +101,8 @@ impl CPUOptimizer {
                     layer.d_biases.view().into_dyn(),
                 ],
                 vec![
-                    ArrayD::zeros(layer.d_weights.shape()).view(),
-                    ArrayD::zeros(layer.d_biases.shape()).view(),
+                    layer.l_weights.view().into_dyn(),
+                    layer.l_biases.view().into_dyn(),
                 ]
             )),
             CPULayer::ConvTranspose2D(layer) => Some((
@@ -107,8 +115,8 @@ impl CPUOptimizer {
                     layer.d_biases.view().into_dyn(),
                 ],
                 vec![
-                    ArrayD::zeros(layer.d_weights.shape()).view(),
-                    ArrayD::zeros(layer.d_biases.shape()).view(),
+                    layer.l_weights.view().into_dyn(),
+                    layer.l_biases.view().into_dyn(),
                 ]
             )),
             CPULayer::BatchNorm1D(layer) => Some((
@@ -121,8 +129,8 @@ impl CPUOptimizer {
                     layer.d_beta.view().into_dyn(),
                 ],
                 vec![
-                    ArrayD::zeros(layer.d_gamma.shape()).view(),
-                    ArrayD::zeros(layer.d_gamma.shape()).view(),
+                    layer.l_gamma.view().into_dyn(),
+                    layer.l_beta.view().into_dyn(),
                 ]
             )),
             CPULayer::BatchNorm2D(layer) => Some((
@@ -135,8 +143,8 @@ impl CPUOptimizer {
                     layer.d_beta.view().into_dyn(),
                 ],
                 vec![
-                    ArrayD::zeros(layer.d_gamma.shape()).view(),
-                    ArrayD::zeros(layer.d_gamma.shape()).view(),
+                    layer.l_gamma.view().into_dyn(),
+                    layer.l_beta.view().into_dyn(),
                 ]
             )),
             _ => return None,
