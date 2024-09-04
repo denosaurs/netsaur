@@ -14,6 +14,7 @@
     "example:xor-cpu": "deno run -A --unstable-ffi ./examples/xor_cpu.ts",
     "example:xor-gpu": "deno run -A --unstable-ffi ./examples/xor_gpu.ts",
     "example:xor-wasm": "deno run -A ./examples/xor_wasm.ts",
+    "example:autoencoder": "deno run -A --unstable-ffi ./examples/autoencoders/example.ts",
     "example:linear": "deno run -A --unstable-ffi ./examples/linear.ts",
     "example:multiple-linear": "deno run -A --unstable-ffi ./examples/multiple-linear/student.ts",
     "example:binary": "deno run -A --unstable-ffi ./examples/classification/binary_iris.ts",
