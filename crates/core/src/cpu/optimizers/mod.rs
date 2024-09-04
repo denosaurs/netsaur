@@ -49,6 +49,7 @@ impl CPUOptimizer {
     ) {
         match self {
             CPUOptimizer::Adam(adam) => adam.t += 1.0,
+            CPUOptimizer::Nadam(nadam) => nadam.t += 1.0,
             _ => {}
         }
         let mut idx = 0;
