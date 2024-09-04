@@ -1,7 +1,7 @@
 use ndarray::{s, Array1, Array4, ArrayD, Dimension, Ix1, Ix4, IxDyn};
 use std::ops::{Add, AddAssign, Mul};
 
-use crate::{CPUInit, ConvTranspose2DLayer, Init, Tensors};
+use crate::{CPUInit, CPURegularizer, ConvTranspose2DLayer, Init, Tensors};
 
 pub struct ConvTranspose2DCPULayer {
     // cache
@@ -17,6 +17,12 @@ pub struct ConvTranspose2DCPULayer {
     // gradients
     pub d_weights: Array4<f32>,
     pub d_biases: Array1<f32>,
+
+    // regulatization
+    pub l_weights: Array4<f32>,
+    pub l_biases: Array1<f32>,
+
+    pub regularizer: CPURegularizer,
 }
 
 impl ConvTranspose2DCPULayer {
@@ -25,12 +31,11 @@ impl ConvTranspose2DCPULayer {
         let padding = config.padding.unwrap_or(vec![0, 0]);
         let input_y = size[2] + 2 * padding[0];
         let input_x = size[3] + 2 * padding[1];
-        let output_y = (input_y + config.kernel_size[2]) / strides[0] - 1;
-        let output_x = (input_x + config.kernel_size[3]) / strides[1] - 1;
+        let output_y = (input_y - 1) * strides[0] - config.kernel_size[2] + 2;
+        let output_x = (input_x - 1) * strides[1] - config.kernel_size[3] + 2;
         let input_size = Ix4(size[0], size[1], input_y, input_x);
         let weight_size = IxDyn(config.kernel_size.as_slice());
         let output_size = Ix4(size[0], weight_size[0], output_y, output_x);
-
         let (weights, biases) = if let Some(Tensors::Conv(tensors)) = tensors {
             (tensors.weights, tensors.biases)
         } else {
@@ -54,10 +59,15 @@ impl ConvTranspose2DCPULayer {
             inputs: Array4::zeros(input_size),
             weights: weights.into_dimensionality::<Ix4>().unwrap(),
             biases: biases.into_dimensionality::<Ix1>().unwrap(),
-            d_weights: ArrayD::zeros(weight_size)
+            d_weights: ArrayD::zeros(weight_size.clone())
                 .into_dimensionality::<Ix4>()
                 .unwrap(),
             d_biases: Array1::zeros(config.kernel_size[0]),
+            l_weights: ArrayD::zeros(weight_size)
+                .into_dimensionality::<Ix4>()
+                .unwrap(),
+            l_biases: Array1::zeros(config.kernel_size[0]),
+            regularizer: CPURegularizer::from(config.c, config.l1_ratio),
         }
     }
 
@@ -141,6 +151,16 @@ impl ConvTranspose2DCPULayer {
             }
         }
 
+        self.l_weights = self
+            .regularizer
+            .coeff(&self.weights.clone().into_dyn())
+            .into_dimensionality::<Ix4>()
+            .unwrap();
+        self.l_biases = self
+            .regularizer
+            .coeff(&self.biases.clone().into_dyn())
+            .into_dimensionality::<Ix1>()
+            .unwrap();
         d_inputs.into_dyn()
     }
 }

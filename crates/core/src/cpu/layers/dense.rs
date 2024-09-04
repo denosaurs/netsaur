@@ -76,8 +76,8 @@ impl DenseCPULayer {
         self.d_weights = inputs_t.dot(&d_outputs);
         self.d_biases = d_outputs.sum_axis(Axis(0));
 
-        self.l_weights = self.regularizer.coeff(&self.weights.into_dyn()).into_dimensionality::<Ix2>().unwrap();
-        self.l_biases = self.regularizer.coeff(&self.biases.into_dyn()).into_dimensionality::<Ix1>().unwrap();
+        self.l_weights = self.regularizer.coeff(&self.weights.clone().into_dyn()).into_dimensionality::<Ix2>().unwrap();
+        self.l_biases = self.regularizer.coeff(&self.biases.clone().into_dyn()).into_dimensionality::<Ix1>().unwrap();
         d_inputs.into_dyn()
     }
 }
