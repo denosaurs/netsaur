@@ -199,7 +199,7 @@ async function feedForward(layers: Layer[]) {
     cost: Cost.MSE,
   });
 
-  const data = new Tensor(buffer, [1, dim, dim]);
+  const data = new Tensor(buffer, [1, 1, dim, dim]);
   return (await net.predict(data)) as Tensor<Rank.R4>;
 }
 

@@ -35,6 +35,10 @@ pub struct BatchNorm1DCPULayer {
     // gradients
     pub d_gamma: Array2<f32>,
     pub d_beta: Array2<f32>,
+
+    // gradients
+    pub l_gamma: Array2<f32>,
+    pub l_beta: Array2<f32>,
 }
 
 impl BatchNorm1DCPULayer {
@@ -74,6 +78,9 @@ impl BatchNorm1DCPULayer {
 
             d_gamma: Array2::zeros((1, size[1])),
             d_beta: Array2::zeros((1, size[1])),
+
+            l_gamma: Array2::zeros((1, size[1])),
+            l_beta: Array2::zeros((1, size[1])),
         }
     }
 

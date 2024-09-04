@@ -9,6 +9,8 @@ pub struct BackendConfig {
     pub cost: Cost,
     pub optimizer: Optimizer,
     pub scheduler: Scheduler,
+    pub tolerance: Option<f32>,
+    pub patience: Option<usize>,
 }
 
 #[derive(Debug)]
@@ -54,9 +56,12 @@ pub struct JSTensor {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct DenseLayer {
     pub size: Vec<usize>,
     pub init: Option<Init>,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -67,6 +72,8 @@ pub struct Conv2DLayer {
     pub kernel_size: Vec<usize>,
     pub padding: Option<Vec<usize>>,
     pub strides: Option<Vec<usize>>,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -77,6 +84,8 @@ pub struct ConvTranspose2DLayer {
     pub kernel_size: Vec<usize>,
     pub padding: Option<Vec<usize>>,
     pub strides: Option<Vec<usize>>,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -110,10 +119,14 @@ pub struct ActivationLayer {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Cost {
+    BinCrossEntropy,
     CrossEntropy,
     Hinge,
+    Huber,
+    MAE,
     MSE,
-    BinCrossEntropy,
+    SmoothHinge,
+    Tukey,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -134,11 +147,28 @@ pub struct AdamOptimizer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub struct NadamOptimizer {
+    pub beta1: f32,
+    pub beta2: f32,
+    pub epsilon: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct RMSPropOptimizer {
+    pub decay_rate: f32,
+    pub epsilon: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type", content = "config")]
 #[serde(rename_all = "lowercase")]
 pub enum Optimizer {
     SGD,
     Adam(AdamOptimizer),
+    Nadam(NadamOptimizer),
+    RMSProp(RMSPropOptimizer),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -183,3 +213,11 @@ pub struct PredictOptions {
     pub output_shape: Vec<usize>,
     pub layers: Option<Vec<usize>>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct RegularizeOptions {
+    pub c: f32,
+    pub l1_ratio: f32,
+}
+

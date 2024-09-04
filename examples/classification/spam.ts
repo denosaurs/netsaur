@@ -3,6 +3,7 @@ import {
   Cost,
   CPU,
   DenseLayer,
+  NadamOptimizer,
   ReluLayer,
   Sequential,
   setupBackend,
@@ -30,7 +31,7 @@ const data = parse(_data);
 const x = data.map((msg) => msg[1]);
 
 // Get the classes
-const y = data.map((msg) => ymap.indexOf(msg[0]));
+const y = data.map((msg) => ymap.indexOf(msg[0]) === 0 ? -1 : 1);
 
 // Split the dataset for training and testing
 const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y) as [
@@ -67,11 +68,11 @@ const net = new Sequential({
     // A dense layer with 1 neuron
     DenseLayer({ size: [1] }),
     // A sigmoid activation layer
-    SigmoidLayer(),
   ],
 
   // We are using Log Loss for finding cost
-  cost: Cost.BinCrossEntropy,
+  cost: Cost.Hinge,
+  optimizer: NadamOptimizer()
 });
 
 const inputs = tensor(x_vec.data, x_vec.shape);
@@ -97,6 +98,6 @@ const x_vec_test = vec.transform(test[0]);
 
 // Calculate metrics
 const res = await net.predict(tensor(x_vec_test.data, x_vec_test.shape));
-const y1 = res.data.map((i) => i < 0.5 ? 0 : 1);
+const y1 = res.data.map((i) => i < 0 ? -1 : 1);
 const cMatrix = new ClassificationReport(test[1], y1);
 console.log("Confusion Matrix: ", cMatrix);
