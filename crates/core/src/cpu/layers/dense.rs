@@ -47,7 +47,7 @@ impl DenseCPULayer {
             d_biases: Array1::zeros(config.size[0]),
             l_weights: Array2::zeros(weight_size),
             l_biases: Array1::zeros(config.size[0]),
-            regularizer: CPURegularizer::from(config.c, config.l1_ratio)
+            regularizer: CPURegularizer::from(config.c.unwrap_or(0.0), config.l1_ratio.unwrap_or(1.0))
         }
     }
 

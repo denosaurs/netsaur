@@ -58,8 +58,8 @@ pub struct JSTensor {
 pub struct DenseLayer {
     pub size: Vec<usize>,
     pub init: Option<Init>,
-    pub c: f32,
-    pub l1_ratio: f32,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -70,8 +70,8 @@ pub struct Conv2DLayer {
     pub kernel_size: Vec<usize>,
     pub padding: Option<Vec<usize>>,
     pub strides: Option<Vec<usize>>,
-    pub c: f32,
-    pub l1_ratio: f32,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -82,8 +82,8 @@ pub struct ConvTranspose2DLayer {
     pub kernel_size: Vec<usize>,
     pub padding: Option<Vec<usize>>,
     pub strides: Option<Vec<usize>>,
-    pub c: f32,
-    pub l1_ratio: f32,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
