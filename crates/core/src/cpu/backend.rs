@@ -14,6 +14,8 @@ use crate::{
 pub struct Backend {
     pub silent: bool,
     pub config: BackendConfig,
+    pub tolerance: f32,
+    pub patience: usize,
     pub layers: Vec<CPULayer>,
     pub size: Vec<usize>,
     pub cost: CPUCost,
@@ -83,10 +85,14 @@ impl Backend {
         let scheduler = CPUScheduler::from(&config.scheduler);
         let cost = CPUCost::from(config.cost.clone());
         let silent = config.silent.is_some_and(|x| x == true);
+        let tolerance = config.tolerance.unwrap_or(0.0);
+        let patience = config.patience.unwrap_or(0);
         Self {
             logger,
             silent,
             config,
+            tolerance,
+            patience,
             layers,
             cost,
             optimizer,
@@ -131,6 +137,10 @@ impl Backend {
 
     pub fn train(&mut self, datasets: Vec<Dataset>, epochs: usize, batches: usize, rate: f32) {
         let mut epoch = 0;
+        let mut best_cost = -1f32;
+        let mut disappointments = 0;
+        let mut best_net = self.save();
+        let mut cost = 0f32;
         while epoch < epochs {
             let mut total = 0.0;
             for (i, dataset) in datasets.iter().enumerate() {
@@ -141,10 +151,33 @@ impl Backend {
                 total += (self.cost.cost)(outputs.view(), dataset.outputs.view());
                 let minibatch = outputs.dim()[0];
                 if !self.silent && ((i + 1) * minibatch) % batches == 0 {
-                    let cost = total / (batches) as f32;
+                    cost = total / (batches) as f32;
                     let msg = format!("Epoch={}, Dataset={}, Cost={}", epoch, i * minibatch, cost);
                     (self.logger.log)(msg);
                     total = 0.0;
+                }
+            }
+            if self.patience != 0 {
+                if best_cost < 0.0 {
+                    best_cost = cost;
+                }
+                if cost < best_cost - self.tolerance {
+                    disappointments = 0;
+                    best_cost = cost;
+                    best_net = self.save();
+                }  else {
+                    disappointments += 1;
+                    if !self.silent {
+                        println!("Patience counter: {} disappointing epochs out of {}.", disappointments, self.patience);
+                    }
+                }
+                if disappointments >= self.patience {
+                    if !self.silent {
+                        println!("No improvement for {} epochs. Stopping early at cost={}", disappointments, best_cost);
+                    }
+                    let net = Self::load(&best_net, Logger { log: |x| println!("{}", x) });
+                    self.layers = net.layers;
+                    break;
                 }
             }
             epoch += 1

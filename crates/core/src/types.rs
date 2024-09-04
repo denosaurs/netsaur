@@ -9,6 +9,8 @@ pub struct BackendConfig {
     pub cost: Cost,
     pub optimizer: Optimizer,
     pub scheduler: Scheduler,
+    pub tolerance: Option<f32>,
+    pub patience: Option<usize>,
 }
 
 #[derive(Debug)]

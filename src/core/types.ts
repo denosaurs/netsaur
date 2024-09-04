@@ -17,7 +17,7 @@ export interface Backend {
     datasets: DataSet[],
     epochs: number,
     batches: number,
-    rate: number,
+    rate: number
   ): void;
 
   /**
@@ -28,7 +28,7 @@ export interface Backend {
   predict(
     input: Tensor<Rank>,
     layers?: number[],
-    outputShape?: Shape<Rank>,
+    outputShape?: Shape<Rank>
   ): Promise<Tensor<Rank>>;
 
   /**
@@ -77,6 +77,16 @@ export type NetworkConfig = {
    * Whether or not to silence the verbose messages.
    */
   silent?: boolean;
+  
+  /**
+   * Minimum threshold for weight updates in each epoch.
+   */
+  tolerance?: number;
+
+  /**
+   * Number of disappointing iterations to allow before early stopping
+   */
+  patience?: number;
 };
 
 /**
@@ -150,7 +160,7 @@ export enum OptimizerType {
   SGD = "sgd",
   Adam = "adam",
   Nadam = "nadam",
-  RMSProp = "rmsprop"
+  RMSProp = "rmsprop",
 }
 
 export enum SchedulerType {
