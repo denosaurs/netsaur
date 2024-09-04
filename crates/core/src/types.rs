@@ -119,10 +119,14 @@ pub struct ActivationLayer {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Cost {
+    BinCrossEntropy,
     CrossEntropy,
     Hinge,
+    Huber,
+    MAE,
     MSE,
-    BinCrossEntropy,
+    SmoothHinge,
+    Tukey,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

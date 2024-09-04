@@ -77,7 +77,7 @@ export type NetworkConfig = {
    * Whether or not to silence the verbose messages.
    */
   silent?: boolean;
-  
+
   /**
    * Minimum threshold for weight updates in each epoch.
    */
@@ -154,6 +154,28 @@ export enum Cost {
    * Mean squared error cost function is the standard cost function for regression.
    */
   MSE = "mse",
+
+  /**
+   * Mean absolute error cost function is a popular cost function for regression.
+   */
+  MAE = "mae",
+
+  /**
+   * Huber is a cost function for regression and is less sensitive to outliers than the 
+   * squared error loss
+   */
+  Huber = "huber",
+
+  /**
+   * Smoothed hinge is a variant of the Huber cost function used for binary classification. 
+   * It is a smoothed version of hinge and is more robust to outliers.
+   */
+  SmoothHinge = "smoothhinge",
+
+  /**
+   * Tukey's biweight loss is a robust cost function for regression problems.
+   */
+  Tukey = "tukey",
 }
 
 export enum OptimizerType {
