@@ -149,6 +149,7 @@ export enum Cost {
 export enum OptimizerType {
   SGD = "sgd",
   Adam = "adam",
+  Nadam = "nadam",
   RMSProp = "rmsprop"
 }
 
