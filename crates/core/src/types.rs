@@ -54,9 +54,12 @@ pub struct JSTensor {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct DenseLayer {
     pub size: Vec<usize>,
     pub init: Option<Init>,
+    pub c: f32,
+    pub l1_ratio: f32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -134,6 +137,14 @@ pub struct AdamOptimizer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub struct NadamOptimizer {
+    pub beta1: f32,
+    pub beta2: f32,
+    pub epsilon: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct RMSPropOptimizer {
     pub decay_rate: f32,
@@ -146,6 +157,7 @@ pub struct RMSPropOptimizer {
 pub enum Optimizer {
     SGD,
     Adam(AdamOptimizer),
+    Nadam(NadamOptimizer),
     RMSProp(RMSPropOptimizer),
 }
 

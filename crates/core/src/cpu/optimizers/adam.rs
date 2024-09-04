@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, SubAssign};
+use std::ops::{Add, Div, Mul, SubAssign, Sub};
 
 use ndarray::{ArrayD, ArrayViewD, ArrayViewMutD};
 
@@ -48,8 +48,9 @@ impl CPUAdamOptimizer {
         idx: usize,
         scheduler: &CPUScheduler,
         rate: f32,
+        l: Vec<ArrayViewD<f32>>,
     ) {
-        for (j, (param, grad)) in params.iter_mut().zip(grads).enumerate() {
+        for (j, ((param, grad), li)) in params.iter_mut().zip(grads).zip(l).enumerate() {
             self.m[idx][j] = self
                 .beta1
                 .mul(&self.m[idx][j])
@@ -67,7 +68,8 @@ impl CPUAdamOptimizer {
             param.sub_assign(
                 &rate
                     .mul(m_hat)
-                    .div(v_hat.map(|x| x.sqrt()).add(self.epsilon)),
+                    .div(v_hat.map(|x| x.sqrt()).add(self.epsilon))
+                    .sub(&li),
             )
         }
     }

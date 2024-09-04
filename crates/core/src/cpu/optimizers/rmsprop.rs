@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, SubAssign};
+use std::ops::{Add, Div, Mul, SubAssign, Sub};
 
 use ndarray::{ArrayD, ArrayViewD, ArrayViewMutD};
 
@@ -36,8 +36,9 @@ impl CPURMSPropOptimizer {
         scheduler: &CPUScheduler,
         rate: f32,
         epoch: usize,
+        l: Vec<ArrayViewD<f32>>,
     ) {
-        for (j, (param, grad)) in params.iter_mut().zip(grads).enumerate() {
+        for (j, ((param, grad), li)) in params.iter_mut().zip(grads).zip(l).enumerate() {
             self.acc_sg[idx][j] = self
                 .decay_rate
                 .mul(&self.acc_sg[idx][j])
@@ -49,6 +50,7 @@ impl CPURMSPropOptimizer {
                 &rate
                     .mul(&grad)
                     .div(self.acc_sg[idx][j].map(|x| x.sqrt()).add(self.epsilon))
+                    .sub(&li),
             )
         }
     }

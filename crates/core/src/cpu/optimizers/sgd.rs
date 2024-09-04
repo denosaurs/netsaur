@@ -18,10 +18,11 @@ impl CPUSGDOptimizer {
         scheduler: &CPUScheduler,
         rate: f32,
         epoch: usize,
+        l: Vec<ArrayViewD<f32>>,
     ) {
         let eta = scheduler.eta(rate, epoch);
-        for (param, grad) in params.iter_mut().zip(grads) {
-            param.sub_assign(&grad.mul(eta));
+        for ((param, grad), li) in params.iter_mut().zip(grads).zip(l) {
+            param.sub_assign(&(&grad - &li).mul(eta));
         }
     }
 }

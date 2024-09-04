@@ -1,7 +1,7 @@
 use ndarray::{Array1, Array2, ArrayD, Axis, Dimension, Ix1, Ix2, IxDyn};
 use std::ops::Add;
 
-use crate::{CPUInit, DenseLayer, Init, Tensors};
+use crate::{CPUInit, CPURegularizer, DenseLayer, Init, Tensors};
 
 pub struct DenseCPULayer {
     // cache
@@ -15,6 +15,12 @@ pub struct DenseCPULayer {
     // gradients
     pub d_weights: Array2<f32>,
     pub d_biases: Array1<f32>,
+
+    // regularization
+    pub l_weights: Array2<f32>,
+    pub l_biases: Array1<f32>,
+
+    pub regularizer: CPURegularizer,
 }
 
 impl DenseCPULayer {
@@ -39,6 +45,9 @@ impl DenseCPULayer {
             biases: biases.into_dimensionality::<Ix1>().unwrap(),
             d_weights: Array2::zeros(weight_size),
             d_biases: Array1::zeros(config.size[0]),
+            l_weights: Array2::zeros(weight_size),
+            l_biases: Array1::zeros(config.size[0]),
+            regularizer: CPURegularizer::from(config.c, config.l1_ratio)
         }
     }
 
@@ -66,6 +75,9 @@ impl DenseCPULayer {
         inputs_t.swap_axes(0, 1);
         self.d_weights = inputs_t.dot(&d_outputs);
         self.d_biases = d_outputs.sum_axis(Axis(0));
+
+        self.l_weights = self.regularizer.coeff(&self.weights.into_dyn()).into_dimensionality::<Ix2>().unwrap();
+        self.l_biases = self.regularizer.coeff(&self.biases.into_dyn()).into_dimensionality::<Ix1>().unwrap();
         d_inputs.into_dyn()
     }
 }

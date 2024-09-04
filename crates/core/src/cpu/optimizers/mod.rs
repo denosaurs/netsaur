@@ -2,7 +2,7 @@ mod adam;
 mod sgd;
 mod rmsprop;
 
-use ndarray::{ArrayViewD, ArrayViewMutD};
+use ndarray::{ArrayD, ArrayViewD, ArrayViewMutD};
 pub use adam::*;
 pub use rmsprop::*;
 pub use sgd::*;
@@ -40,6 +40,7 @@ impl CPUOptimizer {
         scheduler: &CPUScheduler,
         rate: f32,
         epoch: usize,
+        l: ArrayD<f32>,
     ) {
         match self {
             CPUOptimizer::Adam(adam) => adam.t += 1.0,
@@ -50,7 +51,7 @@ impl CPUOptimizer {
             if let Some((params, grads)) = CPUOptimizer::get_params(layer) {
                 match self {
                     CPUOptimizer::SGD(sgd) => {
-                        sgd.update_grads(params, grads, scheduler, rate, epoch)
+                        sgd.update_grads(params, grads, scheduler, rate, epoch, l)
                     }
                     CPUOptimizer::Adam(adam) => {
                         adam.update_grads(params, grads, idx, scheduler, rate)
@@ -66,7 +67,7 @@ impl CPUOptimizer {
 
     pub fn get_params<'a>(
         layer: &'a mut CPULayer,
-    ) -> Option<(Vec<ArrayViewMutD<'a, f32>>, Vec<ArrayViewD<'a, f32>>)> {
+    ) -> Option<(Vec<ArrayViewMutD<'a, f32>>, Vec<ArrayViewD<'a, f32>>, Vec<ArrayViewD<'a, f32>>)> {
         match layer {
             CPULayer::Dense(layer) => Some((
                 vec![
@@ -77,6 +78,10 @@ impl CPUOptimizer {
                     layer.d_weights.view().into_dyn(),
                     layer.d_biases.view().into_dyn(),
                 ],
+                vec![
+                    layer.l_weights.view().into_dyn(),
+                    layer.l_biases.view().into_dyn(),
+                ]
             )),
             CPULayer::Conv2D(layer) => Some((
                 vec![
@@ -87,6 +92,10 @@ impl CPUOptimizer {
                     layer.d_weights.view().into_dyn(),
                     layer.d_biases.view().into_dyn(),
                 ],
+                vec![
+                    ArrayD::zeros(layer.d_weights.shape()).view(),
+                    ArrayD::zeros(layer.d_biases.shape()).view(),
+                ]
             )),
             CPULayer::ConvTranspose2D(layer) => Some((
                 vec![
@@ -97,6 +106,10 @@ impl CPUOptimizer {
                     layer.d_weights.view().into_dyn(),
                     layer.d_biases.view().into_dyn(),
                 ],
+                vec![
+                    ArrayD::zeros(layer.d_weights.shape()).view(),
+                    ArrayD::zeros(layer.d_biases.shape()).view(),
+                ]
             )),
             CPULayer::BatchNorm1D(layer) => Some((
                 vec![
@@ -107,6 +120,10 @@ impl CPUOptimizer {
                     layer.d_gamma.view().into_dyn(),
                     layer.d_beta.view().into_dyn(),
                 ],
+                vec![
+                    ArrayD::zeros(layer.d_gamma.shape()).view(),
+                    ArrayD::zeros(layer.d_gamma.shape()).view(),
+                ]
             )),
             CPULayer::BatchNorm2D(layer) => Some((
                 vec![
@@ -117,6 +134,10 @@ impl CPUOptimizer {
                     layer.d_gamma.view().into_dyn(),
                     layer.d_beta.view().into_dyn(),
                 ],
+                vec![
+                    ArrayD::zeros(layer.d_gamma.shape()).view(),
+                    ArrayD::zeros(layer.d_gamma.shape()).view(),
+                ]
             )),
             _ => return None,
         }
