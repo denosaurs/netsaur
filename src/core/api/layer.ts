@@ -31,6 +31,16 @@ export type DenseLayerConfig = {
    * The size of the layer.
    */
   size: Shape1D;
+
+  /**
+   * Inverse of regularization strength.
+   */
+  c?: number;
+
+  /**
+   * Ratio of l1:l2.
+   */
+  l1Ratio?: number;
 };
 
 /**
@@ -86,6 +96,16 @@ export type Conv2DLayerConfig = {
    * The optional strides to use.
    */
   strides?: Shape2D;
+
+  /**
+   * Inverse of regularization strength.
+   */
+  c?: number;
+
+  /**
+   * Ratio of l1:l2.
+   */
+  l1Ratio?: number;
 };
 
 /**
@@ -111,6 +131,16 @@ export type ConvTranspose2DLayerConfig = {
    * The optional strides to use.
    */
   strides?: Shape2D;
+
+  /**
+   * Inverse of regularization strength.
+   */
+  c?: number;
+
+  /**
+   * Ratio of l1:l2.
+   */
+  l1Ratio?: number;
 };
 
 export enum PoolMode {
