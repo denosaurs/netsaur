@@ -12,7 +12,7 @@ export type DataType =
   | "f32"
   | "f64";
 
-export type TypedArrayMapping = {
+export interface TypedArrayMapping {
   u8: Uint8Array;
   u16: Uint16Array;
   u32: Uint32Array;
@@ -23,9 +23,9 @@ export type TypedArrayMapping = {
   i64: BigInt64Array;
   f32: Float32Array;
   f64: Float64Array;
-};
+}
 
-export type TypedArrayConstructorMapping = {
+export interface TypedArrayConstructorMapping {
   u8: Uint8ArrayConstructor;
   u16: Uint16ArrayConstructor;
   u32: Uint32ArrayConstructor;
@@ -36,9 +36,9 @@ export type TypedArrayConstructorMapping = {
   i64: BigInt64ArrayConstructor;
   f32: Float32ArrayConstructor;
   f64: Float64ArrayConstructor;
-};
+}
 
-type TypedArrayValueMapping = {
+interface TypedArrayValueMapping {
   u8: number;
   u16: number;
   u32: number;
@@ -49,7 +49,7 @@ type TypedArrayValueMapping = {
   i64: bigint;
   f32: number;
   f64: number;
-};
+}
 
 export type DTypeValue<T extends keyof TypedArrayValueMapping> = T extends
   keyof TypedArrayValueMapping ? TypedArrayValueMapping[T] : never;
@@ -157,7 +157,7 @@ export interface PatchCollection extends Patch2d {
 
 export type Pixel = [number, number, number, number?];
 
-export type StandardizeConfig = {
+export interface StandardizeConfig {
   /** Whether to convert everything to lowercase before fitting / transforming */
   lowercase?: boolean;
   /** Whether to strip HTML tags */
@@ -166,7 +166,7 @@ export type StandardizeConfig = {
   normalizeWhiteSpaces?: boolean;
   /** Strip Newlines */
   stripNewlines?: boolean;
-};
+}
 
 export type VectorizerMode = "count" | "indices" | "multihot" | "tfidf";
 
@@ -188,43 +188,44 @@ export type VectorizerModeConfig =
     config?: Partial<BaseVectorizerOptions & { idf: Float64Array }>;
   };
 
-export type TokenizerModeConfig = {
+export interface TokenizerModeConfig {
   mode: "whitespace";
   config?: Partial<BaseVectorizerOptions>;
-};
+}
 
-export type BaseVectorizerOptions = {
+export interface BaseVectorizerOptions {
   /** Map words to indices */
   vocabulary: Map<string, number>;
   /** Options for standardizing text */
   standardize: StandardizeConfig | ((s: string) => string);
   /** Words to ignore from vocabulary */
   skipWords: "english" | false | string[];
-};
-export type BaseTokenizerOptions = {
+}
+
+export interface BaseTokenizerOptions {
   /** Map words to indices */
   vocabulary: Map<string, number>;
   /** Options for standardizing text */
   standardize: StandardizeConfig | ((s: string) => string);
   /** Words to ignore from vocabulary */
   skipWords: "english" | false | string[];
-};
+}
 
-export type Tokenizer = {
+export interface Tokenizer {
   fit(text: string | string[]): unknown;
   transform(text: string | string[]): number[];
-};
+}
 
-export type Cleaner = {
+export interface Cleaner {
   clean(text: string): string;
   clean(text: string[]): string[];
-};
+}
 
-export type Vectorizer = {
+export interface Vectorizer {
   transform<T extends DataType>(tokens: number[][], dType: T): Matrix<T>;
-};
+}
 
-export type Transformer = {
+export interface Transformer {
   fit<T extends DataType>(data: Matrix<T>): Transformer;
   transform<T extends DataType>(data: Matrix<T>): Matrix<T>;
-};
+}

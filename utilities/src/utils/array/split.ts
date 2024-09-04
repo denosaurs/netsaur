@@ -5,6 +5,7 @@ interface SplitOptions {
   ratio: [number, number];
   shuffle?: boolean;
 }
+
 /** Split arrays by their first axis */
 export function useSplit<T extends Sliceable[]>(
   options: SplitOptions = { ratio: [7, 3], shuffle: false },

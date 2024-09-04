@@ -27,4 +27,7 @@ colors.forEach((color, i) => {
   newCtx.fillStyle = new Color(...color).toString();
   newCtx.fillRect(0, i * 100, 300, 100);
 });
-Deno.writeFile("utilities/examples/extract-colors/out.png", newCan.toBuffer("image/png"));
+Deno.writeFile(
+  "utilities/examples/extract-colors/out.png",
+  newCan.toBuffer("image/png"),
+);

@@ -11,7 +11,7 @@ import type {
 // import { TfIdfTransformer } from "./transformer/mod.ts";
 
 /** TODO */
-type PreprocessorConfig = {
+interface PreprocessorConfig {
   vectorizer: Vectorizer;
   tokenizer: Tokenizer;
   cleaner: Cleaner;

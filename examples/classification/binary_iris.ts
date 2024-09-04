@@ -8,7 +8,7 @@ import {
   tensor2D,
 } from "../../mod.ts";
 
-import { parse } from "https://deno.land/std@0.204.0/csv/parse.ts";
+import { parse } from "jsr:@std/csv@1.0.3/parse";
 
 // Import helpers for metrics
 import {

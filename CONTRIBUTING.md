@@ -5,13 +5,13 @@
 Unoptimized:
 
 ```sh
-cargo build
+cargo build --release -p netsaur
 ```
 
 Optimized:
 
 ```sh
-cargo build --release
+deno task build:cpu
 ```
 
 ## Building `backends/wasm`
@@ -19,11 +19,33 @@ cargo build --release
 Unoptimized:
 
 ```sh
-deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backends/wasm/lib --debug
+deno run -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur --out src/backends/wasm/lib --debug
 ```
 
 Optimized:
 
 ```sh
-deno run -A https://deno.land/x/wasmbuild@0.11.0/main.ts --out src/backends/wasm/lib
+deno task build:wasm
+```
+
+## Building `tokenizers`
+
+Unoptimized:
+
+```sh
+deno run -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur-tokenizers --out tokenizers/lib --debug
+```
+
+Optimized:
+
+```sh
+deno task build:tokenizers
+```
+
+## Building everything
+
+Optimized:
+
+```sh
+deno task build
 ```

@@ -6,11 +6,10 @@ import {
   OneCycle,
   Sequential,
   setupBackend,
-  tensor1D,
   tensor2D,
 } from "../../mod.ts";
 
-import { parse } from "https://deno.land/std@0.214.0/csv/parse.ts";
+import { parse } from "jsr:@std/csv@1.0.3/parse";
 
 // Import helpers for splitting dataset
 import { useSplit } from "https://deno.land/x/vectorizer@v0.2.1/mod.ts";
@@ -36,7 +35,7 @@ const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y) as [
 // Setup the CPU backend for Netsaur
 await setupBackend(CPU);
 
-console.log(train)
+console.log(train);
 
 // Create a sequential neural network
 const net = new Sequential({

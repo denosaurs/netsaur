@@ -4,7 +4,7 @@
 // deno-fmt-ignore-file
 /// <reference types="./netsaur.generated.d.ts" />
 
-// source-hash: af6cb6fb1e5d51212d81be60c88a3b2eb20dfbc5
+// source-hash: 07f117aa71fc0f1087195d0d2f04b4e584951ac1
 let wasm;
 let cachedInt32Memory0;
 
@@ -12,11 +12,20 @@ const heap = new Array(128).fill(undefined);
 
 heap.push(undefined, null, true, false);
 
+let heap_next = heap.length;
+
+function addHeapObject(obj) {
+  if (heap_next === heap.length) heap.push(heap.length + 1);
+  const idx = heap_next;
+  heap_next = heap[idx];
+
+  heap[idx] = obj;
+  return idx;
+}
+
 function getObject(idx) {
   return heap[idx];
 }
-
-let heap_next = heap.length;
 
 function dropObject(idx) {
   if (idx < 132) return;
@@ -28,15 +37,6 @@ function takeObject(idx) {
   const ret = getObject(idx);
   dropObject(idx);
   return ret;
-}
-
-function addHeapObject(obj) {
-  if (heap_next === heap.length) heap.push(heap.length + 1);
-  const idx = heap_next;
-  heap_next = heap[idx];
-
-  heap[idx] = obj;
-  return idx;
 }
 
 const cachedTextDecoder = typeof TextDecoder !== "undefined"
@@ -214,15 +214,15 @@ function handleError(f, args) {
 
 const imports = {
   __wbindgen_placeholder__: {
-    __wbindgen_object_drop_ref: function (arg0) {
-      takeObject(arg0);
-    },
-    __wbg_log_67e9366454666686: function (arg0, arg1) {
+    __wbg_log_0d1ab300f7656e29: function (arg0, arg1) {
       console.log(getStringFromWasm0(arg0, arg1));
     },
     __wbindgen_number_new: function (arg0) {
       const ret = arg0;
       return addHeapObject(ret);
+    },
+    __wbindgen_object_drop_ref: function (arg0) {
+      takeObject(arg0);
     },
     __wbg_crypto_c48a774b022d20ac: function (arg0) {
       const ret = getObject(arg0).crypto;
@@ -249,10 +249,6 @@ const imports = {
       const ret = typeof (getObject(arg0)) === "string";
       return ret;
     },
-    __wbg_msCrypto_bcb970640f50a1e8: function (arg0) {
-      const ret = getObject(arg0).msCrypto;
-      return addHeapObject(ret);
-    },
     __wbg_require_8f08ceecec0f4fee: function () {
       return handleError(function () {
         const ret = module.require;
@@ -265,6 +261,10 @@ const imports = {
     },
     __wbindgen_string_new: function (arg0, arg1) {
       const ret = getStringFromWasm0(arg0, arg1);
+      return addHeapObject(ret);
+    },
+    __wbg_msCrypto_bcb970640f50a1e8: function (arg0) {
+      const ret = getObject(arg0).msCrypto;
       return addHeapObject(ret);
     },
     __wbg_randomFillSync_dc1e9a60c158336d: function () {

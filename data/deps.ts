@@ -1,1 +1,1 @@
-export { CsvParseStream } from "jsr:@std/csv@0.214.0";
+export { CsvParseStream } from "jsr:@std/csv@1.0.3";

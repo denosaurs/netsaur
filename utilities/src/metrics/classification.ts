@@ -1,12 +1,12 @@
 import { useUnique } from "../utils/mod.ts";
 
-type Report = {
+interface Report {
   c: ConfusionMatrix;
   precision: number;
   recall: number;
   f1: number;
   support: number;
-};
+}
 
 /** A report with metrics for classification results */
 export class ClassificationReport {

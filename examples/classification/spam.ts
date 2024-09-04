@@ -1,4 +1,4 @@
-import { parse } from "https://deno.land/std@0.188.0/csv/parse.ts";
+import { parse } from "jsr:@std/csv@1.0.3/parse";
 import {
   Cost,
   CPU,
@@ -7,7 +7,6 @@ import {
   ReluLayer,
   Sequential,
   setupBackend,
-  SigmoidLayer,
   tensor,
   tensor2D,
 } from "../../mod.ts";
@@ -72,7 +71,7 @@ const net = new Sequential({
 
   // We are using Log Loss for finding cost
   cost: Cost.Hinge,
-  optimizer: NadamOptimizer()
+  optimizer: NadamOptimizer(),
 });
 
 const inputs = tensor(x_vec.data, x_vec.shape);

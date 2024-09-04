@@ -16,7 +16,7 @@ import { getConstructor } from "./get_constructor.ts";
 export type Order = 1 | 2 | 3 | 4 | 5 | 6;
 
 /** The base type implemented by Tensor */
-export type TensorLike<DT extends DataType, O extends Order> = {
+export interface TensorLike<DT extends DataType, O extends Order> {
   data: DType<DT>;
   shape: Shape<O>;
 };
@@ -26,7 +26,7 @@ export type Shape<N extends number> = N extends 0 ? []
   : [number, ...number[]] & { length: N };
 
 /** nDArray type */
-export type NDArray<DT extends DataType> = {
+export interface NDArray<DT extends DataType> {
   1: DTypeValue<DT>[];
   2: DTypeValue<DT>[][];
   3: DTypeValue<DT>[][][];

@@ -17,7 +17,7 @@ export interface Backend {
     datasets: DataSet[],
     epochs: number,
     batches: number,
-    rate: number
+    rate: number,
   ): void;
 
   /**
@@ -28,7 +28,7 @@ export interface Backend {
   predict(
     input: Tensor<Rank>,
     layers?: number[],
-    outputShape?: Shape<Rank>
+    outputShape?: Shape<Rank>,
   ): Promise<Tensor<Rank>>;
 
   /**
@@ -161,13 +161,13 @@ export enum Cost {
   MAE = "mae",
 
   /**
-   * Huber is a cost function for regression and is less sensitive to outliers than the 
+   * Huber is a cost function for regression and is less sensitive to outliers than the
    * squared error loss
    */
   Huber = "huber",
 
   /**
-   * Smoothed hinge is a variant of the Huber cost function used for binary classification. 
+   * Smoothed hinge is a variant of the Huber cost function used for binary classification.
    * It is a smoothed version of hinge and is more robust to outliers.
    */
   SmoothHinge = "smoothhinge",

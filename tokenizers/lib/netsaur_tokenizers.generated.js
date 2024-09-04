@@ -4,7 +4,7 @@
 // deno-fmt-ignore-file
 /// <reference types="./netsaur_tokenizers.generated.d.ts" />
 
-// source-hash: 1c51c6670646b6ae9e407e9c7104be0bc13ca7ad
+// source-hash: ee4162f9c05d7605a37e1330df218bdf79833feb
 let wasm;
 
 const heap = new Array(128).fill(undefined);
@@ -380,21 +380,21 @@ const imports = {
       const ret = new Error(getStringFromWasm0(arg0, arg1));
       return addHeapObject(ret);
     },
+    __wbindgen_number_new: function (arg0) {
+      const ret = arg0;
+      return addHeapObject(ret);
+    },
+    __wbindgen_string_new: function (arg0, arg1) {
+      const ret = getStringFromWasm0(arg0, arg1);
+      return addHeapObject(ret);
+    },
     __wbindgen_is_object: function (arg0) {
       const val = getObject(arg0);
       const ret = typeof val === "object" && val !== null;
       return ret;
     },
-    __wbindgen_number_new: function (arg0) {
-      const ret = arg0;
-      return addHeapObject(ret);
-    },
     __wbindgen_object_clone_ref: function (arg0) {
       const ret = getObject(arg0);
-      return addHeapObject(ret);
-    },
-    __wbindgen_string_new: function (arg0, arg1) {
-      const ret = getStringFromWasm0(arg0, arg1);
       return addHeapObject(ret);
     },
     __wbg_set_bd72c078edfa51ad: function (arg0, arg1, arg2) {
@@ -416,10 +416,6 @@ const imports = {
       const ret = getObject(arg0).node;
       return addHeapObject(ret);
     },
-    __wbg_msCrypto_bcb970640f50a1e8: function (arg0) {
-      const ret = getObject(arg0).msCrypto;
-      return addHeapObject(ret);
-    },
     __wbg_require_8f08ceecec0f4fee: function () {
       return handleError(function () {
         const ret = module.require;
@@ -429,6 +425,10 @@ const imports = {
     __wbindgen_is_function: function (arg0) {
       const ret = typeof (getObject(arg0)) === "function";
       return ret;
+    },
+    __wbg_msCrypto_bcb970640f50a1e8: function (arg0) {
+      const ret = getObject(arg0).msCrypto;
+      return addHeapObject(ret);
     },
     __wbg_randomFillSync_dc1e9a60c158336d: function () {
       return handleError(function (arg0, arg1) {

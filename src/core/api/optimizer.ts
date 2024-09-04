@@ -35,7 +35,9 @@ export function NadamOptimizer(config: AdamOptimizerConfig = {}): Optimizer {
   return { type: OptimizerType.Nadam, config };
 }
 
-export function RMSPropOptimizer(config: RMSPropOptimizerConfig = {}): Optimizer {
+export function RMSPropOptimizer(
+  config: RMSPropOptimizerConfig = {},
+): Optimizer {
   config.decayRate = config.decayRate || 0.9;
   config.epsilon = config.epsilon || 1e-8;
   return { type: OptimizerType.RMSProp, config };
