@@ -36,6 +36,8 @@ const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y) as [
 // Setup the CPU backend for Netsaur
 await setupBackend(CPU);
 
+console.log(train)
+
 // Create a sequential neural network
 const net = new Sequential({
   // Set number of minibatches to 4
@@ -81,9 +83,9 @@ console.log(`training time: ${performance.now() - time}ms`);
 
 // Compute RMSE
 let err = 0;
+const y_test = await net.predict(tensor2D(test[0]));
 for (const i in test[0]) {
-  const y_test = await net.predict(tensor1D(test[0][i]));
-  err += (test[1][i] - y_test.data[0]) ** 2;
-  console.log(`\nOutput: ${y_test.data[0]}\nExpected: ${test[1][i]}`);
+  err += (test[1][i] - y_test.data[i]) ** 2;
+  console.log(`\nOutput: ${y_test.data[i]}\nExpected: ${test[1][i]}`);
 }
 console.log("RMSE:", Math.sqrt(err / test[0].length));
