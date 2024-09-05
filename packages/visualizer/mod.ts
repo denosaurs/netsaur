@@ -1,4 +1,4 @@
-import type { NeuralNetwork, Rank, Tensor } from "../mod.ts";
+import type { NeuralNetwork, Rank, Tensor } from "../../mod.ts";
 import type { Line } from "./types.ts";
 
 /**
