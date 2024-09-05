@@ -14,7 +14,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Deno
         uses: denoland/setup-deno@v1
 
