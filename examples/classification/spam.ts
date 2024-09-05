@@ -1,4 +1,4 @@
-import { parse } from "https://deno.land/std@0.188.0/csv/parse.ts";
+import { parse } from "jsr:@std/csv@1.0.3/parse";
 import {
   Cost,
   CPU,
@@ -7,18 +7,19 @@ import {
   ReluLayer,
   Sequential,
   setupBackend,
-  SigmoidLayer,
   tensor,
   tensor2D,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 
 // Import helpers for metrics
 import {
   ClassificationReport,
-  TextVectorizer,
+  CountVectorizer,
+  SplitTokenizer,
+  TfIdfTransformer,
   // Split the dataset
   useSplit,
-} from "https://deno.land/x/vectorizer@v0.3.7/mod.ts";
+} from "../../packages/utilities/mod.ts";
 
 // Define classes
 const ymap = ["spam", "ham"];
@@ -31,21 +32,25 @@ const data = parse(_data);
 const x = data.map((msg) => msg[1]);
 
 // Get the classes
-const y = data.map((msg) => ymap.indexOf(msg[0]) === 0 ? -1 : 1);
+const y = data.map((msg) => (ymap.indexOf(msg[0]) === 0 ? -1 : 1));
 
 // Split the dataset for training and testing
-const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y) as [
-  [typeof x, typeof y],
-  [typeof x, typeof y],
-];
+const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y);
 
 // Vectorize the text messages
-const vec = new TextVectorizer({
-  mode: "tfidf",
-  config: { skipWords: "english", standardize: { lowercase: true } },
+
+const tokenizer = new SplitTokenizer({
+  skipWords: "english",
+  standardize: { lowercase: true },
 }).fit(train[0]);
 
-const x_vec = vec.transform(train[0], "f32");
+const vec = new CountVectorizer(tokenizer.vocabulary.size);
+
+const x_vec = vec.transform(tokenizer.transform(train[0]), "f32")
+
+const tfidf = new TfIdfTransformer();
+
+const x_tfidf = tfidf.fit(x_vec).transform(x_vec)
 
 // Setup the CPU backend for Netsaur
 await setupBackend(CPU);
@@ -72,10 +77,10 @@ const net = new Sequential({
 
   // We are using Log Loss for finding cost
   cost: Cost.Hinge,
-  optimizer: NadamOptimizer()
+  optimizer: NadamOptimizer(),
 });
 
-const inputs = tensor(x_vec.data, x_vec.shape);
+const inputs = tensor(x_tfidf);
 
 const time = performance.now();
 // Train the network
@@ -89,15 +94,15 @@ net.train(
   // Train for 20 epochs
   20,
   2,
-  0.01,
+  0.01
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
 
-const x_vec_test = vec.transform(test[0]);
+const x_vec_test = tfidf.transform(vec.transform(tokenizer.transform(test[0]), "f32"));
 
 // Calculate metrics
-const res = await net.predict(tensor(x_vec_test.data, x_vec_test.shape));
-const y1 = res.data.map((i) => i < 0 ? -1 : 1);
+const res = await net.predict(tensor(x_vec_test));
+const y1 = res.data.map((i) => (i < 0 ? -1 : 1));
 const cMatrix = new ClassificationReport(test[1], y1);
 console.log("Confusion Matrix: ", cMatrix);

@@ -1,4 +1,4 @@
-import { init, Tokenizer } from "../../tokenizers/mod.ts";
+import { init, Tokenizer } from "../../packages/tokenizers/mod.ts";
 
 await init();
 

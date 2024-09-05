@@ -9,7 +9,7 @@ import {
   Sequential,
   setupBackend,
   tensor2D,
-} from "../mod.ts";
+} from "../packages/core/mod.ts";
 
 /**
  * The test data used for predicting the output of the function y = 2x + 1

@@ -10,7 +10,7 @@ import {
   SigmoidLayer,
   tensor2D,
   WASM,
-} from "../mod.ts";
+} from "../packages/core/mod.ts";
 
 /**
  * Setup the WASM backend. This backend is slower than the CPU backend but works on the Edge.

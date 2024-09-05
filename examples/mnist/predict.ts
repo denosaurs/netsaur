@@ -6,7 +6,7 @@ import {
   type Shape,
   type Tensor,
   tensor,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 import { loadDataset } from "./common.ts";
 
 await setupBackend(CPU);

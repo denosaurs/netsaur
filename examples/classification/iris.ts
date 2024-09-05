@@ -1,5 +1,4 @@
 import {
-  AdamOptimizer,
   Cost,
   CPU,
   DenseLayer,
@@ -9,22 +8,21 @@ import {
   Sequential,
   setupBackend,
   SoftmaxLayer,
-  Tensor,
+  type Tensor,
   tensor,
   tensor2D,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 
-import { parse } from "https://deno.land/std@0.204.0/csv/parse.ts";
+import { parse } from "jsr:@std/csv@1.0.3/parse";
 
 // Import helpers for metrics
 import {
   // One-hot encoding of targets
   CategoricalEncoder,
   ClassificationReport,
-  Matrix,
   // Split the dataset
   useSplit,
-} from "jsr:@lala/appraisal@0.7.3";
+} from "../../packages/utilities/mod.ts";
 
 // Read the training dataset
 const _data = Deno.readTextFileSync("examples/classification/iris.csv");
@@ -40,10 +38,7 @@ const y = encoder.fit(y_pre).transform(y_pre, "f32");
 
 // Split the dataset for training and testing
 // @ts-ignore Matrices can be split
-const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y) as [
-  [typeof x, typeof y],
-  [typeof x, typeof y]
-];
+const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y)
 
 // Setup the CPU backend for Netsaur
 await setupBackend(CPU);
@@ -89,7 +84,7 @@ net.train(
   // Train for 300 epochs
   400,
   1,
-  0.02
+  0.02,
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
@@ -97,7 +92,7 @@ console.log(`training time: ${performance.now() - time}ms`);
 // Calculate metrics
 const res = await net.predict(tensor2D(test[0]));
 const y1 = encoder.untransform(
-  CategoricalEncoder.fromSoftmax(res as Tensor<2>)
+  CategoricalEncoder.fromSoftmax(res as Tensor<2>),
 );
 const y0 = encoder.untransform(test[1]);
 
@@ -106,5 +101,5 @@ const cMatrix = new ClassificationReport(y0, y1);
 console.log(cMatrix);
 console.log(
   "Total Accuracy: ",
-  y1.filter((x, i) => x === y0[i]).length / y1.length
+  y1.filter((x, i) => x === y0[i]).length / y1.length,
 );

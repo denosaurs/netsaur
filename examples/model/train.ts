@@ -6,7 +6,7 @@ import {
   setupBackend,
   SigmoidLayer,
   tensor2D,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 
 /**
  * Setup the CPU backend. This backend is fast but doesn't work on the Edge.

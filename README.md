@@ -19,10 +19,15 @@
 
 ## Powerful Machine Learning library for Deno
 
+## Installation
+
+There is no installation step required. You can simply import the library and
+you're good to go :)
+
 ## Features
 
 - Lightweight and easy-to-use neural network library for
-  [Deno](https://deno.land).
+  [Deno](https://deno.com).
 - Blazingly fast and efficient.
 - Provides a simple API for creating and training neural networks.
 - Can run on both the CPU and the GPU (WIP).
@@ -51,6 +56,7 @@
 
 - Dean Srebnik ([@load1n9](https://github.com/load1n9))
 - CarrotzRule ([@carrotzrule123](https://github.com/CarrotzRule123))
+- Pranev ([@retraigo](https://github.com/retraigo))
 
 ### QuickStart
 
@@ -66,9 +72,8 @@ import {
   Sequential,
   setupBackend,
   SigmoidLayer,
-  tensor1D,
   tensor2D,
-} from "https://deno.land/x/netsaur/mod.ts";
+} from "jsr:@denosaurs/netsaur";
 
 /**
  * Setup the CPU backend. This backend is fast but doesn't work on the Edge.
@@ -111,8 +116,6 @@ const net = new Sequential({
   cost: Cost.MSE,
 });
 
-const time = performance.now();
-
 /**
  * Train the network on the given data.
  */
@@ -133,8 +136,6 @@ net.train(
    */
   10000,
 );
-
-console.log(`training time: ${performance.now() - time}ms`);
 
 /**
  * Predict the output of the XOR function for the given inputs.
@@ -167,7 +168,7 @@ import {
   tensor1D,
   tensor2D,
   WASM,
-} from "https://deno.land/x/netsaur/mod.ts";
+} from "jsr:@denosaurs/netsaur";
 
 /**
  * Setup the WASM backend. This backend is slower than the CPU backend but works on the Edge.
@@ -210,8 +211,6 @@ const net = new Sequential({
   cost: Cost.MSE,
 });
 
-const time = performance.now();
-
 /**
  * Train the network on the given data.
  */
@@ -233,8 +232,6 @@ net.train(
   10000,
 );
 
-console.log(`training time: ${performance.now() - time}ms`);
-
 /**
  * Predict the output of the XOR function for the given inputs.
  */
@@ -254,7 +251,7 @@ console.log(`1 xor 1 = ${out4[0]} (should be close to 0)`);
 ### Documentation
 
 The full documentation for Netsaur can be found
-[here](https://deno.land/x/netsaur@0.3.1-patch/mod.ts).
+[here](https://deno.land/x/netsaur/mod.ts).
 
 ### License
 
