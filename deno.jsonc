@@ -8,7 +8,7 @@
     "./data": "./packages/data/mod.ts",
     // Core
     "./core/engine": "./packages/core/src/core/engine.ts",
-    "./core": "./packages/core/packages/core/src/core/mod.ts",
+    "./core": "./packages/core/src/core/mod.ts",
     "./core/types": "./packages/core/src/core/types.ts",
     "./core/tensor": "./packages/core/src/core/tensor/tensor.ts",
     "./core/layers": "./packages/core/src/core/api/layers.ts",
