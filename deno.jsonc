@@ -17,11 +17,11 @@
     "./core/schedulers": "./src/core/api/scheduler.ts",
     // Utilities
     "./utilities": "./packages/utilities/src/mod.ts",
-    "./utilities/text": "./packages/utilities/src/src/text/mod.ts",
-    "./utilities/image": "./packages/utilities/src/src/image/mod.ts",
-    "./utilities/metrics": "./packages/utilities/src/src/metrics/mod.ts",
-    "./utilities/encoding": "./packages/utilities/src/src/encoding/mod.ts",
-    "./utilities/misc": "./packages/utilities/src/src/utils/mod.ts",
+    "./utilities/text": "./packages/utilities/src/text/mod.ts",
+    "./utilities/image": "./packages/utilities/src/image/mod.ts",
+    "./utilities/metrics": "./packages/utilities/src/metrics/mod.ts",
+    "./utilities/encoding": "./packages/utilities/src/encoding/mod.ts",
+    "./utilities/misc": "./packages/utilities/src/utils/mod.ts",
     // Tokenizers
     "./tokenizers": "./packages/tokenizers/mod.ts",
     // Visualizer
