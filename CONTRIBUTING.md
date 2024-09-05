@@ -11,7 +11,7 @@ cargo build --release -p netsaur
 Optimized:
 
 ```sh
-deno task build:cpu
+deno run build:cpu
 ```
 
 ## Building `backends/wasm`
@@ -19,13 +19,13 @@ deno task build:cpu
 Unoptimized:
 
 ```sh
-deno run -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur --out src/backends/wasm/lib --debug
+deno -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur --out src/backends/wasm/lib --debug
 ```
 
 Optimized:
 
 ```sh
-deno task build:wasm
+deno run build:wasm
 ```
 
 ## Building `tokenizers`
@@ -33,13 +33,13 @@ deno task build:wasm
 Unoptimized:
 
 ```sh
-deno run -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur-tokenizers --out tokenizers/lib --debug
+deno -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur-tokenizers --out tokenizers/lib --debug
 ```
 
 Optimized:
 
 ```sh
-deno task build:tokenizers
+deno run build:tokenizers
 ```
 
 ## Building everything
@@ -47,5 +47,5 @@ deno task build:tokenizers
 Optimized:
 
 ```sh
-deno task build
+deno run build
 ```
