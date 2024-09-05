@@ -10,7 +10,7 @@ import {
   setupBackend,
   SigmoidLayer,
   tensor2D,
-} from "../mod.ts";
+} from "../packages/core/mod.ts";
 
 /**
  * Setup the AUTO backend. This backend is chosen automatically based on the environment.

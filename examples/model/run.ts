@@ -1,4 +1,4 @@
-import { CPU, Sequential, setupBackend, tensor2D } from "../../mod.ts";
+import { CPU, Sequential, setupBackend, tensor2D } from "../../packages/core/mod.ts";
 
 /**
  * Setup the CPU backend. This backend is fast but doesn't work on the Edge.

@@ -7,12 +7,12 @@ import {
   Sequential,
   setupBackend,
   tensor2D,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 
 import { parse } from "jsr:@std/csv@1.0.3/parse";
 
 // Import helpers for splitting dataset
-import { useSplit } from "https://deno.land/x/vectorizer@v0.2.1/mod.ts";
+import { useSplit } from "../../packages/utilities/mod.ts";
 
 // Read the training dataset
 const _data = Deno.readTextFileSync("examples/multiple-linear/student.csv");

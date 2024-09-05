@@ -12,7 +12,7 @@ import {
   SigmoidLayer,
   tensor2D,
   WASM,
-} from "../mod.ts";
+} from "../packages/core/mod.ts";
 
 /**
  * Setup the backend with the OPTION function. The backend is chosen automatically based on the environment.

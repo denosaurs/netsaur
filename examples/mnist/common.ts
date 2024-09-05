@@ -1,5 +1,4 @@
-import type { DataSet } from "../../src/core/types.ts";
-import { Tensor } from "../../mod.ts";
+import { Tensor, type DataSet } from "../../packages/core/mod.ts";
 
 export function assert(condition: boolean, message?: string) {
   if (!condition) {

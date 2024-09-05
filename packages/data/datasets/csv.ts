@@ -1,4 +1,4 @@
-import { tensor2D } from "../../mod.ts";
+import { tensor2D } from "../../core/mod.ts";
 import type { DataLike } from "../types.ts";
 import { CsvParseStream } from "../deps.ts";
 

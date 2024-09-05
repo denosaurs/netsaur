@@ -1,5 +1,5 @@
 import type { Plugin } from "./types.ts";
-import type { NeuralNetwork } from "../../mod.ts";
+import type { NeuralNetwork } from "../../../../mod.ts";
 
 /**
  * Load a plugin into a NeuralNetwork instance.

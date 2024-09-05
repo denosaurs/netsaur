@@ -6,7 +6,7 @@ import {
   setupBackend,
   SigmoidLayer,
   tensor2D,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 
 import { parse } from "jsr:@std/csv@1.0.3/parse";
 
@@ -15,7 +15,7 @@ import {
   ClassificationReport,
   // Split the dataset
   useSplit,
-} from "https://deno.land/x/vectorizer@v0.3.7/mod.ts";
+} from "../../packages/utilities/mod.ts";
 
 // Define classes
 const classes = ["Setosa", "Versicolor"];
@@ -29,10 +29,7 @@ const x = data.map((fl) => fl.slice(0, 4).map(Number));
 const y = data.map((fl) => classes.indexOf(fl[4]));
 
 // Split the dataset for training and testing
-const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y) as [
-  [typeof x, typeof y],
-  [typeof x, typeof y],
-];
+const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y)
 
 // Setup the CPU backend for Netsaur
 await setupBackend(CPU);

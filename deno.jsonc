@@ -1,0 +1,55 @@
+{
+  "name": "@denosaurs/netsaur",
+  "version": "0.3.2-patch3",
+  "exports": {
+    ".": "./mod.ts",
+    "./web": "./web.ts",
+    "./data": "./data/mod.ts",
+    // Core
+    "./core/engine": "./src/core/engine.ts",
+    "./core": "./src/core/mod.ts",
+    "./core/types": "./src/core/types.ts",
+    "./core/tensor": "./src/core/tensor/tensor.ts",
+    "./core/layers": "./src/core/api/layers.ts",
+    "./core/shape": "./src/core/api/shape.ts",
+    "./core/models": "./src/core/api/network.ts",
+    "./core/optimizers": "./src/core/api/optimizer.ts",
+    "./core/schedulers": "./src/core/api/scheduler.ts",
+    // Utilities
+    "./utilities": "./packages/utilities/src/mod.ts",
+    "./utilities/text": "./packages/utilities/src/src/text/mod.ts",
+    "./utilities/image": "./packages/utilities/src/src/image/mod.ts",
+    "./utilities/metrics": "./packages/utilities/src/src/metrics/mod.ts",
+    "./utilities/encoding": "./packages/utilities/src/src/encoding/mod.ts",
+    "./utilities/misc": "./packages/utilities/src/src/utils/mod.ts",
+    // Tokenizers
+    "./tokenizers": "./packages/tokenizers/mod.ts",
+    // Visualizer
+    "./visualizer": "./packages/visualizer/mod.ts"
+  },
+  "tasks": {
+    "example:xor": "deno -A ./examples/xor_auto.ts",
+    "example:xor-option": "deno -A ./examples/xor_option.ts",
+    "example:xor-cpu": "deno -A ./examples/xor_cpu.ts",
+    "example:xor-gpu": "deno -A ./examples/xor_gpu.ts",
+    "example:xor-wasm": "deno -A ./examples/xor_wasm.ts",
+    "example:autoencoder": "deno -A ./examples/autoencoders/example.ts",
+    "example:linear": "deno -A ./examples/linear.ts",
+    "example:multiple-linear": "deno -A ./examples/multiple-linear/student.ts",
+    "example:binary": "deno -A ./examples/classification/binary_iris.ts",
+    "example:multiclass": "deno -A ./examples/classification/iris.ts",
+    "example:text": "deno -A ./examples/classification/spam.ts",
+    "example:filters": "deno -A examples/filters/conv.ts ",
+    "example:train": "deno -A examples/model/train.ts ",
+    "example:run": "deno -A examples/model/run.ts ",
+    "example:mnist-download": "deno -A examples/mnist/download.ts",
+    "example:mnist-train": "deno -A examples/mnist/train.ts",
+    "example:mnist-predict": "deno -A examples/mnist/predict.ts",
+    "example:tokenizers-basic": "deno -A examples/tokenizers/basic.ts",
+    "build": "deno run build:cpu && deno run build:wasm && deno run build:tokenizers",
+    "build:cpu": "cargo build --release -p netsaur",
+    "build:gpu": "cargo build --release -p netsaur-gpu",
+    "build:wasm": "deno -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur --out src/backends/wasm/lib",
+    "build:tokenizers": "deno -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur-tokenizers --out tokenizers/lib"
+  }
+}

@@ -1,4 +1,4 @@
-import { Matrix } from "https://deno.land/x/vectorizer@v0.3.6/mod.ts";
+import { Matrix } from "../../packages/utilities/mod.ts";
 import {
   AdamOptimizer,
   Cost,
@@ -9,7 +9,7 @@ import {
   setupBackend,
   type Shape2D,
   tensor,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 
 import { parse } from "jsr:@std/csv@1.0.3/parse";
 
@@ -19,7 +19,7 @@ const data = parse(
 data.shift();
 
 const x_data = data.slice(0, 20).map((fl) => fl.slice(0, 11).map(Number));
-const X = new Matrix<"f32">(Float32Array.from(x_data.flat()), [x_data.length]);
+const X = new Matrix(x_data, "f32");
 
 await setupBackend(CPU);
 
@@ -46,7 +46,7 @@ const net = new Sequential({
   //  scheduler: OneCycle()
 });
 
-const input = tensor(X.data, X.shape);
+const input = tensor(X);
 
 const timeStart = performance.now();
 net.train([{ inputs: input, outputs: input }], 10000, 1, 0.01);
@@ -73,7 +73,7 @@ const encoded_mat = new Matrix<"f32">(encoded.data, encoded.shape as Shape2D);
 saveTable("encoded", encoded_mat);
 
 console.log("Running Decoder");
-const decoded = await net.predict(tensor(encoded_mat.data, encoded_mat.shape), [
+const decoded = await net.predict(tensor(encoded_mat), [
   5,
   10,
 ]);

@@ -1,4 +1,4 @@
-import type { Rank, Tensor } from "../mod.ts";
+import type { Rank, Tensor } from "../core/mod.ts";
 
 export interface DataLike {
   /**

@@ -13,10 +13,10 @@ import {
   Tensor,
   tensor4D,
   WASM,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 import { decode } from "https://deno.land/x/pngs@0.1.1/mod.ts";
 import { createCanvas } from "https://deno.land/x/canvas@v1.4.1/mod.ts";
-import type { Layer } from "../../src/core/api/layer.ts";
+import type { Layer } from "../../packages/core/src/core/api/layer.ts";
 
 const canvas = createCanvas(600, 600);
 const ctx = canvas.getContext("2d");

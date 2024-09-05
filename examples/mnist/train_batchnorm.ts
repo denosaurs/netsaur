@@ -11,7 +11,7 @@ import {
   Sequential,
   setupBackend,
   SoftmaxLayer,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 
 import { loadDataset } from "./common.ts";
 

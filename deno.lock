@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@denosaurs/plug@1.0.3": "1.0.3",
     "jsr:@std/assert@~0.213.1": "0.213.1",
+    "jsr:@std/csv@1.0.3": "1.0.3",
     "jsr:@std/encoding@0.213.1": "0.213.1",
     "jsr:@std/fmt@0.213.1": "0.213.1",
     "jsr:@std/fs@0.213.1": "0.213.1",
@@ -21,6 +22,9 @@
     },
     "@std/assert@0.213.1": {
       "integrity": "24c28178b30c8e0782c18e8e94ea72b16282207569cdd10ffb9d1d26f2edebfe"
+    },
+    "@std/csv@1.0.3": {
+      "integrity": "623acf0dcb88d62ba727c3611ad005df7f109ede8cac833e3986f540744562e5"
     },
     "@std/encoding@0.213.1": {
       "integrity": "fcbb6928713dde941a18ca5db88ca1544d0755ec8fb20fe61e2dc8144b390c62"
@@ -41,5 +45,21 @@
         "jsr:@std/assert"
       ]
     }
+  },
+  "remote": {
+    "https://deno.land/std@0.106.0/encoding/base64.ts": "eecae390f1f1d1cae6f6c6d732ede5276bf4b9cd29b1d281678c054dc5cc009e",
+    "https://deno.land/x/canvas@v1.4.1/deps.ts": "e956026d98094946166e06d7b799290b732db015813870d84e04e33ab88e98f3",
+    "https://deno.land/x/canvas@v1.4.1/mod.ts": "a4e16972647ceafef58612a377a218372454c99d2c9da615a132694597114f80",
+    "https://deno.land/x/canvas@v1.4.1/src/base64.ts": "0928031fdba0c43b617154fbe2eb7578366460c04da1422933ae5e936d3d0349",
+    "https://deno.land/x/canvas@v1.4.1/src/canvas.ts": "58119999b04f68ebeed2627485c5c24c5b0c029707edde0b6568814f9049a3a8",
+    "https://deno.land/x/canvas@v1.4.1/src/canvaskit.ts": "c3d807472cbb3e1d9fc01bb43ff974ef796c4b010178d1595be5fa793cce5e7d",
+    "https://deno.land/x/canvas@v1.4.1/src/color_util.ts": "28f1072f0a5acbe7add7fac2f452311a47b44c080806fc4057de2d2e405c6c1c",
+    "https://deno.land/x/canvas@v1.4.1/src/lib.js": "bb21711589bfbc8997b455cdf53e3150e23289f3b44809188041b1d2fc7924fa",
+    "https://deno.land/x/canvas@v1.4.1/src/types.ts": "67d5800f8f4b0a407e0251676a03ae91b5f50a3ed53e6b72dc5984113cb93128",
+    "https://deno.land/x/canvas@v1.4.1/src/wasm.js": "449d72cc14fc4142a5853f944df49a744d852981d09c5515528ede8aebb0afda",
+    "https://deno.land/x/lz4@v0.1.2/mod.ts": "4decfc1a3569d03fd1813bd39128b71c8f082850fe98ecfdde20025772916582",
+    "https://deno.land/x/lz4@v0.1.2/wasm.js": "b9c65605327ba273f0c76a6dc596ec534d4cda0f0225d7a94ebc606782319e46",
+    "https://deno.land/x/pngs@0.1.1/mod.ts": "9dc8a7daed1497b94a77b68c954164a9f0b2a6f40866481bdfdbbaf015b5f764",
+    "https://deno.land/x/pngs@0.1.1/wasm.js": "e3d4a8f293b267c9859a2164ca7b4603869bc92fe0d5ad4f109925858bce0c4c"
   }
 }

@@ -11,7 +11,7 @@ import {
   type Tensor,
   tensor,
   tensor2D,
-} from "../../mod.ts";
+} from "../../packages/core/mod.ts";
 
 import { parse } from "jsr:@std/csv@1.0.3/parse";
 
@@ -22,7 +22,7 @@ import {
   ClassificationReport,
   // Split the dataset
   useSplit,
-} from "jsr:@lala/appraisal@0.7.3";
+} from "../../packages/utilities/mod.ts";
 
 // Read the training dataset
 const _data = Deno.readTextFileSync("examples/classification/iris.csv");
@@ -38,10 +38,7 @@ const y = encoder.fit(y_pre).transform(y_pre, "f32");
 
 // Split the dataset for training and testing
 // @ts-ignore Matrices can be split
-const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y) as [
-  [typeof x, typeof y],
-  [typeof x, typeof y],
-];
+const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y)
 
 // Setup the CPU backend for Netsaur
 await setupBackend(CPU);
