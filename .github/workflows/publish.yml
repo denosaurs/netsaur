@@ -1,5 +1,6 @@
 name: Publish
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
@@ -13,4 +14,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - run: npx jsr publish
+
+      - name: Install Deno
+        uses: denoland/setup-deno@v1
+
+      - name: Publish package
+        run: deno publish
