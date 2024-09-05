@@ -4,7 +4,8 @@
   "exports": {
     ".": "./mod.ts",
     "./web": "./web.ts",
-    "./data": "./data/mod.ts",
+    // Data
+    "./data": "./packages/data/mod.ts",
     // Core
     "./core/engine": "./src/core/engine.ts",
     "./core": "./src/core/mod.ts",
