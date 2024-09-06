@@ -1,4 +1,4 @@
-import { Cost, CPU, setupBackend, tensor } from "jsr:@denosaurs/netsaur@0.4.0";
+import { AdamOptimizer, Cost, CPU, Init, setupBackend, tensor } from "jsr:@denosaurs/netsaur@0.4.0";
 import { Sequential } from "jsr:@denosaurs/netsaur@0.4.0/core";
 import { NadamOptimizer } from "jsr:@denosaurs/netsaur@0.4.0/core/optimizers";
 import {
@@ -28,7 +28,9 @@ console.time("Time Elapsed");
 
 console.log("\nImports loaded.");
 
-const file = Deno.readTextFileSync("examples/sentiment-analysis/text_emotion.csv");
+const file = Deno.readTextFileSync(
+  "examples/sentiment-analysis/text_emotion.csv"
+);
 
 console.log("\nData file loaded.");
 console.timeLog("Time Elapsed");
@@ -77,15 +79,14 @@ const transformer = new TfIdfTransformer();
 const tfidfX = transformer.fit(vecX).transform<"f32">(vecX);
 
 console.log("\nX Transformed", tfidfX.shape);
-vecX.data = new Float32Array(0);
 console.timeLog("Time Elapsed");
-console.log(tfidfX.shape, tfidfX.data.byteLength);
 
 const encoder = new CategoricalEncoder<string>();
 
 const oneHotY = encoder.fit(trainY).transform(trainY, "f32");
 
-console.log(oneHotY.shape, oneHotY.data.byteLength);
+Deno.writeTextFileSync("examples/sentiment-analysis/mappings.json", JSON.stringify(Array.from(encoder.mapping.entries())))
+Deno.writeTextFileSync("examples/sentiment-analysis/vocab.json", JSON.stringify(Array.from(tokenizer.vocabulary.entries())))
 
 console.log("\nCPU Backend Loading");
 console.timeLog("Time Elapsed");
@@ -96,29 +97,32 @@ console.log("\nCPU Backend Loaded");
 console.timeLog("Time Elapsed");
 
 const net = new Sequential({
-  size: [4, tfidfX.nCols],
+  size: [4, vecX.nCols],
   layers: [
-    DenseLayer({ size: [128] }),
+    DenseLayer({ size: [256], init: Init.Kaiming }),
     ReluLayer(),
-    DenseLayer({ size: [64] }),
+    DenseLayer({ size: [32], init: Init.Kaiming }),
     ReluLayer(),
-    DenseLayer({ size: [32] }),
+    DenseLayer({ size: [16], init: Init.Kaiming }),
     ReluLayer(),
-    DenseLayer({ size: [32] }),
+    DenseLayer({ size: [16], init: Init.Kaiming }),
     ReluLayer(),
-    DenseLayer({ size: [encoder.mapping.size] }),
+    DenseLayer({ size: [16], init: Init.Kaiming }),
+    ReluLayer(),
+    DenseLayer({ size: [encoder.mapping.size], init: Init.Kaiming }),
     SoftmaxLayer(),
   ],
   silent: false,
-  optimizer: NadamOptimizer(),
+  optimizer: AdamOptimizer(),
   cost: Cost.CrossEntropy,
+  patience: 10
 });
 
 console.log("\nStarting");
 console.timeLog("Time Elapsed");
 const timeStart = performance.now();
 
-net.train([{ inputs: tensor(tfidfX), outputs: tensor(oneHotY) }], 20, 4, 0.01);
+net.train([{ inputs: tensor(vecX), outputs: tensor(oneHotY) }], 100, 2, 0.002);
 
 console.log(
   `Training complete in ${duration(performance.now() - timeStart, {
@@ -127,14 +131,12 @@ console.log(
 );
 
 const predYSoftmax = await net.predict(
-  tensor(
-    transformer.transform<"f32">(
-      vectorizer.transform(tokenizer.transform(testX), "f32")
-    )
-  )
+  tensor(vectorizer.transform(tokenizer.transform(testX), "f32"))
 );
 
 CategoricalEncoder.fromSoftmax<"f32">(predYSoftmax as MatrixLike<"f32">);
 const predY = encoder.untransform(predYSoftmax as MatrixLike<"f32">);
 
 console.log(new ClassificationReport(testY, predY));
+
+net.saveFile("examples/sentiment-analysis/sentiment.st")
