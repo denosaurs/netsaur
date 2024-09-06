@@ -34,12 +34,12 @@ export class ClassificationReport {
       let [tp, fn, fp, tn] = [0, 0, 0, 0];
       for (let i = 0; i < y.length; i += 1) {
         if (y1[i] !== label && y[i] !== label) tn += 1;
-        else if (y1[i] !== label && y[i] === unique[0]) fn += 1;
+        else if (y1[i] !== label && y[i] === label) fn += 1;
         else if (y1[i] === label && y[i] !== label) fp += 1;
         else tp += 1;
       }
-      this.true += tp + tn;
-      this.false += fp + fn;
+      this.true += tp;
+      this.false += fp;
       const cMatrix = new ConfusionMatrix([tp, fn, fp, tn]);
       this.reports.set(`${label}`, {
         c: cMatrix,
@@ -57,7 +57,7 @@ export class ClassificationReport {
     for (const [label, report] of this.reports.entries()) {
       res += `\n${label}`;
       res +=
-        `\t${report.precision}\t${report.f1}\t${report.recall}\t${report.support}`;
+        `\t${report.precision.toFixed(4)}\t${report.f1.toFixed(4)}\t${report.recall.toFixed(4)}\t${report.support}`;
     }
     res += `\nAccuracy\t\t${
       this.true / (this.true + this.false)
@@ -191,24 +191,24 @@ export function accuracyScore(cMatrix: ConfusionMatrix): number {
 }
 /** The fraction of "positive" predictions that were actually positive */
 export function precisionScore(cMatrix: ConfusionMatrix): number {
-  return cMatrix.truePositive / (cMatrix.truePositive + cMatrix.falsePositive);
+  return (cMatrix.truePositive / (cMatrix.truePositive + cMatrix.falsePositive)) || 0;
 }
 /** The fraction of positives that were predicted correctly */
 export function sensitivityScore(cMatrix: ConfusionMatrix): number {
-  return cMatrix.truePositive / (cMatrix.truePositive + cMatrix.falseNegative);
+  return (cMatrix.truePositive / (cMatrix.truePositive + cMatrix.falseNegative)) || 0;
 }
 /** The fraction of positives that were predicted correctly */
 export const recallScore = sensitivityScore;
 /** The fraction of negatives that were predicted correctly */
 export function specificityScore(cMatrix: ConfusionMatrix): number {
-  return cMatrix.trueNegative / (cMatrix.trueNegative + cMatrix.falsePositive);
+  return (cMatrix.trueNegative / (cMatrix.trueNegative + cMatrix.falsePositive)) || 0;
 }
 /** Compute F1 Score */
 export function f1Score(cMatrix: ConfusionMatrix): number {
   return (
     (2 * cMatrix.truePositive) /
     (2 * cMatrix.truePositive + cMatrix.falsePositive + cMatrix.falseNegative)
-  );
+  ) || 0;
 }
 
 /** Compute Cohen's Kappa to find Agreement */
