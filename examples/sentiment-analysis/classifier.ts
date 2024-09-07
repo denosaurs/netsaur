@@ -114,7 +114,7 @@ console.log("\nCPU Backend Loaded");
 console.timeLog("Time Elapsed");
 
 const net = new Sequential({
-  size: [4, vecX.nCols],
+  size: [4, tfidfX.nCols],
   layers: [
     DenseLayer({ size: [256], init: Init.Kaiming }),
     ReluLayer(),
@@ -124,9 +124,9 @@ const net = new Sequential({
     ReluLayer(),
     DenseLayer({ size: [16], init: Init.Kaiming }),
     ReluLayer(),
-    Dropout1DLayer({ probability: 0.5 }),
     DenseLayer({ size: [16], init: Init.Kaiming }),
     ReluLayer(),
+    Dropout1DLayer({ probability: 0.5 }),
     DenseLayer({ size: [encoder.mapping.size], init: Init.Kaiming }),
     SoftmaxLayer(),
   ],
