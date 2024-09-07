@@ -4,7 +4,7 @@
 // deno-fmt-ignore-file
 /// <reference types="./netsaur_tokenizers.generated.d.ts" />
 
-// source-hash: 7411764ea128cc65962626e00ed109dfa6e5ba46
+// source-hash: e11fff4f445d516e52460d2ff206a6a083ca5f09
 let wasm;
 
 const heap = new Array(128).fill(undefined);

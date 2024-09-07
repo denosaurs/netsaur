@@ -34,10 +34,10 @@ impl FlattenCPULayer {
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
         let output_size = IxDyn(&self.output_size);
-        inputs.into_shape(output_size).unwrap()
+        inputs.into_shape_with_order(output_size).unwrap()
     }
 
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
-        d_outputs.into_shape(self.input_size.clone()).unwrap()
+        d_outputs.into_shape_with_order(self.input_size.clone()).unwrap()
     }
 }
