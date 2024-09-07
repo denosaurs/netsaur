@@ -77,12 +77,11 @@ export class SplitTokenizer {
       let i = 0;
       while (i < text.length) {
         res[i] = this.#transform(text[i], size);
-        i += 1;
+        i++;
       }
       return res;
-    } else {
-      return [this.#transform(text, 0)];
     }
+    return [this.#transform(text, 0)];
   }
   #transform(text: string, size: number): number[] {
     const words = this.split(text);
@@ -93,15 +92,13 @@ export class SplitTokenizer {
     while (i < words.length && i < size) {
       if (this.vocabulary.has(words[i])) {
         const index = this.vocabulary.get(words[i]);
-        if (typeof index === "number") {
-          res[i] = index;
-        } else {
-          res[i] = this.vocabulary.get("__unk__") || 0;
-        }
+        res[i] = typeof index === "number"
+          ? index
+          : this.vocabulary.get("__unk__") || 0;
       } else {
         res[i] = this.vocabulary.get("__unk__") || 0;
       }
-      i += 1;
+      i++;
     }
     return res;
   }

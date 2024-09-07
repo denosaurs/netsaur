@@ -42,11 +42,11 @@ const trainSet = loadDataset(
   "train-images.idx",
   "train-labels.idx",
   0,
-  5000,
+  10000,
   32,
 );
 
-const epochs = 1;
+const epochs = 10;
 console.log("Training (" + epochs + " epochs)...");
 const start = performance.now();
 network.train(trainSet, epochs, 1, 0.005);
