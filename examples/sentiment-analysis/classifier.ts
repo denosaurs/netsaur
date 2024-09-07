@@ -126,7 +126,6 @@ const net = new Sequential({
     ReluLayer(),
     DenseLayer({ size: [16], init: Init.Kaiming }),
     ReluLayer(),
-    Dropout1DLayer({ probability: 0.5 }),
     DenseLayer({ size: [encoder.mapping.size], init: Init.Kaiming }),
     SoftmaxLayer(),
   ],
