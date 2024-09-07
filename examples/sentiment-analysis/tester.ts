@@ -78,5 +78,3 @@ CategoricalEncoder.fromSoftmax<"f32">(predYSoftmax as MatrixLike<"f32">);
 const predY = encoder.untransform(predYSoftmax as MatrixLike<"f32">);
 
 console.log(new ClassificationReport(testY, predY));
-
-console.log(testY, predY);
