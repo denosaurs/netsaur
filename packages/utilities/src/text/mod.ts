@@ -4,4 +4,5 @@
  * @module
  */
 
-export * from "./preprocess/mod.ts";
+export * from "./cleaner.ts";
+export * from "./vectorizer.ts"

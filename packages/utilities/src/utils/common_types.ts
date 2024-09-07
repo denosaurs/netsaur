@@ -51,27 +51,34 @@ interface TypedArrayValueMapping {
   f64: number;
 }
 
-export type DTypeValue<T extends keyof TypedArrayValueMapping> = T extends
-  keyof TypedArrayValueMapping ? TypedArrayValueMapping[T] : never;
+export type DTypeValue<T extends keyof TypedArrayValueMapping> =
+  T extends keyof TypedArrayValueMapping ? TypedArrayValueMapping[T] : never;
 
 type AddableTypes = number | bigint;
 
 export type AddDTypeValues<
   T1 extends AddableTypes,
-  T2 extends AddableTypes,
-> = T1 extends number ? T2 extends number ? number
-  : T2 extends bigint ? bigint
-  : never
-  : T1 extends bigint ? T2 extends number ? bigint
-    : T2 extends bigint ? bigint
+  T2 extends AddableTypes
+> = T1 extends number
+  ? T2 extends number
+    ? number
+    : T2 extends bigint
+    ? bigint
+    : never
+  : T1 extends bigint
+  ? T2 extends number
+    ? bigint
+    : T2 extends bigint
+    ? bigint
     : never
   : never;
 
-export type DType<T extends keyof TypedArrayMapping> = T extends
-  keyof TypedArrayMapping ? TypedArrayMapping[T] : never;
+export type DType<T extends keyof TypedArrayMapping> =
+  T extends keyof TypedArrayMapping ? TypedArrayMapping[T] : never;
 
 export type DTypeConstructor<T extends keyof TypedArrayConstructorMapping> =
-  T extends keyof TypedArrayConstructorMapping ? TypedArrayConstructorMapping[T]
+  T extends keyof TypedArrayConstructorMapping
+    ? TypedArrayConstructorMapping[T]
     : never;
 
 export type TypedArray =
@@ -93,8 +100,8 @@ export interface Sliceable {
     predicate: (
       value: unknown,
       index: number,
-      array: unknown[],
-    ) => value is unknown,
+      array: unknown[]
+    ) => value is unknown
   ): Sliceable;
   slice(start?: number, end?: number): Sliceable;
   length: number;
@@ -166,27 +173,29 @@ export interface StandardizeConfig {
   normalizeWhiteSpaces?: boolean;
   /** Strip Newlines */
   stripNewlines?: boolean;
+  /** Remove stop words from text */
+  removeStopWords?: "english" | false | string[];
 }
 
 export type VectorizerMode = "count" | "indices" | "multihot" | "tfidf";
 
 export type VectorizerModeConfig =
   | {
-    mode: "count";
-    config?: Partial<BaseVectorizerOptions>;
-  }
+      mode: "count";
+      config?: Partial<BaseVectorizerOptions>;
+    }
   | {
-    mode: "indices";
-    config?: Partial<BaseVectorizerOptions & { size: number }>;
-  }
+      mode: "indices";
+      config?: Partial<BaseVectorizerOptions & { size: number }>;
+    }
   | {
-    mode: "multihot";
-    config?: Partial<BaseVectorizerOptions>;
-  }
+      mode: "multihot";
+      config?: Partial<BaseVectorizerOptions>;
+    }
   | {
-    mode: "tfidf";
-    config?: Partial<BaseVectorizerOptions & { idf: Float64Array }>;
-  };
+      mode: "tfidf";
+      config?: Partial<BaseVectorizerOptions & { idf: Float64Array }>;
+    };
 
 export interface TokenizerModeConfig {
   mode: "whitespace";
