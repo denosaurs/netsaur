@@ -1,4 +1,5 @@
-import type { StandardizeConfig } from "../../utils/common_types.ts";
+import type { StandardizeConfig } from "../utils/common_types.ts";
+import { DefaultIgnoreList } from "../constants/stop_words.ts";
 
 /** Simple text cleaner */
 export class TextCleaner implements StandardizeConfig {
@@ -6,16 +7,19 @@ export class TextCleaner implements StandardizeConfig {
   lowercase: boolean;
   normalizeWhiteSpaces: boolean;
   stripNewlines: boolean;
+  removeStopWords: false | "english" | string[];
   constructor({
     stripHtml = false,
     lowercase = false,
     normalizeWhiteSpaces = true,
     stripNewlines = true,
+    removeStopWords = false,
   }: StandardizeConfig = {}) {
     this.stripHtml = stripHtml;
     this.lowercase = lowercase;
     this.normalizeWhiteSpaces = normalizeWhiteSpaces;
     this.stripNewlines = stripNewlines;
+    this.removeStopWords = removeStopWords;
   }
   clean(text: string): string;
   clean(text: string[]): string[];
@@ -35,7 +39,8 @@ export function preprocess(
     lowercase = false,
     normalizeWhiteSpaces = true,
     stripNewlines = true,
-  }: StandardizeConfig = {},
+    removeStopWords = false,
+  }: StandardizeConfig = {}
 ): string {
   if (lowercase) {
     text = text.toLowerCase();
@@ -48,6 +53,14 @@ export function preprocess(
   }
   if (normalizeWhiteSpaces) {
     text = text.replace(/\s\s+/g, " ");
+  }
+  if (removeStopWords) {
+    const stopWords =
+      removeStopWords === "english" ? DefaultIgnoreList : removeStopWords;
+    text = text
+      .split(" ")
+      .filter((x) => !stopWords.includes(x))
+      .join(" ");
   }
   return text;
 }

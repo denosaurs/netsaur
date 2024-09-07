@@ -1,11 +1,11 @@
-import type { DataType } from "../../../utils/common_types.ts";
-import type { Matrix, MatrixLike } from "../../../mod.ts";
-import { multiplyDiags } from "../../../utils/math.ts";
+import type { DataType } from "../utils/common_types.ts";
+import type { Matrix, MatrixLike } from "../mod.ts";
+import { multiplyDiags } from "../utils/math.ts";
 
-/** Convert tf features (CountVectorizer) into tf-idf features. */
+/** Convert tf features (Count) into tf-idf features. */
 export class TfIdfTransformer {
-  idf: null | Float64Array;
-  constructor({ idf }: { idf?: Float64Array } = {}) {
+  idf: null | Float32Array;
+  constructor({ idf }: { idf?: Float32Array } = {}) {
     this.idf = idf ?? null;
   }
   /**
@@ -20,7 +20,7 @@ export class TfIdfTransformer {
     };
     const freq = data.rowSum();
 
-    const idf = new Float64Array(freq.length);
+    const idf = new Float32Array(freq.length);
 
     let i = 0;
     while (i < idf.length) {
@@ -32,6 +32,7 @@ export class TfIdfTransformer {
   }
   /**
    * Transform an tf features into tf-idf features.
+   * Mutates the input.
    * @param data tf features from CountVectorizer
    * @returns Sparse matrix of Tf-Idf features
    */

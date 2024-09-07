@@ -22,6 +22,8 @@
     "./utilities/image": "./packages/utilities/src/image/mod.ts",
     "./utilities/metrics": "./packages/utilities/src/metrics/mod.ts",
     "./utilities/encoding": "./packages/utilities/src/encoding/mod.ts",
+    "./utilities/mapper": "./packages/utilities/src/mapper/mod.ts",
+    "./utilities/transformer": "./packages/utilities/src/transformer/mod.ts",
     "./utilities/misc": "./packages/utilities/src/utils/mod.ts",
     // Tokenizers
     "./tokenizers": "./packages/tokenizers/mod.ts",
