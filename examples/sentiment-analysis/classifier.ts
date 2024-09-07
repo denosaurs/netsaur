@@ -81,12 +81,13 @@ const tfidfX = transformer.fit(vecX).transform<"f32">(vecX);
 console.log("\nX Transformed", tfidfX.shape);
 console.timeLog("Time Elapsed");
 
-const encoder = new CategoricalEncoder<string>();
+const encoder = new CategoricalEncoder<string>(); 
 
 const oneHotY = encoder.fit(trainY).transform(trainY, "f32");
 
 Deno.writeTextFileSync("examples/sentiment-analysis/mappings.json", JSON.stringify(Array.from(encoder.mapping.entries())))
 Deno.writeTextFileSync("examples/sentiment-analysis/vocab.json", JSON.stringify(Array.from(tokenizer.vocabulary.entries())))
+Deno.writeTextFileSync("examples/sentiment-analysis/tfidf.json", JSON.stringify(transformer.idf))
 
 console.log("\nCPU Backend Loading");
 console.timeLog("Time Elapsed");
@@ -122,7 +123,7 @@ console.log("\nStarting");
 console.timeLog("Time Elapsed");
 const timeStart = performance.now();
 
-net.train([{ inputs: tensor(vecX), outputs: tensor(oneHotY) }], 100, 2, 0.002);
+net.train([{ inputs: tensor(tfidfX), outputs: tensor(oneHotY) }], 100, 2, 0.002);
 
 console.log(
   `Training complete in ${duration(performance.now() - timeStart, {
