@@ -2,7 +2,6 @@ import {
   AdamOptimizer,
   Cost,
   CPU,
-  Dropout1DLayer,
   Init,
   setupBackend,
   tensor,
