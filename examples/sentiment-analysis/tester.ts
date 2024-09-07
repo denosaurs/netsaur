@@ -4,7 +4,7 @@ import { Sequential } from "jsr:@denosaurs/netsaur@0.4.0/core";
 import {
   useSplit,
   ClassificationReport,
-  MatrixLike,
+  type MatrixLike,
 } from "jsr:@denosaurs/netsaur@0.4.0/utilities";
 
 import { CategoricalEncoder } from "jsr:@denosaurs/netsaur@0.4.0/utilities/encoding";
@@ -15,6 +15,7 @@ import {
 
 import Mappings from "./mappings.json" with {type: "json"}
 import Vocab from "./vocab.json" with {type: "json"}
+import Idf from "./idf.json" with {type: "json"}
 
 import { parse as parseCsv } from "jsr:@std/csv@1.0.3/parse";
 
@@ -40,7 +41,7 @@ const labels = data.map((x) => x.sentiment);
 console.log("\nCSV Parsed");
 console.timeLog("Time Elapsed");
 
-const [[trainX, trainY], [testX, testY]] = useSplit(
+const [[_trainX, _trainY], [testX, testY]] = useSplit(
   { shuffle: true, ratio: [7, 3] },
   text,
   labels

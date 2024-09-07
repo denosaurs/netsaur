@@ -94,7 +94,7 @@ net.train(
   // Train for 20 epochs
   20,
   2,
-  0.01
+  0.001
 );
 
 console.log(`training time: ${performance.now() - time}ms`);

@@ -1,9 +1,7 @@
 import { CPU, setupBackend, tensor } from "jsr:@denosaurs/netsaur@0.4.0";
 import { Sequential } from "jsr:@denosaurs/netsaur@0.4.0/core";
 
-import {
-  useSplit,
-  ClassificationReport,
+import type {
   MatrixLike,
 } from "jsr:@denosaurs/netsaur@0.4.0/utilities";
 
@@ -15,6 +13,7 @@ import {
 
 import Mappings from "./mappings.json" with {type: "json"}
 import Vocab from "./vocab.json" with {type: "json"}
+import Idf from "./idf.json" with {type: "json"}
 
 
 console.time("Time Elapsed");

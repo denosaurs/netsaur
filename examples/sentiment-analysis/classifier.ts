@@ -8,7 +8,6 @@ import {
   tensor,
 } from "jsr:@denosaurs/netsaur@0.4.0";
 import { Sequential } from "jsr:@denosaurs/netsaur@0.4.0/core";
-import { NadamOptimizer } from "jsr:@denosaurs/netsaur@0.4.0/core/optimizers";
 import {
   DenseLayer,
   ReluLayer,
@@ -18,7 +17,7 @@ import {
 import {
   useSplit,
   ClassificationReport,
-  MatrixLike,
+  type MatrixLike,
 } from "jsr:@denosaurs/netsaur@0.4.0/utilities";
 
 import { CategoricalEncoder } from "jsr:@denosaurs/netsaur@0.4.0/utilities/encoding";
@@ -103,7 +102,7 @@ Deno.writeTextFileSync(
 );
 Deno.writeTextFileSync(
   "examples/sentiment-analysis/tfidf.json",
-  JSON.stringify(transformer.idf)
+  JSON.stringify(Array.from(transformer.idf as Float64Array))
 );
 
 console.log("\nCPU Backend Loading");
@@ -125,9 +124,9 @@ const net = new Sequential({
     ReluLayer(),
     DenseLayer({ size: [16], init: Init.Kaiming }),
     ReluLayer(),
+    Dropout1DLayer({ probability: 0.5 }),
     DenseLayer({ size: [16], init: Init.Kaiming }),
     ReluLayer(),
-    Dropout1DLayer({ probability: 0.5 }),
     DenseLayer({ size: [encoder.mapping.size], init: Init.Kaiming }),
     SoftmaxLayer(),
   ],
