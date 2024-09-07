@@ -132,7 +132,7 @@ console.log(
 );
 
 const predYSoftmax = await net.predict(
-  tensor(vectorizer.transform(tokenizer.transform(testX), "f32"))
+  tensor(transformer.transform<"f32">(vectorizer.transform(tokenizer.transform(testX), "f32")))
 );
 
 CategoricalEncoder.fromSoftmax<"f32">(predYSoftmax as MatrixLike<"f32">);
