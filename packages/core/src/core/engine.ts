@@ -15,6 +15,12 @@ export interface BackendInstance {
 export interface BackendLoader {
   /**
    * Whether the backend is supported.
+   * 
+   * ```ts
+   * import { WASM } from "https://deno.land/x/netsaur/mod.ts";
+   * 
+   * console.log(WASM.isSupported());
+   * ```
    */
   isSupported(): boolean;
 

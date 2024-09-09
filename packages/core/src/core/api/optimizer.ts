@@ -6,16 +6,16 @@ export type Optimizer =
   | { type: OptimizerType.Nadam; config: AdamOptimizerConfig }
   | { type: OptimizerType.RMSProp; config: RMSPropOptimizerConfig };
 
-export type AdamOptimizerConfig = {
+export interface AdamOptimizerConfig {
   beta1?: number;
   beta2?: number;
   epsilon?: number;
-};
+}
 
-export type RMSPropOptimizerConfig = {
+export interface RMSPropOptimizerConfig {
   decayRate?: number;
   epsilon?: number;
-};
+}
 
 export function SGDOptimizer(): Optimizer {
   return { type: OptimizerType.SGD };

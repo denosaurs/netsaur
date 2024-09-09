@@ -32,8 +32,8 @@ jobs:
           rustc --version
           cargo --version
           cargo build --release -p netsaur
-          deno run -Ar jsr:@deno/wasmbuild@0.17.1 -p netsaur --out src/backends/wasm/lib
-          deno run -Ar jsr:@deno/wasmbuild@0.17.1 -p netsaur-tokenizers --out tokenizers/lib
+          deno run -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur --out src/backends/wasm/lib
+          deno run -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur-tokenizers --out tokenizers/lib
       - name: Release
         uses: softprops/action-gh-release@master
         env:
