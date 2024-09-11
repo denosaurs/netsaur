@@ -21,7 +21,7 @@ export type Layer =
 /**
  * The configuration for a dense layer.
  */
-export type DenseLayerConfig = {
+export interface DenseLayerConfig {
   /**
    * The type of initialization to use.
    */
@@ -46,7 +46,7 @@ export type DenseLayerConfig = {
 /**
  * The configuration for a dropout layer.
  */
-export type DropoutLayerConfig = {
+export interface DropoutLayerConfig {
   /**
    * probability of dropping out a value.
    */
@@ -61,7 +61,7 @@ export type DropoutLayerConfig = {
 /**
  * The configuration for an activation layer.
  */
-export type ActivationLayerConfig = {
+export interface ActivationLayerConfig {
   /**
    * The activation function to use.
    */
@@ -71,7 +71,7 @@ export type ActivationLayerConfig = {
 /**
  * The configuration for a convolutional layer.
  */
-export type Conv2DLayerConfig = {
+export interface Conv2DLayerConfig {
   /**
    * The type of initialization to use.
    */
@@ -111,7 +111,7 @@ export type Conv2DLayerConfig = {
 /**
  * The configuration for a convolutional transpose layer.
  */
-export type ConvTranspose2DLayerConfig = {
+export interface ConvTranspose2DLayerConfig {
   /**
    * The type of initialization to use.
    */
@@ -158,7 +158,7 @@ export enum PoolMode {
 /**
  * The configuration for a pooling layer.
  */
-export type Pool2DLayerConfig = {
+export interface Pool2DLayerConfig {
   /**
    * The optional strides to use.
    */
@@ -173,7 +173,7 @@ export type Pool2DLayerConfig = {
 /**
  * The configuration for a flatten layer.
  */
-export type FlattenLayerConfig = {
+export interface FlattenLayerConfig {
   /**
    * The size of the layer.
    */
@@ -183,7 +183,7 @@ export type FlattenLayerConfig = {
 /**
  * The configuration for a batch normalization layer.
  */
-export type BatchNormLayerConfig = {
+export interface BatchNormLayerConfig {
   /**
    * The momentum to use for the batch normalization.
    * Defaults to 0.99.

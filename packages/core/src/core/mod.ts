@@ -17,11 +17,13 @@ import { SGDOptimizer } from "./api/optimizer.ts";
  */
 export class Sequential implements NeuralNetwork {
   backend!: Backend;
+  config: NetworkConfig;
 
   /**
    * Create a Sequential Neural Network.
    */
-  constructor(public config: NetworkConfig) {
+  constructor(config: NetworkConfig) {
+    this.config = config;
     this.config.cost = this.config.cost || Cost.MSE;
     this.config.optimizer = this.config.optimizer || SGDOptimizer();
     this.config.scheduler = this.config.scheduler || {

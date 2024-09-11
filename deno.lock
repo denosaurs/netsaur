@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@denosaurs/netsaur@0.4.0": "0.4.0",
     "jsr:@denosaurs/plug@1.0.3": "1.0.3",
     "jsr:@std/assert@~0.213.1": "0.213.1",
     "jsr:@std/encoding@0.213.1": "0.213.1",
@@ -10,6 +11,12 @@
     "jsr:@std/path@~0.213.1": "0.213.1"
   },
   "jsr": {
+    "@denosaurs/netsaur@0.4.0": {
+      "integrity": "91192ee3ffffc2db3eac38a3f01abb7d52d9fd1053591eddb70852423d44f8ae",
+      "dependencies": [
+        "jsr:@denosaurs/plug"
+      ]
+    },
     "@denosaurs/plug@1.0.3": {
       "integrity": "b010544e386bea0ff3a1d05e0c88f704ea28cbd4d753439c2f1ee021a85d4640",
       "dependencies": [

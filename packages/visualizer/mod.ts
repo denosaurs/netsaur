@@ -5,9 +5,6 @@ import type { Line } from "./types.ts";
  * Visualizer for Neural Networks in Jupyter Notebook
  */
 export class Visualizer {
-  /**
-   * Graph title
-   */
   #title: string;
 
   constructor(title: string) {
@@ -68,6 +65,50 @@ export class Visualizer {
         return {
           "application/vnd.plotly.v1+json": {
             data: [expected, results],
+            layout: {
+              title,
+            },
+          },
+        };
+      },
+    };
+  }
+
+  /**
+   * Graph the loss of a Neural Network during training
+   */
+  graphLoss(loss: number[]): {
+    [x: symbol]: () => {
+      "application/vnd.plotly.v1+json": {
+        data: Line[];
+        layout: { title: string };
+      };
+    };
+  } {
+    const lossLine: Line = {
+      x: [],
+      y: [],
+      type: "scatter",
+      mode: "lines+markers",
+      name: "Loss",
+      line: {
+        color: "blue",
+        width: 3,
+      },
+    };
+
+    for (let i = 0; i < loss.length; i++) {
+      lossLine.x.push(i + 1);
+      lossLine.y.push(loss[i]);
+    }
+
+    const title = this.#title;
+
+    return {
+      [Symbol.for("Jupyter.display")]() {
+        return {
+          "application/vnd.plotly.v1+json": {
+            data: [lossLine],
             layout: {
               title,
             },

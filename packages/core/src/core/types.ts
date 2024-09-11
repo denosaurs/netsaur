@@ -12,6 +12,10 @@ export interface Backend {
    * The train method is a function that trains a neural network using a set of training data.
    * It takes in an array of DataSet objects, the number of epochs to train for, and the learning rate.
    * The method modifies the weights and biases of the network to minimize the cost function and improve its accuracy on the training data.
+   *
+   * ```ts
+   * net.train(datasets, 100, 10, 0.01);
+   * ```
    */
   train(
     datasets: DataSet[],
@@ -24,6 +28,11 @@ export interface Backend {
    * The predict method is a function that takes in a Tensor object
    * representing the input to the neural network and returns a Promise that resolves to a Tensor object representing the output of the network.
    * This method is used to make predictions on new data after the network has been trained.
+   *
+   * ```ts
+   * const input = new Tensor([1, 2, 3, 4]);
+   * const output = await net.predict(input);
+   * ```
    */
   predict(
     input: Tensor<Rank>,
@@ -34,12 +43,20 @@ export interface Backend {
   /**
    * The save method is a function that saves the network to a Uint8Array.
    * This method is used to save the network after it has been trained.
+   *
+   * ```ts
+   * const buffer = net.save();
+   * ```
    */
   save(): Uint8Array;
 
   /**
    * The saveFile method is a function that takes in a string representing the path to a file and saves the network to that file.
    * This method is used to save the network after it has been trained.
+   *
+   * ```ts
+   * net.saveFile("model.bin");
+   * ```
    */
   saveFile(path: string): void;
 }
@@ -47,7 +64,7 @@ export interface Backend {
 /**
  * NetworkConfig represents the configuration of a neural network.
  */
-export type NetworkConfig = {
+export interface NetworkConfig {
   /**
    * Input size of the neural network.
    */
@@ -87,7 +104,7 @@ export type NetworkConfig = {
    * Number of disappointing iterations to allow before early stopping
    */
   patience?: number;
-};
+}
 
 /**
  * Activation functions are used to transform the output of a layer into a new output.
@@ -195,10 +212,10 @@ export enum SchedulerType {
 /**
  * DataSet is a container for training data.
  */
-export type DataSet = {
+export interface DataSet {
   inputs: Tensor<Rank>;
   outputs: Tensor<Rank>;
-};
+}
 
 export enum LayerType {
   Activation = "activation",

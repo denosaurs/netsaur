@@ -3,19 +3,19 @@ import type { Rank, Shape } from "../../core/api/shape.ts";
 /**
  * Train Options Interface.
  */
-export type TrainOptions = {
+export interface TrainOptions {
   datasets: number;
   inputShape: Shape<Rank>;
   outputShape: Shape<Rank>;
   epochs: number;
   batches: number;
   rate: number;
-};
+}
 
 /**
  * Predict Options Interface.
  */
-export type PredictOptions = {
+export interface PredictOptions {
   inputShape: Shape<Rank>;
   outputShape: Shape<Rank>;
-};
+}

@@ -16,7 +16,7 @@ import type {
 } from "../api/shape.ts";
 import { inferShape, length } from "./util.ts";
 
-export type TensorLike<R extends Rank> = {
+export interface TensorLike<R extends Rank> {
   shape: Shape<R>;
   data: Float32Array;
 };
@@ -35,6 +35,9 @@ export class Tensor<R extends Rank> {
 
   /**
    * Creates an empty tensor.
+   * ```ts
+   * Tensor.zeros([2, 2]);
+   * ```
    */
   static zeroes<R extends Rank>(shape: Shape<R>): Tensor<R> {
     return new Tensor(new Float32Array(length(shape)), shape);
@@ -42,6 +45,10 @@ export class Tensor<R extends Rank> {
 
   /**
    * Serialise a tensor into JSON.
+   * 
+   * ```ts
+   * tensor([1, 2, 3, 4], [2, 2]).toJSON();
+   * ```
    */
   toJSON(): { data: number[]; shape: Shape<R> } {
     const data = new Array(this.data.length).fill(1);

@@ -8,15 +8,15 @@ export type Scheduler =
   }
   | { type: SchedulerType.OneCycle; config: OneCycleSchedulerConfig };
 
-export type DecaySchedulerConfig = {
+export interface DecaySchedulerConfig {
   rate?: number;
   step_size?: number;
-};
+}
 
-export type OneCycleSchedulerConfig = {
+export interface OneCycleSchedulerConfig {
   max_rate?: number;
   step_size?: number;
-};
+}
 
 export function NoScheduler(): Scheduler {
   return { type: SchedulerType.None };

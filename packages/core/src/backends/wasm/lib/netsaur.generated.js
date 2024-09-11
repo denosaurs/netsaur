@@ -217,7 +217,7 @@ const imports = {
     __wbindgen_object_drop_ref: function (arg0) {
       takeObject(arg0);
     },
-    __wbg_log_023d7669e382bddf: function (arg0, arg1) {
+    __wbg_log_6f7dfa87fad40a57: function (arg0, arg1) {
       console.log(getStringFromWasm0(arg0, arg1));
     },
     __wbindgen_number_new: function (arg0) {
