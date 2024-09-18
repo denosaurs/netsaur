@@ -13,7 +13,7 @@ export class TextVectorizer {
     this.mode = mode;
     this.mapper = new DiscreteMapper();
   }
-  fit(document: string | string[]) {
+  fit(document: string | string[]): TextVectorizer {
     this.mapper.fit(
       (Array.isArray(document) ? document.join(" ") : document).split(" ")
     );
@@ -27,6 +27,7 @@ export class TextVectorizer {
         this.transformer.fit(this.encoder.transform(tokens, "f32"));
       }
     }
+    return this;
   }
   transform<DT extends DataType>(
     document: string | string[],
