@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::time::Instant;
 
 use ndarray::{ArrayD, ArrayViewD, IxDyn};
 use safetensors::{serialize, SafeTensors};
@@ -110,7 +111,10 @@ impl Backend {
         match layers {
             Some(layer_indices) => {
                 for layer_index in layer_indices {
-                    let layer = self.layers.get_mut(layer_index).expect(&format!("Layer #{} does not exist.", layer_index));
+                    let layer = self
+                        .layers
+                        .get_mut(layer_index)
+                        .expect(&format!("Layer #{} does not exist.", layer_index));
                     inputs = layer.forward_propagate(inputs, training);
                 }
             }
@@ -141,6 +145,10 @@ impl Backend {
         let mut disappointments = 0;
         let mut best_net = self.save();
         let mut cost = 0f32;
+        let mut time: u128;
+        let mut total_time = 0u128;
+        let start = Instant::now();
+        let total_iter = epochs * datasets.len();
         while epoch < epochs {
             let mut total = 0.0;
             for (i, dataset) in datasets.iter().enumerate() {
@@ -152,7 +160,19 @@ impl Backend {
                 let minibatch = outputs.dim()[0];
                 if !self.silent && ((i + 1) * minibatch) % batches == 0 {
                     cost = total / (batches) as f32;
-                    let msg = format!("Epoch={}, Dataset={}, Cost={}", epoch, i * minibatch, cost);
+                    time = start.elapsed().as_millis() - total_time;
+                    total_time += time;
+                    let current_iter = epoch * datasets.len() + i;
+                    let msg = format!(
+                        "Epoch={}, Dataset={}, Cost={}, Time={}s, ETA={}s",
+                        epoch,
+                        i * minibatch,
+                        cost,
+                        (time as f32) / 1000.0,
+                        (((total_time as f32) / current_iter as f32)
+                            * (total_iter - current_iter) as f32)
+                            / 1000.0
+                    );
                     (self.logger.log)(msg);
                     total = 0.0;
                 }
@@ -165,17 +185,28 @@ impl Backend {
                     disappointments = 0;
                     best_cost = cost;
                     best_net = self.save();
-                }  else {
+                } else {
                     disappointments += 1;
                     if !self.silent {
-                        println!("Patience counter: {} disappointing epochs out of {}.", disappointments, self.patience);
+                        println!(
+                            "Patience counter: {} disappointing epochs out of {}.",
+                            disappointments, self.patience
+                        );
                     }
                 }
                 if disappointments >= self.patience {
                     if !self.silent {
-                        println!("No improvement for {} epochs. Stopping early at cost={}", disappointments, best_cost);
+                        println!(
+                            "No improvement for {} epochs. Stopping early at cost={}",
+                            disappointments, best_cost
+                        );
                     }
-                    let net = Self::load(&best_net, Logger { log: |x| println!("{}", x) });
+                    let net = Self::load(
+                        &best_net,
+                        Logger {
+                            log: |x| println!("{}", x),
+                        },
+                    );
                     self.layers = net.layers;
                     break;
                 }
