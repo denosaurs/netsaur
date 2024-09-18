@@ -14,12 +14,12 @@ import {
 // Import helpers for metrics
 import {
   ClassificationReport,
-  CountVectorizer,
-  SplitTokenizer,
-  TfIdfTransformer,
+  TextCleaner,
+  TextVectorizer,
   // Split the dataset
   useSplit,
 } from "../../packages/utilities/mod.ts";
+import { SigmoidLayer } from "../../mod.ts";
 
 // Define classes
 const ymap = ["spam", "ham"];
@@ -32,25 +32,21 @@ const data = parse(_data);
 const x = data.map((msg) => msg[1]);
 
 // Get the classes
-const y = data.map((msg) => (ymap.indexOf(msg[0]) === 0 ? -1 : 1));
+const y = data.map((msg) => (ymap.indexOf(msg[0]) === 0 ? 0 : 1));
 
 // Split the dataset for training and testing
 const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y);
 
 // Vectorize the text messages
 
-const tokenizer = new SplitTokenizer({
-  skipWords: "english",
-  standardize: { lowercase: true },
-}).fit(train[0]);
+const textCleaner = new TextCleaner({ lowercase: true });
 
-const vec = new CountVectorizer(tokenizer.vocabulary.size);
+train[0] = textCleaner.clean(train[0])
 
-const x_vec = vec.transform(tokenizer.transform(train[0]), "f32")
+const vec = new TextVectorizer("tfidf").fit(train[0]);
 
-const tfidf = new TfIdfTransformer();
+const x_vec = vec.transform(train[0], "f32");
 
-const x_tfidf = tfidf.fit(x_vec).transform(x_vec)
 
 // Setup the CPU backend for Netsaur
 await setupBackend(CPU);
@@ -73,14 +69,15 @@ const net = new Sequential({
     // A dense layer with 1 neuron
     DenseLayer({ size: [1] }),
     // A sigmoid activation layer
+    SigmoidLayer()
   ],
 
   // We are using Log Loss for finding cost
-  cost: Cost.Hinge,
+  cost: Cost.BinCrossEntropy,
   optimizer: NadamOptimizer(),
 });
 
-const inputs = tensor(x_tfidf);
+const inputs = tensor(x_vec);
 
 const time = performance.now();
 // Train the network
@@ -99,10 +96,10 @@ net.train(
 
 console.log(`training time: ${performance.now() - time}ms`);
 
-const x_vec_test = tfidf.transform(vec.transform(tokenizer.transform(test[0]), "f32"));
+const x_vec_test = vec.transform(test[0], "f32");
 
 // Calculate metrics
 const res = await net.predict(tensor(x_vec_test));
-const y1 = res.data.map((i) => (i < 0 ? -1 : 1));
+const y1 = res.data.map((i) => (i < 0.5 ? 0 : 1));
 const cMatrix = new ClassificationReport(test[1], y1);
 console.log("Confusion Matrix: ", cMatrix);
