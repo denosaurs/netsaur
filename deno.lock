@@ -4,6 +4,7 @@
     "jsr:@denosaurs/netsaur@0.4.0": "0.4.0",
     "jsr:@denosaurs/plug@1.0.3": "1.0.3",
     "jsr:@std/assert@~0.213.1": "0.213.1",
+    "jsr:@std/csv@1.0.3": "1.0.3",
     "jsr:@std/encoding@0.213.1": "0.213.1",
     "jsr:@std/fmt@0.213.1": "0.213.1",
     "jsr:@std/fs@0.213.1": "0.213.1",
@@ -28,6 +29,9 @@
     },
     "@std/assert@0.213.1": {
       "integrity": "24c28178b30c8e0782c18e8e94ea72b16282207569cdd10ffb9d1d26f2edebfe"
+    },
+    "@std/csv@1.0.3": {
+      "integrity": "623acf0dcb88d62ba727c3611ad005df7f109ede8cac833e3986f540744562e5"
     },
     "@std/encoding@0.213.1": {
       "integrity": "fcbb6928713dde941a18ca5db88ca1544d0755ec8fb20fe61e2dc8144b390c62"
