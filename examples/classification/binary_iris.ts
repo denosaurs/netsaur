@@ -17,6 +17,7 @@ import {
   useSplit,
 } from "../../packages/utilities/mod.ts";
 import { PostProcess } from "../../packages/core/src/core/api/postprocess.ts";
+import { AdamOptimizer, WASM } from "../../mod.ts";
 
 // Define classes
 const classes = ["Setosa", "Versicolor"];
@@ -33,7 +34,7 @@ const y = data.map((fl) => classes.indexOf(fl[4]));
 const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y);
 
 // Setup the CPU backend for Netsaur
-await setupBackend(CPU);
+await setupBackend(WASM);
 
 // Create a sequential neural network
 const net = new Sequential({
@@ -57,6 +58,7 @@ const net = new Sequential({
   ],
   // We are using Log Loss for finding cost
   cost: Cost.BinCrossEntropy,
+  optimizer: AdamOptimizer()
 });
 
 const time = performance.now();
@@ -70,7 +72,7 @@ net.train(
     },
   ],
   // Train for 150 epochs
-  150,
+  100,
   1,
   // Use a smaller learning rate
   0.02

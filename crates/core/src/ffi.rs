@@ -1,8 +1,9 @@
 use std::slice::{from_raw_parts, from_raw_parts_mut};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::{
-    decode_array, decode_json, length, Backend, Dataset, Logger, PredictOptions, TrainOptions,
-    RESOURCES,
+    decode_array, decode_json, length, Backend, Dataset, Logger, PredictOptions, Timer,
+    TrainOptions, RESOURCES,
 };
 
 type AllocBufferFn = extern "C" fn(usize) -> *mut u8;
@@ -11,10 +12,17 @@ fn log(string: String) {
     println!("{}", string)
 }
 
+fn now() -> u128 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Your system is behind the Unix Epoch")
+        .as_millis()
+}
+
 #[no_mangle]
 pub extern "C" fn ffi_backend_create(ptr: *const u8, len: usize, alloc: AllocBufferFn) -> usize {
     let config = decode_json(ptr, len);
-    let net_backend = Backend::new(config, Logger { log }, None);
+    let net_backend = Backend::new(config, Logger { log }, Timer { now }, None);
     let buf: Vec<u8> = net_backend
         .size
         .iter()
@@ -98,7 +106,7 @@ pub extern "C" fn ffi_backend_load(
     alloc: AllocBufferFn,
 ) -> usize {
     let buffer = unsafe { from_raw_parts(file_ptr, file_len) };
-    let net_backend = Backend::load(buffer, Logger { log });
+    let net_backend = Backend::load(buffer, Logger { log }, Timer { now });
     let buf: Vec<u8> = net_backend.size.iter().map(|x| *x as u8).collect();
     let size_ptr = alloc(buf.len());
     let output_shape = unsafe { from_raw_parts_mut(size_ptr, buf.len()) };
