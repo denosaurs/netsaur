@@ -6,10 +6,10 @@ use safetensors::{serialize, SafeTensors};
 
 use crate::{
     to_arr, ActivationCPULayer, BackendConfig, BatchNorm1DCPULayer, BatchNorm2DCPULayer,
-    BatchNormTensors, CPUCost, CPULayer, CPUOptimizer, CPUScheduler, Conv2DCPULayer, ConvTensors,
-    ConvTranspose2DCPULayer, Dataset, DenseCPULayer, DenseTensors, Dropout1DCPULayer,
-    Dropout2DCPULayer, FlattenCPULayer, GetTensor, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer,
-    Tensor, Tensors,
+    BatchNormTensors, CPUCost, CPULayer, CPUOptimizer, CPUPostProcessor, CPUScheduler,
+    Conv2DCPULayer, ConvTensors, ConvTranspose2DCPULayer, Dataset, DenseCPULayer, DenseTensors,
+    Dropout1DCPULayer, Dropout2DCPULayer, FlattenCPULayer, GetTensor, Layer, Logger,
+    Pool2DCPULayer, PostProcessor, SoftmaxCPULayer, Tensor, Tensors,
 };
 
 pub struct Backend {
@@ -215,11 +215,17 @@ impl Backend {
         }
     }
 
-    pub fn predict(&mut self, data: ArrayD<f32>, layers: Option<Vec<usize>>) -> ArrayD<f32> {
+    pub fn predict(
+        &mut self,
+        data: ArrayD<f32>,
+        postprocess: PostProcessor,
+        layers: Option<Vec<usize>>,
+    ) -> ArrayD<f32> {
+        let processor = CPUPostProcessor::from(&postprocess);
         for layer in &mut self.layers {
             layer.reset(1);
         }
-        self.forward_propagate(data, false, layers)
+        processor.process(self.forward_propagate(data, false, layers))
     }
 
     pub fn save(&self) -> Vec<u8> {

@@ -6,6 +6,7 @@ mod layers;
 mod optimizers;
 mod schedulers;
 mod regularizer;
+mod postprocessing;
 
 pub use activation::*;
 pub use backend::*;
@@ -15,3 +16,4 @@ pub use layers::*;
 pub use optimizers::*;
 pub use schedulers::*;
 pub use regularizer::*;
+pub use postprocessing::*;

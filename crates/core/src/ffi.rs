@@ -75,7 +75,7 @@ pub extern "C" fn ffi_backend_predict(
 
     RESOURCES.with(|cell| {
         let mut backend = cell.backend.borrow_mut();
-        let res = backend[id].predict(inputs, options.layers);
+        let res = backend[id].predict(inputs, options.post_process, options.layers);
         outputs.copy_from_slice(res.as_slice().unwrap());
     });
 }

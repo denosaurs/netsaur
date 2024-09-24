@@ -16,6 +16,7 @@ import {
   // Split the dataset
   useSplit,
 } from "../../packages/utilities/mod.ts";
+import { PostProcess } from "../../packages/core/src/core/api/postprocess.ts";
 
 // Define classes
 const classes = ["Setosa", "Versicolor"];
@@ -29,7 +30,7 @@ const x = data.map((fl) => fl.slice(0, 4).map(Number));
 const y = data.map((fl) => classes.indexOf(fl[4]));
 
 // Split the dataset for training and testing
-const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y)
+const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y);
 
 // Setup the CPU backend for Netsaur
 await setupBackend(CPU);
@@ -72,13 +73,14 @@ net.train(
   150,
   1,
   // Use a smaller learning rate
-  0.02,
+  0.02
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
 
-const res = await net.predict(tensor2D(test[0]));
+const res = await net.predict(tensor2D(test[0]), {
+  postProcess: PostProcess("step", { thresholds: [0.5], values: [0, 1] }),
+});
 
-const y1 = res.data.map((x) => x < 0.5 ? 0 : 1);
-const cMatrix = new ClassificationReport(test[1], y1);
+const cMatrix = new ClassificationReport(test[1], res.data);
 console.log("Confusion Matrix: ", cMatrix);

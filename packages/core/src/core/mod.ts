@@ -11,6 +11,7 @@ import type { Rank } from "./api/shape.ts";
 import type { Tensor } from "./tensor/tensor.ts";
 import type { NeuralNetwork } from "./api/network.ts";
 import { SGDOptimizer } from "./api/optimizer.ts";
+import { PostProcess, type PostProcessor } from "./api/postprocess.ts";
 
 /**
  * Sequential Neural Network
@@ -46,21 +47,22 @@ export class Sequential implements NeuralNetwork {
    */
   async predict(
     data: Tensor<Rank>,
-    layers?: [number, number],
+    config: { postProcess: PostProcessor; layers?: [number, number] } = {
+      postProcess: PostProcess("none"),
+    }
   ): Promise<Tensor<Rank>> {
-    if (layers) {
-      if (layers[0] < 0 || layers[1] > this.config.layers.length) {
+    if (config.layers) {
+      if (config.layers[0] < 0 || config.layers[1] > this.config.layers.length) {
         throw new RangeError(
-          `Execution range should be within (0, ${this.config.layers.length}). Received (${(layers[
-            0
-          ],
-            layers[1])})`,
+          `Execution range should be within (0, ${
+            this.config.layers.length
+          }). Received (${(config.layers[0], config.layers[1])})`
         );
       }
-      const lastLayer = this.config.layers[layers[1] - 1];
-      const layerList = new Array(layers[1] - layers[0]);
+      const lastLayer = this.config.layers[config.layers[1] - 1];
+      const layerList = new Array(config.layers[1] - config.layers[0]);
       for (let i = 0; i < layerList.length; i += 1) {
-        layerList[i] = layers[0] + i;
+        layerList[i] = config.layers[0] + i;
       }
       if (
         lastLayer.type === LayerType.Dense ||
@@ -68,32 +70,38 @@ export class Sequential implements NeuralNetwork {
       ) {
         return await this.backend.predict(
           data,
-          layerList,
-          lastLayer.config.size,
+          {
+            postProcess: config.postProcess,
+            outputShape: lastLayer.config.size,
+          },
+          layerList
         );
       } else if (lastLayer.type === LayerType.Activation) {
-        const penultimate = this.config.layers[layers[1] - 2];
+        const penultimate = this.config.layers[config.layers[1] - 2];
         if (
           penultimate.type === LayerType.Dense ||
           penultimate.type === LayerType.Flatten
         ) {
           return await this.backend.predict(
             data,
-            layerList,
-            penultimate.config.size,
+            {
+              postProcess: config.postProcess,
+              outputShape: penultimate.config.size,
+            },
+            layerList
           );
         } else {
           throw new Error(
-            `The penultimate layer must be a dense layer, or a flatten layer if the last layer is an activation layer. Received ${penultimate.type}.`,
+            `The penultimate layer must be a dense layer, or a flatten layer if the last layer is an activation layer. Received ${penultimate.type}.`
           );
         }
       } else {
         throw new Error(
-          `The output layer must be a dense layer, activation layer, or a flatten layer. Received ${lastLayer.type}.`,
+          `The output layer must be a dense layer, activation layer, or a flatten layer. Received ${lastLayer.type}.`
         );
       }
     }
-    return await this.backend.predict(data);
+    return await this.backend.predict(data, config);
   }
 
   /**
