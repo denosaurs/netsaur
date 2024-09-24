@@ -47,12 +47,17 @@ export class Sequential implements NeuralNetwork {
    */
   async predict(
     data: Tensor<Rank>,
-    config: { postProcess: PostProcessor; layers?: [number, number] } = {
-      postProcess: PostProcess("none"),
-    }
+    config?: { postProcess?: PostProcessor; layers?: [number, number] }
   ): Promise<Tensor<Rank>> {
+    if (!config)
+      config = {
+        postProcess: PostProcess("none"),
+      };
     if (config.layers) {
-      if (config.layers[0] < 0 || config.layers[1] > this.config.layers.length) {
+      if (
+        config.layers[0] < 0 ||
+        config.layers[1] > this.config.layers.length
+      ) {
         throw new RangeError(
           `Execution range should be within (0, ${
             this.config.layers.length
@@ -71,7 +76,7 @@ export class Sequential implements NeuralNetwork {
         return await this.backend.predict(
           data,
           {
-            postProcess: config.postProcess,
+            postProcess: config.postProcess || PostProcess("none"),
             outputShape: lastLayer.config.size,
           },
           layerList
@@ -85,7 +90,7 @@ export class Sequential implements NeuralNetwork {
           return await this.backend.predict(
             data,
             {
-              postProcess: config.postProcess,
+              postProcess: config.postProcess || PostProcess("none"),
               outputShape: penultimate.config.size,
             },
             layerList
@@ -101,7 +106,12 @@ export class Sequential implements NeuralNetwork {
         );
       }
     }
-    return await this.backend.predict(data, config);
+    return await this.backend.predict(
+      data,
+      config.postProcess
+        ? (config as { postProcess: PostProcessor; layers?: [number, number] })
+        : { ...config, postProcess: PostProcess("none") }
+    );
   }
 
   /**
