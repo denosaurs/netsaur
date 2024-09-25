@@ -14,7 +14,7 @@ import {
 import { parse } from "jsr:@std/csv@1.0.3/parse";
 
 const data = parse(
-  Deno.readTextFileSync("examples/autoencoders/winequality-red.csv"),
+  Deno.readTextFileSync("examples/autoencoders/winequality-red.csv")
 );
 data.shift();
 
@@ -49,7 +49,7 @@ const net = new Sequential({
 const input = tensor(X);
 
 const timeStart = performance.now();
-net.train([{ inputs: input, outputs: input }], 10000, 1, 0.01);
+net.train([{ inputs: input, outputs: tensor(Float32Array.from(input.data), input.shape) }], 10000, 1, 0.001);
 console.log(`Trained in ${performance.now() - timeStart}ms`);
 
 function saveTable(name: string, data: Matrix<"f32">) {
@@ -66,17 +66,14 @@ const output_mat = new Matrix<"f32">(output.data, output.shape as Shape2D);
 saveTable("output", output_mat);
 
 console.log("Running Encoder");
-const encoded = await net.predict(input, [0, 5]);
+const encoded = await net.predict(input, { layers: [0, 5] });
 
 const encoded_mat = new Matrix<"f32">(encoded.data, encoded.shape as Shape2D);
 
 saveTable("encoded", encoded_mat);
 
 console.log("Running Decoder");
-const decoded = await net.predict(tensor(encoded_mat), [
-  5,
-  10,
-]);
+const decoded = await net.predict(tensor(encoded_mat), { layers: [5, 10] });
 
 const decoded_mat = new Matrix<"f32">(decoded.data, decoded.shape as Shape2D);
 

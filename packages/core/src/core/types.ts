@@ -3,6 +3,7 @@ import type { Rank, Shape } from "./api/shape.ts";
 import type { Layer } from "./api/layer.ts";
 import type { Optimizer } from "./api/optimizer.ts";
 import type { Scheduler } from "./api/scheduler.ts";
+import type { PostProcessor } from "./api/postprocess.ts";
 
 /**
  * The Backend is responsible for eveything related to the neural network.
@@ -36,8 +37,8 @@ export interface Backend {
    */
   predict(
     input: Tensor<Rank>,
+    config: {postProcess: PostProcessor, outputShape?: Shape<Rank>},
     layers?: number[],
-    outputShape?: Shape<Rank>,
   ): Promise<Tensor<Rank>>;
 
   /**

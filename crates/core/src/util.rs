@@ -4,8 +4,14 @@ use ndarray::ArrayD;
 use safetensors::tensor::TensorView;
 use serde::Deserialize;
 
+#[derive(Clone)]
 pub struct Logger {
     pub log: fn(string: String) -> (),
+}
+
+#[derive(Clone)]
+pub struct Timer {
+    pub now: fn() -> u128,
 }
 
 pub fn length(shape: Vec<usize>) -> usize {

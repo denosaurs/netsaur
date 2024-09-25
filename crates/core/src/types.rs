@@ -196,6 +196,21 @@ pub enum Scheduler {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct StepFunctionConfig {
+    pub thresholds: Vec<f32>,
+    pub values: Vec<f32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type", content = "config")]
+#[serde(rename_all = "lowercase")]
+pub enum PostProcessor {
+    None,
+    Sign,
+    Step(StepFunctionConfig),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TrainOptions {
     pub datasets: usize,
@@ -212,6 +227,7 @@ pub struct PredictOptions {
     pub input_shape: Vec<usize>,
     pub output_shape: Vec<usize>,
     pub layers: Option<Vec<usize>>,
+    pub post_process: PostProcessor,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -10,6 +10,7 @@ import {
   type PredictOptions,
   type TrainOptions,
 } from "./util.ts";
+import type { PostProcessor } from "../../core/api/postprocess.ts";
 
 /**
  * CPU Backend.
@@ -68,25 +69,26 @@ export class CPUBackend implements Backend {
     );
   }
 
-  async predict(input: Tensor<Rank>): Promise<Tensor<Rank>>;
+  async predict(input: Tensor<Rank>, config: {postProcess: PostProcessor, outputShape?: Shape<Rank>}): Promise<Tensor<Rank>>;
   async predict(
     input: Tensor<Rank>,
+    config: {postProcess: PostProcessor, outputShape?: Shape<Rank>},
     layers: number[],
-    outputShape: Shape<Rank>,
   ): Promise<Tensor<Rank>>;
   //deno-lint-ignore require-await
   async predict(
     input: Tensor<Rank>,
-    layers?: number[],
-    outputShape?: Shape<Rank>,
+    config: {postProcess: PostProcessor, outputShape?: Shape<Rank>},
+    layers?: number[],    
   ): Promise<Tensor<Rank>> {
     const options = encodeJSON({
       inputShape: input.shape,
-      outputShape: [input.shape[0], ...(outputShape ?? this.outputShape)],
+      outputShape: [input.shape[0], ...(config.outputShape ?? this.outputShape)],
+      postProcess: config.postProcess,
       layers,
     } as PredictOptions);
     const output = new Float32Array(
-      input.shape[0] * length(outputShape ?? this.outputShape),
+      input.shape[0] * length(config.outputShape ?? this.outputShape),
     );
     this.library.symbols.ffi_backend_predict(
       this.#id,
@@ -99,7 +101,7 @@ export class CPUBackend implements Backend {
       output,
       [
         input.shape[0],
-        ...(outputShape ?? this.outputShape),
+        ...(config.outputShape ?? this.outputShape),
       ] as Shape<Rank>,
     );
   }
