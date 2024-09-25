@@ -12,6 +12,8 @@ use crate::{
     Tensor, Tensors,
 };
 
+use super::EmbeddingCPULayer;
+
 pub struct Backend {
     pub silent: bool,
     pub config: BackendConfig,
@@ -65,6 +67,11 @@ impl Backend {
                     let layer = DenseCPULayer::new(config, IxDyn(&size), tensors.get());
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Dense(layer));
+                }
+                Layer::Embedding(config) => {
+                    let layer = EmbeddingCPULayer::new(config, IxDyn(&size));
+                    size = layer.output_size().to_vec();
+                    layers.push(CPULayer::Embedding(layer));
                 }
                 Layer::Flatten(config) => {
                     let layer = FlattenCPULayer::new(config, IxDyn(&size));

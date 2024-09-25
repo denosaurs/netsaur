@@ -12,6 +12,7 @@ export type Layer =
   | { type: LayerType.Dense; config: DenseLayerConfig }
   | { type: LayerType.Dropout1D; config: DropoutLayerConfig }
   | { type: LayerType.Dropout2D; config: DropoutLayerConfig }
+  | { type: LayerType.Embedding; config: EmbeddingLayerConfig }
   | { type: LayerType.Flatten; config: FlattenLayerConfig }
   | { type: LayerType.Pool2D; config: Pool2DLayerConfig }
   | { type: LayerType.BatchNorm1D; config: BatchNormLayerConfig }
@@ -41,7 +42,7 @@ export interface DenseLayerConfig {
    * Ratio of l1:l2.
    */
   l1Ratio?: number;
-};
+}
 
 /**
  * The configuration for a dropout layer.
@@ -56,7 +57,7 @@ export interface DropoutLayerConfig {
    * whether or not to do the operation in place.
    */
   inplace?: boolean;
-};
+}
 
 /**
  * The configuration for an activation layer.
@@ -66,7 +67,7 @@ export interface ActivationLayerConfig {
    * The activation function to use.
    */
   activation: Activation;
-};
+}
 
 /**
  * The configuration for a convolutional layer.
@@ -106,7 +107,7 @@ export interface Conv2DLayerConfig {
    * Ratio of l1:l2.
    */
   l1Ratio?: number;
-};
+}
 
 /**
  * The configuration for a convolutional transpose layer.
@@ -141,7 +142,7 @@ export interface ConvTranspose2DLayerConfig {
    * Ratio of l1:l2.
    */
   l1Ratio?: number;
-};
+}
 
 export enum PoolMode {
   /**
@@ -168,7 +169,33 @@ export interface Pool2DLayerConfig {
    * The mode to use for the pool layer.
    */
   mode?: PoolMode;
-};
+}
+
+/**
+ * The configuration for an embedding layer.
+ */
+export interface EmbeddingLayerConfig {
+
+  /**
+   * Size of each embedding vector.
+   */
+  embeddingSize: number;
+
+  /**
+   * Number of words in the vocabulary.
+   */
+  vocabSize: number;
+
+  /**
+   * Inverse of regularization strength.
+   */
+  c?: number;
+
+  /**
+   * Ratio of l1:l2.
+   */
+  l1Ratio?: number;
+}
 
 /**
  * The configuration for a flatten layer.
@@ -178,7 +205,7 @@ export interface FlattenLayerConfig {
    * The size of the layer.
    */
   size: Shape<Rank>;
-};
+}
 
 /**
  * The configuration for a batch normalization layer.
@@ -197,4 +224,4 @@ export interface BatchNormLayerConfig {
    * https://arxiv.org/abs/1502.03167
    */
   epsilon?: number;
-};
+}

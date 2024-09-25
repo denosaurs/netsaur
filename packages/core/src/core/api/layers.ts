@@ -5,6 +5,7 @@ import {
   type ConvTranspose2DLayerConfig,
   type DenseLayerConfig,
   type DropoutLayerConfig,
+  type EmbeddingLayerConfig,
   type FlattenLayerConfig,
   type Layer,
   type Pool2DLayerConfig,
@@ -152,6 +153,15 @@ export function EluLayer(): Layer {
 export function SeluLayer(): Layer {
   const config = { activation: Activation.Selu };
   return { type: LayerType.Activation, config };
+}
+
+/**
+ * Creates an Embedding layer.
+ * Embedding layers convert numerical data into dense vectors.
+ * They are usually used for text processing.
+ */
+export function EmbeddingLayer(config: EmbeddingLayerConfig): Layer {
+  return { type: LayerType.Embedding, config };
 }
 
 /**

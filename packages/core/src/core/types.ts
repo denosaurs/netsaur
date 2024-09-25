@@ -227,6 +227,7 @@ export enum LayerType {
   Dropout1D = "dropout1d",
   Dropout2D = "dropout2d",
   Pool2D = "pool2d",
+  Embedding = "embedding",
   Flatten = "flatten",
   Softmax = "softmax",
 }

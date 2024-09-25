@@ -9,18 +9,10 @@ pub struct FlattenCPULayer {
 
 impl FlattenCPULayer {
     pub fn new(config: FlattenLayer, size: IxDyn) -> Self {
-        let mut new_size = config.size.clone();
-        new_size.insert(0, size[0]);
-        let output_size = IxDyn(&new_size);
-        if output_size.size() != size.size() {
-            panic!(
-                "Shape {:#?} is incompatible with shape {:#?}",
-                output_size, size
-            )
-        }
+        let output_size = IxDyn(&[size[0], size.size() / size[0]]);
         Self {
-            input_size: size,
-            output_size: new_size,
+            input_size: size.clone(),
+            output_size: vec![size[0], size.size() / size[0]],
         }
     }
 
@@ -33,11 +25,13 @@ impl FlattenCPULayer {
     }
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
-        let output_size = IxDyn(&self.output_size);
+        let output_size = IxDyn(&[inputs.shape()[0], self.output_size[1]]);
         inputs.into_shape_with_order(output_size).unwrap()
     }
 
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
-        d_outputs.into_shape_with_order(self.input_size.clone()).unwrap()
+        let mut current_size = self.input_size.clone();
+        current_size[0] = d_outputs.shape()[0];
+        d_outputs.into_shape_with_order(current_size).unwrap()
     }
 }

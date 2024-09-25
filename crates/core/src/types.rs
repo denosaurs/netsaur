@@ -30,6 +30,7 @@ pub enum Layer {
     Conv2D(Conv2DLayer),
     ConvTranspose2D(ConvTranspose2DLayer),
     Pool2D(Pool2DLayer),
+    Embedding(EmbeddingLayer),
     Flatten(FlattenLayer),
     Dropout1D(DropoutLayer),
     Dropout2D(DropoutLayer),
@@ -92,6 +93,15 @@ pub struct ConvTranspose2DLayer {
 pub struct Pool2DLayer {
     pub mode: usize, // 0 = avg, 1 = max
     pub strides: Option<Vec<usize>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct EmbeddingLayer {
+    pub vocab_size: usize,
+    pub embedding_size: usize,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

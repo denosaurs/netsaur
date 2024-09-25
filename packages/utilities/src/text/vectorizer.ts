@@ -9,9 +9,11 @@ export class TextVectorizer {
   mapper: DiscreteMapper<string>;
   encoder?: TfEncoder;
   transformer?: TfIdfTransformer;
+  maxLength: number;
   constructor(mode: "tf" | "tfidf" | "indices" = "indices") {
     this.mode = mode;
     this.mapper = new DiscreteMapper();
+    this.maxLength = 0;
   }
   fit(document: string | string[]): TextVectorizer {
     this.mapper.fit(
@@ -20,6 +22,7 @@ export class TextVectorizer {
     const tokens = Array.isArray(document)
       ? document.map((x) => this.mapper.transform(x.split(" ")))
       : [this.mapper.transform(document.split(" "))];
+    this.maxLength = Math.max(Math.max(...tokens.map((x) => x.length)), this.maxLength);
     if (this.mode === "tf" || this.mode === "tfidf") {
       this.encoder = new TfEncoder(this.mapper.mapping.size);
       if (this.mode === "tfidf") {
@@ -41,7 +44,7 @@ export class TextVectorizer {
     if (this.mode === "indices") {
       const res = new Matrix(dType, [
         tokens.length,
-        Math.max(...tokens.map((x) => x.length)),
+        this.maxLength,
       ]);
       for (let i = 0; i < res.nRows; i += 1) {
         res.setRow(i, tokens[i]);

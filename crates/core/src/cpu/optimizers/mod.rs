@@ -148,6 +148,17 @@ impl CPUOptimizer {
                     layer.l_beta.view().into_dyn(),
                 ]
             )),
+            CPULayer::Embedding(layer) => Some((
+                vec![
+                    layer.embeddings.view_mut().into_dyn(),
+                ],
+                vec![
+                    layer.d_embeddings.view().into_dyn(),
+                ],
+                vec![
+                    layer.l_embeddings.view().into_dyn(),
+                ]
+            )),
             _ => return None,
         }
     }
