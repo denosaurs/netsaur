@@ -78,8 +78,8 @@ impl Backend {
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Embedding(layer));
                 }
-                Layer::Flatten(config) => {
-                    let layer = FlattenCPULayer::new(config, IxDyn(&size));
+                Layer::Flatten => {
+                    let layer = FlattenCPULayer::new(IxDyn(&size));
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Flatten(layer));
                 }

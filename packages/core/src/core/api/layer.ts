@@ -1,25 +1,53 @@
 import type { Tensor } from "../tensor/tensor.ts";
 import type { Activation, Init, LayerType } from "../types.ts";
-import type { Rank, Shape, Shape1D, Shape2D, Shape4D } from "./shape.ts";
+import type { Rank, Shape, Shape1D, Shape2D, Shape3D, Shape4D } from "./shape.ts";
 
 /**
  * Layer is the base type for all layers.
  */
 export type Layer =
   | { type: LayerType.Activation; config: ActivationLayerConfig }
+  | { type: LayerType.Conv1D; config: Conv1DLayerConfig }
   | { type: LayerType.Conv2D; config: Conv2DLayerConfig }
+  | { type: LayerType.ConvTranspose1D; config: ConvTranspose1DLayerConfig }
   | { type: LayerType.ConvTranspose2D; config: ConvTranspose2DLayerConfig }
   | { type: LayerType.Dense; config: DenseLayerConfig }
   | { type: LayerType.Dropout1D; config: DropoutLayerConfig }
   | { type: LayerType.Dropout2D; config: DropoutLayerConfig }
   | { type: LayerType.Embedding; config: EmbeddingLayerConfig }
-  | { type: LayerType.Flatten; config: FlattenLayerConfig }
+  | { type: LayerType.Flatten }
+  | { type: LayerType.LSTM; config: LSTMLayerConfig }
   | { type: LayerType.Pool2D; config: Pool2DLayerConfig }
   | { type: LayerType.BatchNorm1D; config: BatchNormLayerConfig }
   | { type: LayerType.BatchNorm2D; config: BatchNormLayerConfig }
   | { type: LayerType.Softmax };
 
 /**
+ * The configuration for an LSTM layer.
+ */
+export interface LSTMLayerConfig {
+  /**
+   * The type of initialization to use.
+   */
+  init?: Init;
+
+  /**
+   * Number of units in the layer.
+   */
+  units: number;
+
+  /**
+   * Inverse of regularization strength.
+   */
+  c?: number;
+
+  /**
+   * Ratio of l1:l2.
+   */
+  l1Ratio?: number;
+}
+
+  /**
  * The configuration for a dense layer.
  */
 export interface DenseLayerConfig {
@@ -72,6 +100,46 @@ export interface ActivationLayerConfig {
 /**
  * The configuration for a convolutional layer.
  */
+export interface Conv1DLayerConfig {
+  /**
+   * The type of initialization to use.
+   */
+  init?: Init;
+
+  /**
+   * The kernel to use.
+   */
+  kernel?: Tensor<Rank>;
+
+  /**
+   * The size of the kernel.
+   */
+  kernelSize: Shape3D;
+
+  /**
+   * The optional padding to use.
+   */
+  padding?: Shape1D;
+
+  /**
+   * The optional strides to use.
+   */
+  strides?: Shape1D;
+
+  /**
+   * Inverse of regularization strength.
+   */
+  c?: number;
+
+  /**
+   * Ratio of l1:l2.
+   */
+  l1Ratio?: number;
+}
+
+/**
+ * The configuration for a convolutional layer.
+ */
 export interface Conv2DLayerConfig {
   /**
    * The type of initialization to use.
@@ -97,6 +165,46 @@ export interface Conv2DLayerConfig {
    * The optional strides to use.
    */
   strides?: Shape2D;
+
+  /**
+   * Inverse of regularization strength.
+   */
+  c?: number;
+
+  /**
+   * Ratio of l1:l2.
+   */
+  l1Ratio?: number;
+}
+
+/**
+ * The configuration for a convolution transpose layer.
+ */
+export interface ConvTranspose1DLayerConfig {
+  /**
+   * The type of initialization to use.
+   */
+  init?: Init;
+
+  /**
+   * The kernel to use.
+   */
+  kernel?: Tensor<Rank>;
+
+  /**
+   * The size of the kernel.
+   */
+  kernelSize: Shape3D;
+
+  /**
+   * The optional padding to use.
+   */
+  padding?: Shape1D;
+
+  /**
+   * The optional strides to use.
+   */
+  strides?: Shape1D;
 
   /**
    * Inverse of regularization strength.

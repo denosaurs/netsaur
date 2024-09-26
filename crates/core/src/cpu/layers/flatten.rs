@@ -1,6 +1,4 @@
-use ndarray::{ArrayD, Axis, Dimension, IxDyn};
-
-use crate::FlattenLayer;
+use ndarray::{ArrayD, Dimension, IxDyn};
 
 pub struct FlattenCPULayer {
     pub input_size: IxDyn,
@@ -8,8 +6,7 @@ pub struct FlattenCPULayer {
 }
 
 impl FlattenCPULayer {
-    pub fn new(config: FlattenLayer, size: IxDyn) -> Self {
-        let output_size = IxDyn(&[size[0], size.size() / size[0]]);
+    pub fn new(size: IxDyn) -> Self {
         Self {
             input_size: size.clone(),
             output_size: vec![size[0], size.size() / size[0]],

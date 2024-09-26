@@ -222,7 +222,9 @@ export enum LayerType {
   Activation = "activation",
   BatchNorm1D = "batchnorm1d",
   BatchNorm2D = "batchnorm2d",
+  Conv1D = "conv1d",
   Conv2D = "conv2d",
+  ConvTranspose1D = "convtranspose1d",
   ConvTranspose2D = "convtranspose2d",
   Dense = "dense",
   Dropout1D = "dropout1d",
@@ -230,6 +232,7 @@ export enum LayerType {
   Pool2D = "pool2d",
   Embedding = "embedding",
   Flatten = "flatten",
+  LSTM = "lstm",
   Softmax = "softmax",
 }
 
@@ -277,3 +280,5 @@ export enum Init {
    */
   Kaiming = "kaiming",
 }
+
+export type Padding = "same" | "valid"
