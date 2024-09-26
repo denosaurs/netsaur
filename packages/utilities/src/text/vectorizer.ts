@@ -1,4 +1,4 @@
-import { TfEncoder } from "../encoding/mod.ts";
+import { TfEncoder } from "../encoding/termfrequency.ts";
 import { DiscreteMapper } from "../mapper/discrete.ts";
 import { Matrix } from "../mod.ts";
 import { TfIdfTransformer } from "../transformer/tfidf.ts";
