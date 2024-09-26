@@ -4,7 +4,7 @@
 // deno-fmt-ignore-file
 /// <reference types="./netsaur.generated.d.ts" />
 
-// source-hash: c1eff57085f8488444a8499d3d2fcad1650a7099
+// source-hash: f1db375a60100b82256510390e36e2ea79669a26
 let wasm;
 let cachedInt32Memory0;
 
@@ -61,6 +61,12 @@ function getUint8Memory0() {
 function getStringFromWasm0(ptr, len) {
   ptr = ptr >>> 0;
   return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
+}
+
+function notDefined(what) {
+  return () => {
+    throw new Error(`${what} is not defined`);
+  };
 }
 
 let WASM_VECTOR_LEN = 0;
@@ -220,6 +226,9 @@ const imports = {
     __wbg_log_6f7dfa87fad40a57: function (arg0, arg1) {
       console.log(getStringFromWasm0(arg0, arg1));
     },
+    __wbg_now_de5fe0de473bcd7d: typeof Date.now == "function"
+      ? Date.now
+      : notDefined("Date.now"),
     __wbindgen_number_new: function (arg0) {
       const ret = arg0;
       return addHeapObject(ret);
@@ -249,6 +258,10 @@ const imports = {
       const ret = typeof (getObject(arg0)) === "string";
       return ret;
     },
+    __wbg_msCrypto_bcb970640f50a1e8: function (arg0) {
+      const ret = getObject(arg0).msCrypto;
+      return addHeapObject(ret);
+    },
     __wbg_require_8f08ceecec0f4fee: function () {
       return handleError(function () {
         const ret = module.require;
@@ -261,10 +274,6 @@ const imports = {
     },
     __wbindgen_string_new: function (arg0, arg1) {
       const ret = getStringFromWasm0(arg0, arg1);
-      return addHeapObject(ret);
-    },
-    __wbg_msCrypto_bcb970640f50a1e8: function (arg0) {
-      const ret = getObject(arg0).msCrypto;
       return addHeapObject(ret);
     },
     __wbg_randomFillSync_dc1e9a60c158336d: function () {

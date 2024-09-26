@@ -1,15 +1,14 @@
 use std::collections::HashMap;
-use std::time::Instant;
 
 use ndarray::{ArrayD, ArrayViewD, IxDyn};
 use safetensors::{serialize, SafeTensors};
 
 use crate::{
     to_arr, ActivationCPULayer, BackendConfig, BatchNorm1DCPULayer, BatchNorm2DCPULayer,
-    BatchNormTensors, CPUCost, CPULayer, CPUOptimizer, CPUScheduler, Conv2DCPULayer, ConvTensors,
-    ConvTranspose2DCPULayer, Dataset, DenseCPULayer, DenseTensors, Dropout1DCPULayer,
-    Dropout2DCPULayer, FlattenCPULayer, GetTensor, Layer, Logger, Pool2DCPULayer, SoftmaxCPULayer,
-    Tensor, Tensors,
+    BatchNormTensors, CPUCost, CPULayer, CPUOptimizer, CPUPostProcessor, CPUScheduler,
+    Conv2DCPULayer, ConvTensors, ConvTranspose2DCPULayer, Dataset, DenseCPULayer, DenseTensors,
+    Dropout1DCPULayer, Dropout2DCPULayer, FlattenCPULayer, GetTensor, Layer, Logger,
+    Pool2DCPULayer, PostProcessor, SoftmaxCPULayer, Tensor, Tensors, Timer,
 };
 
 use super::EmbeddingCPULayer;
@@ -25,10 +24,16 @@ pub struct Backend {
     pub optimizer: CPUOptimizer,
     pub scheduler: CPUScheduler,
     pub logger: Logger,
+    pub timer: Timer,
 }
 
 impl Backend {
-    pub fn new(config: BackendConfig, logger: Logger, mut tensors: Option<Vec<Tensors>>) -> Self {
+    pub fn new(
+        config: BackendConfig,
+        logger: Logger,
+        timer: Timer,
+        mut tensors: Option<Vec<Tensors>>,
+    ) -> Self {
         let mut layers = Vec::new();
         let mut size = config.size.clone();
         for layer in config.layers.iter() {
@@ -106,6 +111,7 @@ impl Backend {
             optimizer,
             scheduler,
             size,
+            timer,
         }
     }
 
@@ -154,7 +160,7 @@ impl Backend {
         let mut cost = 0f32;
         let mut time: u128;
         let mut total_time = 0u128;
-        let start = Instant::now();
+        let start = (self.timer.now)();
         let total_iter = epochs * datasets.len();
         while epoch < epochs {
             let mut total = 0.0;
@@ -167,11 +173,11 @@ impl Backend {
                 let minibatch = outputs.dim()[0];
                 if !self.silent && ((i + 1) * minibatch) % batches == 0 {
                     cost = total / (batches) as f32;
-                    time = start.elapsed().as_millis() - total_time;
+                    time = ((self.timer.now)() - start) - total_time;
                     total_time += time;
                     let current_iter = epoch * datasets.len() + i;
                     let msg = format!(
-                        "Epoch={}, Dataset={}, Cost={}, Time={}s, ETA={}s",
+                        "Epoch={}, Dataset={}, Cost={}, Time={:.3}s, ETA={:.3}s",
                         epoch,
                         i * minibatch,
                         cost,
@@ -195,25 +201,20 @@ impl Backend {
                 } else {
                     disappointments += 1;
                     if !self.silent {
-                        println!(
+                        (self.logger.log)(format!(
                             "Patience counter: {} disappointing epochs out of {}.",
                             disappointments, self.patience
-                        );
+                        ));
                     }
                 }
                 if disappointments >= self.patience {
                     if !self.silent {
-                        println!(
+                        (self.logger.log)(format!(
                             "No improvement for {} epochs. Stopping early at cost={}",
                             disappointments, best_cost
-                        );
+                        ));
                     }
-                    let net = Self::load(
-                        &best_net,
-                        Logger {
-                            log: |x| println!("{}", x),
-                        },
-                    );
+                    let net = Self::load(&best_net, self.logger.clone(), self.timer.clone());
                     self.layers = net.layers;
                     break;
                 }
@@ -222,11 +223,18 @@ impl Backend {
         }
     }
 
-    pub fn predict(&mut self, data: ArrayD<f32>, layers: Option<Vec<usize>>) -> ArrayD<f32> {
+    pub fn predict(
+        &mut self,
+        data: ArrayD<f32>,
+        postprocess: PostProcessor,
+        layers: Option<Vec<usize>>,
+    ) -> ArrayD<f32> {
+        let processor = CPUPostProcessor::from(&postprocess);
         for layer in &mut self.layers {
             layer.reset(1);
         }
-        self.forward_propagate(data, false, layers)
+        let res = self.forward_propagate(data, false, layers);
+        processor.process(res)
     }
 
     pub fn save(&self) -> Vec<u8> {
@@ -279,7 +287,7 @@ impl Backend {
         serialize(tensors, &Some(metadata)).unwrap()
     }
 
-    pub fn load(buffer: &[u8], logger: Logger) -> Self {
+    pub fn load(buffer: &[u8], logger: Logger, timer: Timer) -> Self {
         let tensors = SafeTensors::deserialize(buffer).unwrap();
         let (_, metadata) = SafeTensors::read_metadata(buffer).unwrap();
         let data = metadata.metadata().as_ref().unwrap();
@@ -311,6 +319,6 @@ impl Backend {
             };
         }
 
-        Backend::new(config, logger, Some(layers))
+        Backend::new(config, logger, timer, Some(layers))
     }
 }

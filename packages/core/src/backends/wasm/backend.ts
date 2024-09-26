@@ -9,6 +9,7 @@ import {
   wasm_backend_save,
   wasm_backend_train,
 } from "./lib/netsaur.generated.js";
+import type { PostProcessor } from "../../core/api/postprocess.ts";
 
 /**
  * Web Assembly Backend.
@@ -32,7 +33,7 @@ export class WASMBackend implements Backend {
     datasets: DataSet[],
     epochs: number,
     batches: number,
-    rate: number,
+    rate: number
   ): void {
     this.outputShape = datasets[0].outputs.shape.slice(1) as Shape<Rank>;
     const buffer = [];
@@ -52,18 +53,39 @@ export class WASMBackend implements Backend {
     wasm_backend_train(this.#id, buffer, options);
   }
 
+  async predict(
+    input: Tensor<Rank>,
+    config: { postProcess: PostProcessor; outputShape?: Shape<Rank> }
+  ): Promise<Tensor<Rank>>;
+  async predict(
+    input: Tensor<Rank>,
+    config: { postProcess: PostProcessor; outputShape?: Shape<Rank> },
+    layers: number[]
+  ): Promise<Tensor<Rank>>;
   //deno-lint-ignore require-await
-  async predict(input: Tensor<Rank>): Promise<Tensor<Rank>> {
+  async predict(
+    input: Tensor<Rank>,
+    config: { postProcess: PostProcessor; outputShape?: Shape<Rank> },
+    layers?: number[]
+  ): Promise<Tensor<Rank>> {
     const options = JSON.stringify({
-      inputShape: [1, ...input.shape],
-      outputShape: this.outputShape,
+      inputShape: input.shape,
+      outputShape: [input.shape[0], ...(config.outputShape ?? this.outputShape)],
+      postProcess: config.postProcess,
+      layers,
     } as PredictOptions);
     const output = wasm_backend_predict(
       this.#id,
       input.data as Float32Array,
-      options,
+      options
     );
-    return new Tensor(output, this.outputShape!);
+    return new Tensor(
+      output,
+      [
+        input.shape[0],
+        ...(config.outputShape ?? this.outputShape),
+      ] as Shape<Rank>,
+    );
   }
 
   save(): Uint8Array {
