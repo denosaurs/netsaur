@@ -1,4 +1,4 @@
-use ndarray::{ArrayD, Dimension, IxDyn};
+use ndarray::{ArrayD, Axis, Dimension, IxDyn};
 
 use crate::FlattenLayer;
 
@@ -32,6 +32,6 @@ impl FlattenCPULayer {
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let mut current_size = self.input_size.clone();
         current_size[0] = d_outputs.shape()[0];
-        d_outputs.into_shape_with_order(current_size).unwrap()
+        d_outputs.to_shape(current_size).unwrap().to_owned()
     }
 }
