@@ -13,9 +13,11 @@ import {
   EmbeddingLayer,
   FlattenLayer,
   NadamOptimizer,
+  Tensor,
+  Dropout1DLayer,
+  OneCycle,
+  LSTMLayer,
 } from "../../mod.ts";
-
-import { CategoricalEncoder } from "jsr:@denosaurs/netsaur@0.4.0/utilities/encoding";
 
 import { parse as parseCsv } from "jsr:@std/csv@1.0.3/parse";
 
@@ -24,6 +26,7 @@ import {
   TextVectorizer,
   useSplit,
   ClassificationReport,
+  CategoricalEncoder,
   type MatrixLike,
   TextCleaner,
 } from "../../packages/utilities/mod.ts";
@@ -76,11 +79,14 @@ const oneHotY = encoder.fit(trainY).transform(trainY, "f32");
 
 Deno.writeTextFileSync(
   "examples/sentiment-analysis/mappings.json",
-  JSON.stringify(Array.from(encoder.mapping.entries()))
+  JSON.stringify(Array.from(encoder.mapper.mapping.entries()))
 );
 Deno.writeTextFileSync(
   "examples/sentiment-analysis/vocab.json",
-  JSON.stringify({vocab: Array.from(vectorizer.mapper.mapping.entries()), maxLength: vectorizer.maxLength})
+  JSON.stringify({
+    vocab: Array.from(vectorizer.mapper.mapping.entries()),
+    maxLength: vectorizer.maxLength,
+  })
 );
 
 console.log("\nCPU Backend Loading");
@@ -95,27 +101,27 @@ const net = new Sequential({
   size: [4, vecX.nCols],
   layers: [
     EmbeddingLayer({
-      embeddingSize: 3,
+      embeddingSize: 50,
       vocabSize: vectorizer.mapper.mapping.size,
+      c: 10,
+      l1Ratio: 0.25,
     }),
-    FlattenLayer({ size: [vecX.nCols * 3] }),
-    DenseLayer({ size: [256], init: Init.Kaiming }),
+    //LSTMLayer({ size: 64, init: Init.Xavier }),
+    FlattenLayer(),
+    Dropout1DLayer({ probability: 0.5 }),
+    DenseLayer({ size: [64], init: Init.Xavier }),
     ReluLayer(),
-    DenseLayer({ size: [128], init: Init.Kaiming }),
-    ReluLayer(),
-    DenseLayer({ size: [32], init: Init.Kaiming }),
-    ReluLayer(),
-    DenseLayer({ size: [32], init: Init.Kaiming }),
-    ReluLayer(),
-    DenseLayer({ size: [16], init: Init.Kaiming }),
-    ReluLayer(),
-    DenseLayer({ size: [encoder.mapping.size], init: Init.Kaiming }),
+    DenseLayer({
+      size: [encoder.mapper.mapping.size],
+      init: Init.Xavier,
+    }),
     SoftmaxLayer(),
   ],
   silent: false,
   optimizer: AdamOptimizer(),
   cost: Cost.CrossEntropy,
-  patience: 10,
+  patience: 30,
+//  scheduler: OneCycle({ max_rate: 0.005, step_size: 10 }),
 });
 
 console.log("\nStarting");
@@ -134,8 +140,7 @@ const predYSoftmax = await net.predict(
   tensor(vectorizer.transform(testX, "f32"))
 );
 
-CategoricalEncoder.fromSoftmax<"f32">(predYSoftmax as MatrixLike<"f32">);
-const predY = encoder.untransform(predYSoftmax as MatrixLike<"f32">);
+const predY = encoder.untransform(predYSoftmax as Tensor<2>);
 
 console.log(predY.map((x, i) => `${x}, ${testY[i]}`));
 

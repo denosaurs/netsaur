@@ -159,6 +159,23 @@ impl CPUOptimizer {
                     layer.l_embeddings.view().into_dyn(),
                 ]
             )),
+            CPULayer::LSTM(layer) => Some((
+                vec![
+                    layer.w_hh.view_mut().into_dyn(),
+                    layer.w_ih.view_mut().into_dyn(),
+                    layer.biases.view_mut().into_dyn(),
+                ],
+                vec![
+                    layer.d_w_hh.view().into_dyn(),
+                    layer.d_w_ih.view().into_dyn(),
+                    layer.d_biases.view().into_dyn(),
+                ],
+                vec![
+                    layer.l_w_hh.view().into_dyn(),
+                    layer.l_w_ih.view().into_dyn(),
+                    layer.l_biases.view().into_dyn(),
+                ],
+            )),
             _ => return None,
         }
     }

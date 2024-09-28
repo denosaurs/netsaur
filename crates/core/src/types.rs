@@ -32,6 +32,7 @@ pub enum Layer {
     Pool2D(Pool2DLayer),
     Embedding(EmbeddingLayer),
     Flatten,
+    LSTM(LSTMLayer),
     Dropout1D(DropoutLayer),
     Dropout2D(DropoutLayer),
     Softmax,
@@ -101,7 +102,16 @@ pub struct EmbeddingLayer {
     pub vocab_size: usize,
     pub embedding_size: usize,
     pub c: Option<f32>,
-    pub l1_ratio: Option<f32>
+    pub l1_ratio: Option<f32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct LSTMLayer {
+    pub size: usize,
+    pub init: Option<Init>,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -241,4 +251,3 @@ pub struct RegularizeOptions {
     pub c: f32,
     pub l1_ratio: f32,
 }
-

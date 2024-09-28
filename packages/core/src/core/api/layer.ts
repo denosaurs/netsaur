@@ -34,7 +34,7 @@ export interface LSTMLayerConfig {
   /**
    * Number of units in the layer.
    */
-  units: number;
+  size: number;
 
   /**
    * Inverse of regularization strength.

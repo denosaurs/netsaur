@@ -43,7 +43,7 @@ impl CPUActivation {
     }
 }
 
-fn sigmoid(x: &f32) -> f32 {
+pub fn sigmoid(x: &f32) -> f32 {
     return 1.0 / (1.0 + (-x).exp());
 }
 

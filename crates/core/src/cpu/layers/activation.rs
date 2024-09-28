@@ -1,5 +1,5 @@
 use ndarray::{s, ArrayD, Dimension, IxDyn};
-use std::ops::{Div, Mul, Sub};
+use std::{f32::EPSILON, ops::{Div, Mul, Sub}};
 
 use crate::{ActivationLayer, CPUActivation};
 
@@ -71,7 +71,7 @@ impl SoftmaxCPULayer {
             let exp = inputs.slice(s![b, ..]).map(|x| x.exp());
             self.outputs
                 .slice_mut(s![b, ..])
-                .assign(&exp.clone().div(exp.sum()));
+                .assign(&exp.clone().div(exp.sum() + EPSILON));
         }
         self.outputs.clone().into_dyn()
     }
@@ -79,7 +79,6 @@ impl SoftmaxCPULayer {
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let batches = self.outputs.dim()[0];
         let array_size = self.outputs.dim().size() / batches;
-        
         let mut d_inputs = ArrayD::zeros(self.outputs.dim());
         for b in 0..batches {
             for y in 0..array_size {

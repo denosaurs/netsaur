@@ -1,11 +1,13 @@
 import {
   Cost,
-  CPU,
   DenseLayer,
   Sequential,
   setupBackend,
   SigmoidLayer,
   tensor2D,
+  AdamOptimizer,
+  WASM,
+  PostProcess,
 } from "../../packages/core/mod.ts";
 
 import { parse } from "jsr:@std/csv@1.0.3/parse";
@@ -16,8 +18,6 @@ import {
   // Split the dataset
   useSplit,
 } from "../../packages/utilities/mod.ts";
-import { PostProcess } from "../../packages/core/src/core/api/postprocess.ts";
-import { AdamOptimizer, WASM } from "../../mod.ts";
 
 // Define classes
 const classes = ["Setosa", "Versicolor"];
@@ -58,7 +58,7 @@ const net = new Sequential({
   ],
   // We are using Log Loss for finding cost
   cost: Cost.BinCrossEntropy,
-  optimizer: AdamOptimizer()
+  optimizer: AdamOptimizer(),
 });
 
 const time = performance.now();
@@ -84,5 +84,8 @@ const res = await net.predict(tensor2D(test[0]), {
   postProcess: PostProcess("step", { thresholds: [0.5], values: [0, 1] }),
 });
 
-const cMatrix = new ClassificationReport(test[1], res.data);
+const cMatrix = new ClassificationReport(
+  test[1].map((x) => classes[x]),
+  Array.from(res.data).map((x) => classes[x])
+);
 console.log("Confusion Matrix: ", cMatrix);

@@ -9,10 +9,10 @@ pub struct EmbeddingCPULayer {
     pub output_size: Vec<usize>,
     pub vocab_size: usize,
     pub embedding_size: usize,
-    pub embeddings: ArrayD<f32>,
-    pub d_embeddings: ArrayD<f32>,
+    pub embeddings: Array2<f32>,
+    pub d_embeddings: Array2<f32>,
     // regularization
-    pub l_embeddings: ArrayD<f32>,
+    pub l_embeddings: Array2<f32>,
 
     pub regularizer: CPURegularizer,
 }
@@ -21,8 +21,8 @@ impl EmbeddingCPULayer {
     pub fn new(config: EmbeddingLayer, size: IxDyn) -> Self {
         let init = CPUInit::from(Init::Uniform);
         let output_size = vec![size[0], size[1], config.embedding_size];
-        let embeddings = init.init(IxDyn(&[config.vocab_size, config.embedding_size]), 0, 0);
-        let d_embeddings = ArrayD::zeros(IxDyn(&[config.vocab_size, config.embedding_size]));
+        let embeddings = init.init(IxDyn(&[config.vocab_size, config.embedding_size]), 0, 0).into_dimensionality::<Ix2>().unwrap();
+        let d_embeddings = Array2::zeros((config.vocab_size, config.embedding_size));
         Self {
             input_size: size,
             input_indices: vec![],
@@ -31,7 +31,7 @@ impl EmbeddingCPULayer {
             embedding_size: config.embedding_size,
             embeddings,
             d_embeddings,
-            l_embeddings: ArrayD::zeros(IxDyn(&[config.vocab_size, config.embedding_size])),
+            l_embeddings: Array2::zeros((config.vocab_size, config.embedding_size)),
             regularizer: CPURegularizer::from(config.c.unwrap_or(0.0), config.l1_ratio.unwrap_or(1.0))
         }
     }
@@ -54,12 +54,13 @@ impl EmbeddingCPULayer {
 
     pub fn backward_propagate(&mut self, d_outputs: ArrayD<f32>) -> ArrayD<f32> {
         let indices = Array2::from_shape_vec(Ix2(d_outputs.shape()[0], self.input_size[1]), self.input_indices.clone());
+        self.d_embeddings = Array2::zeros((self.d_embeddings.shape()[0], self.d_embeddings.shape()[1]));
         d_outputs.axis_iter(Axis(0)).zip(indices).for_each(|(rec, i)| {
             rec.axis_iter(Axis(0)).zip(i).for_each(|(grad, idx)| {
                 self.d_embeddings.index_axis_mut(Axis(0), idx).add_assign(&grad);
             });
         });
-        self.l_embeddings = self.regularizer.coeff(&self.embeddings);
+        self.l_embeddings = self.regularizer.coeff(&self.embeddings.clone().into_dyn()).into_dimensionality::<Ix2>().unwrap();
         let mut input_size = self.input_size.clone();
         input_size[0] = d_outputs.shape()[0];
         ArrayD::from_shape_vec(input_size,  self.input_indices.iter().map(|x| *x as f32).collect()).unwrap()

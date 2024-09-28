@@ -11,7 +11,7 @@ use crate::{
     Pool2DCPULayer, PostProcessor, SoftmaxCPULayer, Tensor, Tensors, Timer,
 };
 
-use super::EmbeddingCPULayer;
+use super::{EmbeddingCPULayer, LSTMCPULayer};
 
 pub struct Backend {
     pub silent: bool,
@@ -82,6 +82,11 @@ impl Backend {
                     let layer = FlattenCPULayer::new(IxDyn(&size));
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Flatten(layer));
+                }
+                Layer::LSTM(config) => {
+                    let layer = LSTMCPULayer::new(config, IxDyn(&size), None);
+                    size = layer.output_size().to_vec();
+                    layers.push(CPULayer::LSTM(layer));
                 }
                 Layer::Pool2D(config) => {
                     let layer = Pool2DCPULayer::new(config, IxDyn(&size));

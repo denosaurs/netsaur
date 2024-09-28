@@ -1,6 +1,6 @@
 import { DiscreteMapper } from "../mapper/mod.ts";
-import type { Matrix } from "../mod.ts";
-import type { DataType } from "../utils/common_types.ts";
+import { argmax, Matrix, MatrixLike } from "../mod.ts";
+import type { DataType, DType } from "../utils/common_types.ts";
 import { MultiHotEncoder } from "./multihot.ts";
 import { OneHotEncoder } from "./onehot.ts";
 import { TfEncoder } from "./termfrequency.ts";
@@ -26,6 +26,18 @@ export class CategoricalEncoder<T> {
       throw new Error("Categorical Encoder not trained yet. Use .fit() first.");
     const encoded = this.encoder.transform(tokens, dType);
     return encoded;
+  }
+  getMapping<DT extends DataType>(data: DType<DT>): T | undefined {
+    const max = argmax(data);
+    return this.mapper.getOg(max);
+  }
+  untransform<DT extends DataType>(data: MatrixLike<DT>): T[] {
+    const matrix = new Matrix(data);
+    const res = new Array(matrix.nRows);
+    for (let i = 0; i < matrix.nRows; i += 1) {
+      res[i] = this.getMapping(matrix.row(i));
+    }
+    return res;
   }
 }
 
