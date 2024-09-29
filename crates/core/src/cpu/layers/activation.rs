@@ -1,7 +1,7 @@
 use ndarray::{s, ArrayD, Dimension, IxDyn};
 use std::{f32::EPSILON, ops::{Div, Mul, Sub}};
 
-use crate::{ActivationLayer, CPUActivation};
+use crate::{ActivationLayer, CPUActivation, SoftmaxLayer};
 
 pub struct ActivationCPULayer {
     pub outputs: ArrayD<f32>,
@@ -45,11 +45,13 @@ impl ActivationCPULayer {
 
 pub struct SoftmaxCPULayer {
     pub outputs: ArrayD<f32>,
+    pub temperature: f32,
 }
 
 impl SoftmaxCPULayer {
-    pub fn new(size: IxDyn) -> Self {
+    pub fn new(config: SoftmaxLayer, size: IxDyn) -> Self {
         Self {
+            temperature: config.temperature.unwrap_or(1f32),
             outputs: ArrayD::zeros(size),
         }
     }
@@ -68,7 +70,9 @@ impl SoftmaxCPULayer {
         self.outputs = inputs.clone();
         let batches = self.outputs.dim()[0];
         for b in 0..batches {
-            let exp = inputs.slice(s![b, ..]).map(|x| x.exp());
+            let current_input = inputs.slice(s![b, ..]).map(|x| x / self.temperature);
+            let max = current_input.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
+            let exp = current_input.map(|x| (x - max).exp());
             self.outputs
                 .slice_mut(s![b, ..])
                 .assign(&exp.clone().div(exp.sum() + EPSILON));

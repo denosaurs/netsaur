@@ -12,6 +12,7 @@ import {
   type Layer,
   type Pool2DLayerConfig,
   PoolMode,
+  type SoftmaxLayerConfig,
 } from "./layer.ts";
 
 /**
@@ -106,8 +107,8 @@ export function AveragePool2DLayer(config: Pool2DLayerConfig): Layer {
  * Creates a softmax layer. Softmax layers are used for classification.
  * See https://en.wikipedia.org/wiki/Softmax_function
  */
-export function SoftmaxLayer(): Layer {
-  return { type: LayerType.Softmax };
+export function SoftmaxLayer(config: SoftmaxLayerConfig = {}): Layer {
+  return { type: LayerType.Softmax, config };
 }
 
 /**

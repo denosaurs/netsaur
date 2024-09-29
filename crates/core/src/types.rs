@@ -35,7 +35,7 @@ pub enum Layer {
     LSTM(LSTMLayer),
     Dropout1D(DropoutLayer),
     Dropout2D(DropoutLayer),
-    Softmax,
+    Softmax(SoftmaxLayer),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -112,12 +112,18 @@ pub struct LSTMLayer {
     pub init: Option<Init>,
     pub c: Option<f32>,
     pub l1_ratio: Option<f32>,
+    pub return_sequences: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DropoutLayer {
     pub probability: f32,
     pub inplace: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SoftmaxLayer {
+    pub temperature: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

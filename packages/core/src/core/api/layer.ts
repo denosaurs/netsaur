@@ -20,7 +20,7 @@ export type Layer =
   | { type: LayerType.Pool2D; config: Pool2DLayerConfig }
   | { type: LayerType.BatchNorm1D; config: BatchNormLayerConfig }
   | { type: LayerType.BatchNorm2D; config: BatchNormLayerConfig }
-  | { type: LayerType.Softmax };
+  | { type: LayerType.Softmax, config: SoftmaxLayerConfig };
 
 /**
  * The configuration for an LSTM layer.
@@ -45,6 +45,11 @@ export interface LSTMLayerConfig {
    * Ratio of l1:l2.
    */
   l1Ratio?: number;
+
+  /** 
+   * Whether to return all time steps.
+   */
+  returnSequences?: boolean;
 }
 
   /**
@@ -332,4 +337,16 @@ export interface BatchNormLayerConfig {
    * https://arxiv.org/abs/1502.03167
    */
   epsilon?: number;
+}
+
+
+/**
+ * The configuration for a softmax layer.
+ */
+export interface SoftmaxLayerConfig {
+  /**
+   * A temperature for scaling softmax inputs
+   * to prevent exponential overflow/underflow
+   */
+  temperature?: number;
 }

@@ -23,6 +23,7 @@ impl FlattenCPULayer {
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>) -> ArrayD<f32> {
         let output_size = IxDyn(&[inputs.shape()[0], self.output_size[1]]);
+        println!("O {:?} {:?}", inputs.shape(), self.output_size);
         inputs.into_shape_with_order(output_size).unwrap()
     }
 

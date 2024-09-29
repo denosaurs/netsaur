@@ -17,6 +17,10 @@ import {
   Dropout1DLayer,
   OneCycle,
   LSTMLayer,
+  BatchNorm1DLayer,
+  LeakyReluLayer,
+  SigmoidLayer,
+  LinearDecay,
 } from "../../mod.ts";
 
 import { parse as parseCsv } from "jsr:@std/csv@1.0.3/parse";
@@ -55,6 +59,8 @@ const textCleaner = new TextCleaner({
   normalizeWhiteSpaces: true,
   stripNewlines: true,
   removeStopWords: "english",
+  removeMentions: true,
+  keepOnlyAlphaNumeric: true,
 });
 const cleanX = textCleaner.clean(text);
 
@@ -103,32 +109,28 @@ const net = new Sequential({
     EmbeddingLayer({
       embeddingSize: 50,
       vocabSize: vectorizer.mapper.mapping.size,
-      c: 10,
-      l1Ratio: 0.25,
     }),
-    //LSTMLayer({ size: 64, init: Init.Xavier }),
-    FlattenLayer(),
-    Dropout1DLayer({ probability: 0.5 }),
-    DenseLayer({ size: [64], init: Init.Xavier }),
-    ReluLayer(),
+    LSTMLayer({ size: 128, init: Init.Xavier, returnSequences: true }),
+    Dropout1DLayer({ probability: 0.2 }),
+    LSTMLayer({ size: 128, init: Init.Xavier }),
     DenseLayer({
       size: [encoder.mapper.mapping.size],
       init: Init.Xavier,
     }),
-    SoftmaxLayer(),
+    SoftmaxLayer({ temperature: 2 }),
   ],
   silent: false,
-  optimizer: AdamOptimizer(),
+  optimizer: NadamOptimizer(),
   cost: Cost.CrossEntropy,
-  patience: 30,
-//  scheduler: OneCycle({ max_rate: 0.005, step_size: 10 }),
+  patience: 10,
+  scheduler: LinearDecay({ rate: 1.5, step_size: 5 }), //OneCycle({ max_rate: 0.01, step_size: 10 }),
 });
 
 console.log("\nStarting");
 console.timeLog("Time Elapsed");
 const timeStart = performance.now();
 
-net.train([{ inputs: tensor(vecX), outputs: tensor(oneHotY) }], 100, 2, 0.005);
+net.train([{ inputs: tensor(vecX), outputs: tensor(oneHotY) }], 10, 10, 0.01);
 
 console.log(
   `Training complete in ${duration(performance.now() - timeStart, {
