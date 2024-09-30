@@ -27,8 +27,10 @@ export type MatrixLike<DT extends DataType> = {
  * This is a collection of row vectors.
  * A special case of Tensor for 2D data.
  */
-export class Matrix<DT extends DataType> extends Tensor<DT, 2>
-  implements Sliceable, MatrixLike<DT> {
+export class Matrix<DT extends DataType>
+  extends Tensor<DT, 2>
+  implements Sliceable, MatrixLike<DT>
+{
   /**
    * Create a matrix from a typed array
    * @param data Data to move into the matrix.
@@ -40,10 +42,16 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
   constructor(dType: DT, shape: Shape<2>);
   constructor(
     data: NDArray<DT>[2] | DType<DT> | DT | TensorLike<DT, 2>,
-    shape?: Shape<2> | DT,
+    shape?: Shape<2> | DT
   ) {
     // @ts-ignore This call will work
     super(data, shape);
+  }
+  get head() {
+    return this.slice(0, Math.min(this.nRows, 10));
+  }
+  get tail() {
+    return this.slice(Math.max(this.nRows - 10, 0), this.nRows);
   }
   /** Convert the Matrix into a HTML table */
   get html(): string {
@@ -65,7 +73,7 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
     res += "</table>";
     return res;
   }
-  get length(): number {
+  override get length(): number {
     return this.nRows;
   }
   /** Returns number of cols */
@@ -79,7 +87,7 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
   /** Get the transpose of the matrix. This method clones the matrix. */
   get T(): Matrix<DT> {
     const resArr = new (this.data.constructor as DTypeConstructor<DT>)(
-      this.nRows * this.nCols,
+      this.nRows * this.nCols
     ) as DType<DT>;
     let i = 0;
     for (const col of this.cols()) {
@@ -106,7 +114,7 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
   col(n: number): DType<DT> {
     let i = 0;
     const col = new (this.data.constructor as DTypeConstructor<DT>)(
-      this.nRows,
+      this.nRows
     ) as DType<DT>;
     let offset = 0;
     while (i < this.nRows) {
@@ -131,7 +139,7 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
   /** Get a column array of all column sums in the matrix */
   colSum(): DType<DT> {
     const sum = new (this.data.constructor as DTypeConstructor<DT>)(
-      this.nRows,
+      this.nRows
     ) as DType<DT>;
     let i = 0;
     while (i < this.nCols) {
@@ -161,7 +169,8 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
     while (j < this.nCols) {
       let i = 0;
       while (i < this.nRows) {
-        const adder = (this.item(i, j) as DTypeValue<DT>) *
+        const adder =
+          (this.item(i, j) as DTypeValue<DT>) *
           (rhs.item(i, j) as DTypeValue<DT>);
         // @ts-ignore I'll fix this later
         res += adder as DTypeValue<DT>;
@@ -172,8 +181,8 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
     return res;
   }
   /** Filter the matrix by rows */
-  filter(
-    fn: (value: DType<DT>, row: number, _: DType<DT>[]) => boolean,
+  override filter(
+    fn: (value: DType<DT>, row: number, _: DType<DT>[]) => boolean
   ): Matrix<DT> {
     const satisfying: number[] = [];
     let i = 0;
@@ -193,7 +202,7 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
     return matrix;
   }
   /** Get an item using a row and column index */
-  item(row: number, col: number): DTypeValue<DT> {
+  override item(row: number, col: number): DTypeValue<DT> {
     return this.data[row * this.nCols + col] as DTypeValue<DT>;
   }
   /** Get the nth row in the matrix */
@@ -215,7 +224,7 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
   /** Compute the sum of all rows */
   rowSum(): DType<DT> {
     const sum = new (this.data.constructor as DTypeConstructor<DT>)(
-      this.nCols,
+      this.nCols
     ) as DType<DT>;
     let i = 0;
     let offset = 0;
@@ -258,13 +267,13 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
     this.data.set(val, row * this.nCols);
   }
   /** Slice matrix by rows */
-  slice(start = 0, end?: number): Matrix<DT> {
+  override slice(start = 0, end?: number): Matrix<DT> {
     return new Matrix<DT>(
       this.data.slice(
         start ? start * this.nCols : 0,
-        end ? end * this.nCols : undefined,
+        end ? end * this.nCols : undefined
       ) as DType<DT>,
-      [end ? end - start : this.nRows - start, this.nCols],
+      [end ? end - start : this.nRows - start, this.nCols]
     );
   }
   /** Iterate through rows */
@@ -281,7 +290,7 @@ export class Matrix<DT extends DataType> extends Tensor<DT, 2>
     while (i < this.nCols) {
       let j = 0;
       const col = new (this.data.constructor as DTypeConstructor<DT>)(
-        this.nRows,
+        this.nRows
       ) as DType<DT>;
       while (j < this.nRows) {
         col[j] = this.data[j * this.nCols + i];

@@ -4,9 +4,15 @@ export class DiscreteMapper<T> {
   mapping: Map<T, number>;
   /** An internal counter for remembering the last index in mapping. */
   #lastToken: Uint32Array;
-  constructor() {
-    this.mapping = new Map();
+  constructor(mapping?: Map<T, number>) {
+    this.mapping = mapping || new Map();
     this.#lastToken = new Uint32Array(1);
+    if (mapping?.size) {
+      this.#lastToken[0] = Array.from(mapping.values()).reduce(
+        (acc, val) => (acc > val ? acc : val),
+        0
+      );
+    }
   }
   /** Construct a mapping from a given set of text. */
   fit(targets: T[]): this {

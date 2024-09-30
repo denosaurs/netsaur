@@ -150,6 +150,11 @@ export enum Activation {
    * This is a scaled version of the Elu function, which is a smoother approximation to the ReLU function.
    */
   Selu = "selu",
+
+  /**
+   * Gelu is the Gaussian Error Linear Unit
+   */
+  Gelu = "gelu",
 }
 
 export enum Cost {
@@ -222,13 +227,17 @@ export enum LayerType {
   Activation = "activation",
   BatchNorm1D = "batchnorm1d",
   BatchNorm2D = "batchnorm2d",
+  Conv1D = "conv1d",
   Conv2D = "conv2d",
+  ConvTranspose1D = "convtranspose1d",
   ConvTranspose2D = "convtranspose2d",
   Dense = "dense",
   Dropout1D = "dropout1d",
   Dropout2D = "dropout2d",
   Pool2D = "pool2d",
+  Embedding = "embedding",
   Flatten = "flatten",
+  LSTM = "lstm",
   Softmax = "softmax",
 }
 
@@ -276,3 +285,5 @@ export enum Init {
    */
   Kaiming = "kaiming",
 }
+
+export type Padding = "same" | "valid"

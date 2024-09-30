@@ -4,6 +4,7 @@ import {
   CPU,
   DenseLayer,
   NadamOptimizer,
+  PostProcess,
   ReluLayer,
   Sequential,
   setupBackend,
@@ -19,7 +20,14 @@ import {
   // Split the dataset
   useSplit,
 } from "../../packages/utilities/mod.ts";
-import { SigmoidLayer } from "../../mod.ts";
+import {
+  EmbeddingLayer,
+  FlattenLayer,
+  Init,
+  LinearDecay,
+  LSTMLayer,
+  SigmoidLayer,
+} from "../../mod.ts";
 
 // Define classes
 const ymap = ["spam", "ham"];
@@ -32,21 +40,27 @@ const data = parse(_data);
 const x = data.map((msg) => msg[1]);
 
 // Get the classes
-const y = data.map((msg) => (ymap.indexOf(msg[0]) === 0 ? 0 : 1));
+const y = data.map((msg) => (ymap.indexOf(msg[0]) === 0 ? -1 : 1));
 
 // Split the dataset for training and testing
 const [train, test] = useSplit({ ratio: [7, 3], shuffle: true }, x, y);
 
 // Vectorize the text messages
 
-const textCleaner = new TextCleaner({ lowercase: true });
+const textCleaner = new TextCleaner({
+  lowercase: true,
+  stripHtml: true,
+  normalizeWhiteSpaces: true,
+  removeStopWords: "english",
+  stripNewlines: true,
+  keepOnlyAlphaNumeric: true,
+});
 
-train[0] = textCleaner.clean(train[0])
+train[0] = textCleaner.clean(train[0]);
 
-const vec = new TextVectorizer("tfidf").fit(train[0]);
+const vec = new TextVectorizer("indices").fit(train[0]);
 
 const x_vec = vec.transform(train[0], "f32");
-
 
 // Setup the CPU backend for Netsaur
 await setupBackend(CPU);
@@ -54,27 +68,19 @@ await setupBackend(CPU);
 const net = new Sequential({
   size: [4, x_vec.nCols],
   layers: [
-    // A dense layer with 256 neurons
-    DenseLayer({ size: [256] }),
-    // A relu activation layer
-    ReluLayer(),
-    // A dense layer with 8 neurons
-    DenseLayer({ size: [32] }),
-    // A relu activation layer
-    ReluLayer(),
-    // A dense layer with 8 neurons
-    DenseLayer({ size: [8] }),
-    // A relu activation layer
-    ReluLayer(),
+    EmbeddingLayer({ vocabSize: vec.vocabSize, embeddingSize: 50 }),
+    LSTMLayer({ size: 128, init: Init.Kaiming, returnSequences: true, }),
+    LSTMLayer({ size: 128, init: Init.Kaiming }),
+//FlattenLayer(),
     // A dense layer with 1 neuron
-    DenseLayer({ size: [1] }),
-    // A sigmoid activation layer
-    SigmoidLayer()
+    DenseLayer({ size: [1], init: Init.XavierN }),
   ],
 
   // We are using Log Loss for finding cost
-  cost: Cost.BinCrossEntropy,
+  cost: Cost.Hinge,
+  patience: 50,
   optimizer: NadamOptimizer(),
+  scheduler: LinearDecay({ rate: 2, step_size: 5 })
 });
 
 const inputs = tensor(x_vec);
@@ -89,9 +95,9 @@ net.train(
     },
   ],
   // Train for 20 epochs
-  20,
+  10,
   2,
-  0.001
+  0.005
 );
 
 console.log(`training time: ${performance.now() - time}ms`);
@@ -99,7 +105,10 @@ console.log(`training time: ${performance.now() - time}ms`);
 const x_vec_test = vec.transform(test[0], "f32");
 
 // Calculate metrics
-const res = await net.predict(tensor(x_vec_test));
-const y1 = res.data.map((i) => (i < 0.5 ? 0 : 1));
-const cMatrix = new ClassificationReport(test[1], y1);
+const res = await net.predict(tensor(x_vec_test), {postProcess: PostProcess("sign")});
+const y1 = Array.from(res.data);
+const cMatrix = new ClassificationReport(
+  test[1].map((x) => ymap[x < 0 ? 0 : 1]),
+  y1.map((x) => ymap[x < 0 ? 0 : 1])
+);
 console.log("Confusion Matrix: ", cMatrix);

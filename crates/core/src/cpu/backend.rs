@@ -11,6 +11,8 @@ use crate::{
     Pool2DCPULayer, PostProcessor, SoftmaxCPULayer, Tensor, Tensors, Timer,
 };
 
+use super::{EmbeddingCPULayer, LSTMCPULayer};
+
 pub struct Backend {
     pub silent: bool,
     pub config: BackendConfig,
@@ -71,18 +73,28 @@ impl Backend {
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Dense(layer));
                 }
-                Layer::Flatten(config) => {
-                    let layer = FlattenCPULayer::new(config, IxDyn(&size));
+                Layer::Embedding(config) => {
+                    let layer = EmbeddingCPULayer::new(config, IxDyn(&size));
+                    size = layer.output_size().to_vec();
+                    layers.push(CPULayer::Embedding(layer));
+                }
+                Layer::Flatten => {
+                    let layer = FlattenCPULayer::new(IxDyn(&size));
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Flatten(layer));
+                }
+                Layer::LSTM(config) => {
+                    let layer = LSTMCPULayer::new(config, IxDyn(&size), None);
+                    size = layer.output_size().to_vec();
+                    layers.push(CPULayer::LSTM(layer));
                 }
                 Layer::Pool2D(config) => {
                     let layer = Pool2DCPULayer::new(config, IxDyn(&size));
                     size = layer.output_size().to_vec();
                     layers.push(CPULayer::Pool2D(layer));
                 }
-                Layer::Softmax => {
-                    let layer = SoftmaxCPULayer::new(IxDyn(&size));
+                Layer::Softmax(config) => {
+                    let layer = SoftmaxCPULayer::new(config, IxDyn(&size));
                     layers.push(CPULayer::Softmax(layer));
                 }
             }
@@ -125,7 +137,10 @@ impl Backend {
                 }
             }
             None => {
+      //          let mut i = 0;
                 for layer in &mut self.layers {
+       //             i += 1;
+       //             println!("\n\nLayer +{}: {:?}", i, &inputs);
                     inputs = layer.forward_propagate(inputs, training);
                 }
             }
@@ -138,9 +153,14 @@ impl Backend {
         outputs: ArrayViewD<'b, f32>,
         data: ArrayViewD<'b, f32>,
     ) -> ArrayD<f32> {
+ //       println!("\n\nOutput: {:?}", &outputs);
         let mut d_outputs = (self.cost.prime)(outputs, data);
+   //     println!("\n\nD Output: {:?}", &d_outputs);
+   //     let mut i = 0;
         for layer in self.layers.iter_mut().rev() {
+  //          i += 1;
             d_outputs = layer.backward_propagate(d_outputs);
+  //          println!("\n\nLayer -{}: {:?}", i, &d_outputs);
         }
         d_outputs
     }

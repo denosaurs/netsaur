@@ -62,7 +62,6 @@ impl CPUAdamOptimizer {
 
             let m_hat = self.m[idx][j].view().div(1.0 - self.beta1.powf(self.t));
             let v_hat = self.v[idx][j].view().div(1.0 - self.beta2.powf(self.t));
-
             let rate = scheduler.eta(rate, self.t as usize);
 
             param.sub_assign(
@@ -70,7 +69,7 @@ impl CPUAdamOptimizer {
                     .mul(m_hat)
                     .div(v_hat.map(|x| x.sqrt()).add(self.epsilon))
                     .sub(&li),
-            )
+            );
         }
     }
 }

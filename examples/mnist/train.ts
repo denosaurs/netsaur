@@ -28,7 +28,7 @@ const network = new Sequential({
     MaxPool2DLayer({ strides: [2, 2] }),
     Conv2DLayer({ kernelSize: [120, 16, 5, 5] }),
     ReluLayer(),
-    FlattenLayer({ size: [120] }),
+    FlattenLayer(),
     DenseLayer({ size: [84], init: Init.Kaiming }),
     ReluLayer(),
     DenseLayer({ size: [10], init: Init.Kaiming }),
