@@ -4,7 +4,7 @@
 // deno-fmt-ignore-file
 /// <reference types="./netsaur.generated.d.ts" />
 
-// source-hash: ed7e643fe169d302b470142cf6ea190ecaeb8c49
+// source-hash: 60e03f192e01f72854ad537d5cc565c02235b170
 let wasm;
 let cachedInt32Memory0;
 
