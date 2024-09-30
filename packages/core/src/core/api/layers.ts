@@ -175,6 +175,15 @@ export function SeluLayer(): Layer {
 }
 
 /**
+ * Creates a Gelu layer.
+ * Gelu layers use the Gelu activation function.
+ */
+export function GeluLayer(): Layer {
+  const config = { activation: Activation.Gelu };
+  return { type: LayerType.Activation, config };
+}
+
+/**
  * Creates an Embedding layer.
  * Embedding layers convert numerical data into dense vectors.
  * They are usually used for text processing.

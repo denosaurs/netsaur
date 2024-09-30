@@ -7,6 +7,9 @@ pub struct CPUActivation {
 
 type ActivationFn = fn(x: &f32) -> f32;
 
+const ROOT_2_BY_PI: f32 = 0.7978845608028654;
+const GELU_APPROX: f32 = 0.044715;
+
 impl CPUActivation {
     pub fn from(activation: Activation) -> Self {
         let (activate, prime): (ActivationFn, ActivationFn) = match activation {
@@ -15,6 +18,7 @@ impl CPUActivation {
             Activation::Linear => (linear, linear_prime),
             Activation::Relu => (relu, relu_prime),
             Activation::Relu6 => (relu6, relu6_prime),
+            Activation::Gelu => (gelu, gelu_prime),
             Activation::Selu => (selu, selu_prime),
             Activation::Sigmoid => (sigmoid, sigmoid_prime),
             Activation::Tanh => (tanh, tanh_prime),
@@ -43,7 +47,7 @@ impl CPUActivation {
     }
 }
 
-pub fn sigmoid(x: &f32) -> f32 {
+fn sigmoid(x: &f32) -> f32 {
     return 1.0 / (1.0 + (-x).exp());
 }
 
@@ -73,6 +77,16 @@ fn relu(x: &f32) -> f32 {
 
 fn relu_prime(x: &f32) -> f32 {
     return if *x > 0.0 { 1.0 } else { 0.0 };
+}
+
+fn gelu(x: &f32) -> f32 {
+    return (0.5 * x) * (1.0 + (ROOT_2_BY_PI * (x + GELU_APPROX * x.powi(3))).tanh());
+}
+
+fn gelu_prime(x: &f32) -> f32 {
+    let tanned = (ROOT_2_BY_PI * (x + GELU_APPROX * x.powi(3))).tanh();
+    return (0.5 * (1.0 + tanned))
+        + (0.5 * x * (1.0 - tanned.powi(2))) * ROOT_2_BY_PI * (1.0 + 3.0 * GELU_APPROX * x.powi(2));
 }
 
 fn relu6(x: &f32) -> f32 {

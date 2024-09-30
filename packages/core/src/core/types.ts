@@ -150,6 +150,11 @@ export enum Activation {
    * This is a scaled version of the Elu function, which is a smoother approximation to the ReLU function.
    */
   Selu = "selu",
+
+  /**
+   * Gelu is the Gaussian Error Linear Unit
+   */
+  Gelu = "gelu",
 }
 
 export enum Cost {
