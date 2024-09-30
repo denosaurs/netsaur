@@ -110,27 +110,27 @@ const net = new Sequential({
       embeddingSize: 50,
       vocabSize: vectorizer.mapper.mapping.size,
     }),
-    LSTMLayer({ size: 128, init: Init.Xavier, returnSequences: true }),
-    Dropout1DLayer({ probability: 0.2 }),
-    LSTMLayer({ size: 128, init: Init.Xavier }),
+ //   LSTMLayer({ size: 128, init: Init.Xavier, returnSequences: true }),
+//    Dropout1DLayer({ probability: 0.2 }),
+    LSTMLayer({ size: 64, init: Init.Xavier }),
     DenseLayer({
       size: [encoder.mapper.mapping.size],
       init: Init.Xavier,
     }),
-    SoftmaxLayer({ temperature: 2 }),
+    SoftmaxLayer({ temperature: 1 }),
   ],
   silent: false,
   optimizer: NadamOptimizer(),
   cost: Cost.CrossEntropy,
   patience: 10,
-  scheduler: LinearDecay({ rate: 1.5, step_size: 5 }), //OneCycle({ max_rate: 0.01, step_size: 10 }),
+ // scheduler: LinearDecay({ rate: 1.2, step_size: 5 }), //OneCycle({ max_rate: 0.01, step_size: 10 }),
 });
 
 console.log("\nStarting");
 console.timeLog("Time Elapsed");
 const timeStart = performance.now();
 
-net.train([{ inputs: tensor(vecX), outputs: tensor(oneHotY) }], 10, 10, 0.01);
+net.train([{ inputs: tensor(vecX), outputs: tensor(oneHotY) }], 40, 10, 0.01);
 
 console.log(
   `Training complete in ${duration(performance.now() - timeStart, {
@@ -141,6 +141,7 @@ console.log(
 const predYSoftmax = await net.predict(
   tensor(vectorizer.transform(testX, "f32"))
 );
+console.log(predYSoftmax)
 
 const predY = encoder.untransform(predYSoftmax as Tensor<2>);
 
