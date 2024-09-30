@@ -55,8 +55,12 @@ const net = new Sequential({
 
   // Define each layer of the network
   layers: [
-    // A dense layer with 16 neurons
-    DenseLayer({ size: [16] }),
+    // A dense layer with 8 neurons
+    DenseLayer({ size: [8] }),
+    // A ReLu activation layer
+    ReluLayer(),
+    // A dense layer with 8 neurons
+    DenseLayer({ size: [8] }),
     // A ReLu activation layer
     ReluLayer(),
     // A dense layer with 3 neurons

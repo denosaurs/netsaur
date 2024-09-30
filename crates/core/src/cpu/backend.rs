@@ -203,7 +203,7 @@ impl Backend {
                     total = 0.0;
                 }
             }
-            if self.patience != 0 {
+            if self.patience != 0 && cost != 0.0 {
                 if best_cost < 0.0 {
                     best_cost = cost;
                 }
