@@ -47,6 +47,7 @@ pub enum Activation {
     Relu,
     Relu6,
     Selu,
+    Gelu,
     Sigmoid,
     Tanh,
 }
@@ -113,6 +114,8 @@ pub struct LSTMLayer {
     pub c: Option<f32>,
     pub l1_ratio: Option<f32>,
     pub return_sequences: Option<bool>,
+    pub recurrent_activation: Option<Activation>,
+    pub activation: Option<Activation>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

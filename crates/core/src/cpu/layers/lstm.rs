@@ -1,4 +1,4 @@
-use crate::{sigmoid, CPUInit, CPURegularizer, Init, LSTMLayer, Tensors};
+use crate::{CPUActivation, Activation, CPUInit, CPURegularizer, Init, LSTMLayer, Tensors, LayerNorm};
 use core::f32;
 use ndarray::{
     concatenate, s, Array2, Array3, ArrayD, Axis, Dimension, Ix2, Ix3, IxDyn,
@@ -14,6 +14,9 @@ pub struct LSTMCPULayer {
     pub output_size: IxDyn,
     pub inputs: Array3<f32>,
     pub return_sequences: bool,
+    pub layer_norm: LayerNorm,
+    pub activation_h: CPUActivation,
+    pub activation_o: CPUActivation,
 
     pub w_ih: Array3<f32>,
     pub w_hh: Array3<f32>,
@@ -48,6 +51,7 @@ impl LSTMCPULayer {
         Self {
             return_sequences,
             output_size,
+            layer_norm: LayerNorm::new(config.size, f32::EPSILON),
             inputs: Array3::zeros(input_size),
             w_ih: init
                 .init(weight_size.into_dyn(), size[2], config.size)
@@ -70,6 +74,9 @@ impl LSTMCPULayer {
                 config.c.unwrap_or(0.0),
                 config.l1_ratio.unwrap_or(1.0),
             ),
+
+            activation_h: CPUActivation::from(config.recurrent_activation.unwrap_or(Activation::Sigmoid)),
+            activation_o: CPUActivation::from(config.activation.unwrap_or(Activation::Tanh)),
         }
     }
 
@@ -106,22 +113,22 @@ impl LSTMCPULayer {
             let i_t = (&x_t.dot(&self.w_ih.index_axis(Axis(0), 0))
                 + &h_t.dot(&self.w_hh.index_axis(Axis(0), 0))
                 + &self.biases.index_axis(Axis(0), 0))
-                .mapv(|x| sigmoid(&x));
+                .mapv(|x| (self.activation_h.activate)(&x));
             let f_t = (&x_t.dot(&self.w_ih.index_axis(Axis(0), 1))
                 + &h_t.dot(&self.w_hh.index_axis(Axis(0), 1))
                 + &self.biases.index_axis(Axis(0), 1))
-                .mapv(|x| sigmoid(&x));
+                .mapv(|x| (self.activation_h.activate)(&x));
             let o_t = (&x_t.dot(&self.w_ih.index_axis(Axis(0), 2))
                 + &h_t.dot(&self.w_hh.index_axis(Axis(0), 2))
                 + &self.biases.index_axis(Axis(0), 2))
-                .mapv(|x| sigmoid(&x));
+                .mapv(|x| (self.activation_h.activate)(&x));
             let g_t = (&x_t.dot(&self.w_ih.index_axis(Axis(0), 3))
                 + &h_t.dot(&self.w_hh.index_axis(Axis(0), 3))
                 + &self.biases.index_axis(Axis(0), 3))
-                .mapv(|x| sigmoid(&x));
+                .mapv(|x| (self.activation_o.activate)(&x));
 
             c_t = &(&c_t * &f_t) + &(&g_t * &i_t);
-            h_t = &c_t.mapv(|x| x.tanh()) * &o_t;
+            h_t = &c_t.mapv(|x| (self.activation_o.activate)(&x)) * &o_t;
 
             self.h.index_axis_mut(Axis(0), t).assign(&h_t);
             self.c.index_axis_mut(Axis(0), t).assign(&c_t);
@@ -146,16 +153,16 @@ impl LSTMCPULayer {
     ) -> (Array2<f32>, Array2<f32>, Array2<f32>, Array2<f32>) {
         let i_t = z
             .slice(ndarray::s![.., ..hidden_size])
-            .mapv(|x| sigmoid(&x));
+            .mapv(|x| (self.activation_h.activate)(&x));
         let f_t = z
             .slice(ndarray::s![.., hidden_size..2 * hidden_size])
-            .mapv(|x| sigmoid(&x));
+            .mapv(|x| (self.activation_h.activate)(&x));
         let o_t = z
             .slice(ndarray::s![.., 2 * hidden_size..3 * hidden_size])
-            .mapv(|x| sigmoid(&x));
+            .mapv(|x| (self.activation_h.activate)(&x));
         let g_t = z
             .slice(ndarray::s![.., 3 * hidden_size..])
-            .mapv(|x| sigmoid(&x));
+            .mapv(|x| (self.activation_o.activate)(&x));
 
         (i_t, f_t, o_t, g_t)
     }
@@ -220,25 +227,24 @@ impl LSTMCPULayer {
             let d_h = d_outputs.slice(s![.., t, ..]).clone().to_owned().into_dimensionality::<Ix2>().unwrap();
 
             d_h_prev = d_h_prev + d_h;
-            clip_gradients(&mut d_h_prev, 5f32);
-
-            let tanned_c = c_prev.mapv(|x| x.tanh());
+//            clip_gradients(&mut d_h_prev, 5f32);
 
             let gates = x_t.dot(&w_ih)
                 + h_prev.dot(&w_hh)
                 + &self.biases.to_shape(4 * hidden_size).unwrap();
             let (i_t, f_t, o_t, g_t) = self.split_gates(&gates, hidden_size);
 
-            let d_tanned_c = &d_h_prev * &o_t * (1.0 - &tanned_c.mapv(|x| x * x));
+            let d_tanned_c = &d_h_prev * &o_t * c_prev.map(|x| (self.activation_o.activate)(&x));
             let mut d_c_t = d_tanned_c + &d_c_prev;
-            clip_gradients(&mut d_c_t, 5f32);
+ //           clip_gradients(&mut d_c_t, 5f32);
 
-            let d_o_t = &d_h_prev * &c_prev.mapv(|x| x.tanh());
-            let d_f_t = &d_c_t * &c_prev * &f_t * (1.0 - &f_t);
-            let d_i_t = &d_c_t * &g_t * &i_t * (1.0 - &i_t);
-            let d_g_t = &d_c_t * &i_t * (1.0 - g_t.mapv(|x| x * x));
-
+            let d_o_t = &d_h_prev * &c_prev.mapv(|x| (self.activation_o.activate)(&x));
+            let d_f_t = &d_c_t * &c_prev * &f_t.map(|x| (self.activation_h.prime)(x));
+            let d_i_t = &d_c_t * &g_t * &i_t.map(|x| (self.activation_h.prime)(x));
+            let d_g_t = &d_c_t * &i_t * &g_t.map(|x| (self.activation_o.prime)(x));
             let d_gates = concatenate![Axis(1), d_i_t, d_f_t, d_o_t, d_g_t];
+      //      println!("ADD {:?}", concatenate![Axis(0), d_i_t, d_f_t, d_o_t, d_g_t].shape());
+      //      println!("DG {:?} {:?}", d_gates.shape(), &w_ih.shape());
             d_inputs
                 .slice_mut(s![.., t, ..])
                 .assign(&d_gates.dot(&w_ih.t()));
@@ -333,21 +339,19 @@ impl LSTMCPULayer {
                 .into_dimensionality::<Ix2>()
                 .unwrap();
 
-            let tanned_c = c_prev.mapv(|x| x.tanh());
-
             let gates = x_t.dot(&w_ih)
                 + h_prev.dot(&w_hh)
                 + &self.biases.to_shape(4 * hidden_size).unwrap();
             let (i_t, f_t, o_t, g_t) = self.split_gates(&gates, hidden_size);
 
-            let d_tanned_c = &d_h_prev * &o_t * (1.0 - &tanned_c.mapv(|x| x * x));
+            let d_tanned_c = &d_h_prev * &o_t * c_prev.map(|x| (self.activation_o.activate)(&x));
             let mut d_c_t = d_tanned_c + &d_c_prev;
-            clip_gradients(&mut d_c_t, 5f32);
+//            clip_gradients(&mut d_c_t, 5f32);
 
-            let d_o_t = &d_h_prev * &c_prev.mapv(|x| x.tanh());
-            let d_f_t = &d_c_t * &c_prev * &f_t * (1.0 - &f_t);
-            let d_i_t = &d_c_t * &g_t * &i_t * (1.0 - &i_t);
-            let d_g_t = &d_c_t * &i_t * (1.0 - g_t.mapv(|x| x * x));
+            let d_o_t = &d_h_prev * &c_prev.mapv(|x| (self.activation_o.activate)(&x));
+            let d_f_t = &d_c_t * &c_prev * &f_t.map(|x| (self.activation_h.prime)(x));
+            let d_i_t = &d_c_t * &g_t * &i_t.map(|x| (self.activation_h.prime)(x));
+            let d_g_t = &d_c_t * &i_t * &g_t.map(|x| (self.activation_o.prime)(x));
 
             let d_gates = concatenate![Axis(1), d_i_t, d_f_t, d_o_t, d_g_t];
             //      println!("OT: {:?}\n\nFT {:?}", &d_h_prev, &d_c_prev);
@@ -395,7 +399,6 @@ impl LSTMCPULayer {
                 .unwrap();
             d_h_prev = d_gates.dot(&w_hh.t());
             d_c_prev = d_c_t * f_t;
-            clip_gradients(&mut d_h_prev, 5f32);
         }
 
         d_inputs
