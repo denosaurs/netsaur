@@ -1,5 +1,5 @@
 [workspace]
-package.version = "0.4.1"
+package.version = "0.4.2"
 members = ["crates/*"]
 resolver = "2"
 
