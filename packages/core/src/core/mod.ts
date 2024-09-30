@@ -12,6 +12,7 @@ import type { Tensor } from "./tensor/tensor.ts";
 import type { NeuralNetwork } from "./api/network.ts";
 import { SGDOptimizer } from "./api/optimizer.ts";
 import { PostProcess, type PostProcessor } from "./api/postprocess.ts";
+import type { DenseLayerConfig } from "./api/layer.ts";
 
 /**
  * Sequential Neural Network
@@ -47,21 +48,22 @@ export class Sequential implements NeuralNetwork {
    */
   async predict(
     data: Tensor<Rank>,
-    config?: { postProcess?: PostProcessor; layers?: [number, number] }
+    config?: { postProcess?: PostProcessor; layers?: [number, number] },
   ): Promise<Tensor<Rank>> {
-    if (!config)
+    if (!config) {
       config = {
         postProcess: PostProcess("none"),
       };
+    }
     if (config.layers) {
       if (
         config.layers[0] < 0 ||
         config.layers[1] > this.config.layers.length
       ) {
         throw new RangeError(
-          `Execution range should be within (0, ${
-            this.config.layers.length
-          }). Received (${(config.layers[0], config.layers[1])})`
+          `Execution range should be within (0, ${this.config.layers.length}). Received (${(config
+            .layers[0],
+            config.layers[1])})`,
         );
       }
       const lastLayer = this.config.layers[config.layers[1] - 1];
@@ -77,9 +79,12 @@ export class Sequential implements NeuralNetwork {
           data,
           {
             postProcess: config.postProcess || PostProcess("none"),
-            outputShape: lastLayer.config.size,
+            outputShape: (lastLayer as {
+              type: LayerType.Dense;
+              config: DenseLayerConfig;
+            }).config.size,
           },
-          layerList
+          layerList,
         );
       } else if (lastLayer.type === LayerType.Activation) {
         const penultimate = this.config.layers[config.layers[1] - 2];
@@ -91,18 +96,21 @@ export class Sequential implements NeuralNetwork {
             data,
             {
               postProcess: config.postProcess || PostProcess("none"),
-              outputShape: penultimate.config.size,
+              outputShape: (penultimate as {
+                type: LayerType.Dense;
+                config: DenseLayerConfig;
+              }).config.size,
             },
-            layerList
+            layerList,
           );
         } else {
           throw new Error(
-            `The penultimate layer must be a dense layer, or a flatten layer if the last layer is an activation layer. Received ${penultimate.type}.`
+            `The penultimate layer must be a dense layer, or a flatten layer if the last layer is an activation layer. Received ${penultimate.type}.`,
           );
         }
       } else {
         throw new Error(
-          `The output layer must be a dense layer, activation layer, or a flatten layer. Received ${lastLayer.type}.`
+          `The output layer must be a dense layer, activation layer, or a flatten layer. Received ${lastLayer.type}.`,
         );
       }
     }
@@ -110,7 +118,7 @@ export class Sequential implements NeuralNetwork {
       data,
       config.postProcess
         ? (config as { postProcess: PostProcessor; layers?: [number, number] })
-        : { ...config, postProcess: PostProcess("none") }
+        : { ...config, postProcess: PostProcess("none") },
     );
   }
 

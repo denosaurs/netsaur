@@ -1,4 +1,4 @@
-export function argmax(mat: ArrayLike<number | bigint>) {
+export function argmax(mat: ArrayLike<number | bigint>): number {
   let max = mat[0];
   let index = 0;
   for (let i = 0; i < mat.length; i++) {
