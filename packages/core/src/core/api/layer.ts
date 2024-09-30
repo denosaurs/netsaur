@@ -50,6 +50,10 @@ export interface LSTMLayerConfig {
    * Whether to return all time steps.
    */
   returnSequences?: boolean;
+
+  activation?: Activation;
+
+  recurrentActivation?: Activation;
 }
 
   /**
