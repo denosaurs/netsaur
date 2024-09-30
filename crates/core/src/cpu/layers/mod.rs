@@ -6,7 +6,9 @@ mod convtrans2d;
 mod dense;
 mod dropout;
 mod flatten;
+mod embedding;
 mod pool2d;
+mod lstm;
 
 pub use activation::*;
 pub use batchnorm1d::*;
@@ -16,7 +18,9 @@ pub use convtrans2d::*;
 pub use dense::*;
 pub use dropout::*;
 pub use flatten::*;
+pub use embedding::*;
 pub use pool2d::*;
+pub use lstm::*;
 
 use ndarray::ArrayD;
 
@@ -28,6 +32,8 @@ pub enum CPULayer {
     Dropout1D(Dropout1DCPULayer),
     Dropout2D(Dropout2DCPULayer),
     Flatten(FlattenCPULayer),
+    Embedding(EmbeddingCPULayer),
+    LSTM(LSTMCPULayer),
     Pool2D(Pool2DCPULayer),
     Softmax(SoftmaxCPULayer),
     BatchNorm1D(BatchNorm1DCPULayer),
@@ -45,6 +51,8 @@ impl CPULayer {
             CPULayer::Dense(layer) => layer.output_size(),
             CPULayer::Dropout1D(layer) => layer.output_size(),
             CPULayer::Dropout2D(layer) => layer.output_size(),
+            CPULayer::Embedding(layer) => layer.output_size(),
+            CPULayer::LSTM(layer) => layer.output_size(),
             CPULayer::Flatten(layer) => layer.output_size(),
             CPULayer::Pool2D(layer) => layer.output_size(),
             CPULayer::Softmax(layer) => layer.output_size(),
@@ -61,6 +69,8 @@ impl CPULayer {
             CPULayer::Dense(layer) => layer.forward_propagate(inputs),
             CPULayer::Dropout1D(layer) => layer.forward_propagate(inputs, training),
             CPULayer::Dropout2D(layer) => layer.forward_propagate(inputs, training),
+            CPULayer::Embedding(layer) => layer.forward_propagate(inputs),
+            CPULayer::LSTM(layer) => layer.forward_propagate(inputs),
             CPULayer::Flatten(layer) => layer.forward_propagate(inputs),
             CPULayer::Pool2D(layer) => layer.forward_propagate(inputs),
             CPULayer::Softmax(layer) => layer.forward_propagate(inputs),
@@ -77,6 +87,8 @@ impl CPULayer {
             CPULayer::Dense(layer) => layer.backward_propagate(d_outputs),
             CPULayer::Dropout1D(layer) => layer.backward_propagate(d_outputs),
             CPULayer::Dropout2D(layer) => layer.backward_propagate(d_outputs),
+            CPULayer::Embedding(layer) => layer.backward_propagate(d_outputs),
+            CPULayer::LSTM(layer) => layer.backward_propagate(d_outputs),
             CPULayer::Flatten(layer) => layer.backward_propagate(d_outputs),
             CPULayer::Pool2D(layer) => layer.backward_propagate(d_outputs),
             CPULayer::Softmax(layer) => layer.backward_propagate(d_outputs),
@@ -92,6 +104,8 @@ impl CPULayer {
             CPULayer::Dense(layer) => layer.reset(batches),
             CPULayer::Dropout1D(layer) => layer.reset(batches),
             CPULayer::Dropout2D(layer) => layer.reset(batches),
+            CPULayer::Embedding(layer) => layer.reset(batches),
+            CPULayer::LSTM(layer) => layer.reset(batches),
             CPULayer::Flatten(layer) => layer.reset(batches),
             CPULayer::Pool2D(layer) => layer.reset(batches),
             CPULayer::Softmax(layer) => layer.reset(batches),

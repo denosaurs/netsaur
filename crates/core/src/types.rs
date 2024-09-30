@@ -30,10 +30,12 @@ pub enum Layer {
     Conv2D(Conv2DLayer),
     ConvTranspose2D(ConvTranspose2DLayer),
     Pool2D(Pool2DLayer),
-    Flatten(FlattenLayer),
+    Embedding(EmbeddingLayer),
+    Flatten,
+    LSTM(LSTMLayer),
     Dropout1D(DropoutLayer),
     Dropout2D(DropoutLayer),
-    Softmax,
+    Softmax(SoftmaxLayer),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -45,6 +47,7 @@ pub enum Activation {
     Relu,
     Relu6,
     Selu,
+    Gelu,
     Sigmoid,
     Tanh,
 }
@@ -95,14 +98,35 @@ pub struct Pool2DLayer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct FlattenLayer {
-    pub size: Vec<usize>,
+#[serde(rename_all = "camelCase")]
+pub struct EmbeddingLayer {
+    pub vocab_size: usize,
+    pub embedding_size: usize,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct LSTMLayer {
+    pub size: usize,
+    pub init: Option<Init>,
+    pub c: Option<f32>,
+    pub l1_ratio: Option<f32>,
+    pub return_sequences: Option<bool>,
+    pub recurrent_activation: Option<Activation>,
+    pub activation: Option<Activation>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DropoutLayer {
     pub probability: f32,
     pub inplace: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SoftmaxLayer {
+    pub temperature: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -236,4 +260,3 @@ pub struct RegularizeOptions {
     pub c: f32,
     pub l1_ratio: f32,
 }
-

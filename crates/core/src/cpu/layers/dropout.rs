@@ -30,7 +30,7 @@ impl Dropout1DCPULayer {
 
     pub fn forward_propagate(&mut self, inputs: ArrayD<f32>, training: bool) -> ArrayD<f32> {
         if training {
-            self.mask = ArrayD::random(self.mask.dim(), Uniform::new(0.0, 1.0))
+            self.mask = ArrayD::random(inputs.dim(), Uniform::new(0.0, 1.0))
                 .map(|x| (if x > &self.probability { 1.0 } else { 0.0 }));
             inputs.mul(&self.mask).mul(1.0 / 1.0 - self.probability)
         } else {

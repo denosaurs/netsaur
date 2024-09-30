@@ -5,10 +5,14 @@ import {
   type ConvTranspose2DLayerConfig,
   type DenseLayerConfig,
   type DropoutLayerConfig,
-  type FlattenLayerConfig,
+  type EmbeddingLayerConfig,
+  type Conv1DLayerConfig,
+  type ConvTranspose1DLayerConfig,
+  type LSTMLayerConfig,
   type Layer,
   type Pool2DLayerConfig,
   PoolMode,
+  type SoftmaxLayerConfig,
 } from "./layer.ts";
 
 /**
@@ -48,10 +52,26 @@ export function Conv2DLayer(config: Conv2DLayerConfig): Layer {
   return { type: LayerType.Conv2D, config };
 }
 
+/**
+ * Creates a 1D convolutional layer.
+ * Convolutional layers are used for feature extraction.
+ * They are commonly used in image processing.
+ * See https://en.wikipedia.org/wiki/Convolutional_neural_network
+ */
+export function Conv1DLayer(config: Conv1DLayerConfig): Layer {
+  return { type: LayerType.Conv1D, config };
+}
+
 export function ConvTranspose2DLayer(
   config: ConvTranspose2DLayerConfig,
 ): Layer {
   return { type: LayerType.ConvTranspose2D, config };
+}
+
+export function ConvTranspose1DLayer(
+  config: ConvTranspose1DLayerConfig,
+): Layer {
+  return { type: LayerType.ConvTranspose1D, config };
 }
 
 /**
@@ -87,8 +107,8 @@ export function AveragePool2DLayer(config: Pool2DLayerConfig): Layer {
  * Creates a softmax layer. Softmax layers are used for classification.
  * See https://en.wikipedia.org/wiki/Softmax_function
  */
-export function SoftmaxLayer(): Layer {
-  return { type: LayerType.Softmax };
+export function SoftmaxLayer(config: SoftmaxLayerConfig = {}): Layer {
+  return { type: LayerType.Softmax, config };
 }
 
 /**
@@ -155,12 +175,39 @@ export function SeluLayer(): Layer {
 }
 
 /**
+ * Creates a Gelu layer.
+ * Gelu layers use the Gelu activation function.
+ */
+export function GeluLayer(): Layer {
+  const config = { activation: Activation.Gelu };
+  return { type: LayerType.Activation, config };
+}
+
+/**
+ * Creates an Embedding layer.
+ * Embedding layers convert numerical data into dense vectors.
+ * They are usually used for text processing.
+ */
+export function EmbeddingLayer(config: EmbeddingLayerConfig): Layer {
+  return { type: LayerType.Embedding, config };
+}
+
+/**
  * Creates a Flatten layer.
  * Flatten layers flatten the input.
  * They are usually used to transition from convolutional layers to dense layers.
  */
-export function FlattenLayer(config: FlattenLayerConfig): Layer {
-  return { type: LayerType.Flatten, config };
+export function FlattenLayer(): Layer {
+  return { type: LayerType.Flatten };
+}
+
+/**
+ * Creates a Flatten layer.
+ * Flatten layers flatten the input.
+ * They are usually used to transition from convolutional layers to dense layers.
+ */
+export function LSTMLayer(config: LSTMLayerConfig): Layer {
+  return { type: LayerType.LSTM, config };
 }
 
 /**

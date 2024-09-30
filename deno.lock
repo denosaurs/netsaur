@@ -7,6 +7,7 @@
     "jsr:@std/csv@1.0.3": "1.0.3",
     "jsr:@std/encoding@0.213.1": "0.213.1",
     "jsr:@std/fmt@0.213.1": "0.213.1",
+    "jsr:@std/fmt@1.0.2": "1.0.2",
     "jsr:@std/fs@0.213.1": "0.213.1",
     "jsr:@std/path@0.213.1": "0.213.1",
     "jsr:@std/path@~0.213.1": "0.213.1"
@@ -22,7 +23,7 @@
       "integrity": "b010544e386bea0ff3a1d05e0c88f704ea28cbd4d753439c2f1ee021a85d4640",
       "dependencies": [
         "jsr:@std/encoding",
-        "jsr:@std/fmt",
+        "jsr:@std/fmt@0.213.1",
         "jsr:@std/fs",
         "jsr:@std/path@0.213.1"
       ]
@@ -38,6 +39,9 @@
     },
     "@std/fmt@0.213.1": {
       "integrity": "a06d31777566d874b9c856c10244ac3e6b660bdec4c82506cd46be052a1082c3"
+    },
+    "@std/fmt@1.0.2": {
+      "integrity": "87e9dfcdd3ca7c066e0c3c657c1f987c82888eb8103a3a3baa62684ffeb0f7a7"
     },
     "@std/fs@0.213.1": {
       "integrity": "fbcaf099f8a85c27ab0712b666262cda8fe6d02e9937bf9313ecaea39a22c501",

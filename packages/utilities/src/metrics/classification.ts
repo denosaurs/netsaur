@@ -4,6 +4,7 @@ interface Report {
   c: ConfusionMatrix;
   precision: number;
   recall: number;
+  cohensKappa: number;
   f1: number;
   support: number;
 }
@@ -22,7 +23,7 @@ export class ClassificationReport {
     const unique = useUnique(y);
     if (unique.length <= 1) {
       throw new Error(
-        `Cannot create a classification report for less than 1 class.`,
+        `Cannot create a classification report for less than 1 class.`
       );
     }
     this.true = 0;
@@ -46,34 +47,44 @@ export class ClassificationReport {
         precision: precisionScore(cMatrix),
         f1: f1Score(cMatrix),
         recall: recallScore(cMatrix),
+        cohensKappa: cohensKappa(cMatrix),
         support: cMatrix.truePositive + cMatrix.falseNegative,
       });
     }
   }
   toString(): string {
+    const maxClassNameLength = this.labels.reduce(
+      (acc, val) => (acc > val.length ? acc : val.length),
+      0
+    );
     let res = `Classification Report`;
-    res += `\nNumber of classes:\t${this.labels.length}\n`;
-    res += `Class\tPreci\tF1\tRec\tSup`;
+    res += `\nClasses:\t${this.labels.length}\n`;
+    res += `${`Class`.padEnd(
+      maxClassNameLength,
+      " "
+    )}\tPreci\tF1\tRec\tCKA\tSup`;
     for (const [label, report] of this.reports.entries()) {
-      res += `\n${label}`;
-      res +=
-        `\t${report.precision.toFixed(4)}\t${report.f1.toFixed(4)}\t${report.recall.toFixed(4)}\t${report.support}`;
+      res += `\n${label.padEnd(maxClassNameLength, " ")}`;
+      res += `\t${report.precision.toFixed(4)}\t${report.f1.toFixed(
+        4
+      )}\t${report.recall.toFixed(4)}\t${report.cohensKappa.toFixed(4)}\t${
+        report.support
+      }`;
     }
-    res += `\nAccuracy\t\t${
-      this.true / (this.true + this.false)
-    }\t${this.size}`;
+    res += `\n${`Accuracy`.padEnd(maxClassNameLength, " ")}\t${(
+      this.true /
+      (this.true + this.false)
+    ).toFixed(4)}\t\t\t\t${this.size}`;
     return res;
   }
   toHtml(): string {
-    let res =
-      `<table><thead><tr><th>Class</th><th>Precision</th><th>F1Score</th><th>Recall</th><th>Support</th></tr></thead>`;
+    let res = `<table><thead><tr><th>Class</th><th>Precision</th><th>F1Score</th><th>Recall</th><th>Cohen's Kappa</th><th>Support</th></tr></thead>`;
     for (const [label, report] of this.reports.entries()) {
-      res +=
-        `<tr><td>${label}</td><td>${report.precision}</td><td>${report.f1}</td><td>${report.recall}</td><td>${report.support}</td></tr>`;
+      res += `<tr><td>${label}</td><td>${report.precision}</td><td>${report.f1}</td><td>${report.recall}</td><td>${report.cohensKappa}</td><td>${report.support}</td></tr>`;
     }
-    res += `<tr><td>Accuracy</td><td></td><td></td><td>${
+    res += `<tr><td>Accuracy</td><td>${
       this.true / (this.true + this.false)
-    }</td><td>${this.size}</td></tr>`;
+    }</td><td></td><td></td><td></td><td>${this.size}</td></tr>`;
     res += `</table>`;
     return res;
   }
@@ -105,18 +116,6 @@ export class ClassificationReport {
       support: reports.map((x) => x[1].support),
     };
   }
-  /*
-  [Symbol.for("Deno.customInspect")]() {
-    let res = `\t${this.labels.join("\t")}`
-    for (const label of this.labels) {
-      res += `\n${label}`
-      for (const label1 of this.labels) {
-        res += `\t${}`
-      }
-    }
-    return `\n\t${this.labelP}\t${this.labelN}\n${this.labelP}\t${this.truePositive}\t${this.falseNegative}\n${this.labelN}\t${this.falsePositive}\t${this.trueNegative}`;
-  }
-  */
 }
 
 /** Confusion matrix for the result. */
@@ -141,7 +140,7 @@ export class ConfusionMatrix {
   labelN: string;
   constructor(
     [tp, fn, fp, tn]: [number, number, number, number],
-    [label1, label2]: [string?, string?] = [],
+    [label1, label2]: [string?, string?] = []
   ) {
     this.truePositive = tp;
     this.falseNegative = fn;
@@ -166,12 +165,12 @@ export class ConfusionMatrix {
   }
   static fromResults(
     y: ArrayLike<unknown>,
-    y1: ArrayLike<unknown>,
+    y1: ArrayLike<unknown>
   ): ConfusionMatrix {
     const unique = useUnique(y);
     if (unique.length !== 2) {
       throw new Error(
-        `Cannot create confusion matrix for ${unique.length} classes. Try ClassificationReport instead.`,
+        `Cannot create confusion matrix for ${unique.length} classes. Try ClassificationReport instead.`
       );
     }
     let [tp, fn, fp, tn] = [0, 0, 0, 0];
@@ -191,24 +190,32 @@ export function accuracyScore(cMatrix: ConfusionMatrix): number {
 }
 /** The fraction of "positive" predictions that were actually positive */
 export function precisionScore(cMatrix: ConfusionMatrix): number {
-  return (cMatrix.truePositive / (cMatrix.truePositive + cMatrix.falsePositive)) || 0;
+  return (
+    cMatrix.truePositive / (cMatrix.truePositive + cMatrix.falsePositive) || 0
+  );
 }
 /** The fraction of positives that were predicted correctly */
 export function sensitivityScore(cMatrix: ConfusionMatrix): number {
-  return (cMatrix.truePositive / (cMatrix.truePositive + cMatrix.falseNegative)) || 0;
+  return (
+    cMatrix.truePositive / (cMatrix.truePositive + cMatrix.falseNegative) || 0
+  );
 }
 /** The fraction of positives that were predicted correctly */
 export const recallScore = sensitivityScore;
 /** The fraction of negatives that were predicted correctly */
 export function specificityScore(cMatrix: ConfusionMatrix): number {
-  return (cMatrix.trueNegative / (cMatrix.trueNegative + cMatrix.falsePositive)) || 0;
+  return (
+    cMatrix.trueNegative / (cMatrix.trueNegative + cMatrix.falsePositive) || 0
+  );
 }
 /** Compute F1 Score */
 export function f1Score(cMatrix: ConfusionMatrix): number {
   return (
     (2 * cMatrix.truePositive) /
-    (2 * cMatrix.truePositive + cMatrix.falsePositive + cMatrix.falseNegative)
-  ) || 0;
+      (2 * cMatrix.truePositive +
+        cMatrix.falsePositive +
+        cMatrix.falseNegative) || 0
+  );
 }
 
 /** Compute Cohen's Kappa to find Agreement */
