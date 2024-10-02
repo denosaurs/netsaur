@@ -63,6 +63,7 @@
     // Build
     "build": "deno run build:cpu && deno run build:wasm && deno run build:tokenizers",
     "build:cpu": "cargo build --release -p netsaur",
+    "build:cpu-modular": "cargo build --release -p netsaur-modular",
     "build:gpu": "cargo build --release -p netsaur-gpu",
     "build:wasm": "deno -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur --out packages/core/src/backends/wasm/lib",
     "build:tokenizers": "deno -Ar jsr:@deno/wasmbuild@0.17.2 -p netsaur-tokenizers --out packages/tokenizers/lib"

@@ -382,6 +382,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "netsaur-modular"
+version = "0.4.2"
+dependencies = [
+ "getrandom",
+ "js-sys",
+ "ndarray",
+ "ndarray-rand",
+ "safetensors",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "netsaur-tokenizers"
 version = "0.4.2"
 dependencies = [

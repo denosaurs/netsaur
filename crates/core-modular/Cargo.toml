@@ -1,0 +1,19 @@
+[package]
+edition = "2021"
+name = "netsaur-modular"
+version = { workspace = true }
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+ndarray = { workspace = true }
+ndarray-rand = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+safetensors = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2.92"
+getrandom = { version = "0.2", features = ["js"] }
+js-sys = "0.3.69"

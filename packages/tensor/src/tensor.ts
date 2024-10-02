@@ -3,14 +3,10 @@
  * @module
  */
 
-import {
-  type DataType,
-  type DType,
-  type DTypeValue,
-  getDataType,
-  type Sliceable,
-} from "../common_types.ts";
-import { getConstructor } from "./get_constructor.ts";
+import type { DataType, DType, DTypeValue } from "./types.ts";
+import { getConstructor, getDataType } from "./utils.ts";
+
+import type { Sliceable } from "../../utilities/src/utils/common_types.ts";
 
 /** Order of the tensor */
 export type Order = 1 | 2 | 3 | 4 | 5 | 6;
@@ -19,10 +15,11 @@ export type Order = 1 | 2 | 3 | 4 | 5 | 6;
 export interface TensorLike<DT extends DataType, O extends Order> {
   data: DType<DT>;
   shape: Shape<O>;
-};
+}
 
 /** An array with n items */
-export type Shape<N extends number> = N extends 0 ? []
+export type Shape<N extends number> = N extends 0
+  ? []
   : [number, ...number[]] & { length: N };
 
 /** nDArray type */
@@ -33,10 +30,10 @@ export interface NDArray<DT extends DataType> {
   4: DTypeValue<DT>[][][][];
   5: DTypeValue<DT>[][][][][];
   6: DTypeValue<DT>[][][][][][];
-};
+}
 
 function getShape<O extends Order, DT extends DataType>(
-  arr: NDArray<DT>[O],
+  arr: NDArray<DT>[O]
 ): Shape<O> {
   const shape: number[] = [];
   let curr: NDArray<DT>[O] | DTypeValue<DT> = arr;
@@ -51,7 +48,8 @@ function getShape<O extends Order, DT extends DataType>(
  * A Tensor of order O.
  */
 export class Tensor<DT extends DataType, O extends Order>
-  implements Sliceable, TensorLike<DT, O> {
+  implements Sliceable, TensorLike<DT, O>
+{
   order: O;
   shape: Shape<O>;
   data: DType<DT>;
@@ -63,16 +61,16 @@ export class Tensor<DT extends DataType, O extends Order>
   constructor(dType: DT, shape: Shape<O>);
   constructor(
     data: NDArray<DT>[O] | DType<DT> | DT | TensorLike<DT, O>,
-    shape?: Shape<O> | DType<DT>,
+    shape?: Shape<O> | DType<DT>
   ) {
     if (typeof data === "string") {
       if (!shape || !Array.isArray(shape)) {
         throw new Error(
-          `Expected shape to be defined as an Array. Got ${shape}.`,
+          `Expected shape to be defined as an Array. Got ${shape}.`
         );
       } else {
         this.data = new (getConstructor(data))(
-          shape.reduce((acc, val) => acc * val, 1),
+          shape.reduce((acc, val) => acc * val, 1)
         ) as DType<DT>;
         this.shape = shape;
         this.order = shape.length as O;
@@ -82,14 +80,14 @@ export class Tensor<DT extends DataType, O extends Order>
     } else if (Array.isArray(data)) {
       if (!shape || typeof shape !== "string") {
         throw new Error(
-          `Expected dType to be defined when using a normal array. Got ${shape}.`,
+          `Expected dType to be defined when using a normal array. Got ${shape}.`
         );
       } else {
         this.shape = getShape(data);
         this.order = this.shape.length as O;
         // @ts-ignore They're mapped correctly
         this.data = getConstructor(shape).from(
-          data.flat(this.shape.length) as DTypeValue<DT>[],
+          data.flat(this.shape.length) as DTypeValue<DT>[]
         ) as DType<DT>;
         this.dType = shape;
         this.strides = Tensor.getStrides(this.shape);
@@ -97,7 +95,7 @@ export class Tensor<DT extends DataType, O extends Order>
     } else if (ArrayBuffer.isView(data)) {
       if (!shape || !Array.isArray(shape)) {
         throw new Error(
-          `Shape must be defined when Tensor is constructed from a TypedArray.`,
+          `Shape must be defined when Tensor is constructed from a TypedArray.`
         );
       }
       this.shape = shape;
@@ -119,9 +117,18 @@ export class Tensor<DT extends DataType, O extends Order>
   get length(): number {
     return this.shape[0];
   }
+  /*
+    axisSelect(axis: number, indices: number[]): Tensor<DT, O> {
+      const newShape = this.shape.slice();
+      newShape.splice(axis, 1, indices.length);
+      const res = new Tensor(this.dType, newShape as Shape<O>);
+      for (let i = 0; i < indices.length; i += 1) {}
+      return res;
+    }
+      */
   /** Filter the tensor by 0th axis */
   filter(
-    fn: (value: DType<DT>, row: number, _: DType<DT>[]) => boolean,
+    fn: (value: DType<DT>, row: number, _: DType<DT>[]) => boolean
   ): Tensor<DT, O> {
     const satisfying: number[] = [];
     let i = 0;
@@ -143,14 +150,47 @@ export class Tensor<DT extends DataType, O extends Order>
       res.data.set(
         // @ts-ignore This line will work
         this.data.slice(stride * satisfying[i], stride * (satisfying[i] + 1)),
-        i,
+        i
       );
       i += 1;
     }
     return res;
   }
+  /*
+    indexAxis(axis: number, index: number): Tensor<DT, O> {
+      if (axis < 0 || axis >= this.shape.length) {
+        throw new Error(`Axis(${axis}) out of bounds (max: ${this.shape.length}).`);
+      }
+      if (index < 0 || index >= this.shape[axis]) {
+        throw new Error(`Index out of bounds for Axis(${axis}) (max: ${this.shape[axis]}).`);
+      }
+    
+      // Calculate the offset to the desired slice
+      const offset = index * this.strides[axis];
+    
+      const newShape = this.shape.slice();
+      newShape.splice(axis, 1);
+    
+      const newStrides = this.strides.slice();
+      newStrides.splice(axis, 1);
+  
+      const newOrder = newShape.length - 1;
+  
+      const res = new Tensor<DT, O>(this.dType, newShape as Shape<O>)
+      for (let i = 0; i < this.shape[axis] + 1; i += 1) {
+        //
+      }
+    
+      return res;
+    }
+    */
   /** Get an item using indices */
   item(...indices: number[]): DTypeValue<DT> {
+    if (indices.length !== this.strides.length) {
+      throw new Error(
+        `Tensor has ${this.strides.length} dims. Tried to index ${indices.length} dims.`
+      );
+    }
     return this.data[
       indices.reduce((acc, val, i) => acc + val * this.strides[i])
     ] as DTypeValue<DT>;
@@ -161,7 +201,7 @@ export class Tensor<DT extends DataType, O extends Order>
       throw new Error(
         `Axis given is ${axis} while highest axis is ${
           this.strides.length - 1
-        }.`,
+        }.`
       );
     }
     if (!end) end = this.shape[axis] - start;
@@ -179,7 +219,7 @@ export class Tensor<DT extends DataType, O extends Order>
         this.data
           .slice(stride * i, stride * (i + 1))
           .slice(start * this.strides[axis], end * this.strides[axis]),
-        newStride * i,
+        newStride * i
       );
     }
     return res;
@@ -192,10 +232,12 @@ export class Tensor<DT extends DataType, O extends Order>
     };
   }
   static getStrides<O extends Order>(shape: Shape<O>): Shape<O> {
-    const strides = new Array(shape.length).fill(1);
-    for (let i = 0; i < shape.length; i += 1) {
-      strides[i] = shape.slice(i + 1).reduce((acc, val) => acc * val, 1);
+    const strides = new Array(shape.length) as Shape<O>;
+    let stride = 1;
+    for (let i = shape.length - 1; i >= 0; i--) {
+      strides[i] = stride;
+      stride *= shape[i];
     }
-    return strides as Shape<O>;
+    return strides;
   }
 }

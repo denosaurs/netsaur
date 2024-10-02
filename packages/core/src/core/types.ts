@@ -1,5 +1,4 @@
-import type { Tensor } from "./tensor/tensor.ts";
-import type { Rank, Shape } from "./api/shape.ts";
+import type { Tensor, Order, Shape, DataType } from "../../../tensor/mod.ts";
 import type { Layer } from "./api/layer.ts";
 import type { Optimizer } from "./api/optimizer.ts";
 import type { Scheduler } from "./api/scheduler.ts";
@@ -36,10 +35,10 @@ export interface Backend {
    * ```
    */
   predict(
-    input: Tensor<Rank>,
-    config: {postProcess: PostProcessor, outputShape?: Shape<Rank>},
+    input: Tensor<DataType, Order>,
+    config: {postProcess: PostProcessor, outputShape?: Shape<Order>},
     layers?: number[],
-  ): Promise<Tensor<Rank>>;
+  ): Promise<Tensor<DataType, Order>>;
 
   /**
    * The save method is a function that saves the network to a Uint8Array.
@@ -69,7 +68,7 @@ export interface NetworkConfig {
   /**
    * Input size of the neural network.
    */
-  size: Shape<Rank>;
+  size: Shape<Order>;
 
   /**
    * List of layers in the neural network.
@@ -219,8 +218,8 @@ export enum SchedulerType {
  * DataSet is a container for training data.
  */
 export interface DataSet {
-  inputs: Tensor<Rank>;
-  outputs: Tensor<Rank>;
+  inputs: Tensor<DataType, Order>;
+  outputs: Tensor<DataType, Order>;
 }
 
 export enum LayerType {
@@ -285,5 +284,6 @@ export enum Init {
    */
   Kaiming = "kaiming",
 }
+
 
 export type Padding = "same" | "valid"

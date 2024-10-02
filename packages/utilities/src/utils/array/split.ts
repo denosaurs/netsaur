@@ -1,5 +1,5 @@
 import type { Sliceable } from "../common_types.ts";
-import { Matrix } from "../mod.ts";
+import { Matrix } from "../../../../tensor/mod.ts";
 import { useShuffle } from "../random/shuffle.ts";
 
 interface SplitOptions {

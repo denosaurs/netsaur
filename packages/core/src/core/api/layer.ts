@@ -68,7 +68,7 @@ export interface DenseLayerConfig {
   /**
    * The size of the layer.
    */
-  size: Shape1D;
+  size: number;
 
   /**
    * Inverse of regularization strength.
