@@ -1,8 +1,7 @@
-import type { Rank, Shape } from "../../core/api/shape.ts";
 import type { Backend, DataSet, NetworkConfig } from "../../core/types.ts";
 import type { Library } from "./mod.ts";
-import { length } from "../../core/tensor/util.ts";
-import { Tensor } from "../../core/tensor/tensor.ts";
+import { Tensor, type Shape } from "../../../../tensor/mod.ts";
+import { length, } from "../../../../tensor/src/utils.ts";
 import {
   Buffer,
   encodeDatasets,
@@ -10,6 +9,7 @@ import {
   type PredictOptions,
   type TrainOptions,
 } from "./util.ts";
+import type { Rank } from "../../../../tensor/src/types.ts";
 
 /**
  * GPU Backend.

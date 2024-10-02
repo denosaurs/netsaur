@@ -1,7 +1,5 @@
-import type { Rank, Shape } from "../../core/api/shape.ts";
 import type { Backend, DataSet, NetworkConfig } from "../../core/types.ts";
 import type { PredictOptions, TrainOptions } from "./utils.ts";
-import { Tensor } from "../../core/tensor/tensor.ts";
 import {
   wasm_backend_create,
   wasm_backend_load,
@@ -10,6 +8,8 @@ import {
   wasm_backend_train,
 } from "./lib/netsaur.generated.js";
 import type { PostProcessor } from "../../core/api/postprocess.ts";
+import type { Shape } from "../../../../tensor/mod.ts";
+import type { Rank } from "../../../../tensor/src/types.ts";
 
 /**
  * Web Assembly Backend.

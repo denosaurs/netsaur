@@ -1,4 +1,5 @@
-import type { Rank, Shape } from "../../core/api/shape.ts";
+import type { Shape } from "../../../../tensor/mod.ts";
+import type { Rank } from "../../../../tensor/src/types.ts";
 
 /**
  * Train Options Interface.

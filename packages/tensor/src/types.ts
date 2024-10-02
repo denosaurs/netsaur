@@ -1,4 +1,3 @@
-
 export type DataType =
   | "u8"
   | "u16"
@@ -11,6 +10,40 @@ export type DataType =
   | "f32"
   | "f64";
 
+/**
+ * Rank Types.
+ */
+export enum Rank {
+  /**
+   * Scalar   (magnitude only).
+   */
+  R1 = 1,
+
+  /**
+   * Vector   (magnitude and direction).
+   */
+  R2 = 2,
+
+  /**
+   * Matrix   (table of numbers).
+   */
+  R3 = 3,
+
+  /**
+   *  3-Tensor (cube of numbers)
+   */
+  R4 = 4,
+
+  /**
+   * Rank 5 Tensor
+   */
+  R5 = 5,
+
+  /**
+   * Rank 6 Tensor
+   */
+  R6 = 6,
+}
 export interface TypedArrayMapping {
   u8: Uint8Array;
   u16: Uint16Array;
@@ -50,34 +83,27 @@ interface TypedArrayValueMapping {
   f64: number;
 }
 
-export type DTypeValue<T extends keyof TypedArrayValueMapping> =
-  T extends keyof TypedArrayValueMapping ? TypedArrayValueMapping[T] : never;
+export type DTypeValue<T extends keyof TypedArrayValueMapping> = T extends
+  keyof TypedArrayValueMapping ? TypedArrayValueMapping[T] : never;
 
 type AddableTypes = number | bigint;
 
 export type AddDTypeValues<
   T1 extends AddableTypes,
-  T2 extends AddableTypes
-> = T1 extends number
-  ? T2 extends number
-    ? number
-    : T2 extends bigint
-    ? bigint
-    : never
-  : T1 extends bigint
-  ? T2 extends number
-    ? bigint
-    : T2 extends bigint
-    ? bigint
+  T2 extends AddableTypes,
+> = T1 extends number ? T2 extends number ? number
+  : T2 extends bigint ? bigint
+  : never
+  : T1 extends bigint ? T2 extends number ? bigint
+    : T2 extends bigint ? bigint
     : never
   : never;
 
-export type DType<T extends keyof TypedArrayMapping> =
-  T extends keyof TypedArrayMapping ? TypedArrayMapping[T] : never;
+export type DType<T extends keyof TypedArrayMapping> = T extends
+  keyof TypedArrayMapping ? TypedArrayMapping[T] : never;
 
 export type DTypeConstructor<T extends keyof TypedArrayConstructorMapping> =
-  T extends keyof TypedArrayConstructorMapping
-    ? TypedArrayConstructorMapping[T]
+  T extends keyof TypedArrayConstructorMapping ? TypedArrayConstructorMapping[T]
     : never;
 
 export type TypedArray =
@@ -91,4 +117,3 @@ export type TypedArray =
   | BigInt64Array
   | Float32Array
   | Float64Array;
-

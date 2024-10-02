@@ -1,8 +1,5 @@
-import type { Rank, Shape } from "../../core/api/shape.ts";
 import type { Backend, DataSet, NetworkConfig } from "../../core/types.ts";
 import type { Library } from "./mod.ts";
-import { Tensor } from "../../core/tensor/tensor.ts";
-import { length } from "../../core/tensor/util.ts";
 import {
   Buffer,
   encodeDatasets,
@@ -11,6 +8,9 @@ import {
   type TrainOptions,
 } from "./util.ts";
 import type { PostProcessor } from "../../core/api/postprocess.ts";
+import type { Shape, Tensor } from "../../../../tensor/mod.ts";
+import type { Rank } from "../../../../tensor/src/types.ts";
+import { length } from "../../../../tensor/src/utils.ts";
 
 /**
  * CPU Backend.
@@ -69,21 +69,27 @@ export class CPUBackend implements Backend {
     );
   }
 
-  async predict(input: Tensor<Rank>, config: {postProcess: PostProcessor, outputShape?: Shape<Rank>}): Promise<Tensor<Rank>>;
   async predict(
     input: Tensor<Rank>,
-    config: {postProcess: PostProcessor, outputShape?: Shape<Rank>},
+    config: { postProcess: PostProcessor; outputShape?: Shape<Rank> },
+  ): Promise<Tensor<Rank>>;
+  async predict(
+    input: Tensor<Rank>,
+    config: { postProcess: PostProcessor; outputShape?: Shape<Rank> },
     layers: number[],
   ): Promise<Tensor<Rank>>;
   //deno-lint-ignore require-await
   async predict(
     input: Tensor<Rank>,
-    config: {postProcess: PostProcessor, outputShape?: Shape<Rank>},
-    layers?: number[],    
+    config: { postProcess: PostProcessor; outputShape?: Shape<Rank> },
+    layers?: number[],
   ): Promise<Tensor<Rank>> {
     const options = encodeJSON({
       inputShape: input.shape,
-      outputShape: [input.shape[0], ...(config.outputShape ?? this.outputShape)],
+      outputShape: [
+        input.shape[0],
+        ...(config.outputShape ?? this.outputShape),
+      ],
       postProcess: config.postProcess,
       layers,
     } as PredictOptions);
